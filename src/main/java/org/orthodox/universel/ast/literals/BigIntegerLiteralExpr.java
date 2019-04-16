@@ -8,7 +8,7 @@ import org.orthodox.universel.ast.TokenImage;
  */
 public class BigIntegerLiteralExpr extends Expression {
     /**
-     * Consructs a new integer literal node from the given parser token image.
+     * Consructs a new big integer literal node from the given parser token image.
      *
      * @param tokenImage the parser token image.
      */

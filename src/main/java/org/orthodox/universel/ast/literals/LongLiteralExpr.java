@@ -4,15 +4,15 @@ import org.orthodox.universel.ast.Expression;
 import org.orthodox.universel.ast.TokenImage;
 
 /**
- * An integer literal on the Abstract Syntax Tree.
+ * An long integer literal on the Abstract Syntax Tree.
  */
-public class IntegerLiteralExpr extends Expression {
+public class LongLiteralExpr extends Expression {
     /**
-     * Consructs a new integer literal node from the given parser token image.
+     * Consructs a new long literal node from the given parser token image.
      *
      * @param tokenImage the parser token image.
      */
-    public IntegerLiteralExpr(TokenImage tokenImage) {
+    public LongLiteralExpr(TokenImage tokenImage) {
         super(tokenImage);
     }
 }

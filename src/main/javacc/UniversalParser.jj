@@ -1,7 +1,7 @@
 /*******************************************************************************
   ~  MIT Licence:
   ~
-  ~  Copyright (c) 2018 Orthodox Engineering Ltd
+  ~  Copyright (c) 2019 Orthodox Engineering Ltd
   ~
   ~  Permission is hereby granted, free of charge, to any person
   ~  obtaining a copy of this software and associated documentation
@@ -86,6 +86,8 @@ TOKEN :
 |
   < HEX_LITERAL: "0" ["x","X"] <HEX_DIGITS> >
 |
+  < LONG_LITERAL: <INTEGER_LITERAL> (["l","L"]) >
+|
   < OCTAL_LITERAL: "0" ["0"-"7"]((["0"-"7","_"])*["0"-"7"])? >
 }
 
@@ -95,12 +97,16 @@ public Expression Literal():
 }
 {
   (
+	  <BIGINTEGER_LITERAL> {
+	  		ret = new BigIntegerLiteralExpr(tokenImage());
+	  }
+	  |
 	  <INTEGER_LITERAL> {
 	  		ret = new IntegerLiteralExpr(tokenImage());
 	  }
 	  |
-	  <BIGINTEGER_LITERAL> {
-	  		ret = new BigIntegerLiteralExpr(tokenImage());
+	  <LONG_LITERAL> {
+	  		ret = new LongLiteralExpr(tokenImage());
 	  }
 //	|
 //
