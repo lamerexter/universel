@@ -40,47 +40,47 @@ public abstract class AbstractCompositeNode extends Node implements CompositeNod
    public AbstractCompositeNode() {
    }
    
-   /**
-    * Constructs a new AST composite node instance from the given nodes.
-    * 
-    * @param objects the nodes that will comprise this composite.
-    */
+//   /**
+//    * Constructs a new AST composite node instance from the given nodes.
+//    *
+//    * @param objects the nodes that will comprise this composite.
+//    */
 //   public AbstractCompositeNode(Object ...objects) {
 //      setStartAndEndPositions(objects);
 //   }
-
-   /**
-    * Constructs a new AST composite node instance with the given start and end information.
-    * 
-    * @param startLine the line the token image of this node begins.
-    * @param startColumn the column the token image of this node begins.
-    */
-   public AbstractCompositeNode(int startLine, int startColumn) {
-      super(startLine, startColumn);
-   }
-
-   /**
-    * Constructs a new AST composite node instance with the given start line and ending line information.
-    * 
-    * @param startLine the line the token image of this node begins.
-    * @param startColumn the column the token image of this node begins.
-    * @param endLine the line the token image of this node ends.
-    * @param endColumn the column the token image of this node ends.
-    */
-   public AbstractCompositeNode(int startLine, int startColumn, int endLine, int endColumn) {
-      super(startLine, startColumn, endLine, endColumn);
-   }
-
-   /**
-    * Constructs a new AST composite node instance with the given start line and token image information.
-    * 
-    * @param startLine the line the token image of this node begins.
-    * @param startColumn the column the token image of this node begins.
-    * @param image the token image of this AST node.
-    */
-   public AbstractCompositeNode(int startLine, int startColumn, String image) {
-      super(startLine, startColumn, image);
-   }
+//
+//   /**
+//    * Constructs a new AST composite node instance with the given start and end information.
+//    *
+//    * @param startLine the line the token image of this node begins.
+//    * @param startColumn the column the token image of this node begins.
+//    */
+//   public AbstractCompositeNode(int startLine, int startColumn) {
+//      super(startLine, startColumn);
+//   }
+//
+//   /**
+//    * Constructs a new AST composite node instance with the given start line and ending line information.
+//    *
+//    * @param startLine the line the token image of this node begins.
+//    * @param startColumn the column the token image of this node begins.
+//    * @param endLine the line the token image of this node ends.
+//    * @param endColumn the column the token image of this node ends.
+//    */
+//   public AbstractCompositeNode(int startLine, int startColumn, int endLine, int endColumn) {
+//      super(startLine, startColumn, endLine, endColumn);
+//   }
+//
+//   /**
+//    * Constructs a new AST composite node instance with the given start line and token image information.
+//    *
+//    * @param startLine the line the token image of this node begins.
+//    * @param startColumn the column the token image of this node begins.
+//    * @param image the token image of this AST node.
+//    */
+//   public AbstractCompositeNode(int startLine, int startColumn, String image) {
+//      super(startLine, startColumn, image);
+//   }
 
    /**
     * Returns an iterator over a set nodes of this composite.

@@ -92,10 +92,7 @@
                             <goal>javacc</goal>
                         </goals>
                         <configuration>
-                            <jdkVersion>1.5</jdkVersion>
-                            <javadocFriendlyComments>true</javadocFriendlyComments>
-                            <packageName>org.orthodox.utl.parser</packageName>
-                            <sourceDirectory>src/main/java/org/orthodox/utl/parser</sourceDirectory>
+                            <!--<sourceDirectory>src/main/java/org/orthodox/utl/parser</sourceDirectory>-->
                             <outputDirectory>${project.build.directory}/generated-sources/</outputDirectory>
                         </configuration>
                     </execution>
@@ -114,6 +111,12 @@
             <groupId>org.beanplanet</groupId>
             <artifactId>beanplanet-core</artifactId>
             <version>${beanplanet.framework.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.beanplanet</groupId>
+            <artifactId>beanplanet-testing-utils</artifactId>
+            <version>${beanplanet.framework.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>

@@ -29,215 +29,113 @@ package org.orthodox.universel.ast;
 
 import org.beanplanet.core.util.PropertyBasedToStringBuilder;
 
-import java.util.Collection;
-import java.util.List;
-
 /**
  * The superclass of all UEL Abstact Syntax Tree (AST) elements.
- * 
+ *
  * @author Gary Watson
  */
 public abstract class Node {
-   public static final Node[] EMPTY_NODES_ARRAY = new Node[0];
-   
-   private Node parent;
-   
-   /** The type of the node, if known from its static context. */
-   private Class<?> type;
+    /**
+     * The parent node.
+     */
+    private Node parent;
 
-   /** The line the token image of this node begins. */
-   private int startLine;
-   /** The column the token image of this node begins. */
-   private int startColumn;
-   /** The line the token image of this node ends. */
-   private int endLine;
-   /** The column the token image of this node ends. */
-   private int endColumn;
+    /**
+     * The parser token image backing this node.
+     */
+    private TokenImage tokenImage;
 
-   private String image;
 
-   public Node() {
-      this(-1, -1, -1, -1, null);
-   }
+    /**
+     * Constructs a new AST node instance, with no initial configuration.
+     */
+    public Node() {
+    }
 
-   /**
-    * Constructs a new AST node instance.
-    * 
-    * @param startLine the line the token image of this node begins.
-    * @param startColumn the column the token image of this node begins.
-    * @param endLine the line the token image of this node ends.
-    * @param endColumn the column the token image of this node ends.
-    * @param image the token image of this AST node.
-    */
-   public Node(int startLine, int startColumn, int endLine, int endColumn, String image) {
-      this.startLine = startLine;
-      this.startColumn = startColumn;
-      this.endLine = endLine;
-      this.endColumn = endColumn;
-      this.image = image;
-   }
+    /**
+     * Constructs a new AST node instance.
+     *
+     * @param tokenImage the parser token image backing this node.
+     */
+    public Node(TokenImage tokenImage) {
+        this.tokenImage = tokenImage;
+    }
 
-   /**
-    * Constructs a new AST node instance.
-    * 
-    * @param startLine the line the token image of this node begins.
-    * @param startColumn the column the token image of this node begins.
-    * @param endLine the line the token image of this node ends.
-    * @param endColumn the column the token image of this node ends.
-    */
-   public Node(int startLine, int startColumn, int endLine, int endColumn) {
-      this(startLine, startColumn, endLine, endColumn, null);
-   }
+    public boolean accept(UniversalCodeVisitor visitor) {
+        return true;
+    }
 
-   /**
-    * Constructs a new AST node instance.
-    * 
-    * @param startLine the line the token image of this node begins.
-    * @param startColumn the column the token image of this node begins.
-    * @param image the token image of this AST node.
-    */
-   public Node(int startLine, int startColumn, String image) {
-      this(startLine, startColumn, -1, -1, image);
-   }
+    /**
+     * Gets the parent node.
+     *
+     * @return the parent node, which may be null if this node does not have a parent.
+     */
+    public Node getParent() {
+        return parent;
+    }
 
-   /**
-    * Constructs a new AST node instance.
-    * 
-    * @param startLine the line the token image of this node begins.
-    * @param startColumn the column the token image of this node begins.
-    */
-   public Node(int startLine, int startColumn) {
-      this(startLine, startColumn, -1, -1, null);
-   }
+    /**
+     * Sets the parent node.
+     *
+     * @param parent the parent node, which may be null if this node does not have a parent.
+     */
+    public void setParent(Node parent) {
+        this.parent = parent;
+    }
 
-   public Node clone() {
-       return null;
-   }
+    /**
+     * Sets the parent node.
+     *
+     * @param parent the parent node, which may be null if this node does not have a parent.
+     * @return this instance for builder chaining.
+     */
+    public Node withParent(Node parent) {
+        setParent(parent);
+        return this;
+    }
 
-   public boolean accept(UniversalCodeVisitor visitor) {
-      // GAW TODO: remove once all implementations in place
-      return true;
-   }
-   
-   /**
-    * Gets the type of the node, if known from its static context. This is generally the
-    * type returned by execution of the node.
-    * 
-    * @return the type of the node, or null if the type is unknown.
-    */
-   public Class<?> getType() {
-      return type;
-   }
+    /**
+     * Gets the parser token image backing this node.
+     *
+     * @return the parser token image backing this node.
+     */
+    public TokenImage getTokenImage() {
+        return tokenImage;
+    }
 
-   /**
-    * Sets the type of the node, if known from its static context.
-    * 
-    * @param type the type of the node, if known from its static context, or null if the type is unknown.
-    */
-   public void setType(Class<?> type) {
-      this.type= type ;
-   }
+    /**
+     * Sets the parser token image backing this node.
+     *
+     * @param tokenImage the parser token image backing this node.
+     */
+    public void setTokenImage(TokenImage tokenImage) {
+        this.tokenImage = tokenImage;
+    }
 
-   public Node getParent() {
-      return parent;
-   }
+    /**
+     * Sets the parser token image backing this node.
+     *
+     * @param tokenImage the parser token image backing this node.
+     * @return this instance for builder chaining.
+     */
+    public Node withTokenImage(TokenImage tokenImage) {
+        this.tokenImage = tokenImage;
+        return this;
+    }
 
-   public void setParent(Node parent) {
-      this.parent = parent;
-   }
+    /**
+     * Returns the canonical (well-known form) of this node. Usually, this is in the shape of the original parsed form
+     * of the tokens backing this node (i.e. token image). In this naive implementation, it is the parser token image
+     * itself.
+     *
+     * @return the parser token image, or null if there is not one.
+     */
+    public String getCanonicalForm() {
+        return getTokenImage() != null ? getTokenImage().getImage() : null;
+    }
 
-   /**
-    * Gets the line the token image of this node begins.
-    * 
-    * @return the line the token image of this node begins.
-    */
-   public int getStartLine() {
-      return startLine;
-   }
-
-   /**
-    * Sets the line the token image of this node begins.
-    * 
-    * @param startLine the line the token image of this node begins.
-    */
-   public void setStartLine(int startLine) {
-      this.startLine = startLine;
-   }
-
-   /**
-    * Gets the column the token image of this node begins.
-    * 
-    * @return the column the token image of this node begins.
-    */
-   public int getStartColumn() {
-      return startColumn;
-   }
-
-   /**
-    * Sets the column the token image of this node begins.
-    * 
-    * @param startColumn the column the token image of this node begins.
-    */
-   public void setStartColumn(int startColumn) {
-      this.startColumn = startColumn;
-   }
-
-   /**
-    * Gets the line the token image of this node ends.
-    * 
-    * @return the line the token image of this node ends.
-    */
-   public int getEndLine() {
-      return endLine;
-   }
-
-   /**
-    * Sets the line the token image of this node ends.
-    * 
-    * @param endLine the line the token image of this node ends.
-    */
-   public void setEndLine(int endLine) {
-      this.endLine = endLine;
-   }
-
-   /**
-    * Gets the column the token image of this node ends.
-    * 
-    * @return the column the token image of this node ends.
-    */
-   public int getEndColumn() {
-      return endColumn;
-   }
-
-   /**
-    * Sets the column the token image of this node ends.
-    * 
-    * @param endColumn the column the token image of this node ends.
-    */
-   public void setEndColumn(int endColumn) {
-      this.endColumn = endColumn;
-   }
-
-   /**
-    * @return the image
-    */
-   public String getImage() {
-      return image;
-   }
-
-   /**
-    * @param image the image to set
-    */
-   public void setImage(String image) {
-      this.image = image;
-   }
-
-   public String getCanonicalString() {
-      return new PropertyBasedToStringBuilder(this).withProperties("startLine", "startColumn", "endLine", "endColumn", "image").build();
-   }
-
-   @Override
-   public String toString() {
-      return getCanonicalString();
-   }
+    @Override
+    public String toString() {
+        return getCanonicalForm();
+    }
 }

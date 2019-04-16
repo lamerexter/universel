@@ -28,7 +28,6 @@
 package org.orthodox.universel.ast;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * The top-level goal symbol of the Universel Expression Language, equivalent to Java's Compilation Unit - but so
@@ -154,22 +153,22 @@ public class Script extends AbstractCompositeNode {
 //      this.comments = assignParent(comments);
 //   }
     
-   public String getCanonicalString() {
+   public String getCanonicalForm() {
       StringBuilder s = new StringBuilder();
 
 //      if (packageDeclaration != null) {
-//         s.append(packageDeclaration.getCanonicalString()).append("\n");
+//         s.append(packageDeclaration.getCanonicalForm()).append("\n");
 //      }
 //
 //      if (imports != null) {
 //         for (Node node : imports) {
-//            s.append(node.getCanonicalString()).append("\n");
+//            s.append(node.getCanonicalForm()).append("\n");
 //         }
 //      }
 
       if (bodyElements != null) {
          for (Node node : bodyElements) {
-            s.append(node.getCanonicalString());
+            s.append(node.getCanonicalForm());
          }
       }
       

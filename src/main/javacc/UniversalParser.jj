@@ -35,7 +35,7 @@ options
    DEBUG_TOKEN_MANAGER = false;            // Whether the parser tokeniser should output debugging information to diagnose problems.
    LOOKAHEAD = 1;                          // The input stream symbol lookahead of the generated parser i.e. and LR(<nnn>) parser
    JAVA_UNICODE_ESCAPE = false;            // Whether Java Unicode sequences are expanded prior to transmission to the tokeniser.
-   STATIC    = false;                      // Whether to produce a singleton parser class (containing static variables) or allow multiple instances
+   JDK_VERSION = "1.8";                    // The Java/JDK version of the parser to create
    UNICODE_INPUT = true;                   // Use a unicode capable input stream.
    FORCE_LA_CHECK = false;                 // Always carry out lookahead checking
    COMMON_TOKEN_ACTION=true;               // Call the CommonTokenAction token manager method on each token (special token processing)
@@ -44,8 +44,18 @@ options
 PARSER_BEGIN(UniversalParser)
 package org.orthodox.universal.parser;
 
+import org.orthodox.universel.ast.*;
+import org.orthodox.universel.ast.literals.*;import java.io.StringReader;
+
 public class UniversalParser
 {
+    public UniversalParser(String input) {
+        this(new StringReader(input));
+    }
+
+    TokenImage tokenImage() {
+        return new TokenImage(token.beginLine, token.beginColumn, token.endLine, token.endColumn, token.image);
+    }
 }
 PARSER_END(UniversalParser)
 
@@ -64,286 +74,62 @@ SKIP :
    " " | "\t" | "\r" | "\n"
 }
 
-SPECIAL_TOKEN :
+TOKEN :
 {
-  <SINGLE_LINE_COMMENT: "//" (~["\n","\r"])* >
-}
-
-MORE :
-{
-  <"/**" ~["/"]> { input_stream.backup(1); } : IN_JAVADOC_COMMENT
+  < BIGINTEGER_LITERAL: <INTEGER_LITERAL> "I" >
 |
-  <"/*"> : IN_BLOCK_COMMENT
+  < BINARY_LITERAL: "0" ["b","B"] ["0","1"]((["0","1","_"])*["0","1"])? >
+|
+  < INTEGER_LITERAL: ["0"-"9"]((["0"-"9","_"])*["0"-"9"])? >
+|
+  < #HEX_DIGITS: ["0"-"9","a"-"f","A"-"F"]((["0"-"9","a"-"f","A"-"F","_"])*["0"-"9","a"-"f","A"-"F"])? >
+|
+  < HEX_LITERAL: "0" ["x","X"] <HEX_DIGITS> >
+|
+  < OCTAL_LITERAL: "0" ["0"-"7"]((["0"-"7","_"])*["0"-"7"])? >
 }
 
-<IN_JAVADOC_COMMENT>
-SPECIAL_TOKEN :
+public Expression Literal():
 {
-  <JAVADOC_COMMENT: "*/" > : DEFAULT
+	Expression ret;
 }
-
-<IN_BLOCK_COMMENT>
-SPECIAL_TOKEN :
 {
-  <BLOCK_COMMENT: "*/" > : DEFAULT
-}
+  (
+	  <INTEGER_LITERAL> {
+	  		ret = new IntegerLiteralExpr(tokenImage());
+	  }
+	  |
+	  <BIGINTEGER_LITERAL> {
+	  		ret = new BigIntegerLiteralExpr(tokenImage());
+	  }
+//	|
+//
+//	  <INTEGER_LITERAL> {
+//	  		ret = new IntegerLiteralExpr(tokenRange(), token.image);
+//	  }
+//	|
+//	  <LONG_LITERAL> {
+//	  		ret = new LongLiteralExpr(tokenRange(), token.image);
+//	  }
+//	|
+//	  <FLOATING_POINT_LITERAL> {
+//	  		ret = new DoubleLiteralExpr(tokenRange(), token.image);
+//	  }
+//	|
+//	  <CHARACTER_LITERAL> {
+//	  	ret = new CharLiteralExpr(tokenRange(), token.image.substring(1, token.image.length()-1));
+//	  }
+//	|
+//	  <STRING_LITERAL> {
+//	  	ret = new StringLiteralExpr(tokenRange(), token.image.substring(1, token.image.length()-1));
+//	  }
 
-<IN_JAVADOC_COMMENT, IN_BLOCK_COMMENT>
-MORE :
-{
-  < ~[] >
-}
-
-// Reserved words - case sensitive
-TOKEN :
-{
-  < ASSERT: "assert" > |
-  < BOOLEAN: "boolean" > |
-  < BYTE: "byte" > |
-  < CATCH: "catch" > |
-  < CHAR: "char" > |
-  < CLASS: "class" > |
-  < DO: "do" > |
-  < DOUBLE: "double" > |
-  < ENUM: "enum" > |
-  < EXTENDS: "extends" > |
-  < FINALLY: "finally" > |
-  < FOR: "for" >  |
-  < FLOAT: "float" >  |
-  < FUNCTION: "function" >  |
-  < IF: "if" > |
-  < IMPLEMENTS: "implements" > |
-  < IMPORT: "import" > |
-  < INSTANCEOF: "instanceof" > |
-  < INT: "int" > |
-  < INTERFACE: "interface" > |
-  < LONG: "long" > |
-  < NEW: "new" > |
-  < PACKAGE: "package" > |
-  < RETURN: "return" > |
-  < SHORT: "short" > |
-  < THROW: "throw" > |
-  < THROWS: "throws" > |
-  < TRY: "try" > |
-  < VAR: "var" > |
-  < VOID: "void" > |
-  < WHILE: "while" >
-}
-
-// Reserved words - case in-sensitive
-TOKEN [ IGNORE_CASE ] :
-{
-  < AND: "and" > |
-  < BETWEEN: "between" > |
-  < CASE: "case" > |
-  < ELSE: "else" > |
-  < ELSE_IF: "else if" > |
-  < ENDCASE: "endcase" > |
-  < IN: "in" > |
-  < IS: "is" > |
-  < NOT: "not" > |
-  < NOT_EQUAL: "not" ([" "])* "equal" ("s")? > |
-  < NULL: "null" > |
-  < OR: "or" > |
-  < THEN: "then" > |
-  < WHEN: "when" >
-}
-
-// Literals
-// Regular expressions for numeric literals allow for simple "-" prefix to short-circuit unary negation step
-// and achieve the lowest type chosen to represent the two's complement notation of the negative number. Unary plus and
-// recursive unary forms will be handled by the grammar and parser in the usual way.
-TOKEN :
-{
-   <#DIGIT: ["0"-"9"] > |
-   <#DIGITS: ("0" | (["1"-"9"] (["0"-"9"])*)) > |
-   <INTEGER_UNQUALIFIED: <DIGITS> > |
-   <INTEGER: <DIGITS> "i" > { image.setLength(image.length()-1); matchedToken.image = image.toString(); } |
-   <INTEGER_LONG: <DIGITS> (["l","L"]) > { image.setLength(image.length()-1); matchedToken.image = image.toString(); } |
-   <INTEGER_BIG: <DIGITS> "I" > { image.setLength(image.length()-1); matchedToken.image = image.toString(); } |
-   <HEX_LITERAL: "0" ["x","X"] (["0"-"9","a"-"f","A"-"F"])+ > { image.delete(0, 2); matchedToken.image = image.toString(); } |
-   <OCTAL_LITERAL: "0" (["0"-"7"])* > { image.deleteCharAt(0); matchedToken.image = image.toString(); } |
-
-   <#EXPONENT: ["e","E"] (["+","-"])? (["0"-"9"])+ > |
-   <#DECIMAL_PART:
-      (["0"-"9"])+ "." (["0"-"9"])* (<EXPONENT>)? |
-      "." (["0"-"9"])+ (<EXPONENT>)? |
-      (["0"-"9"])+ <EXPONENT> |
-      (["0"-"9"])+ (<EXPONENT>)?
-   > |
-
-   <DECIMAL_UNQUALIFIED: <DECIMAL_PART > >
-   {
-     // Special case for decimals ending in dot (such as 1.) which are really the
-     // start of a range (1..2).  Look ahead and change matched token, if necessary
-     if ( matchedToken.image.endsWith(".") ) {
-       try {
-         char ch = input_stream.readChar();
-         if (ch == '.') {
-           matchedToken.kind = INTEGER_UNQUALIFIED;
-           matchedToken.endColumn--;
-           image.setLength(image.length()-1);
-           matchedToken.image = image.toString();
-           input_stream.backup(2);
-         }
-       }
-       catch (java.io.IOException ioEx){
-         // An EOF or IO error here will unfold later
-       }
-     }
-   } |
-   <DECIMAL_FLOAT: <DECIMAL_PART > ["f","F"] > |
-   <DECIMAL_DOUBLE: <DECIMAL_PART > ["d"] > |
-   <DECIMAL_BIG: <DECIMAL_PART > ["D"] > { image.setLength(image.length()-1); matchedToken.image = image.toString(); } |
-   <UTC_OFFSET: ["+","-"] <DIGIT><DIGIT> ":" <DIGIT><DIGIT> > |
-   <ISO_8601_DATETIME: <DIGIT><DIGIT><DIGIT><DIGIT> "-" <DIGIT><DIGIT> "-" <DIGIT><DIGIT> "T" <DIGIT><DIGIT> ":" <DIGIT><DIGIT> ":" <DIGIT><DIGIT> ("." <DIGIT><DIGIT><DIGIT>)?
-                       ( <UTC_OFFSET> )? ( "Z" )? >
-}
-
-TOKEN [ IGNORE_CASE ] :
-{
-   <TIME_INTERVAL: (<INTEGER> | <DECIMAL_UNQUALIFIED>) ( ("YEAR"|"MONTH"|"WEEK"|"DAY"|"HOUR"|"MINUTE"|"SECOND"|"MILLISECOND") ("S")? )? >
-}
-
-TOKEN :
-{
-    < AT: "@" > |
-    < BOOLEAN_LITERAL: "true" | "false" > |
-    < IMPORT_ON_DEMAND: ".*" >
-}
-
-// Navigational and Axis specifications
-TOKEN :
-{
-// ------> Forward Axis Specifiers
-//   < ATTRIBUTE: "attribute" > |
-//   < CHILD: "child" > |
-//   < DESCENDANT: "descendant" > |
-   < DESCENDANT_OR_SELF: "descendant-or-self" > |
-//   < FOLLOWING: "following" > |
-   < FOLLOWING_SIBLING: "following-sibling" > |
-//   < SELF: "self" > |
-
-   < DESCENDANT_OR_SELF_ABBREV: "\\\\" > |
-
-// <------ Reverse Axis Specifiers
-//   < PARENT: "parent" > |
-//   < ANCESTOR: "ancestor" > |
-   < ANCESTOR_OR_SELF: "ancestor-or-self" > |
-//   < PRECEDING: "preceding" > |
-   < PRECEDING_SIBLING: "preceding-sibling" > |
-
-   < PARENT_ABBREV: ".." >
-}
-
-// Select expression tokens
-TOKEN [ IGNORE_CASE ] :
-{
-// ------> Forward Axis Specifiers
-   < ALL: "all" > |
-   < AS: "as" > |
-   < ASC: "asc" > |
-   < BY: "by" > |
-   < DESC: "desc" > |
-   < EQUAL: ("equals"|"equal") > |
-   < DISTINCT: "distinct" > |
-   < FROM: "from" > |
-   < ORDER: "order" > |
-   < SELECT: "select" > |
-   < SIBLINGS: "siblings" > |
-   < UNIQUE: "unique" >
-}
-
-// Separators
-TOKEN :
-{
-  < LPAREN: "(" >
-| < RPAREN: ")" >
-| < LBRACE: "{" >
-| < RBRACE: "}" >
-| < LBRACKET: "[" >
-| < RBRACKET: "]" >
-| < SEMICOLON: ";" >
-| < COMMA: "," >
-| < DOT: "." >
-| < VARARG: "..." >
-}
-
-// Operators
-TOKEN :
-{
-   < LT: "<" > |
-   < BANG: "!" > |
-   < TILDE: "~" > |
-   < HOOK: "?" > |
-   < COLON: ":" > |
-   < CONTAINS: "contains" > |
-   < EQ: "==" > |
-   < ENDS_WITH: "ends-with" > |
-   < LE: "<=" > |
-   < MOD: "mod" > |
-   < GE: ">=" > |
-   < NE: "!=" > |
-   < SC_OR: "||" > |
-   < SC_AND: "&&" > |
-   < INCR: "++" > |
-   < DECR: "--" > |
-   < PLUS: "+" > |
-   < MINUS: "-" > |
-   < STAR: "*" > |
-   < SLASH: "/" > |
-   < BIT_AND: "&" > |
-   < BIT_OR: "|" > |
-   < XOR: "^" > |
-   < REM: "%" > |
-   < LSHIFT: "<<" > |
-   < ASSIGN: "=" > |
-   < PLUSASSIGN: "+=" > |
-   < MINUSASSIGN: "-=" > |
-   < STARASSIGN: "*=" > |
-   < SLASHASSIGN: "/=" > |
-   < STARTS_WITH: "starts-with" > |
-   < ANDASSIGN: "&=" > |
-   < ORASSIGN: "|=" > |
-   < XORASSIGN: "^=" > |
-   < REMASSIGN: "%=" > |
-   < LSHIFTASSIGN: "<<=" > |
-   < RSIGNEDSHIFTASSIGN: ">>=" > |
-   < RUNSIGNEDSHIFTASSIGN: ">>>=" >
-}
-
-/* >'s need special attention due to generics syntax. */
-TOKEN :
-{
-  < RUNSIGNEDSHIFT: ">>>" >
-  {
-     matchedToken.kind = GT;
-//     ((Token.GTToken)matchedToken).realKind = RUNSIGNEDSHIFT;
-     input_stream.backup(2);
-  }
-| < RSIGNEDSHIFT: ">>" >
-  {
-     matchedToken.kind = GT;
-//     ((Token.GTToken)matchedToken).realKind = RSIGNEDSHIFT;
-     input_stream.backup(1);
-  }
-| < GT: ">" >
-}
-
-// Modifiers
-TOKEN :
-{
-   < PUBLIC: "public" > |
-   < STATIC: "static" > |
-   < PROTECTED: "protected" > |
-   < PRIVATE: "private" > |
-   < FINAL: "final" > |
-   < ABSTRACT: "abstract" > |
-   < SYNCHRONIZED: "synchronized" > |
-   < NATIVE: "native" > |
-   < TRANSIENT: "transient" > |
-   < VOLATILE: "volatile" > |
-   < STRICTFP: "strictfp" >
+//	|
+//	  ret = BooleanLiteral()
+//	|
+//	  ret = NullLiteral()
+  )
+  { return ret; }
 }
 
 

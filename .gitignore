@@ -1,8 +1,11 @@
 # Compiled class file
+target/
 *.class
 
 # Intellij
 .idea/
+*.iml
+*.jpr
 
 # Log file
 *.log
