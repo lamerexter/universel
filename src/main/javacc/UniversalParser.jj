@@ -82,7 +82,9 @@ TOKEN :
 |
   < BIGINTEGER_LITERAL: <DECIMAL_INTEGER_LITERAL> "I" >
 |
-  < BINARY_LITERAL: "0" ["b","B"] ["0","1"]((["0","1","_"])*["0","1"])? >
+  < BINARY_INTEGER_LITERAL: "0" ["b","B"] ["0","1"]((["0","1","_"])*["0","1"])? >
+|
+  < BINARY_LONG_LITERAL: <BINARY_INTEGER_LITERAL> (["l","L"]) >
 |
   < DECIMAL_INTEGER_LITERAL: ["0"-"9"]((["0"-"9","_"])*["0"-"9"])? >
 |
@@ -102,6 +104,10 @@ public Expression Literal():
 {
   (
 	  <BIGINTEGER_LITERAL> { ret = new BigIntegerLiteralExpr(tokenImage()); }
+	  |
+	  <BINARY_INTEGER_LITERAL> { ret = new BinaryIntegerLiteralExpr(tokenImage()); }
+	  |
+	  <BINARY_LONG_LITERAL> { ret = new BinaryLongLiteralExpr(tokenImage()); }
 	  |
 	  <DECIMAL_INTEGER_LITERAL> { ret = new DecimalIntegerLiteralExpr(tokenImage()); }
 	  |
