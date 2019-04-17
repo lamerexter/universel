@@ -8,10 +8,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.sameInstance;
 
-class IntegerLiteralExprTest {
+class OctalLongLiteralExprTest {
     @Test
     public void propertiesAndToString() {
-        new BeanTestSupport(new IntegerLiteralExpr(new TokenImage(1, 2, 3, 4, "1234I")))
+        new BeanTestSupport(new OctalLongLiteralExpr(new TokenImage(1, 2, 3, 4, "0765L")))
                 .withMockitoValuesGenerator()
                 .testToString()
                 .testProperties()
@@ -21,8 +21,8 @@ class IntegerLiteralExprTest {
     @Test
     public void consructor_tokenImage() {
         // Given
-        TokenImage tokenImage = new TokenImage(1, 2, 3, 4, "8899");
-        IntegerLiteralExpr expr = new IntegerLiteralExpr(tokenImage);
+        TokenImage tokenImage = new TokenImage(1, 2, 3, 4, "0771l");
+        OctalLongLiteralExpr expr = new OctalLongLiteralExpr(tokenImage);
 
         // Then
         assertThat(expr.getTokenImage(), sameInstance(tokenImage));
@@ -31,10 +31,10 @@ class IntegerLiteralExprTest {
     @Test
     public void canonicalForm() {
         // Given
-        TokenImage tokenImage = new TokenImage(1, 2, 3, 4, "8899");
-        IntegerLiteralExpr expr = new IntegerLiteralExpr(tokenImage);
+        TokenImage tokenImage = new TokenImage(1, 2, 3, 4, "0771L");
+        OctalLongLiteralExpr expr = new OctalLongLiteralExpr(tokenImage);
 
         // Then
-        assertThat(new IntegerLiteralExpr(new TokenImage(1, 2, 3, 4, "112233")).getCanonicalForm(), equalTo("112233"));
+        assertThat(expr.getCanonicalForm(), equalTo("0771L"));
     }
 }

@@ -7,7 +7,7 @@ import org.orthodox.universel.ast.TokenImage;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.sameInstance;
 
-class BigIntegerLiteralExprTest {
+class BigDecimalIntegerLiteralExprTest {
     @Test
     public void propertiesAndToString() {
         new BeanTestSupport(new BigIntegerLiteralExpr(new TokenImage(1, 2, 3, 4, "1234I")))
@@ -21,7 +21,7 @@ class BigIntegerLiteralExprTest {
     public void consructor_tokenImage() {
         // Given
         TokenImage tokenImage = new TokenImage(1, 2, 3, 4, "8899I");
-        IntegerLiteralExpr expr = new IntegerLiteralExpr(tokenImage);
+        DecimalIntegerLiteralExpr expr = new DecimalIntegerLiteralExpr(tokenImage);
 
         // Then
         assertThat(expr.getTokenImage(), sameInstance(tokenImage));

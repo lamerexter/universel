@@ -76,19 +76,23 @@ SKIP :
 
 TOKEN :
 {
-  < BIGINTEGER_LITERAL: <INTEGER_LITERAL> "I" >
+  < OCTAL_INTEGER_LITERAL: "0" ["0"-"7"]((["0"-"7","_"])*["0"-"7"])? >
+|
+  < OCTAL_LONG_LITERAL: <OCTAL_INTEGER_LITERAL> (["l","L"]) >
+|
+  < BIGINTEGER_LITERAL: <DECIMAL_INTEGER_LITERAL> "I" >
 |
   < BINARY_LITERAL: "0" ["b","B"] ["0","1"]((["0","1","_"])*["0","1"])? >
 |
-  < INTEGER_LITERAL: ["0"-"9"]((["0"-"9","_"])*["0"-"9"])? >
+  < DECIMAL_INTEGER_LITERAL: ["0"-"9"]((["0"-"9","_"])*["0"-"9"])? >
+|
+  < DECIMAL_LONG_LITERAL: <DECIMAL_INTEGER_LITERAL> (["l","L"]) >
 |
   < #HEX_DIGITS: ["0"-"9","a"-"f","A"-"F"]((["0"-"9","a"-"f","A"-"F","_"])*["0"-"9","a"-"f","A"-"F"])? >
 |
-  < HEX_LITERAL: "0" ["x","X"] <HEX_DIGITS> >
+  < HEX_INTEGER_LITERAL: "0" ["x","X"] <HEX_DIGITS> >
 |
-  < LONG_LITERAL: <INTEGER_LITERAL> (["l","L"]) >
-|
-  < OCTAL_LITERAL: "0" ["0"-"7"]((["0"-"7","_"])*["0"-"7"])? >
+  < HEX_LONG_LITERAL: <HEX_INTEGER_LITERAL> (["l","L"]) >
 }
 
 public Expression Literal():
@@ -97,25 +101,27 @@ public Expression Literal():
 }
 {
   (
-	  <BIGINTEGER_LITERAL> {
-	  		ret = new BigIntegerLiteralExpr(tokenImage());
-	  }
+	  <BIGINTEGER_LITERAL> { ret = new BigIntegerLiteralExpr(tokenImage()); }
 	  |
-	  <INTEGER_LITERAL> {
-	  		ret = new IntegerLiteralExpr(tokenImage());
-	  }
+	  <DECIMAL_INTEGER_LITERAL> { ret = new DecimalIntegerLiteralExpr(tokenImage()); }
 	  |
-	  <LONG_LITERAL> {
-	  		ret = new LongLiteralExpr(tokenImage());
-	  }
+	  <DECIMAL_LONG_LITERAL> { ret = new DecimalLongLiteralExpr(tokenImage()); }
+	  |
+	  <HEX_INTEGER_LITERAL> { ret = new HexadecimalIntegerLiteralExpr(tokenImage()); }
+	  |
+	  <HEX_LONG_LITERAL> { ret = new HexadecimalLongLiteralExpr(tokenImage()); }
+	  |
+	  <OCTAL_INTEGER_LITERAL> { ret = new OctalIntegerLiteralExpr(tokenImage()); }
+	  |
+	  <OCTAL_LONG_LITERAL> { ret = new OctalLongLiteralExpr(tokenImage()); }
 //	|
 //
 //	  <INTEGER_LITERAL> {
-//	  		ret = new IntegerLiteralExpr(tokenRange(), token.image);
+//	  		ret = new DecimalIntegerLiteralExpr(tokenRange(), token.image);
 //	  }
 //	|
 //	  <LONG_LITERAL> {
-//	  		ret = new LongLiteralExpr(tokenRange(), token.image);
+//	  		ret = new DecimalLongLiteralExpr(tokenRange(), token.image);
 //	  }
 //	|
 //	  <FLOATING_POINT_LITERAL> {
