@@ -4,11 +4,11 @@ import org.orthodox.universel.ast.Expression;
 import org.orthodox.universel.ast.TokenImage;
 
 /**
- * An integer literal on the Abstract Syntax Tree.
+ * A decimal integer literal on the Abstract Syntax Tree.
  */
-public class DecimalIntegerLiteralExpr extends Expression {
+public class DecimalIntegerLiteralExpr extends Expression implements IntegerLiteral {
     /**
-     * Consructs a new integer literal node from the given parser token image.
+     * Consructs a new decimal integer literal node from the given parser token image.
      *
      * @param tokenImage the parser token image.
      */

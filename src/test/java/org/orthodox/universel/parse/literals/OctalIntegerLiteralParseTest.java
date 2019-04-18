@@ -46,10 +46,27 @@ public class OctalIntegerLiteralParseTest {
         assertThat(parse("0777").getTokenImage().getImage(), equalTo("0777"));
     }
 
+    @Test
+    public void positiveLongLiterals() throws Exception{
+        assertThat(parse("00L").getTokenImage().getImage(), equalTo("00L"));
+        assertThat(parse("01l").getTokenImage().getImage(), equalTo("01l"));
+        assertThat(parse("0127L").getTokenImage().getImage(), equalTo("0127L"));
+        assertThat(parse("012__7L").getTokenImage().getImage(), equalTo("012__7L"));
+        assertThat(parse("0777L").getTokenImage().getImage(), equalTo("0777L"));
+    }
+
     @Test()
     public void negativeIntegerLiterals() throws Exception {
         Assertions.assertThrows(TokenMgrException.class, () -> {
             parse("-012");
         }, "Unary minus is handled by the parser");
     }
+
+    @Test()
+    public void negativeLongLiterals() throws Exception {
+        Assertions.assertThrows(TokenMgrException.class, () -> {
+            parse("-012L");
+        }, "Unary minus is handled by the parser");
+    }
+
 }

@@ -46,10 +46,27 @@ public class HexadecimalIntegerLiteralParseTest {
         assertThat(parse("0xffffffff").getTokenImage().getImage(), equalTo("0xffffffff"));
     }
 
+    @Test
+    public void positiveLongLiterals() throws Exception{
+        assertThat(parse("0x0L").getTokenImage().getImage(), equalTo("0x0L"));
+        assertThat(parse("0X1l").getTokenImage().getImage(), equalTo("0X1l"));
+        assertThat(parse("0xffeeddL").getTokenImage().getImage(), equalTo("0xffeeddL"));
+        assertThat(parse("0xff__ee__ddL").getTokenImage().getImage(), equalTo("0xff__ee__ddL"));
+        assertThat(parse("0xffffffffL").getTokenImage().getImage(), equalTo("0xffffffffL"));
+    }
+
     @Test()
     public void negativeIntegerLiterals() throws Exception {
         Assertions.assertThrows(TokenMgrException.class, () -> {
             parse("-0xff");
+        }, "Unary minus is handled by the parser");
+    }
+
+
+    @Test()
+    public void negativeLongLiterals() throws Exception {
+        Assertions.assertThrows(TokenMgrException.class, () -> {
+            parse("-0xffL");
         }, "Unary minus is handled by the parser");
     }
 }

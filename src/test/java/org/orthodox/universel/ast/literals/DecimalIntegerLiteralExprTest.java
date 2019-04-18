@@ -21,7 +21,7 @@ class DecimalIntegerLiteralExprTest {
     @Test
     public void consructor_tokenImage() {
         // Given
-        TokenImage tokenImage = new TokenImage(1, 2, 3, 4, "8899");
+        TokenImage tokenImage = new TokenImage(1, 2, 3, 4, "8899I");
         DecimalIntegerLiteralExpr expr = new DecimalIntegerLiteralExpr(tokenImage);
 
         // Then
