@@ -4,7 +4,7 @@ import org.orthodox.universel.ast.Expression;
 import org.orthodox.universel.ast.TokenImage;
 
 /**
- * A binary integer literal on the Abstract Syntax Tree, as per {@link java.math.BigInteger}.
+ * A binary integer literal on the Abstract Syntax Tree.
  */
 public class BinaryLongLiteralExpr extends Expression {
     /**
