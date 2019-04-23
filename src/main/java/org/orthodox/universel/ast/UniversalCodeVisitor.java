@@ -30,6 +30,9 @@
 package org.orthodox.universel.ast;
 
 
+import org.orthodox.universel.ast.literals.BooleanLiteralExpr;
+import org.orthodox.universel.ast.literals.NullLiteralExpr;
+
 /**
  * A use of the <a href="">visitor pattern</a> for working with AST nodes. There is a <code>visit&lt;AstNode&gt;(&lt;AstNode&gt)</code>
  * for each AST node defined by the Universel grammar.
@@ -69,7 +72,7 @@ public interface UniversalCodeVisitor {
 //   boolean visitInstanceofExpression(InstanceofExpression node);
 //   boolean visitJUELStringExpression(JUELStringExpression node);
 //   boolean visitListExpression(ListExpression node);
-//   boolean visitLiteralExpression(LiteralExpression node);
+   boolean visitBooleanLiteral(BooleanLiteralExpr node);
 //   boolean visitMapExpression(MapExpression node);
 //   boolean visitMethodDeclaration(MethodDeclaration node);
 //   boolean visitModifiers(Modifiers node);

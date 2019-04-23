@@ -15,4 +15,8 @@ public class BooleanLiteralExpr extends Expression implements IntegerLiteral {
     public BooleanLiteralExpr(TokenImage tokenImage) {
         super(tokenImage);
     }
+
+    public boolean getBooleanValue() {
+        return Boolean.parseBoolean(getTokenImage().getImage().trim());
+    }
 }
