@@ -11,6 +11,8 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.orthodox.universal.parser.ParseException;
 import org.orthodox.universal.parser.UniversalParser;
+import org.orthodox.universel.ast.Expression;
+import org.orthodox.universel.ast.Node;
 import org.orthodox.universel.ast.literals.BooleanLiteralExpr;
 
 import java.io.IOException;
@@ -36,7 +38,7 @@ public class UniversalCompiler {
             // Parse the compilation unit to the topmost non-terminal.
             //----------------------------------------------------------------------------------------------------------
             UniversalParser parser = new UniversalParser(compilationUnitReader);
-            BooleanLiteralExpr compilationUnitNonTerminal = (BooleanLiteralExpr)parser.Literal();
+            Node compilationUnitNonTerminal = parser.Literal();
 
             //----------------------------------------------------------------------------------------------------------
             // Compile to bytecode.
@@ -46,15 +48,16 @@ public class UniversalCompiler {
 
             ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS + ClassWriter.COMPUTE_FRAMES);
             cw.visit(V1_8, ACC_PUBLIC, className, null, "java/lang/Object", null);
-            MethodVisitor mv = cw.visitMethod(ACC_PUBLIC + ACC_FINAL + ACC_STATIC, "main", "()" + Type.getDescriptor(int.class), null, null);
+            MethodVisitor mv = cw.visitMethod(ACC_PUBLIC + ACC_FINAL + ACC_STATIC, "main", "()" + Type.getDescriptor(Object.class), null, null);
             mv.visitCode();
 
             CompilationContext compilationContext = new CompilationContext(mv, new VirtualMachine());
             CompilingAstVisitor compilingAstVisitor = new CompilingAstVisitor(compilationContext);
-            compilingAstVisitor.visitBooleanLiteral(compilationUnitNonTerminal);
+            compilationUnitNonTerminal.accept(compilingAstVisitor);
 
+            compilationContext.getBytecodeHelper().box(compilationContext.getVirtualMachine().peekOperandStack());
+            mv.visitInsn(ARETURN);
 
-            mv.visitInsn(IRETURN);
             mv.visitEnd();
             mv.visitMaxs(0,0);
             cw.visitEnd();

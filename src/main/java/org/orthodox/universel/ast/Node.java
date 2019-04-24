@@ -34,7 +34,7 @@ import org.beanplanet.core.util.PropertyBasedToStringBuilder;
  *
  * @author Gary Watson
  */
-public abstract class Node {
+public abstract class Node implements UniversalCodeVisitable {
     /**
      * The parent node.
      */

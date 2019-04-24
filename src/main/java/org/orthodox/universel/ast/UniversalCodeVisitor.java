@@ -31,6 +31,8 @@ package org.orthodox.universel.ast;
 
 
 import org.orthodox.universel.ast.literals.BooleanLiteralExpr;
+import org.orthodox.universel.ast.literals.DecimalFloatingPointLiteralExpr;
+import org.orthodox.universel.ast.literals.DecimalIntegerLiteralExpr;
 import org.orthodox.universel.ast.literals.NullLiteralExpr;
 
 /**
@@ -73,6 +75,8 @@ public interface UniversalCodeVisitor {
 //   boolean visitJUELStringExpression(JUELStringExpression node);
 //   boolean visitListExpression(ListExpression node);
    boolean visitBooleanLiteral(BooleanLiteralExpr node);
+   boolean visitDecimalFloatingPointLiteral(DecimalFloatingPointLiteralExpr node);
+   boolean visitDecimalIntegerLiteral(DecimalIntegerLiteralExpr node);
 //   boolean visitMapExpression(MapExpression node);
 //   boolean visitMethodDeclaration(MethodDeclaration node);
 //   boolean visitModifiers(Modifiers node);
