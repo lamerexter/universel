@@ -37,7 +37,11 @@ public class DecimalFloatingPointLiteralExpr extends Expression implements Numer
     }
 
     public double asDouble() {
-        return Float.parseFloat(StringUtil.rTrim(getTokenImage().getImage().trim(), "d"));
+        return Double.parseDouble(StringUtil.rTrim(getTokenImage().getImage().trim(), "d"));
+    }
+
+    public String asBigDecimalString() {
+        return StringUtil.rTrim(getTokenImage().getImage().trim(), "D");
     }
 
     /**

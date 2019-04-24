@@ -4,12 +4,17 @@ import org.beanplanet.core.lang.TypeUtil;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 import static org.objectweb.asm.Opcodes.*;
 
 /**
  * Utility for generating JVM bytecode instructions, using the ASM bytecode manipulation library.
  */
 public class BytecodeHelper {
+    public static final String CTOR_METHOD_NAME = "<init>";
+
     private MethodVisitor methodVisitor;
 
     public BytecodeHelper(MethodVisitor methodVisitor) {
@@ -74,6 +79,45 @@ public class BytecodeHelper {
     }
 
     /**
+     * Emits a constant {@link java.math.BigInteger} value onto the evaluation stack.
+     *
+     * @param value the literal string of the {@link java.math.BigInteger} constant value to emit.
+     */
+    public void emitLoadBigIntegerOperand(String value) {
+        String className = Type.getType(BigInteger.class).getInternalName();
+        methodVisitor.visitTypeInsn(NEW, className);
+        methodVisitor.visitInsn(DUP);
+        methodVisitor.visitLdcInsn(value);
+        methodVisitor.visitMethodInsn(INVOKESPECIAL, className, CTOR_METHOD_NAME, Type.getMethodDescriptor(Type.VOID_TYPE,
+                Type.getType(String.class)), false);
+    }
+
+    /**
+     * Emits a constant {@link java.math.BigDecimal} value onto the evaluation stack.
+     *
+     * @param value the literal string of the {@link java.math.BigDecimal} constant value to emit.
+     */
+    public void emitLoadBigDecimalOperand(String value) {
+        String className = Type.getType(BigDecimal.class).getInternalName();
+        methodVisitor.visitTypeInsn(NEW, className);
+        methodVisitor.visitInsn(DUP);
+        methodVisitor.visitLdcInsn(value);
+        methodVisitor.visitMethodInsn(INVOKESPECIAL, className, CTOR_METHOD_NAME, Type.getMethodDescriptor(Type.VOID_TYPE,
+                Type.getType(String.class)), false);
+    }
+
+    /**
+     * Emits instuctions to box the the primitive type, if indeed it is a primitive type or no-op otherwise.
+     *
+     * @param primitiveType the primitive type to be boxed.
+     */
+    public void boxIfNeeded(Class<?> primitiveType) {
+        if ( !TypeUtil.isPrimitiveType(primitiveType) ) return;
+
+        box(primitiveType);
+    }
+
+    /**
      * Emits instuctions to box the given primitive type.
      *
      * @param primitiveType the primitive type to be boxed.
@@ -82,7 +126,8 @@ public class BytecodeHelper {
         methodVisitor.visitMethodInsn(INVOKESTATIC,
                 Type.getInternalName(BoxingFunctions.class),
                 "box",
-                Type.getMethodDescriptor(Type.getType(TypeUtil.getPrimitiveWrapperType(primitiveType)), Type.getType(primitiveType))
+                Type.getMethodDescriptor(Type.getType(TypeUtil.getPrimitiveWrapperType(primitiveType)), Type.getType(primitiveType)),
+                false
         );
     }
 }

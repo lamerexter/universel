@@ -55,7 +55,7 @@ public class UniversalCompiler {
             CompilingAstVisitor compilingAstVisitor = new CompilingAstVisitor(compilationContext);
             compilationUnitNonTerminal.accept(compilingAstVisitor);
 
-            compilationContext.getBytecodeHelper().box(compilationContext.getVirtualMachine().peekOperandStack());
+            compilationContext.getBytecodeHelper().boxIfNeeded(compilationContext.getVirtualMachine().peekOperandStack());
             mv.visitInsn(ARETURN);
 
             mv.visitEnd();

@@ -1,5 +1,6 @@
 package org.orthodox.universel.compiler;
 
+import java.math.BigDecimal;
 import java.util.Stack;
 
 public class VirtualMachine {
@@ -10,22 +11,26 @@ public class VirtualMachine {
     }
 
     public void loadOperandConstant(boolean operand) {
-        operandStack.push(boolean.class);
+        loadOperandOfType(boolean.class);
     }
 
     public void loadOperandConstant(int operand) {
-        operandStack.push(int.class);
+        loadOperandOfType(int.class);
     }
 
     public void loadOperandConstant(long operand) {
-        operandStack.push(long.class);
+        loadOperandOfType(long.class);
     }
 
     public void loadOperandConstant(float operand) {
-        operandStack.push(float.class);
+        loadOperandOfType(float.class);
     }
 
     public void loadOperandConstant(double operand) {
-        operandStack.push(double.class);
+        loadOperandOfType(double.class);
+    }
+
+    public void loadOperandOfType(Class<?> operandType) {
+        operandStack.push(operandType);
     }
 }

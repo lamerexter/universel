@@ -35,6 +35,10 @@ public class DecimalIntegerLiteralExpr extends Expression implements IntegerLite
         return Long.parseLong(StringUtil.rTrim(getTokenImage().getImage().trim(), "l", false));
     }
 
+    public String asBigIntegerString() {
+        return StringUtil.rTrim(getTokenImage().getImage().trim(), "I", false);
+    }
+
     /**
      * Called to accept a visitor.
      *

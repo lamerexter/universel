@@ -6,6 +6,9 @@ import org.orthodox.universel.ast.literals.BooleanLiteralExpr;
 import org.orthodox.universel.ast.literals.DecimalFloatingPointLiteralExpr;
 import org.orthodox.universel.ast.literals.DecimalIntegerLiteralExpr;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 public class CompilingAstVisitor implements UniversalCodeVisitor {
     private CompilationContext compilationContext;
 
@@ -33,6 +36,10 @@ public class CompilingAstVisitor implements UniversalCodeVisitor {
             double value = node.asDouble();
             compilationContext.getVirtualMachine().loadOperandConstant(value);
             compilationContext.getBytecodeHelper().emitLoadDoubleOperand(value);
+        } else if ( BigDecimal.class == fpClass ) {
+            String value = node.asBigDecimalString();
+            compilationContext.getVirtualMachine().loadOperandOfType(BigDecimal.class);
+            compilationContext.getBytecodeHelper().emitLoadBigDecimalOperand(value);
         }
 
         return true;
@@ -50,6 +57,10 @@ public class CompilingAstVisitor implements UniversalCodeVisitor {
             long value = node.asLongValue();
             compilationContext.getVirtualMachine().loadOperandConstant(value);
             compilationContext.getBytecodeHelper().emitLoadIntegerOperand(value);
+        } else if ( BigInteger.class == integerClass ) {
+            String value = node.asBigIntegerString();
+            compilationContext.getVirtualMachine().loadOperandOfType(BigInteger.class);
+            compilationContext.getBytecodeHelper().emitLoadBigIntegerOperand(value);
         }
 
         return true;
