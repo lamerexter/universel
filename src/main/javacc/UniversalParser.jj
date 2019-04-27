@@ -112,6 +112,34 @@ TOKEN :
 | < #HEX_EXPONENT: ["p","P"] (["+","-"])? <DECIMAL_INTEGER_LITERAL> >
 }
 
+/**
+* String and character sequence literal tokens.
+*/
+TOKEN :
+{
+  < #UNICODE_ESCAPE:
+    "\\u"
+    ["0"-"9","A"-"F","a"-"f"]
+    ["0"-"9","A"-"F","a"-"f"]
+    ["0"-"9","A"-"F","a"-"f"]
+    ["0"-"9","A"-"F","a"-"f"]
+  >
+|
+  < SINGLE_QUOTE_STRING_LITERAL:
+      "'"
+      (   (~["\'","\\","\n","\r"])
+        | ("\\"
+            ( ["n","t","b","r","f","\\","'","\""]
+            | ["0"-"7"] ( ["0"-"7"] )?
+            | ["0"-"3"] ["0"-"7"] ["0"-"7"]
+            )
+          )
+        | <UNICODE_ESCAPE>
+      )*
+      "'"
+  >
+}
+
 public Expression Literal():
 {
 	Expression ret;
@@ -133,6 +161,8 @@ public Expression Literal():
 	  <HEX_FLOATING_POINT_LITERAL> { ret = new HexadecimalFloatingPointLiteralExpr(tokenImage()); }
 	  |
 	  <NULL> { ret = new NullLiteralExpr(tokenImage()); }
+	  |
+	  <SINGLE_QUOTE_STRING_LITERAL> { ret = new StringLiteralExpr(tokenImage()); }
 //	|
 //
 //	  <INTEGER_LITERAL> {
@@ -149,10 +179,6 @@ public Expression Literal():
 //	|
 //	  <CHARACTER_LITERAL> {
 //	  	ret = new CharLiteralExpr(tokenRange(), token.image.substring(1, token.image.length()-1));
-//	  }
-//	|
-//	  <STRING_LITERAL> {
-//	  	ret = new StringLiteralExpr(tokenRange(), token.image.substring(1, token.image.length()-1));
 //	  }
 
 //	|

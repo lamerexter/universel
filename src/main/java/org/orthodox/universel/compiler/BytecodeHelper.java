@@ -107,6 +107,15 @@ public class BytecodeHelper {
     }
 
     /**
+     * Emits a load constant {@link String} value onto the evaluation stack.
+     *
+     * @param value the literal string of the {@link java.math.BigDecimal} constant value to emit.
+     */
+    public void emitLoadStringOperand(String value) {
+        methodVisitor.visitLdcInsn(value);
+    }
+
+    /**
      * Emits instuctions to box the the primitive type, if indeed it is a primitive type or no-op otherwise.
      *
      * @param primitiveType the primitive type to be boxed.

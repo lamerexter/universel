@@ -30,10 +30,7 @@
 package org.orthodox.universel.ast;
 
 
-import org.orthodox.universel.ast.literals.BooleanLiteralExpr;
-import org.orthodox.universel.ast.literals.DecimalFloatingPointLiteralExpr;
-import org.orthodox.universel.ast.literals.DecimalIntegerLiteralExpr;
-import org.orthodox.universel.ast.literals.NullLiteralExpr;
+import org.orthodox.universel.ast.literals.*;
 
 /**
  * A use of the <a href="">visitor pattern</a> for working with AST nodes. There is a <code>visit&lt;AstNode&gt;(&lt;AstNode&gt)</code>
@@ -88,6 +85,7 @@ public interface UniversalCodeVisitor {
 //   boolean visitRangeExpression(RangeExpression node);
 //   boolean visitReturnStatement(ReturnStatement node);
    boolean visitScript(Script node);
+   boolean visitStringLiteral(StringLiteralExpr node);
 //   boolean visitSetExpression(SetExpression node);
 //   boolean visitTernaryExpression(TernaryExpression node);
 //   boolean visitThrowStatement(ThrowStatement node);
