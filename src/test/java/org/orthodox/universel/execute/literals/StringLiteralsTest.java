@@ -24,7 +24,12 @@ public class StringLiteralsTest {
 
     @Test
     public void escapeCharacters() throws Exception{
-        assertThat(Universal.execute("'\\n\\t\\b\\r\\f\\'\\\"'"), equalTo("\n\t\b\r\f'\""));
+        assertThat(Universal.execute("'\\n\\t\\b\\r\\f\\\\\\'\\\"'"), equalTo("\n\t\b\r\f\\'\""));
+    }
+
+    @Test
+    public void escapeStartCharacterAtEndOfString() throws Exception{
+        assertThat(Universal.execute("'HelloWorld\\\\'"), equalTo("HelloWorld\\"));
     }
 
     @Test
@@ -41,10 +46,6 @@ public class StringLiteralsTest {
 
         assertThat("xxx\1\77\12yyy", equalTo("xxx\1\77\12yyy")); // Java example
         assertThat(Universal.execute("'xxx\\1\\77\\12yyy'"), equalTo("xxx\1\77\12yyy")); // Universal equivalent
-
-//        assertThat("\120x", equalTo("\12"));
-//
-//        assertThat(Universal.execute("'\\377'"), equalTo("\377"));
     }
 
     @Test
@@ -66,9 +67,13 @@ public class StringLiteralsTest {
         assertThat(Universal.execute("'xxx\\1\\3679\\12yyy'"), equalTo("xxx\1\3679\12yyy")); // Universal equivalent
     }
 
-//    @Test
+    @Test
     public void unicodeEscapeCharacters() throws Exception{
-        assertThat("\u0000", equalTo("\u0000")); // Java example
-        assertThat(Universal.execute("'\\u0000'"), equalTo("\u0000")); // Universal equivalent
+        assertThat(Universal.execute("'\\"+"u0000'"), equalTo("\u0000")); // character 0
+
+        assertThat(Universal.execute("'\\"+"u0024'"), equalTo("$")); // ASCII
+        assertThat(Universal.execute("'\\"+"u00A3'"), equalTo("£")); // Extended ASCII
+
+        assertThat(Universal.execute("'\\"+"u2264'"), equalTo("\u2264")); // Less than or equal to
     }
 }

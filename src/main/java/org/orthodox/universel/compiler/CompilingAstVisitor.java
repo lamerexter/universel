@@ -11,6 +11,8 @@ import org.orthodox.universel.ast.literals.StringLiteralExpr;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
+import static org.orthodox.universel.StringEscapeUtil.unescapeUniversalCharacterEscapeSequences;
+
 public class CompilingAstVisitor implements UniversalCodeVisitor {
     private CompilationContext compilationContext;
 
@@ -78,59 +80,7 @@ public class CompilingAstVisitor implements UniversalCodeVisitor {
     public boolean visitStringLiteral(StringLiteralExpr node) {
         String value = node.getTokenImage().getImage().substring(1, node.getTokenImage().getImage().length()-1);
         compilationContext.getVirtualMachine().loadOperandOfType(String.class);
-        compilationContext.getBytecodeHelper().emitLoadStringOperand(expandUniversalCharacterEscapeSequences(value));
+        compilationContext.getBytecodeHelper().emitLoadStringOperand(unescapeUniversalCharacterEscapeSequences(value));
         return true;
-    }
-
-    private String expandUniversalCharacterEscapeSequences(String input) {
-        if (input == null) return null;
-
-        StringBuilder s = new StringBuilder();
-        boolean inEscape = false;
-        for (int n=0; n < input.length(); n++) {
-            if (!inEscape && input.charAt(n) == '\\') {
-                inEscape = true;
-                continue;
-            }
-
-            char ch = input.charAt(n);
-            if ( inEscape ) {
-                inEscape = false;
-                switch ( ch )
-                {
-                    case 'n':   ch = '\n'; break;
-                    case 'r':   ch = '\r'; break;
-                    case 't':   ch = '\t'; break;
-                    case 'b':   ch = '\b'; break;
-                    case 'f':   ch = '\f'; break;
-                    case '\\':  ch = '\\'; break;
-                    case '\'':  ch = '\''; break;
-                    case '\"':  ch = '\"'; break;
-                    case '0' :
-                    case '1' :
-                    case '2' :
-                    case '3' :
-                    case '4' :
-                    case '5' :
-                    case '6' :
-                    case '7' :
-                        // Assume it's an octal character sequence (e.g. \17 or \377))
-                        int chSeq = 0;
-                        for (int i=0; i < 3; i++) {
-                            chSeq = (chSeq << 3) | (ch - '0');
-
-                            if (n+1 >= input.length()) break;
-
-                            ch = input.charAt(n+1);
-                            if ( !(ch >= '0' && ch <= '7') ) break;
-                            n++;
-                        }
-                        ch = (char)chSeq;
-                        break;
-                }
-            }
-            s.append(ch);
-        }
-        return s.toString();
     }
 }
