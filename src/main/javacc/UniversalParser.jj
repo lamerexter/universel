@@ -133,6 +133,21 @@ TOKEN :
       )*
       "'"
   >
+|
+  < TRIPLE_QUOTE_STRING_LITERAL:
+      "'''"
+      (   (~["\'","\\"])
+        | ("\\"
+            ( ["n","t","b","r","f","\\","'","\""]
+            | ["0"-"7"] ( ["0"-"7"] )?
+            | ["0"-"3"] ["0"-"7"] ["0"-"7"]
+            )
+          )
+        | "'"
+        | <UNICODE_ESCAPE>
+      )*
+      "'''"
+  >
 }
 
 public Expression Literal():
@@ -158,6 +173,8 @@ public Expression Literal():
 	  <NULL> { ret = new NullLiteralExpr(tokenImage()); }
 	  |
 	  <SINGLE_QUOTE_STRING_LITERAL> { ret = new StringLiteralExpr(tokenImage()); }
+	  |
+	  <TRIPLE_QUOTE_STRING_LITERAL> { ret = new TripleQuotedStringLiteralExpr(tokenImage()); }
 //	|
 //
 //	  <INTEGER_LITERAL> {

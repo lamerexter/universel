@@ -86,6 +86,7 @@ public interface UniversalCodeVisitor {
 //   boolean visitReturnStatement(ReturnStatement node);
    boolean visitScript(Script node);
    boolean visitStringLiteral(StringLiteralExpr node);
+   boolean visitTripleQuotedStringLiteral(TripleQuotedStringLiteralExpr node);
 //   boolean visitSetExpression(SetExpression node);
 //   boolean visitTernaryExpression(TernaryExpression node);
 //   boolean visitThrowStatement(ThrowStatement node);

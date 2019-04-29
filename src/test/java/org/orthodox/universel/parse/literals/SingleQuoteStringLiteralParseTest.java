@@ -10,7 +10,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 
-public class StringLiteralParseTest {
+public class SingleQuoteStringLiteralParseTest {
     @Test
     public void parsePosition() throws Exception{
         // When

@@ -75,5 +75,8 @@ public class StringLiteralsTest {
         assertThat(Universal.execute("'\\"+"u00A3'"), equalTo("£")); // Extended ASCII
 
         assertThat(Universal.execute("'\\"+"u2264'"), equalTo("\u2264")); // Less than or equal to
+
+        assertThat(Universal.execute("'Hello\\"+"u2264World!'"), equalTo("Hello\u2264World!")); // Less than or equal to
+        assertThat(Universal.execute("'Hello\\"+"u2264\\"+"u00A3World!'"), equalTo("Hello\u2264\u00A3World!")); // Less than or equal to
     }
 }

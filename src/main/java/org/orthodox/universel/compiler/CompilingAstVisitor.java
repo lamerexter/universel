@@ -1,12 +1,8 @@
 package org.orthodox.universel.compiler;
 
 import org.orthodox.universel.ast.Script;
-import org.orthodox.universel.ast.TokenImage;
 import org.orthodox.universel.ast.UniversalCodeVisitor;
-import org.orthodox.universel.ast.literals.BooleanLiteralExpr;
-import org.orthodox.universel.ast.literals.DecimalFloatingPointLiteralExpr;
-import org.orthodox.universel.ast.literals.DecimalIntegerLiteralExpr;
-import org.orthodox.universel.ast.literals.StringLiteralExpr;
+import org.orthodox.universel.ast.literals.*;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -79,6 +75,14 @@ public class CompilingAstVisitor implements UniversalCodeVisitor {
     @Override
     public boolean visitStringLiteral(StringLiteralExpr node) {
         String value = node.getTokenImage().getImage().substring(1, node.getTokenImage().getImage().length()-1);
+        compilationContext.getVirtualMachine().loadOperandOfType(String.class);
+        compilationContext.getBytecodeHelper().emitLoadStringOperand(unescapeUniversalCharacterEscapeSequences(value));
+        return true;
+    }
+
+    @Override
+    public boolean visitTripleQuotedStringLiteral(TripleQuotedStringLiteralExpr node) {
+        String value = node.getTokenImage().getImage().substring(3, node.getTokenImage().getImage().length()-3);
         compilationContext.getVirtualMachine().loadOperandOfType(String.class);
         compilationContext.getBytecodeHelper().emitLoadStringOperand(unescapeUniversalCharacterEscapeSequences(value));
         return true;
