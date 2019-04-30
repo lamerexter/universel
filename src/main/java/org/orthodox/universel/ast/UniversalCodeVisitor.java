@@ -84,9 +84,9 @@ public interface UniversalCodeVisitor {
 //   boolean visitPathExpression(PathExpression node);
 //   boolean visitRangeExpression(RangeExpression node);
 //   boolean visitReturnStatement(ReturnStatement node);
+   boolean visitInterpolatedStringLiteral(InterpolatedStringLiteralExpr node);
    boolean visitScript(Script node);
    boolean visitStringLiteral(StringLiteralExpr node);
-   boolean visitTripleQuotedStringLiteral(TripleQuotedStringLiteralExpr node);
 //   boolean visitSetExpression(SetExpression node);
 //   boolean visitTernaryExpression(TernaryExpression node);
 //   boolean visitThrowStatement(ThrowStatement node);

@@ -3,18 +3,18 @@ package org.orthodox.universel.parse.literals;
 import org.junit.jupiter.api.Test;
 import org.orthodox.universal.parser.UniversalParser;
 import org.orthodox.universel.ast.Expression;
-import org.orthodox.universel.ast.literals.TripleQuotedStringLiteralExpr;
+import org.orthodox.universel.ast.literals.StringLiteralExpr;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 
-public class TripleQuoteStringLiteralParseTest {
+public class TripleQuotedStringLiteralParseTest {
     @Test
     public void parsePosition() throws Exception{
         // When
         String input = "\n  \r\n '''\nHello World!\r\nabc'''";
-        TripleQuotedStringLiteralExpr expr = parse(input);
+        StringLiteralExpr expr = parse(input);
         assertThat(expr.getTokenImage().getStartLine(), equalTo(3));
         assertThat(expr.getTokenImage().getStartColumn(), equalTo(2));
         assertThat(expr.getTokenImage().getEndLine(), equalTo(5));
@@ -22,7 +22,7 @@ public class TripleQuoteStringLiteralParseTest {
         assertThat(expr.getTokenImage().getImage(), equalTo(input.trim()));
     }
 
-    private TripleQuotedStringLiteralExpr parse(String input) throws Exception {
+    private StringLiteralExpr parse(String input) throws Exception {
         // Given
         UniversalParser parser = new UniversalParser(input);
 
@@ -30,8 +30,8 @@ public class TripleQuoteStringLiteralParseTest {
         Expression literalExpr = parser.Literal();
 
         // Then
-        assertThat(literalExpr, instanceOf(TripleQuotedStringLiteralExpr.class));
-        return (TripleQuotedStringLiteralExpr)literalExpr;
+        assertThat(literalExpr, instanceOf(StringLiteralExpr.class));
+        return (StringLiteralExpr)literalExpr;
     }
 
     @Test

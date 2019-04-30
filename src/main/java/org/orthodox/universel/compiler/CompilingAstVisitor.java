@@ -1,5 +1,6 @@
 package org.orthodox.universel.compiler;
 
+import org.orthodox.universel.ast.Node;
 import org.orthodox.universel.ast.Script;
 import org.orthodox.universel.ast.UniversalCodeVisitor;
 import org.orthodox.universel.ast.literals.*;
@@ -7,6 +8,7 @@ import org.orthodox.universel.ast.literals.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
+import static org.beanplanet.core.util.IterableUtil.nullSafe;
 import static org.orthodox.universel.StringEscapeUtil.unescapeUniversalCharacterEscapeSequences;
 
 public class CompilingAstVisitor implements UniversalCodeVisitor {
@@ -66,6 +68,26 @@ public class CompilingAstVisitor implements UniversalCodeVisitor {
         return true;
     }
 
+    @Override
+    public boolean visitInterpolatedStringLiteral(InterpolatedStringLiteralExpr node) {
+        compilationContext.getBytecodeHelper().emitInstantiateType(StringBuilder.class);
+
+        for (Node expr : nullSafe(node.getParts())) {
+            compilationContext.getBytecodeHelper().emitDuplicate();
+            expr.accept(this);
+
+            compilationContext.getBytecodeHelper().emitInvokeInstanceMethod(StringBuilder.class, "append", StringBuilder.class, Object.class);
+            compilationContext.getBytecodeHelper().emitPop();
+
+            compilationContext.getVirtualMachine().popOperand();
+        }
+
+        compilationContext.getBytecodeHelper().emitInvokeInstanceMethod(StringBuilder.class, "toString", String.class);
+        compilationContext.getVirtualMachine().loadOperandOfType(String.class);
+
+        return true;
+    }
+
 
     @Override
     public boolean visitScript(Script node) {
@@ -74,17 +96,8 @@ public class CompilingAstVisitor implements UniversalCodeVisitor {
 
     @Override
     public boolean visitStringLiteral(StringLiteralExpr node) {
-        String value = node.getTokenImage().getImage().substring(1, node.getTokenImage().getImage().length()-1);
         compilationContext.getVirtualMachine().loadOperandOfType(String.class);
-        compilationContext.getBytecodeHelper().emitLoadStringOperand(unescapeUniversalCharacterEscapeSequences(value));
-        return true;
-    }
-
-    @Override
-    public boolean visitTripleQuotedStringLiteral(TripleQuotedStringLiteralExpr node) {
-        String value = node.getTokenImage().getImage().substring(3, node.getTokenImage().getImage().length()-3);
-        compilationContext.getVirtualMachine().loadOperandOfType(String.class);
-        compilationContext.getBytecodeHelper().emitLoadStringOperand(unescapeUniversalCharacterEscapeSequences(value));
+        compilationContext.getBytecodeHelper().emitLoadStringOperand(unescapeUniversalCharacterEscapeSequences(node.getUndelimitedTokenImage()));
         return true;
     }
 }

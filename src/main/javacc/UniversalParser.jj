@@ -44,6 +44,8 @@ options
 PARSER_BEGIN(UniversalParser)
 package org.orthodox.universal.parser;
 
+import java.util.List;
+import java.util.ArrayList;
 import org.orthodox.universel.ast.*;
 import org.orthodox.universel.ast.literals.*;import java.io.StringReader;
 
@@ -53,9 +55,17 @@ public class UniversalParser
         this(new StringReader(input));
     }
 
-    TokenImage tokenImage() {
+    private TokenImage tokenImage() {
         return new TokenImage(token.beginLine, token.beginColumn, token.endLine, token.endColumn, token.image);
     }
+
+   private <T> List<T> add(List<T> list, Object obj) {
+      if (list == null) {
+         list = new ArrayList<T>();
+      }
+      list.add((T)obj);
+      return list;
+   }
 }
 PARSER_END(UniversalParser)
 
@@ -120,9 +130,9 @@ TOKEN :
 {
   < #UNICODE_ESCAPE: "\\u" <HEX_DIGIT> <HEX_DIGIT> <HEX_DIGIT> <HEX_DIGIT> >
 |
-  < SINGLE_QUOTE_STRING_LITERAL:
+  < SQ_STRING:
       "'"
-      (   (~["\'","\\","\n","\r"])
+      (   (~["'","\\","\n","\r"])
         | ("\\"
             ( ["n","t","b","r","f","\\","'","\""]
             | ["0"-"7"] ( ["0"-"7"] )?
@@ -134,9 +144,9 @@ TOKEN :
       "'"
   >
 |
-  < TRIPLE_QUOTE_STRING_LITERAL:
+  < TQ_STRING:
       "'''"
-      (   (~["\'","\\"])
+      (   (~["'","\\"])
         | ("\\"
             ( ["n","t","b","r","f","\\","'","\""]
             | ["0"-"7"] ( ["0"-"7"] )?
@@ -148,7 +158,56 @@ TOKEN :
       )*
       "'''"
   >
+|
+  < DQ_INTERP_STRING_START: "\"" > : WITHIN_DQ_INTERP_STRING
+//  < DOUBLE_QUOTE_STRING_LITERAL:
+//      "\""
+//      (   (~["\"","\\","\n","\r"])
+//        | ("${" ~[] "}")
+//        | ("\\"
+//            ( ["n","t","b","r","f","\\","'","\"", "$"]
+//            | ["0"-"7"] ( ["0"-"7"] )?
+//            | ["0"-"3"] ["0"-"7"] ["0"-"7"]
+//            )
+//          )
+//        | <UNICODE_ESCAPE>
+//      )*
+//      "\""
+//  >
 }
+
+<WITHIN_DQ_INTERP_STRING> TOKEN :
+{
+  <DQ_INTERP_STRING_CHARS:
+    (
+        ~["\"","\\","\n","\r"]
+        | "$"
+        | (
+            "\\"
+            ( ["n","t","b","r","f","\\","'","\""]
+            | ["0"-"7"] ( ["0"-"7"] )?
+            | ["0"-"3"] ["0"-"7"] ["0"-"7"]
+            )
+          )
+        | <UNICODE_ESCAPE>
+    )+
+  >
+  |
+  <DQ_INTERP_STRING_END: "\""> : DEFAULT
+  |
+  <DQ_INTERP_STRING_COMPLEX_EXPR_START: "${"> : WITHIN_DQ_INTERP_STRING_COMPLEX_EXPR
+}
+
+<WITHIN_DQ_INTERP_STRING_COMPLEX_EXPR> TOKEN :
+{
+    <JSTRING_SQ_COMPLEX_END: "}"> : WITHIN_DQ_INTERP_STRING
+}
+
+<WITHIN_DQ_INTERP_STRING_COMPLEX_EXPR > MORE :
+{
+    <DQ_INTERP_STRING_COMPLEX_EXPR_CHAR: (~[])>
+}
+
 
 public Expression Literal():
 {
@@ -172,9 +231,11 @@ public Expression Literal():
 	  |
 	  <NULL> { ret = new NullLiteralExpr(tokenImage()); }
 	  |
-	  <SINGLE_QUOTE_STRING_LITERAL> { ret = new StringLiteralExpr(tokenImage()); }
+	  <SQ_STRING> { ret = new StringLiteralExpr(tokenImage(), "'"); }
 	  |
-	  <TRIPLE_QUOTE_STRING_LITERAL> { ret = new TripleQuotedStringLiteralExpr(tokenImage()); }
+	  <TQ_STRING> { ret = new StringLiteralExpr(tokenImage(), "'''"); }
+	  |
+	  ret=InterpolatedStringLiteral()
 //	|
 //
 //	  <INTEGER_LITERAL> {
@@ -199,6 +260,26 @@ public Expression Literal():
 //	  ret = NullLiteral()
   )
   { return ret; }
+}
+
+Expression InterpolatedStringLiteral() :
+{
+    List<Node> parts = null;
+    StringBuilder s = new StringBuilder();
+    boolean isSimpleStringLiteral = true;
+    int startLine = -1, endLine = -1, startColumn = -1, endColumn = -1;
+}
+{
+    <DQ_INTERP_STRING_START> { startLine=token.beginLine; startColumn=token.beginColumn; s.append("\""); }
+    (
+        <DQ_INTERP_STRING_CHARS> { parts=add(parts, new StringLiteralExpr(tokenImage())); s.append(token.image); }
+    )*
+    <DQ_INTERP_STRING_END>
+    {
+
+        endLine=token.endLine; endColumn=token.endColumn; s.append("\"");
+        return new InterpolatedStringLiteralExpr(new TokenImage(startLine, startColumn, endLine, endColumn, s.toString()), parts);
+    }
 }
 
 

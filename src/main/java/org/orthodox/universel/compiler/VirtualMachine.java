@@ -1,6 +1,5 @@
 package org.orthodox.universel.compiler;
 
-import java.math.BigDecimal;
 import java.util.Stack;
 
 public class VirtualMachine {
@@ -32,5 +31,10 @@ public class VirtualMachine {
 
     public void loadOperandOfType(Class<?> operandType) {
         operandStack.push(operandType);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> Class<T> popOperand() {
+        return (Class<T>)operandStack.pop();
     }
 }

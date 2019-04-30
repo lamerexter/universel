@@ -6,6 +6,7 @@ import org.objectweb.asm.Type;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Arrays;
 
 import static org.objectweb.asm.Opcodes.*;
 
@@ -14,6 +15,7 @@ import static org.objectweb.asm.Opcodes.*;
  */
 public class BytecodeHelper {
     public static final String CTOR_METHOD_NAME = "<init>";
+    public static final Type[] EMPTY_TYPES = new Type[0];
 
     private MethodVisitor methodVisitor;
 
@@ -138,5 +140,35 @@ public class BytecodeHelper {
                 Type.getMethodDescriptor(Type.getType(TypeUtil.getPrimitiveWrapperType(primitiveType)), Type.getType(primitiveType)),
                 false
         );
+    }
+
+    public void emitInstantiateType(Class<?> type) {
+        String className = Type.getInternalName(type);
+        methodVisitor.visitTypeInsn(NEW, className);
+        methodVisitor.visitInsn(DUP);
+        methodVisitor.visitMethodInsn(INVOKESPECIAL, className, BytecodeHelper.CTOR_METHOD_NAME, Type.getMethodDescriptor(Type.VOID_TYPE, BytecodeHelper.EMPTY_TYPES), false);
+    }
+
+    public void emitDuplicate() {
+        methodVisitor.visitInsn(DUP);
+    }
+
+    public void emitInvokeInstanceMethod(Class<?> type, String methodName, Class<?> returnType, Class<?> ... paramTypes) {
+        String className = Type.getInternalName(type);
+        methodVisitor.visitMethodInsn(
+                INVOKEVIRTUAL,
+                className,
+                methodName,
+                Type.getMethodDescriptor(Type.getType(returnType), toTypes(paramTypes)),
+                false);
+    }
+
+
+    private static Type[] toTypes(Class<?>[] paramTypes) {
+        return paramTypes == null ? null : Arrays.stream(paramTypes).map(Type::getType).toArray(Type[]::new);
+    }
+
+    public void emitPop() {
+        methodVisitor.visitInsn(POP);
     }
 }
