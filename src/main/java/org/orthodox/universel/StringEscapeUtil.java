@@ -39,6 +39,7 @@ public class StringEscapeUtil {
                         case '\\':  ch ='\\'; break;
                         case '\'':  ch ='\''; break;
                         case '\"':  ch ='"'; break;
+                        case '$':  ch ='$'; break;
                         case 'u':   {
                             // It's a unicode escape sequence. TODO: supplementary characters?
                             if (unicodeSeq == null) unicodeSeq = new StringBuilder(4);
@@ -84,7 +85,7 @@ public class StringEscapeUtil {
                             ch = (char)chSeq;
 
                         }
-                     }
+                    }
                 } else if (ch == '\\') {
                     inEscape = true;
                     continue;
@@ -100,4 +101,5 @@ public class StringEscapeUtil {
             throw new IoException("I/O error during unescape of universal string: ", e);
         }
     }
+
 }

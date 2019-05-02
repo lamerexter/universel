@@ -75,6 +75,7 @@ public class CompilingAstVisitor implements UniversalCodeVisitor {
         for (Node expr : nullSafe(node.getParts())) {
             compilationContext.getBytecodeHelper().emitDuplicate();
             expr.accept(this);
+            compilationContext.getBytecodeHelper().boxIfNeeded(compilationContext.getVirtualMachine().peekOperandStack());
 
             compilationContext.getBytecodeHelper().emitInvokeInstanceMethod(StringBuilder.class, "append", StringBuilder.class, Object.class);
             compilationContext.getBytecodeHelper().emitPop();
