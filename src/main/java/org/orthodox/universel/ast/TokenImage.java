@@ -2,6 +2,8 @@ package org.orthodox.universel.ast;
 
 import org.beanplanet.core.util.PropertyBasedToStringBuilder;
 
+import java.util.Objects;
+
 /**
  * Represents the token, its position in the input stream and the string image of the token itself.
  */
@@ -192,6 +194,23 @@ public class TokenImage {
     public TokenImage withImage(String image) {
         setImage(image);
         return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TokenImage)) return false;
+        TokenImage that = (TokenImage) o;
+        return getStartLine() == that.getStartLine() &&
+                getStartColumn() == that.getStartColumn() &&
+                getEndLine() == that.getEndLine() &&
+                getEndColumn() == that.getEndColumn() &&
+                Objects.equals(getImage(), that.getImage());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getStartLine(), getStartColumn(), getEndLine(), getEndColumn(), getImage());
     }
 
     /**

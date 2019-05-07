@@ -24,6 +24,7 @@ public class StringLiteralExpr extends Expression {
      * Constructs a new string literal node from the given parser token image and delimeter.
      *
      * @param tokenImage the parser token image.
+     * @param delimiter the delimiter of this string
      */
     public StringLiteralExpr(TokenImage tokenImage, String delimiter) {
         super(tokenImage);

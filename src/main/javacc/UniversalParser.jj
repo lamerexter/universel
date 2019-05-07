@@ -161,6 +161,8 @@ TOKEN :
   >
 |
   < DQ_INTERP_STRING_START: "\"" > : WITHIN_DQ_INTERP_STRING
+|
+  < TQ_INTERP_STRING_START: "\"\"\"" > : WITHIN_TQ_INTERP_STRING
 }
 
 <WITHIN_DQ_INTERP_STRING> TOKEN :
@@ -190,6 +192,34 @@ TOKEN :
     <DQ_INTERP_STRING_COMPLEX_EXPR_CHAR: (~[])>
 }
 
+<WITHIN_TQ_INTERP_STRING> TOKEN :
+{
+  <TQ_INTERP_STRING_COMPLEX_EXPR_START: "${"> : DEFAULT
+  |
+  <TQ_INTERP_STRING_CHAR:
+    (
+        ~["\\","\""]
+        | "$"
+        | (
+            "\\"
+            ( ["n","t","b","r","f","\\","'","\"", "$"]
+            | ["0"-"7"] ( ["0"-"7"] )?
+            | ["0"-"3"] ["0"-"7"] ["0"-"7"]
+            )
+          )
+        | <UNICODE_ESCAPE>
+    )
+  >
+  |
+  <TQ_INTERP_STRING_DQ_CHAR: "\"">
+  |
+  <TQ_INTERP_STRING_END: ("\"")* "\"\"\"" > : DEFAULT
+}
+
+<WITHIN_TQ_INTERP_STRING_COMPLEX_EXPR > MORE :
+{
+    <TQ_INTERP_STRING_COMPLEX_EXPR_CHAR: (~[])>
+}
 
 public Expression Literal():
 {
@@ -218,29 +248,8 @@ public Expression Literal():
 	  <TQ_STRING> { ret = new StringLiteralExpr(tokenImage(), "'''"); }
 	  |
 	  ret=InterpolatedStringLiteral()
-//	|
-//
-//	  <INTEGER_LITERAL> {
-//	  		ret = new DecimalIntegerLiteralExpr(tokenRange(), token.image);
-//	  }
-//	|
-//	  <LONG_LITERAL> {
-//	  		ret = new DecimalLongLiteralExpr(tokenRange(), token.image);
-//	  }
-//	|
-//	  <FLOATING_POINT_LITERAL> {
-//	  		ret = new DoubleLiteralExpr(tokenRange(), token.image);
-//	  }
-//	|
-//	  <CHARACTER_LITERAL> {
-//	  	ret = new CharLiteralExpr(tokenRange(), token.image.substring(1, token.image.length()-1));
-//	  }
-
-//	|
-//	  ret = BooleanLiteral()
-//	|
-//	  ret = NullLiteral()
   )
+
   { return ret; }
 }
 
@@ -249,27 +258,101 @@ Expression InterpolatedStringLiteral() :
     Node part = null;
     List<Node> parts = null;
     StringBuilder s = new StringBuilder();
-    int startLine = -1, endLine = -1, startColumn = -1, endColumn = -1;
+    StringBuilder p = new StringBuilder();
+    int startLine = -1, startColumn = -1;
+    int partStartLine = -1, partStartColumn = -1, partEndLine = -1, partEndColumn = -1;
 }
 {
-    <DQ_INTERP_STRING_START> { startLine=token.beginLine; startColumn=token.beginColumn; s.append("\""); }
     (
-        <DQ_INTERP_STRING_CHAR> { parts=add(parts, new StringLiteralExpr(tokenImage())); s.append(token.image); }
-        |
+        <DQ_INTERP_STRING_START> { startLine=token.beginLine; startColumn=token.beginColumn; s.append("\"");}
         (
-            <DQ_INTERP_STRING_COMPLEX_EXPR_START>
+            <DQ_INTERP_STRING_CHAR> { parts=add(parts, new StringLiteralExpr(tokenImage())); s.append(token.image); }
+            |
+            (
+                <DQ_INTERP_STRING_COMPLEX_EXPR_START>
 
-            (part=Literal() { parts=add(parts, part); s.append(part.getTokenImage().getImage()); })?
+                (part=Literal() { parts=add(parts, part); s.append(part.getTokenImage().getImage()); })?
 
-            <RBRACE> { token_source.SwitchTo(WITHIN_DQ_INTERP_STRING); }
+                <RBRACE> { token_source.SwitchTo(WITHIN_DQ_INTERP_STRING); }
+            )
+        )*
+        <DQ_INTERP_STRING_END>
+        {
+             s.append(token.image);
+
+             return new InterpolatedStringLiteralExpr(new TokenImage(startLine, startColumn, token.endLine, token.endColumn, s.toString()), parts, "\"");
+        }
+    )
+    |
+    (
+        <TQ_INTERP_STRING_START> { startLine=token.beginLine; startColumn=token.beginColumn; s.append(token.image);}
+        (
+            (
+                (<TQ_INTERP_STRING_CHAR>|<TQ_INTERP_STRING_DQ_CHAR>)
+                    {
+                        s.append(token.image);
+
+                        if (p.length() == 0) {
+                            partStartLine = token.beginLine;
+                            partStartColumn = token.beginColumn;
+                        }
+                        partEndLine = token.endLine;
+                        partEndColumn = token.endColumn;
+                        p.append(token.image);
+                    }
+                |
+                (
+                    <TQ_INTERP_STRING_COMPLEX_EXPR_START>
+                        {
+                            s.append(token.image);
+
+                            // Deal with any preceding character data
+                            if (p.length() > 0) {
+                                parts=add(parts,
+                                          new StringLiteralExpr(new TokenImage(partStartLine,
+                                                                               partStartColumn,
+                                                                               partEndLine,
+                                                                               partEndColumn,
+                                                                               p.toString())));
+                                p.setLength(0);
+                            }
+                        }
+
+                    (part=Literal() { parts=add(parts, part); s.append(part.getTokenImage().getImage()); })?
+
+                    <RBRACE> { s.append(token.image); token_source.SwitchTo(WITHIN_TQ_INTERP_STRING); }
+                )
+            )*
+            <TQ_INTERP_STRING_END>
+                {
+                    s.append(token.image);
+
+                    // Add any trailing single double=quotes to the any remaining character data
+                    if ( token.image.length() > 3) {
+                        if ( p.length() == 0 ) {
+                            // No preceding character data, so start position is here
+                            partStartLine = token.beginLine;
+                            partStartColumn = token.endColumn - token.image.length() + 1;
+                        }
+                        partEndLine = token.endLine;
+                        partEndColumn = token.endColumn - 3;
+                        p.append(token.image.substring(0, token.image.length()-3));
+                    }
+
+                    // Deal with any remaining character data
+                    if (p.length() > 0) {
+                        parts=add(parts,
+                                  new StringLiteralExpr(new TokenImage(partStartLine,
+                                                                       partStartColumn,
+                                                                       partEndLine,
+                                                                       partEndColumn,
+                                                                       p.toString())));
+                    }
+
+                    return new InterpolatedStringLiteralExpr(new TokenImage(startLine, startColumn, token.endLine, token.endColumn, s.toString()), parts, "\"\"\"");
+                }
         )
-    )*
-    <DQ_INTERP_STRING_END>
-    {
-
-        endLine=token.endLine; endColumn=token.endColumn; s.append("\"");
-        return new InterpolatedStringLiteralExpr(new TokenImage(startLine, startColumn, endLine, endColumn, s.toString()), parts);
-    }
+    )
 }
 
 

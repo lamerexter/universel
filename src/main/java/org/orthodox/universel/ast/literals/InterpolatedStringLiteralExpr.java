@@ -12,6 +12,9 @@ import java.util.List;
  * An interpolated string literal on the Abstract Syntax Tree.
  */
 public class InterpolatedStringLiteralExpr extends Expression {
+    /** The delimiter of this string. */
+    private String delimeter = "";
+
     /** The parts which comprise this interpolated string. */
     private List<Node> parts;
 
@@ -19,10 +22,12 @@ public class InterpolatedStringLiteralExpr extends Expression {
      * Consructs an interpolated string literal node from the given parser token image.
      *
      * @param tokenImage the parser token image.
+     * @param delimiter the delimiter of this string
      */
-    public InterpolatedStringLiteralExpr(TokenImage tokenImage, List<Node> parts) {
+    public InterpolatedStringLiteralExpr(TokenImage tokenImage, List<Node> parts, String delimiter) {
         super(tokenImage);
         this.parts = parts;
+        this.delimeter = delimiter;
     }
 
     /**
@@ -42,5 +47,18 @@ public class InterpolatedStringLiteralExpr extends Expression {
      */
     public List<Node> getParts() {
         return parts == null ? Collections.emptyList() : parts;
+    }
+
+    /**
+     * Gets the delimiter of this string, for example single or triple single/double quotes (i.e. <code>"simple string with ${ 'interpolation' }"</code> or
+     * <code>"""multi-line string with ${ 'interpolation}"""</code>).
+     * @return
+     */
+    public String getDelimeter() {
+        return delimeter;
+    }
+
+    public String getUndelimitedTokenImage() {
+        return getTokenImage() == null ? null : getTokenImage().getImage().substring(getDelimeter().length(), getTokenImage().getImage().length()-getDelimeter().length());
     }
 }
