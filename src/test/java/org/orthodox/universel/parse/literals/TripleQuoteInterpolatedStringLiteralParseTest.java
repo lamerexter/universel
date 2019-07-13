@@ -54,9 +54,9 @@ class TripleQuoteInterpolatedStringLiteralParseTest {
 
     @Test
     void escapeCharacters() throws Exception{
-        assertThat(parse("\"\"\"\\n\\t\\b\\r\\f\\'\\\"\"\"\"").getTokenImage(), equalTo(new TokenImage(1, 1, 1, 14, "\"\"\"\\n\\t\\b\\r\\f\\'\\\"\"\"\"")));
-//        assertThat(parse("\"\"\"\nHello\r\nWorld!\n\n\"\"\"").getTokenImage(), equalTo(new TokenImage(1, 1, 5, 3, "\"\"\"\nHello\r\nWorld!\n\n\"\"\"")));
-//        assertThat(parse("\"\"\"\nHello\r\nWorld!\n\n\"\"\"").getTokenImage(), equalTo(new TokenImage(1, 1, 5, 3, "\"\"\"\nHello\r\nWorld!\n\n\"\"\"")));
+        assertThat(parse("\"\"\"\\n\\t\\b\\r\\f\\'\\\"\"\"\"").getTokenImage(), equalTo(new TokenImage(1, 1, 1, 20, "\"\"\"\\n\\t\\b\\r\\f\\'\\\"\"\"\"")));
+        assertThat(parse("\"\"\"\nHello\r\nWorld!\n\n\"\"\"").getTokenImage(), equalTo(new TokenImage(1, 1, 5, 3, "\"\"\"\nHello\r\nWorld!\n\n\"\"\"")));
+        assertThat(parse("\"\"\"\nHello\r\nWorld!\n\n\"\"\"").getTokenImage(), equalTo(new TokenImage(1, 1, 5, 3, "\"\"\"\nHello\r\nWorld!\n\n\"\"\"")));
 
         assertThat(parse("\"\"\"\\n\\t\\b\\r\\f\\'\\\"\"\"\"").getTokenImage().getImage(), equalTo("\"\"\"\\n\\t\\b\\r\\f\\'\\\"\"\"\""));
         assertThat(parse("\"\"\"\\00\"\"\"").getTokenImage().getImage(), equalTo("\"\"\"\\00\"\"\""));
