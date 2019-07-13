@@ -10,39 +10,97 @@ import org.orthodox.universel.ast.literals.IntegerLiteral;
 import org.orthodox.universel.ast.literals.InterpolatedStringLiteralExpr;
 import org.orthodox.universel.ast.literals.StringLiteralExpr;
 
-import java.util.Arrays;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 
-public class TripleQuoteInterpolatedStringLiteralParseTest {
+class TripleQuoteInterpolatedStringLiteralParseTest {
+    private InterpolatedStringLiteralExpr parse(String input) throws Exception {
+        // Given
+        UniversalParser parser = new UniversalParser(input);
+
+        // When
+        Expression literalExpr = parser.Literal();
+
+        // Then
+        assertThat(literalExpr, instanceOf(InterpolatedStringLiteralExpr.class));
+        return (InterpolatedStringLiteralExpr)literalExpr;
+    }
+
     @Test
-    public void singleLineUninterpolatedParsePosition() throws Exception{
+    void emptyString() throws Exception{
+        assertThat(parse("\"\"\"\"\"\"").getTokenImage(), equalTo(new TokenImage(1, 1, 1, 6, "\"\"\"\"\"\"")));
+    }
+
+    @Test
+    void singleCharacterString() throws Exception{
+        assertThat(parse("\"\"\"w\"\"\"").getTokenImage(), equalTo(new TokenImage(1, 1, 1, 7, "\"\"\"w\"\"\"")));
+    }
+
+    @Test
+    void singleCharacterMultilineString() throws Exception{
+        assertThat(parse("\"\"\"\n\nw\r\n\"\"\"").getTokenImage(), equalTo(new TokenImage(1, 1, 4, 3, "\"\"\"\n\nw\r\n\"\"\"")));
+    }
+
+    @Test
+    void multiCharacterString() throws Exception{
+        assertThat(parse("\"\"\"Hello World!\"\"\"").getTokenImage(), equalTo(new TokenImage(1, 1, 1, 18, "\"\"\"Hello World!\"\"\"")));
+    }
+
+    @Test
+    void multiCharacterMultilineString() throws Exception{
+        assertThat(parse("\"\"\"\nHello\r\nWorld!\n\n\"\"\"").getTokenImage(), equalTo(new TokenImage(1, 1, 5, 3, "\"\"\"\nHello\r\nWorld!\n\n\"\"\"")));
+    }
+
+    @Test
+    void escapeCharacters() throws Exception{
+        assertThat(parse("\"\"\"\\n\\t\\b\\r\\f\\'\\\"\"\"\"").getTokenImage(), equalTo(new TokenImage(1, 1, 1, 14, "\"\"\"\\n\\t\\b\\r\\f\\'\\\"\"\"\"")));
+//        assertThat(parse("\"\"\"\nHello\r\nWorld!\n\n\"\"\"").getTokenImage(), equalTo(new TokenImage(1, 1, 5, 3, "\"\"\"\nHello\r\nWorld!\n\n\"\"\"")));
+//        assertThat(parse("\"\"\"\nHello\r\nWorld!\n\n\"\"\"").getTokenImage(), equalTo(new TokenImage(1, 1, 5, 3, "\"\"\"\nHello\r\nWorld!\n\n\"\"\"")));
+
+        assertThat(parse("\"\"\"\\n\\t\\b\\r\\f\\'\\\"\"\"\"").getTokenImage().getImage(), equalTo("\"\"\"\\n\\t\\b\\r\\f\\'\\\"\"\"\""));
+        assertThat(parse("\"\"\"\\00\"\"\"").getTokenImage().getImage(), equalTo("\"\"\"\\00\"\"\""));
+        assertThat(parse("\"\"\"\\377\"\"\"").getTokenImage().getImage(), equalTo("\"\"\"\\377\"\"\""));
+    }
+
+    @Test
+    void unicodeEscapeCharacters() throws Exception{
+        assertThat(parse("\"\"\"\\u01bc\"\"\"").getTokenImage().getImage(), equalTo("\"\"\"\\u01bc\"\"\""));
+        assertThat(parse("\"\"\"\\u01bcefg\\u1234\"\"\"").getTokenImage().getImage(), equalTo("\"\"\"\\u01bcefg\\u1234\"\"\""));
+    }
+
+    @Test
+    void containingSingleDoubleQuote() throws Exception{
+        // When
+        String input = "\"\"\"\"\"\"\"";
+        InterpolatedStringLiteralExpr expr = parse(input);
+
+        // Then
+        assertThat(expr.getTokenImage(), equalTo(new TokenImage(1, 1, 1, 7, "\"\"\"\"\"\"\"")));
+
+        // And
+        assertThat(expr.getParts().size(), equalTo(1));
+        assertThat(expr.getParts().get(0), instanceOf(StringLiteralExpr.class));
+        assertThat(expr.getParts().get(0).getTokenImage(), equalTo(new TokenImage(1, 4, 1, 4, "\"")));
+    }
+
+    @Test
+    void singleLineUninterpolatedParsePosition() throws Exception{
         // When
         String input = "\"\"\"Hello World!\"\"\"";
         InterpolatedStringLiteralExpr expr = parse(input);
 
         // Then
-        assertThat(expr.getTokenImage().getStartLine(), equalTo(1));
-        assertThat(expr.getTokenImage().getStartColumn(), equalTo(1));
-        assertThat(expr.getTokenImage().getEndLine(), equalTo(1));
-        assertThat(expr.getTokenImage().getEndColumn(), equalTo(18));
-        assertThat(expr.getTokenImage().getImage(), equalTo(input.trim()));
+        assertThat(expr.getTokenImage(), equalTo(new TokenImage(1, 1, 1, 18, "\"\"\"Hello World!\"\"\"")));
 
         // And
         assertThat(expr.getParts().size(), equalTo(1));
         assertThat(expr.getParts().get(0), instanceOf(StringLiteralExpr.class));
-        assertThat(expr.getParts().get(0).getTokenImage().getStartLine(), equalTo(1));
-        assertThat(expr.getParts().get(0).getTokenImage().getStartColumn(), equalTo(4));
-        assertThat(expr.getParts().get(0).getTokenImage().getEndLine(), equalTo(1));
-        assertThat(expr.getParts().get(0).getTokenImage().getEndColumn(), equalTo(15));
-        assertThat(expr.getParts().get(0).getTokenImage().getImage(), equalTo(StringUtil.trim(input, "\"")));
-
+        assertThat(expr.getParts().get(0).getTokenImage(), equalTo(new TokenImage(1, 4, 1, 15, StringUtil.trim(input, "\""))));
     }
 
     @Test
-    public void multiLineUninterpolatedParsePosition() throws Exception{
+    void multiLineUninterpolatedParsePosition() throws Exception{
         // When
         String input = "\n\"\"\"\n\nHello World!\r\n\"\"\"";
 
@@ -57,7 +115,7 @@ public class TripleQuoteInterpolatedStringLiteralParseTest {
     }
 
     @Test
-    public void singleLineInterpolatedParsePosition() throws Exception{
+    void singleLineInterpolatedParsePosition() throws Exception{
         // When
         String input = "\"\"\"Hello${ 1234 } World!\"\"\"\"";
         InterpolatedStringLiteralExpr expr = parse(input);
@@ -80,7 +138,7 @@ public class TripleQuoteInterpolatedStringLiteralParseTest {
     }
 
     @Test
-    public void multiLineInterpolatedParsePosition() throws Exception{
+    void multiLineInterpolatedParsePosition() throws Exception{
         // When
         String input = "\"\"\"\n Hello${\n 1111 }World!${true\r\n}\"${3333}\"\"\"\"\"";
         InterpolatedStringLiteralExpr expr = parse(input);
@@ -116,55 +174,5 @@ public class TripleQuoteInterpolatedStringLiteralParseTest {
         // And
         assertThat(expr.getParts().get(6), instanceOf(StringLiteralExpr.class));
         assertThat(expr.getParts().get(6).getTokenImage(), equalTo(new TokenImage(4, 10, 4, 11, "\"\"")));
-    }
-
-    private InterpolatedStringLiteralExpr parse(String input) throws Exception {
-        // Given
-        UniversalParser parser = new UniversalParser(input);
-
-        // When
-        Expression literalExpr = parser.Literal();
-
-        // Then
-        assertThat(literalExpr, instanceOf(InterpolatedStringLiteralExpr.class));
-        return (InterpolatedStringLiteralExpr)literalExpr;
-    }
-
-    @Test
-    public void emptyString() throws Exception{
-        assertThat(parse("\"\"\"\"\"\"").getTokenImage().getImage(), equalTo("\"\"\"\"\"\""));
-    }
-
-    @Test
-    public void singleCharacterString() throws Exception{
-        assertThat(parse("\"\"\"w\"\"\"").getTokenImage().getImage(), equalTo("\"\"\"w\"\"\""));
-    }
-
-    @Test
-    public void singleCharacterMultilineString() throws Exception{
-        assertThat(parse("\"\"\"\n\nw\r\n\"\"\"").getTokenImage().getImage(), equalTo("\"\"\"\n\nw\r\n\"\"\""));
-    }
-
-    @Test
-    public void multiCharacterString() throws Exception{
-        assertThat(parse("\"\"\"Hello World!\"\"\"").getTokenImage().getImage(), equalTo("\"\"\"Hello World!\"\"\""));
-    }
-
-    @Test
-    public void multiCharacterMultilineString() throws Exception{
-        assertThat(parse("\"\"\"\nHello\r\nWorld!\n\n\"\"\"").getTokenImage().getImage(), equalTo("\"\"\"\nHello\r\nWorld!\n\n\"\"\""));
-    }
-
-    @Test
-    public void escapeCharacters() throws Exception{
-        assertThat(parse("\"\"\"\\n\\t\\b\\r\\f\\'\\\"\"\"\"").getTokenImage().getImage(), equalTo("\"\"\"\\n\\t\\b\\r\\f\\'\\\"\"\"\""));
-        assertThat(parse("\"\"\"\\00\"\"\"").getTokenImage().getImage(), equalTo("\"\"\"\\00\"\"\""));
-        assertThat(parse("\"\"\"\\377\"\"\"").getTokenImage().getImage(), equalTo("\"\"\"\\377\"\"\""));
-    }
-
-    @Test
-    public void unicodeEscapeCharacters() throws Exception{
-        assertThat(parse("\"\"\"\\u01bc\"\"\"").getTokenImage().getImage(), equalTo("\"\"\"\\u01bc\"\"\""));
-        assertThat(parse("\"\"\"\\u01bcefg\\u1234\"\"\"").getTokenImage().getImage(), equalTo("\"\"\"\\u01bcefg\\u1234\"\"\""));
     }
 }
