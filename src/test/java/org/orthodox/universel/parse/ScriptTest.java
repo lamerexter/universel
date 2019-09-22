@@ -1,7 +1,7 @@
 /*
  *  MIT Licence:
  *
- *  Copyright (c) 2018 Orthodox Engineering Ltd
+ *  Copyright (c) 2019 Orthodox Engineering Ltd
  *
  *  Permission is hereby granted, free of charge, to any person
  *  obtaining a copy of this software and associated documentation
@@ -25,26 +25,26 @@
  *  DEALINGS IN THE SOFTWARE.
  *
  */
-package org.orthodox.universel.ast;
 
-import java.util.List;
+package org.orthodox.universel.parse;
 
-/**
- * The top-level goal symbol of the Universel Expression Language, equivalent to Java's Compilation Unit - but so
- * much more.
- *
- * @author Gary Watson
- */
-public class Script extends AbstractCompositeNode {
-    public Script() {
-    }
+import org.junit.jupiter.api.Test;
+import org.orthodox.universel.ast.Script;
 
-    public Script(TokenImage tokenImage, Node... bodyElements) {
-        super(tokenImage, bodyElements);
-    }
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.orthodox.universel.Universal.parse;
 
-    public boolean accept(UniversalCodeVisitor visitor) {
-        visitor.visitScript(this);
-        return true;
+public class ScriptTest {
+    @Test
+    public void parsePosition() throws Exception{
+        // When
+        String input = "\nnull";
+        Script script = parse(input);
+        assertThat(script.getTokenImage().getStartLine(), equalTo(1));
+        assertThat(script.getTokenImage().getStartColumn(), equalTo(1));
+        assertThat(script.getTokenImage().getEndLine(), equalTo(2));
+        assertThat(script.getTokenImage().getEndColumn(), equalTo(4));
+        assertThat(script.getTokenImage().getImage(), equalTo(input.trim()));
     }
 }

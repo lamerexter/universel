@@ -1,7 +1,7 @@
 /*
  *  MIT Licence:
  *
- *  Copyright (c) 2018 Orthodox Engineering Ltd
+ *  Copyright (c) 2019 Orthodox Engineering Ltd
  *
  *  Permission is hereby granted, free of charge, to any person
  *  obtaining a copy of this software and associated documentation
@@ -25,26 +25,20 @@
  *  DEALINGS IN THE SOFTWARE.
  *
  */
-package org.orthodox.universel.ast;
 
-import java.util.List;
+package org.orthodox.universel;
+
+import org.beanplanet.core.UncheckedException;
 
 /**
- * The top-level goal symbol of the Universel Expression Language, equivalent to Java's Compilation Unit - but so
- * much more.
- *
- * @author Gary Watson
+ * The superclass of all Universel exceprions.
  */
-public class Script extends AbstractCompositeNode {
-    public Script() {
-    }
-
-    public Script(TokenImage tokenImage, Node... bodyElements) {
-        super(tokenImage, bodyElements);
-    }
-
-    public boolean accept(UniversalCodeVisitor visitor) {
-        visitor.visitScript(this);
-        return true;
+public class UniversalException extends UncheckedException {
+    /**
+     * Construcs a new Universel exception with the given error message.
+     * @param message the message associated with the exception.
+     */
+    public UniversalException(String message) {
+        super(message);
     }
 }

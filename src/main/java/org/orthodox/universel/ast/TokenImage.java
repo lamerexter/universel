@@ -41,6 +41,18 @@ public class TokenImage {
      * @param startColumn te column the token image of this node begins.
      * @param endLine the line the token image of this node ends.
      * @param endColumn the column the token image of this node ends.
+     */
+    public TokenImage(int startLine, int startColumn, int endLine, int endColumn) {
+        this(startLine, startColumn, endLine, endColumn, null);
+    }
+
+    /**
+     * Constructs a new token image, with parse position and image.
+     *
+     * @param startLine the line the token image of this node begins.
+     * @param startColumn te column the token image of this node begins.
+     * @param endLine the line the token image of this node ends.
+     * @param endColumn the column the token image of this node ends.
      * @param image the parsed token image.
      */
     public TokenImage(int startLine, int startColumn, int endLine, int endColumn, String image) {

@@ -9,7 +9,7 @@ public interface IntegerLiteral extends NumericLiteral {
      * @return the integer representation precision.
      * @see NumericPrecision
      */
-    default public NumericPrecision getPrecision() {
+    default NumericPrecision getPrecision() {
         String image = getTokenImage().getImage();
         if ( image.endsWith("l") ) return LONG;
         else if ( image.endsWith("I") ) return ARBITRARY;

@@ -1,6 +1,5 @@
 package org.orthodox.universel.compiler;
 
-import org.objectweb.asm.Type;
 import org.beanplanet.core.io.IoException;
 import org.beanplanet.core.io.resource.ByteArrayResource;
 import org.beanplanet.core.io.resource.Resource;
@@ -9,14 +8,15 @@ import org.beanplanet.core.lang.TypeUtil;
 import org.beanplanet.core.util.SizeUtil;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Type;
 import org.orthodox.universal.parser.ParseException;
 import org.orthodox.universal.parser.UniversalParser;
-import org.orthodox.universel.ast.Expression;
 import org.orthodox.universel.ast.Node;
-import org.orthodox.universel.ast.literals.BooleanLiteralExpr;
+import org.orthodox.universel.ast.Script;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -26,49 +26,59 @@ public class UniversalCompiler {
     private static AtomicLong inc = new AtomicLong();
     private VirtualMachine virtualMachine = new VirtualMachine();
 
-    public CompiledUnit compile(String script) {
-        return compile(new StringResource(script));
-    }
+    public Script parse(String compilationUnit) { return parse(new StringResource(compilationUnit)); }
 
-    private CompiledUnit compile(Resource compilationUnitResource) {
+    public Script parse(Resource compilationUnitResource) {
         try (Reader compilationUnitReader = compilationUnitResource.getReader()) {
-            long startTime = System.currentTimeMillis();
-
-            //----------------------------------------------------------------------------------------------------------
-            // Parse the compilation unit to the topmost non-terminal.
-            //----------------------------------------------------------------------------------------------------------
             UniversalParser parser = new UniversalParser(compilationUnitReader);
-            Node compilationUnitNonTerminal = parser.Literal();
-
-            //----------------------------------------------------------------------------------------------------------
-            // Compile to bytecode.
-            //----------------------------------------------------------------------------------------------------------
-            String classBasename = "UniScript"  + UUID.randomUUID().hashCode();
-            String className = UniversalCompiler.class.getPackage().getName().replace('.','/')+"/"+classBasename;
-
-            ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS + ClassWriter.COMPUTE_FRAMES);
-            cw.visit(V1_8, ACC_PUBLIC, className, null, "java/lang/Object", null);
-            MethodVisitor mv = cw.visitMethod(ACC_PUBLIC + ACC_FINAL + ACC_STATIC, "main", "()" + Type.getDescriptor(Object.class), null, null);
-            mv.visitCode();
-
-            CompilationContext compilationContext = new CompilationContext(mv, new VirtualMachine());
-            CompilingAstVisitor compilingAstVisitor = new CompilingAstVisitor(compilationContext);
-            compilationUnitNonTerminal.accept(compilingAstVisitor);
-
-            compilationContext.getBytecodeHelper().boxIfNeeded(compilationContext.getVirtualMachine().peekOperandStack());
-            mv.visitInsn(ARETURN);
-
-            mv.visitEnd();
-            mv.visitMaxs(0,0);
-            cw.visitEnd();
-
-            long endTime = System.currentTimeMillis();
-            return new CompiledUnit(new ByteArrayResource(cw.toByteArray()), className, classBasename, endTime-startTime);
+            return parser.script();
         } catch (ParseException parseException) {
             throw new CompilationException(parseException);
         } catch (IOException ioEx) {
             throw new IoException(String.format("I/O error occurred during compilation [%s]: ", compilationUnitResource.getCanonicalForm()), ioEx);
         }
+    }
+
+    public CompiledUnit compile(String compilationUnit) {
+        return compile(new StringResource(compilationUnit));
+    }
+
+    private CompiledUnit compile(Resource compilationUnitResource) {
+        long startTime = System.currentTimeMillis();
+
+        //----------------------------------------------------------------------------------------------------------
+        // Parse the compilation unit to the topmost non-terminal.
+        //----------------------------------------------------------------------------------------------------------
+        Node compilationUnitNonTerminal = parse(compilationUnitResource);
+
+        //----------------------------------------------------------------------------------------------------------
+        // Compile to bytecode.
+        //----------------------------------------------------------------------------------------------------------
+        String classBasename = "UniScript"  + UUID.randomUUID().hashCode();
+        String className = UniversalCompiler.class.getPackage().getName().replace('.','/')+"/"+classBasename;
+
+        // Define top-level script class
+        BytecodeHelper bch = new BytecodeHelper();
+        ClassWriter cw = bch.generateClass(V1_8, ACC_PUBLIC, className, Object.class);
+
+        // Generate execution method with binding
+        MethodVisitor mv = bch.generateMethod(ACC_PUBLIC + ACC_FINAL + ACC_STATIC, "execute", Object.class, Map.class);
+
+        ScriptScope scriptScope = new ScriptScope();
+        CompilationContext compilationContext = new CompilationContext(scriptScope, mv, new VirtualMachine());
+        CompilingAstVisitor compilingAstVisitor = new CompilingAstVisitor(compilationContext);
+        scriptScope.setCompilationContext(compilationContext);
+        compilationUnitNonTerminal.accept(compilingAstVisitor);
+
+        compilationContext.getBytecodeHelper().boxIfNeeded(compilationContext.getVirtualMachine().peekOperandStack());
+        mv.visitInsn(ARETURN);
+
+        mv.visitEnd();
+        mv.visitMaxs(0,0);
+        cw.visitEnd();
+
+        long endTime = System.currentTimeMillis();
+        return new CompiledUnit(new ByteArrayResource(cw.toByteArray()), className, classBasename, endTime-startTime);
     }
 
     public static void main(String... args) throws Exception {

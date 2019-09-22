@@ -1,7 +1,7 @@
 /*
  *  MIT Licence:
  *
- *  Copyright (c) 2018 Orthodox Engineering Ltd
+ *  Copyright (c) 2019 Orthodox Engineering Ltd
  *
  *  Permission is hereby granted, free of charge, to any person
  *  obtaining a copy of this software and associated documentation
@@ -25,26 +25,23 @@
  *  DEALINGS IN THE SOFTWARE.
  *
  */
-package org.orthodox.universel.ast;
 
-import java.util.List;
+package org.orthodox.universel.compiler;
 
-/**
- * The top-level goal symbol of the Universel Expression Language, equivalent to Java's Compilation Unit - but so
- * much more.
- *
- * @author Gary Watson
- */
-public class Script extends AbstractCompositeNode {
-    public Script() {
+import java.util.Map;
+
+public class ScriptScope implements NameScope {
+    private CompilationContext compilationContext;
+
+    public void setCompilationContext(CompilationContext compilationContext) {
+        this.compilationContext = compilationContext;
     }
 
-    public Script(TokenImage tokenImage, Node... bodyElements) {
-        super(tokenImage, bodyElements);
-    }
-
-    public boolean accept(UniversalCodeVisitor visitor) {
-        visitor.visitScript(this);
-        return true;
+    @Override
+    public void generateAccess(String name) {
+        compilationContext.getBytecodeHelper().emitLoadLocal(true, 0, Map.class);
+        compilationContext.getBytecodeHelper().emitLoadStringOperand(name);
+        compilationContext.getBytecodeHelper().emitInvokeInstanceMethod(Map.class, "get", Object.class, Object.class);
+        compilationContext.getVirtualMachine().loadOperandOfType(Object.class);
     }
 }

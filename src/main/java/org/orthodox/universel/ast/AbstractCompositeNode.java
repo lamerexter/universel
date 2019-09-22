@@ -33,14 +33,38 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import static java.util.Arrays.asList;
+import static org.beanplanet.core.util.IterableUtil.nullSafe;
+
 public abstract class AbstractCompositeNode extends Node implements CompositeNode {
-   /**
-    * Constructs a new AST composite node instance with no initial configuration.
-    */
-   public AbstractCompositeNode() {
-   }
-   
-//   /**
+    private List<Node> childNodes = Collections.emptyList();
+
+
+    /**
+     * Constructs a new AST composite node instance with no initial configuration.
+     */
+    public AbstractCompositeNode() {
+    }
+
+    public AbstractCompositeNode(TokenImage tokenImage, Node... childNodes) {
+        this(tokenImage, asList(childNodes));
+    }
+
+    public AbstractCompositeNode(TokenImage tokenImage, List<Node> childNodes) {
+        super(tokenImage);
+        this.childNodes = childNodes;
+    }
+
+    @Override
+    public List<Node> getChildNodes() {
+        return childNodes;
+    }
+
+    public void setChildNodes(List<Node> childNodes) {
+        this.childNodes = childNodes;
+    }
+
+    //   /**
 //    * Constructs a new AST composite node instance from the given nodes.
 //    *
 //    * @param objects the nodes that will comprise this composite.
@@ -82,31 +106,41 @@ public abstract class AbstractCompositeNode extends Node implements CompositeNod
 //      super(startLine, startColumn, image);
 //   }
 
-   /**
-    * Returns an iterator over a set nodes of this composite.
-    * 
-    * @return an Iterator over the child nodes of this composite node.
-    */
-   public Iterator<Node> iterator() {
-      List<Node> childNodes = getChildNodes();
-      return childNodes != null ? childNodes.iterator() : Collections.<Node>emptyList().iterator();
-   }
+    /**
+     * Returns an iterator over a set nodes of this composite.
+     *
+     * @return an Iterator over the child nodes of this composite node.
+     */
+    public Iterator<Node> iterator() {
+        List<Node> childNodes = getChildNodes();
+        return childNodes != null ? childNodes.iterator() : Collections.<Node>emptyList().iterator();
+    }
 
-   protected <T extends Node> T assignParent(T node) {
-      if (node != null) {
-         node.setParent(this);
-      }
-      
-      return node;
-   }
-   
-   protected <T extends Collection<? extends Node>> T assignParent(T nodes) {
-      if (nodes != null) {
-         for (Node node : nodes) {
-            assignParent(node);
-         }
-      }
-      
-      return nodes;
-   }
+    protected <T extends Node> T assignParent(T node) {
+        if (node != null) {
+            node.setParent(this);
+        }
+
+        return node;
+    }
+
+    protected <T extends Collection<? extends Node>> T assignParent(T nodes) {
+        if (nodes != null) {
+            for (Node node : nodes) {
+                assignParent(node);
+            }
+        }
+
+        return nodes;
+    }
+
+    public String getCanonicalForm() {
+        StringBuilder s = new StringBuilder();
+
+        for (Node node : nullSafe(childNodes)) {
+            s.append(node.getCanonicalForm());
+        }
+
+        return s.toString();
+    }
 }

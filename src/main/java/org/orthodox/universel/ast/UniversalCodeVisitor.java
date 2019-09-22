@@ -30,6 +30,8 @@
 package org.orthodox.universel.ast;
 
 
+import org.orthodox.universel.ast.collections.ListExpr;
+import org.orthodox.universel.ast.collections.SetExpr;
 import org.orthodox.universel.ast.literals.*;
 
 /**
@@ -74,6 +76,9 @@ public interface UniversalCodeVisitor {
    boolean visitBooleanLiteral(BooleanLiteralExpr node);
    boolean visitDecimalFloatingPointLiteral(DecimalFloatingPointLiteralExpr node);
    boolean visitDecimalIntegerLiteral(DecimalIntegerLiteralExpr node);
+   boolean visitList(ListExpr node);
+   boolean visitName(Name node);
+   boolean visitNullLiteral(NullLiteralExpr node);
 //   boolean visitMapExpression(MapExpression node);
 //   boolean visitMethodDeclaration(MethodDeclaration node);
 //   boolean visitModifiers(Modifiers node);
@@ -86,6 +91,7 @@ public interface UniversalCodeVisitor {
 //   boolean visitReturnStatement(ReturnStatement node);
    boolean visitInterpolatedStringLiteral(InterpolatedStringLiteralExpr node);
    boolean visitScript(Script node);
+   boolean visitSet(SetExpr node);
    boolean visitStringLiteral(StringLiteralExpr node);
 //   boolean visitSetExpression(SetExpression node);
 //   boolean visitTernaryExpression(TernaryExpression node);

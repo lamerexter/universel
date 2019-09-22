@@ -1,14 +1,26 @@
 package org.orthodox.universel.compiler;
 
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Type;
+import org.orthodox.universel.ast.Name;
 import org.orthodox.universel.ast.Node;
 import org.orthodox.universel.ast.Script;
 import org.orthodox.universel.ast.UniversalCodeVisitor;
+import org.orthodox.universel.ast.collections.ListExpr;
+import org.orthodox.universel.ast.collections.SetExpr;
 import org.orthodox.universel.ast.literals.*;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
+import static org.beanplanet.core.util.CollectionUtil.isEmptyOrNull;
+import static org.beanplanet.core.util.CollectionUtil.isNullOrEmpty;
 import static org.beanplanet.core.util.IterableUtil.nullSafe;
+import static org.objectweb.asm.Opcodes.*;
 import static org.orthodox.universel.StringEscapeUtil.unescapeUniversalCharacterEscapeSequences;
 
 public class CompilingAstVisitor implements UniversalCodeVisitor {
@@ -69,6 +81,46 @@ public class CompilingAstVisitor implements UniversalCodeVisitor {
     }
 
     @Override
+    public boolean visitList(ListExpr node) {
+        MethodVisitor mv = compilationContext.getBytecodeHelper().peekMethodVisitor();
+        String className = Type.getInternalName(ArrayList.class);
+        mv.visitTypeInsn(NEW, className);
+        mv.visitInsn(DUP);
+
+        if ( isNullOrEmpty(node.getElements()) ) {
+            mv.visitMethodInsn(INVOKESPECIAL, className, BytecodeHelper.CTOR_METHOD_NAME, Type.getMethodDescriptor(Type.VOID_TYPE, BytecodeHelper.EMPTY_TYPES));
+        } else {
+            compilationContext.getBytecodeHelper().emitLoadIntegerOperand(node.getElements().size());
+            mv.visitMethodInsn(INVOKESPECIAL, className, BytecodeHelper.CTOR_METHOD_NAME, Type.getMethodDescriptor(Type.VOID_TYPE, Type.INT_TYPE));
+        }
+
+        for (Node itemNode : node.getElements()) {
+            mv.visitInsn(DUP);
+            itemNode.accept(this);
+            compilationContext.getBytecodeHelper().boxIfNeeded(compilationContext.getVirtualMachine().peekOperandStack());
+            mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(List.class), "add",
+                               Type.getMethodDescriptor(Type.BOOLEAN_TYPE, BytecodeHelper.OBJECT_TYPE_ARRAY));
+            mv.visitInsn(POP);
+        }
+        compilationContext.getVirtualMachine().loadOperandOfType(ArrayList.class);
+
+        return true;
+    }
+
+    @Override
+    public boolean visitName(Name node) {
+        compilationContext.getNameScope().generateAccess(node.getName());
+        return true;
+    }
+
+    @Override
+    public boolean visitNullLiteral(NullLiteralExpr node) {
+        compilationContext.getVirtualMachine().loadOperandOfType(Object.class);
+        compilationContext.getBytecodeHelper().emitLoadNullOperand();
+        return true;
+    }
+
+    @Override
     public boolean visitInterpolatedStringLiteral(InterpolatedStringLiteralExpr node) {
         compilationContext.getBytecodeHelper().emitInstantiateType(StringBuilder.class);
 
@@ -92,7 +144,37 @@ public class CompilingAstVisitor implements UniversalCodeVisitor {
 
     @Override
     public boolean visitScript(Script node) {
+        for (Node child : nullSafe(node.getChildNodes())) {
+            child.accept(this);
+        }
         return false;
+    }
+
+    @Override
+    public boolean visitSet(SetExpr node) {
+        MethodVisitor mv = compilationContext.getBytecodeHelper().peekMethodVisitor();
+        String className = Type.getInternalName(LinkedHashSet.class);
+        mv.visitTypeInsn(NEW, className);
+        mv.visitInsn(DUP);
+
+        if ( isNullOrEmpty(node.getElements()) ) {
+            mv.visitMethodInsn(INVOKESPECIAL, className, BytecodeHelper.CTOR_METHOD_NAME, Type.getMethodDescriptor(Type.VOID_TYPE, BytecodeHelper.EMPTY_TYPES));
+        } else {
+            compilationContext.getBytecodeHelper().emitLoadIntegerOperand(node.getElements().size());
+            mv.visitMethodInsn(INVOKESPECIAL, className, BytecodeHelper.CTOR_METHOD_NAME, Type.getMethodDescriptor(Type.VOID_TYPE, new Type[] { Type.INT_TYPE }));
+        }
+
+        for (Node itemNode : node.getElements()) {
+            mv.visitInsn(DUP);
+            itemNode.accept(this);
+            compilationContext.getBytecodeHelper().boxIfNeeded(compilationContext.getVirtualMachine().peekOperandStack());
+            mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Set.class), "add",
+                               Type.getMethodDescriptor(Type.BOOLEAN_TYPE, BytecodeHelper.OBJECT_TYPE_ARRAY));
+            mv.visitInsn(POP);
+        }
+        compilationContext.getVirtualMachine().loadOperandOfType(LinkedHashSet.class);
+
+        return true;
     }
 
     @Override

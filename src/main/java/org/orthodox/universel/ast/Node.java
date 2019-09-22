@@ -27,8 +27,6 @@
  */
 package org.orthodox.universel.ast;
 
-import org.beanplanet.core.util.PropertyBasedToStringBuilder;
-
 /**
  * The superclass of all UEL Abstact Syntax Tree (AST) elements.
  *

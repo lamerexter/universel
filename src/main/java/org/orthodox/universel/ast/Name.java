@@ -1,7 +1,7 @@
 /*
  *  MIT Licence:
  *
- *  Copyright (c) 2018 Orthodox Engineering Ltd
+ *  Copyright (c) 2019 Orthodox Engineering Ltd
  *
  *  Permission is hereby granted, free of charge, to any person
  *  obtaining a copy of this software and associated documentation
@@ -25,26 +25,51 @@
  *  DEALINGS IN THE SOFTWARE.
  *
  */
+
 package org.orthodox.universel.ast;
 
-import java.util.List;
+import org.beanplanet.core.models.Named;
+
+import java.util.Objects;
 
 /**
- * The top-level goal symbol of the Universel Expression Language, equivalent to Java's Compilation Unit - but so
- * much more.
- *
- * @author Gary Watson
+ * Am name reference expression.
  */
-public class Script extends AbstractCompositeNode {
-    public Script() {
+public class Name extends Expression implements Named {
+    private String name;
+
+    /**
+     * Consructs a new name reference from the given parser token image.
+     *
+     * @param tokenImage the parser token image.
+     */
+    public Name(TokenImage tokenImage, String name) {
+        super(tokenImage);
+        this.name = name;
     }
 
-    public Script(TokenImage tokenImage, Node... bodyElements) {
-        super(tokenImage, bodyElements);
+    @Override
+    public String getName() {
+        return name;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (!(o instanceof Name))
+            return false;
+        Name name1 = (Name) o;
+        return Objects.equals(getName(), name1.getName());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getName());
+    }
+
+    @Override
     public boolean accept(UniversalCodeVisitor visitor) {
-        visitor.visitScript(this);
-        return true;
+        return visitor.visitName(this);
     }
 }

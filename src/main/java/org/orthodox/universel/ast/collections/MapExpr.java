@@ -1,7 +1,7 @@
 /*
  *  MIT Licence:
  *
- *  Copyright (c) 2018 Orthodox Engineering Ltd
+ *  Copyright (c) 2019 Orthodox Engineering Ltd
  *
  *  Permission is hereby granted, free of charge, to any person
  *  obtaining a copy of this software and associated documentation
@@ -25,26 +25,38 @@
  *  DEALINGS IN THE SOFTWARE.
  *
  */
-package org.orthodox.universel.ast;
+
+package org.orthodox.universel.ast.collections;
+
+import org.orthodox.universel.ast.Expression;
+import org.orthodox.universel.ast.TokenImage;
 
 import java.util.List;
 
 /**
- * The top-level goal symbol of the Universel Expression Language, equivalent to Java's Compilation Unit - but so
- * much more.
- *
- * @author Gary Watson
+ * An map entry expression on the Abstract Syntax Tree, of the form <code>[1, 2, 3, 4]</code>
  */
-public class Script extends AbstractCompositeNode {
-    public Script() {
+public class MapExpr extends Expression {
+    /** The element expressions of this map entry expression. */
+    private List<MapEntryExpr> entries;
+
+    /**
+     * Consructs map entry expression from the given parser token image.
+     *
+     * @param tokenImage the parser token image.
+     * @param entries the key/value expressions of this map entry expression, which may be empty.
+     */
+    public MapExpr(TokenImage tokenImage, List<MapEntryExpr> entries) {
+        super(tokenImage);
+        this.entries = entries;
     }
 
-    public Script(TokenImage tokenImage, Node... bodyElements) {
-        super(tokenImage, bodyElements);
-    }
-
-    public boolean accept(UniversalCodeVisitor visitor) {
-        visitor.visitScript(this);
-        return true;
+    /**
+     * Gets the entry expressions of this map entry expression.
+     *
+     * @return the key/value expressions of this map entry expression, which may be empty.
+     */
+    public List<MapEntryExpr> getEntries() {
+        return entries;
     }
 }
