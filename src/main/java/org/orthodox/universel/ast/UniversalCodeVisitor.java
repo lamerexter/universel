@@ -31,6 +31,7 @@ package org.orthodox.universel.ast;
 
 
 import org.orthodox.universel.ast.collections.ListExpr;
+import org.orthodox.universel.ast.collections.MapExpr;
 import org.orthodox.universel.ast.collections.SetExpr;
 import org.orthodox.universel.ast.literals.*;
 
@@ -77,6 +78,7 @@ public interface UniversalCodeVisitor {
    boolean visitDecimalFloatingPointLiteral(DecimalFloatingPointLiteralExpr node);
    boolean visitDecimalIntegerLiteral(DecimalIntegerLiteralExpr node);
    boolean visitList(ListExpr node);
+   boolean visitMap(MapExpr node);
    boolean visitName(Name node);
    boolean visitNullLiteral(NullLiteralExpr node);
 //   boolean visitMapExpression(MapExpression node);

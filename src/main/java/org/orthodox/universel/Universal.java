@@ -3,7 +3,6 @@ package org.orthodox.universel;
 import org.beanplanet.core.lang.TypeUtil;
 import org.beanplanet.core.logging.BeanpanetLoggerFactory;
 import org.beanplanet.core.logging.Logger;
-import org.beanplanet.core.util.CollectionUtil;
 import org.beanplanet.core.util.SizeUtil;
 import org.orthodox.universel.ast.Node;
 import org.orthodox.universel.ast.Script;
@@ -11,11 +10,9 @@ import org.orthodox.universel.compiler.CompiledUnit;
 import org.orthodox.universel.compiler.UniversalCompiler;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import static java.lang.String.format;
-import static org.beanplanet.core.util.CollectionUtil.isEmptyOrNull;
 
 /**
  * Helper class for parsing and executing Universal expressions and scripts.
@@ -59,14 +56,42 @@ public class Universal implements Logger {
     }
 
     /**
+     * Evaluates a script and executes it immediately. The script will be parsed, compiled to bytecode and then executed
+     * by this invocation.
+     *
+     * @param script the script to be executed.
+     * @param resultType the type of the result expected from execution of the script: either directly or through type
+     *                   conversion applied to the result.
+     * @return any result returned by the script, which may be null, or null if the script did not return any result.
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T execute(Class<T> resultType, String script) {
+        return execute(script, Collections.emptyMap());
+    }
+
+    /**
      * Evaluates a script and executes it immediately using the supplied map binding. The script will be parsed, compiled to bytecode and then executed
      * by this invocation.
      *
      * @param script the script to be executed.
-     * @return any result returned by the script, which may be null, or null if h script did not return any result.
+     * @return any result returned by the script, which may be null, or null if the script did not return any result.
      */
     @SuppressWarnings("unchecked")
     public static <T> T execute(String script, Map<String, Object> binding) {
+        return (T)execute(Object.class, script, binding);
+    }
+
+    /**
+     * Evaluates a script and executes it immediately using the supplied map binding. The script will be parsed, compiled to bytecode and then executed
+     * by this invocation.
+     *
+     * @param script the script to be executed.
+     * @param resultType the type of the result expected from execution of the script: either directly or through type
+     *                   conversion applied to the result.
+     * @return any result returned by the script, which may be null, or null if the script did not return any result.
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T execute(Class<T> resultType, String script, Map<String, Object> binding) {
         LOG.info("Beginning evaluation of script [{0}] ...", script);
         UniversalCompiler compiler = new UniversalCompiler();
         CompiledUnit compiledUnit = compiler.compile(script);

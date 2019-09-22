@@ -7,15 +7,14 @@ import org.orthodox.universel.ast.Node;
 import org.orthodox.universel.ast.Script;
 import org.orthodox.universel.ast.UniversalCodeVisitor;
 import org.orthodox.universel.ast.collections.ListExpr;
+import org.orthodox.universel.ast.collections.MapEntryExpr;
+import org.orthodox.universel.ast.collections.MapExpr;
 import org.orthodox.universel.ast.collections.SetExpr;
 import org.orthodox.universel.ast.literals.*;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.beanplanet.core.util.CollectionUtil.isEmptyOrNull;
 import static org.beanplanet.core.util.CollectionUtil.isNullOrEmpty;
@@ -103,6 +102,31 @@ public class CompilingAstVisitor implements UniversalCodeVisitor {
             mv.visitInsn(POP);
         }
         compilationContext.getVirtualMachine().loadOperandOfType(ArrayList.class);
+
+        return true;
+    }
+
+    @Override
+    public boolean visitMap(MapExpr node) {
+        MethodVisitor mv = compilationContext.getBytecodeHelper().peekMethodVisitor();
+        String className = Type.getInternalName(LinkedHashMap.class);
+        mv.visitTypeInsn(NEW, className);
+        mv.visitInsn(DUP);
+        mv.visitMethodInsn(INVOKESPECIAL, className, BytecodeHelper.CTOR_METHOD_NAME, Type.getMethodDescriptor(Type.VOID_TYPE, BytecodeHelper.EMPTY_TYPES));
+
+        if (node.getEntries() != null) {
+            for (MapEntryExpr mapEntryExpr : node.getEntries()) {
+                mv.visitInsn(DUP);
+                mapEntryExpr.getKeyExpression().accept(this);
+                compilationContext.getBytecodeHelper().boxIfNeeded(compilationContext.getVirtualMachine().peekOperandStack());
+                mapEntryExpr.getValueExpression().accept(this);
+                compilationContext.getBytecodeHelper().boxIfNeeded(compilationContext.getVirtualMachine().peekOperandStack());
+                mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Map.class), "put",
+                                   Type.getMethodDescriptor(BytecodeHelper.OBJECT_TYPE, BytecodeHelper.OBJECT_TYPE, BytecodeHelper.OBJECT_TYPE));
+                mv.visitInsn(POP);
+            }
+        }
+        compilationContext.getVirtualMachine().loadOperandOfType(LinkedHashMap.class);
 
         return true;
     }

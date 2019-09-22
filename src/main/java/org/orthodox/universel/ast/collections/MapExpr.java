@@ -30,6 +30,7 @@ package org.orthodox.universel.ast.collections;
 
 import org.orthodox.universel.ast.Expression;
 import org.orthodox.universel.ast.TokenImage;
+import org.orthodox.universel.ast.UniversalCodeVisitor;
 
 import java.util.List;
 
@@ -59,4 +60,9 @@ public class MapExpr extends Expression {
     public List<MapEntryExpr> getEntries() {
         return entries;
     }
+
+    public boolean accept(UniversalCodeVisitor visitor) {
+        return visitor.visitMap(this);
+    }
+
 }
