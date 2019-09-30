@@ -1,7 +1,7 @@
 /*
  *  MIT Licence:
  *
- *  Copyright (c) 2018 Orthodox Engineering Ltd
+ *  Copyright (c) 2019 Orthodox Engineering Ltd
  *
  *  Permission is hereby granted, free of charge, to any person
  *  obtaining a copy of this software and associated documentation
@@ -25,52 +25,47 @@
  *  DEALINGS IN THE SOFTWARE.
  *
  */
+
 package org.orthodox.universel.ast;
 
 import java.util.Collections;
 import java.util.List;
 
-import static java.util.Arrays.asList;
 import static org.orthodox.universel.ast.TokenImage.range;
 
 /**
- * The top-level goal symbol of the Universel Expression Language, equivalent to Java's Compilation Unit - but so
- * much more.
- *
- * @author Gary Watson
+ * An import declaration, consisting of one or more import statements.
  */
-public class Script extends Node {
-    private final ImportDecl importDeclaration;
-    private final List<Node> bodyElements;
+public class ImportDecl extends Expression {
+    /** The import statements associated with this import declaration. */
+    private List<ImportStmt> imports;
 
-    public Script() {
-        this.importDeclaration = null;
-        this.bodyElements = null;
-
+    /**
+     * Consructs set expression from the given parser token image.
+     *
+     * @param imports he import statements associated with this import declaration.
+     */
+    public ImportDecl(List<ImportStmt> imports) {
+        super(range(imports));
+        this.imports = imports;
     }
 
-    public Script(Node ... bodyElements) {
-        super(range(asList(bodyElements)));
-        this.importDeclaration = null;
-        this.bodyElements = asList(bodyElements);
+    /**
+     * Gets the import statements associated with this import declaration.
+     *
+     * @return the import statements associated with this import declaration.
+     */
+    public List<ImportStmt> getImports() {
+        return imports == null ? Collections.emptyList() : imports;
     }
 
-    public Script(ImportDecl importDecl, List<Node> bodyElements) {
-        super(range(importDecl, bodyElements));
-        this.importDeclaration = importDecl;
-        this.bodyElements = bodyElements;
-    }
-
-    public ImportDecl getImportDeclaration() {
-        return importDeclaration;
-    }
-
-    public List<Node> getBodyElements() {
-        return bodyElements;
-    }
-
+    /**
+     * Called to accept a visitor.
+     *
+     * @param visitor the visitor visiting the node.
+     * @return true if visitation is to continue after this visit, false if visitation is requested to stop after this visit.
+     */
     public boolean accept(UniversalCodeVisitor visitor) {
-        visitor.visitScript(this);
-        return true;
+        return visitor.visitImportDeclaration(this);
     }
 }

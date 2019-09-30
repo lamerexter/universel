@@ -27,14 +27,4 @@ class DecimalIntegerLiteralExprTest {
         // Then
         assertThat(expr.getTokenImage(), sameInstance(tokenImage));
     }
-
-    @Test
-    public void canonicalForm() {
-        // Given
-        TokenImage tokenImage = new TokenImage(1, 2, 3, 4, "8899");
-        DecimalIntegerLiteralExpr expr = new DecimalIntegerLiteralExpr(tokenImage);
-
-        // Then
-        assertThat(expr.getCanonicalForm(), equalTo("8899"));
-    }
 }

@@ -26,27 +26,22 @@
  *
  */
 
-package org.orthodox.universel.compiler;
+package org.orthodox.universel.execute.names;
 
-import java.util.Map;
+import org.junit.jupiter.api.Test;
+import org.orthodox.universel.Universal;
 
-public class ScriptScope implements NameScope {
-    private CompilationContext compilationContext;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-    public void setCompilationContext(CompilationContext compilationContext) {
-        this.compilationContext = compilationContext;
+public class TypeReferenceScopeTest {
+    @Test
+    public void typeFromImport() {
+        assertThat(Universal.execute("import "+getClass().getName()+"\n"+getClass().getSimpleName()), equalTo(getClass()));
     }
 
-    @Override
-    public boolean canResolve(String name) {
-        return true; // Will always attempt to resolve the name
-    }
-
-    @Override
-    public void generateAccess(String name) {
-        compilationContext.getBytecodeHelper().emitLoadLocal(true, 0, Map.class);
-        compilationContext.getBytecodeHelper().emitLoadStringOperand(name);
-        compilationContext.getBytecodeHelper().emitInvokeInstanceMethod(Map.class, "get", Object.class, Object.class);
-        compilationContext.getVirtualMachine().loadOperandOfType(Object.class);
+    @Test
+    public void typeFromImportOnDemand() {
+        assertThat(Universal.execute("import "+getClass().getPackage().getName()+".*\n"+getClass().getSimpleName()), equalTo(getClass()));
     }
 }

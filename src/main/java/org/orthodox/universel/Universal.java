@@ -4,6 +4,7 @@ import org.beanplanet.core.lang.TypeUtil;
 import org.beanplanet.core.logging.BeanpanetLoggerFactory;
 import org.beanplanet.core.logging.Logger;
 import org.beanplanet.core.util.SizeUtil;
+import org.orthodox.universel.ast.ImportDecl;
 import org.orthodox.universel.ast.Node;
 import org.orthodox.universel.ast.Script;
 import org.orthodox.universel.compiler.CompiledUnit;
@@ -13,6 +14,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import static java.lang.String.format;
+import static org.beanplanet.core.util.CollectionUtil.nullSafe;
 
 /**
  * Helper class for parsing and executing Universal expressions and scripts.
@@ -33,14 +35,16 @@ public class Universal implements Logger {
     @SuppressWarnings("unchecked")
     public static final <T extends Node> T parse(Class<T> astType, String script) {
         Script scriptNode = parse(script);
-        return scriptNode.getChildNodes().stream()
+
+        if (astType == ImportDecl.class && scriptNode.getImportDeclaration() != null) return (T)scriptNode.getImportDeclaration();
+        return nullSafe(scriptNode.getBodyElements()).stream()
                   .filter(n -> astType.isAssignableFrom(n.getClass()))
                   .map(n -> (T)n)
                   .findFirst()
                   .orElseThrow(() -> new UniversalException(format("Unable to parse expression [%s] to single given AST node of tyoe [%s]: found %d nodes when expecting 1",
                                                              script,
                                                              astType,
-                                                             scriptNode.getChildNodes().size())));
+                                                             scriptNode.getBodyElements().size())));
     }
 
     /**

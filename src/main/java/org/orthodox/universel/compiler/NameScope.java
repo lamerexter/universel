@@ -29,5 +29,19 @@
 package org.orthodox.universel.compiler;
 
 public interface NameScope {
+    /**
+     * Determines whether this name scope can definitively resolve a given name.
+     *
+     * @param name the name to be determined within this scope.
+     * @return true if name can be resolved within this scope, false otherwise.
+     */
+    boolean canResolve(String name);
+
+    /**
+     * Generates the code to access the given name w.r.t. a rhs expression, leaving the value
+     * on the evaluation stack.
+     *
+     * @param name the name within this scopr whose access code is to be generated.
+     */
     void generateAccess(String name);
 }

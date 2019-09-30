@@ -27,14 +27,4 @@ class HexadecimalIntegerLiteralExprTest {
         // Then
         assertThat(expr.getTokenImage(), sameInstance(tokenImage));
     }
-
-    @Test
-    public void canonicalForm() {
-        // Given
-        TokenImage tokenImage = new TokenImage(1, 2, 3, 4, "0xf1e2d1");
-        HexadecimalIntegerLiteralExpr expr = new HexadecimalIntegerLiteralExpr(tokenImage);
-
-        // Then
-        assertThat(expr.getCanonicalForm(), equalTo("0xf1e2d1"));
-    }
 }

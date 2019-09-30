@@ -41,10 +41,9 @@ public class ScriptTest {
         // When
         String input = "\nnull";
         Script script = parse(input);
-        assertThat(script.getTokenImage().getStartLine(), equalTo(1));
+        assertThat(script.getTokenImage().getStartLine(), equalTo(2));
         assertThat(script.getTokenImage().getStartColumn(), equalTo(1));
         assertThat(script.getTokenImage().getEndLine(), equalTo(2));
         assertThat(script.getTokenImage().getEndColumn(), equalTo(4));
-        assertThat(script.getTokenImage().getImage(), equalTo(input.trim()));
     }
 }

@@ -232,4 +232,8 @@ public class BytecodeHelper {
             peekMethodVisitor().visitVarInsn(ALOAD, varPosition);
         }
     }
+
+    public void emitLoadType(Class<?> typeName) {
+        peekMethodVisitor().visitLdcInsn(Type.getType(typeName));
+    }
 }

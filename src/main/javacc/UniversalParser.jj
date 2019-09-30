@@ -60,6 +60,11 @@ public class UniversalParser
         return new TokenImage(token.beginLine, token.beginColumn, token.endLine, token.endColumn, token.image);
     }
 
+    private TokenImage tokenImage(int startLine, int startColumn, int endLine, int endColumn) {
+        return new TokenImage(startLine, startColumn, endLine, endColumn);
+    }
+
+
    private <T> List<T> add(List<T> list, Object obj) {
       if (list == null) {
          list = new ArrayList<T>();
@@ -123,6 +128,7 @@ TOKEN :
     | "0" ["x","X"] (<HEX_DIGITS>)? "." <HEX_DIGITS> <HEX_EXPONENT> (["f","F","d","D"])?
   >
 | < #HEX_EXPONENT: ["p","P"] (["+","-"])? <DECIMAL_LITERAL> >
+| < IMPORT: "import" >
 }
 
 /**
@@ -385,13 +391,17 @@ TOKEN :
 
 public Script script():
 {
-    Node top;
+    TokenImage tokenImage = null;
+    List<Node> bodyElements = null;
+    Node expr = null;
+    ImportDecl importDecl = null;
 }
 {
-    top = Expression()
+   [ importDecl=ImportDeclaration() ]
 
-    { return new Script(new TokenImage(1, 1, token.endLine, token.endColumn,
-             top.getTokenImage().getImage()), top); }
+   ( expr=Expression() { bodyElements=add(bodyElements, expr); } )*
+
+   { return new Script(importDecl, bodyElements); }
 }
 
 public Expression Expression():
@@ -546,7 +556,7 @@ Expression InterpolatedStringLiteral() :
     )
 }
 
-public Expression Identifier():
+public Name Identifier():
 {
     Name ret;
 }
@@ -643,10 +653,40 @@ Expression MapOrSetExpression() :
            return new SetExpr(new TokenImage(startLine,
                                              startColumn,
                                              token.endLine,
-                                             token.endColumn,
-                                             null), expressionList);
+                                             token.endColumn),
+                                             expressionList);
         } else {
             return new MapExpr(new TokenImage(startLine, startColumn, token.endLine, token.endColumn), expressionList);
         }
     }
+}
+
+ImportDecl ImportDeclaration() :
+{
+	ImportStmt imp;
+	List<ImportStmt> imports = null;
+}
+{
+  ( imp=ImportStatement() { imports = add(imports, imp); } )+
+
+  { return imports == null ? null : new ImportDecl(imports); }
+}
+
+ImportStmt ImportStatement() :
+{
+	int startLine, startColumn;
+	boolean isImportOnDemand = false;
+	Name name;
+	List<Name> nameElements = null;
+}
+{
+  <IMPORT> {startLine=token.beginLine; startColumn=token.beginColumn; }
+
+  name=Identifier() { nameElements=add(nameElements, name); }
+
+  ( "." name=Identifier() { nameElements=add(nameElements, name); } )*
+
+  [ ".*" { isImportOnDemand=true; } ]
+
+  { return new ImportStmt(new TokenImage(startLine, startColumn, token.endLine, token.endColumn), nameElements, isImportOnDemand); }
 }

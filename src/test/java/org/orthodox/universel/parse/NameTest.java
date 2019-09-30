@@ -29,28 +29,19 @@
 package org.orthodox.universel.parse;
 
 import org.junit.jupiter.api.Test;
-import org.orthodox.universal.parser.UniversalParser;
 import org.orthodox.universel.Universal;
-import org.orthodox.universel.ast.Expression;
 import org.orthodox.universel.ast.Name;
-import org.orthodox.universel.ast.Script;
-import org.orthodox.universel.ast.literals.NullLiteralExpr;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
 
 public class NameTest {
     @Test
     public void parsePosition() throws Exception{
         // When
         String input = "\n\r\n  theVariable123Abc";
-        Script script = Universal.parse(input);
+        Name name = Universal.parse(Name.class, input);
 
-        assertThat(script.getChildNodes().size(), equalTo(1));
-        assertThat(script.getChildNodes().get(0), instanceOf(Name.class));
-
-        Name name = (Name) script.getChildNodes().get(0);
         assertThat(name.getTokenImage().getStartLine(), equalTo(3));
         assertThat(name.getTokenImage().getStartColumn(), equalTo(3));
         assertThat(name.getTokenImage().getEndLine(), equalTo(3));

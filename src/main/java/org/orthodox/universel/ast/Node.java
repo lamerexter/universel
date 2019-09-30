@@ -27,6 +27,8 @@
  */
 package org.orthodox.universel.ast;
 
+import org.beanplanet.core.util.PropertyBasedToStringBuilder;
+
 /**
  * The superclass of all UEL Abstact Syntax Tree (AST) elements.
  *
@@ -121,19 +123,8 @@ public abstract class Node implements UniversalCodeVisitable {
         return this;
     }
 
-    /**
-     * Returns the canonical (well-known form) of this node. Usually, this is in the shape of the original parsed form
-     * of the tokens backing this node (i.e. token image). In this naive implementation, it is the parser token image
-     * itself.
-     *
-     * @return the parser token image, or null if there is not one.
-     */
-    public String getCanonicalForm() {
-        return getTokenImage() != null ? getTokenImage().getImage() : null;
-    }
-
     @Override
     public String toString() {
-        return getCanonicalForm();
+        return new PropertyBasedToStringBuilder(this).build();
     }
 }

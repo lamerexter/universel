@@ -2,7 +2,14 @@ package org.orthodox.universel.ast;
 
 import org.beanplanet.core.util.PropertyBasedToStringBuilder;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 
 /**
  * Represents the token, its position in the input stream and the string image of the token itself.
@@ -19,6 +26,33 @@ public class TokenImage {
 
     /** The string image of the parsed token. */
     private String image;
+
+    public static TokenImage range(Node lhs, List<Node> rhs) {
+        if (lhs != null && rhs != null)
+            return range(Stream.concat(singletonList(lhs).stream(), rhs.stream()).collect(Collectors.toList()));
+        else if (lhs == null)
+            return range(rhs);
+
+        return range(Collections.singletonList(lhs));
+    }
+
+    public static TokenImage range(List<? extends Node> nodeList) {
+        if ( nodeList == null) return null;
+
+        boolean first = true;
+        int startLine = -1, startColumn = -1, endLine = -1, endColumn = -1;
+        for (Node node : nodeList) {
+            if (node == null || node.getTokenImage() == null) continue;
+
+            startLine   = first || node.getTokenImage().getStartLine() < startLine ? node.getTokenImage().getStartLine() : startLine;
+            startColumn = first || node.getTokenImage().getStartColumn() < startColumn ? node.getTokenImage().getStartColumn() : startColumn;
+            endLine     = first || node.getTokenImage().getEndLine() < endLine ? node.getTokenImage().getEndLine() : endLine;
+            endColumn = first || node.getTokenImage().getEndColumn() < endColumn ? node.getTokenImage().getEndColumn() : endColumn;
+            first = false;
+        }
+
+        return new TokenImage(startLine, startColumn, endLine, endColumn);
+    }
 
     /**
      * Constructs a new token image, with no initial configuration.

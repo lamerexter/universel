@@ -77,6 +77,7 @@ public interface UniversalCodeVisitor {
    boolean visitBooleanLiteral(BooleanLiteralExpr node);
    boolean visitDecimalFloatingPointLiteral(DecimalFloatingPointLiteralExpr node);
    boolean visitDecimalIntegerLiteral(DecimalIntegerLiteralExpr node);
+   boolean visitImportDeclaration(ImportDecl node);
    boolean visitList(ListExpr node);
    boolean visitMap(MapExpr node);
    boolean visitName(Name node);

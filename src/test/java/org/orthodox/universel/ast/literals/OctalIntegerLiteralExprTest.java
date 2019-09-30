@@ -27,14 +27,4 @@ class OctalIntegerLiteralExprTest {
         // Then
         assertThat(expr.getTokenImage(), sameInstance(tokenImage));
     }
-
-    @Test
-    public void canonicalForm() {
-        // Given
-        TokenImage tokenImage = new TokenImage(1, 2, 3, 4, "0771");
-        OctalIntegerLiteralExpr expr = new OctalIntegerLiteralExpr(tokenImage);
-
-        // Then
-        assertThat(expr.getCanonicalForm(), equalTo("0771"));
-    }
 }

@@ -34,7 +34,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import static java.util.Arrays.asList;
-import static org.beanplanet.core.util.IterableUtil.nullSafe;
 
 public abstract class AbstractCompositeNode extends Node implements CompositeNode {
     private List<Node> childNodes = Collections.emptyList();
@@ -132,15 +131,5 @@ public abstract class AbstractCompositeNode extends Node implements CompositeNod
         }
 
         return nodes;
-    }
-
-    public String getCanonicalForm() {
-        StringBuilder s = new StringBuilder();
-
-        for (Node node : nullSafe(childNodes)) {
-            s.append(node.getCanonicalForm());
-        }
-
-        return s.toString();
     }
 }

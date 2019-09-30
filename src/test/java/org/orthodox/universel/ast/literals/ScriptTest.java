@@ -11,13 +11,14 @@ import java.util.Collections;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 class ScriptTest {
     @Test
     public void propertiesAndToString() {
-        new BeanTestSupport(new Script(new TokenImage(-1, -1, -1, -1, ""), new BooleanLiteralExpr(new TokenImage("true"))))
+        new BeanTestSupport(new Script(new BooleanLiteralExpr(new TokenImage("true"))))
                 .withMockitoValuesGenerator()
                 .testToString()
                 .testProperties()
@@ -26,7 +27,7 @@ class ScriptTest {
 
     @Test
     public void consructor_noArgs() {
-        assertThat(new Script().getChildNodes(), equalTo(Collections.emptyList()));
+        assertThat(new Script().getBodyElements(), nullValue());
     }
 
     @Test
@@ -34,10 +35,10 @@ class ScriptTest {
         // Given
         TokenImage tokenImage = new TokenImage(1, 2, 3, 4, "Hello World");
         StringLiteralExpr expr = new StringLiteralExpr(tokenImage);
-        Script script = new Script(new TokenImage(-1, -1, -1, -1, ""), expr);
+        Script script = new Script(expr);
 
         // Then
-        assertThat(script.getChildNodes(), equalTo(asList(expr)));
+        assertThat(script.getBodyElements(), equalTo(asList(expr)));
     }
 
     @Test

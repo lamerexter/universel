@@ -2,10 +2,7 @@ package org.orthodox.universel.compiler;
 
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
-import org.orthodox.universel.ast.Name;
-import org.orthodox.universel.ast.Node;
-import org.orthodox.universel.ast.Script;
-import org.orthodox.universel.ast.UniversalCodeVisitor;
+import org.orthodox.universel.ast.*;
 import org.orthodox.universel.ast.collections.ListExpr;
 import org.orthodox.universel.ast.collections.MapEntryExpr;
 import org.orthodox.universel.ast.collections.MapExpr;
@@ -16,7 +13,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 
-import static org.beanplanet.core.util.CollectionUtil.isEmptyOrNull;
 import static org.beanplanet.core.util.CollectionUtil.isNullOrEmpty;
 import static org.beanplanet.core.util.IterableUtil.nullSafe;
 import static org.objectweb.asm.Opcodes.*;
@@ -80,6 +76,12 @@ public class CompilingAstVisitor implements UniversalCodeVisitor {
     }
 
     @Override
+    public boolean visitImportDeclaration(ImportDecl node) {
+        compilationContext.pushNameScope(new TypeReferenceScope(compilationContext, node));
+        return false;
+    }
+
+    @Override
     public boolean visitList(ListExpr node) {
         MethodVisitor mv = compilationContext.getBytecodeHelper().peekMethodVisitor();
         String className = Type.getInternalName(ArrayList.class);
@@ -133,7 +135,7 @@ public class CompilingAstVisitor implements UniversalCodeVisitor {
 
     @Override
     public boolean visitName(Name node) {
-        compilationContext.getNameScope().generateAccess(node.getName());
+        compilationContext.generateAccess(node.getName());
         return true;
     }
 
@@ -168,7 +170,13 @@ public class CompilingAstVisitor implements UniversalCodeVisitor {
 
     @Override
     public boolean visitScript(Script node) {
-        for (Node child : nullSafe(node.getChildNodes())) {
+        // Visit the import declaration section, if present
+        if (node.getImportDeclaration() != null) {
+            node.getImportDeclaration().accept(this);
+        }
+
+        // Visit script body elements
+        for (Node child : nullSafe(node.getBodyElements())) {
             child.accept(this);
         }
         return false;
