@@ -28,20 +28,25 @@
 
 package org.orthodox.universel.compiler;
 
-public interface NameScope {
+import org.orthodox.universel.ast.MethodCall;
+import org.orthodox.universel.ast.UniversalCodeVisitor;
+
+public interface MethodCallScope {
     /**
-     * Determines whether this name scope can definitively resolve a given name.
+     * Determines whether this method call scope can definitively resolve a given method call.
      *
-     * @param name the name to be determined within this scope.
-     * @return true if name can be resolved within this scope, false otherwise.
+     * @param methodCall the method call to be determined within this scope.
+     * @return true if method call can be resolved within this scope, false otherwise.
      */
-    boolean canResolve(String name);
+    boolean canResolve(MethodCall methodCall);
 
     /**
-     * Generates the code to access the given name w.r.t. a rhs expression, leaving the value
+     * Generates the code to invoke the given method, leaving any return value
      * on the evaluation stack.
      *
-     * @param name the name within this scope whose access code is to be generated.
+     * @param visitor the code generator in context of this method call invocation.
+     * @param methodCall the method call whose invocation code is to be geneerated.
      */
-    void generateAccess(String name);
+    void generateCall(UniversalCodeVisitor visitor, MethodCall methodCall);
+
 }

@@ -412,7 +412,7 @@ public Expression Expression():
     (
         ret = Literal()
         |
-        ret = Identifier()
+        ret = IdentifierPrefixed()
         |
         ret = ListExpression()
         |
@@ -556,16 +556,43 @@ Expression InterpolatedStringLiteral() :
     )
 }
 
-public Name Identifier():
+public Expression IdentifierPrefixed():
 {
-    Name ret;
+    List<Expression> argumentsList = null;
+    Expression ret;
 }
 {
     (
-        <IDENTIFIER>  { ret = new Name(tokenImage(), token.image); }
+        ret = Identifier()
+
+        [ "(" [ argumentsList=ArgumentsList() ] ")"  { ret = new MethodCall((Name)ret, argumentsList); } ]
+
     )
 
     { return ret; }
+}
+
+public Name Identifier():
+{
+    Name name;
+}
+{
+    (
+        <IDENTIFIER>  { name = new Name(tokenImage(), token.image); }
+    )
+
+    { return name; }
+}
+
+List<Expression> ArgumentsList() :
+{
+	List<Expression> argumentsList = null;
+	Expression expr;
+}
+{
+   expr=Expression() { argumentsList=add(argumentsList, expr); } ("," expr=Expression() { argumentsList=add(argumentsList, expr); } )*
+
+   { return argumentsList; }
 }
 
 ListExpr ListExpression() :

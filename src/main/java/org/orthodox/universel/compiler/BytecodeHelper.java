@@ -149,14 +149,17 @@ public class BytecodeHelper {
      * Emits instuctions to box the given primitive type.
      *
      * @param primitiveType the primitive type to be boxed.
+     * @return the primtive wrapper type employed to box the given primitive type.
      */
-    public void box(Class<?> primitiveType) {
+    public Class<?> box(Class<?> primitiveType) {
+        Class<?> primitiveWrapperType = TypeUtil.getPrimitiveWrapperType(primitiveType);
         peekMethodVisitor().visitMethodInsn(INVOKESTATIC,
-                Type.getInternalName(BoxingFunctions.class),
-                "box",
-                Type.getMethodDescriptor(Type.getType(TypeUtil.getPrimitiveWrapperType(primitiveType)), Type.getType(primitiveType)),
-                false
+                                            Type.getInternalName(BoxingFunctions.class),
+                                            "box",
+                                            Type.getMethodDescriptor(Type.getType(primitiveWrapperType), Type.getType(primitiveType)),
+                                            false
         );
+        return primitiveWrapperType;
     }
 
     public void emitInstantiateType(Class<?> type) {
@@ -235,5 +238,14 @@ public class BytecodeHelper {
 
     public void emitLoadType(Class<?> typeName) {
         peekMethodVisitor().visitLdcInsn(Type.getType(typeName));
+    }
+
+    public static final Type[] typeArrayFor(Class<?> types[]) {
+        if (types == null) return null;
+        if (types.length == 0) return EMPTY_TYPES;
+
+        return Arrays.stream(types)
+              .map(Type::getType)
+              .toArray(Type[]::new);
     }
 }

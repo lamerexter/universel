@@ -1,6 +1,7 @@
 package org.orthodox.universel.compiler;
 
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.orthodox.universel.ast.*;
 import org.orthodox.universel.ast.collections.ListExpr;
@@ -78,6 +79,8 @@ public class CompilingAstVisitor implements UniversalCodeVisitor {
     @Override
     public boolean visitImportDeclaration(ImportDecl node) {
         compilationContext.pushNameScope(new TypeReferenceScope(compilationContext, node));
+        compilationContext.pushMethodCallScope(new StaticMethodCallGenerator(compilationContext, node));
+
         return false;
     }
 
@@ -116,21 +119,30 @@ public class CompilingAstVisitor implements UniversalCodeVisitor {
         mv.visitInsn(DUP);
         mv.visitMethodInsn(INVOKESPECIAL, className, BytecodeHelper.CTOR_METHOD_NAME, Type.getMethodDescriptor(Type.VOID_TYPE, BytecodeHelper.EMPTY_TYPES));
 
-        if (node.getEntries() != null) {
-            for (MapEntryExpr mapEntryExpr : node.getEntries()) {
-                mv.visitInsn(DUP);
-                mapEntryExpr.getKeyExpression().accept(this);
-                compilationContext.getBytecodeHelper().boxIfNeeded(compilationContext.getVirtualMachine().peekOperandStack());
-                mapEntryExpr.getValueExpression().accept(this);
-                compilationContext.getBytecodeHelper().boxIfNeeded(compilationContext.getVirtualMachine().peekOperandStack());
-                mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Map.class), "put",
-                                   Type.getMethodDescriptor(BytecodeHelper.OBJECT_TYPE, BytecodeHelper.OBJECT_TYPE, BytecodeHelper.OBJECT_TYPE));
-                mv.visitInsn(POP);
-            }
+        for (MapEntryExpr mapEntryExpr : nullSafe(node.getEntries())) {
+            mv.visitInsn(DUP);
+            mapEntryExpr.getKeyExpression().accept(this);
+            compilationContext.getBytecodeHelper().boxIfNeeded(compilationContext.getVirtualMachine().peekOperandStack());
+            mapEntryExpr.getValueExpression().accept(this);
+            compilationContext.getBytecodeHelper().boxIfNeeded(compilationContext.getVirtualMachine().peekOperandStack());
+            mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Map.class), "put",
+                               Type.getMethodDescriptor(BytecodeHelper.OBJECT_TYPE, BytecodeHelper.OBJECT_TYPE, BytecodeHelper.OBJECT_TYPE));
+            mv.visitInsn(POP);
         }
+
         compilationContext.getVirtualMachine().loadOperandOfType(LinkedHashMap.class);
 
         return true;
+    }
+
+    @Override
+    public boolean visitMethodCall(MethodCall node) {
+        compilationContext.generateCall(this, node);
+        return true;
+    }
+
+    private MethodVisitor mv() {
+        return compilationContext.getBytecodeHelper().peekMethodVisitor();
     }
 
     @Override

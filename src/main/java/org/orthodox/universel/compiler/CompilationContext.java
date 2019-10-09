@@ -2,18 +2,20 @@ package org.orthodox.universel.compiler;
 
 import org.beanplanet.core.collections.DoublyLinkedListImpl;
 import org.objectweb.asm.MethodVisitor;
+import org.orthodox.universel.ast.MethodCall;
+import org.orthodox.universel.ast.UniversalCodeVisitor;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
 
-public class CompilationContext implements NameScope {
+public class CompilationContext implements NameScope, MethodCallScope {
     private MethodVisitor methodVisitor;
     private VirtualMachine virtualMachine;
     private BytecodeHelper bytecodeHelper;
     private Deque<NameScope> scopes = new ArrayDeque<>();
+    private Deque<MethodCallScope> methodCallScopes = new ArrayDeque<>();
 
-    public CompilationContext(NameScope nameScope, MethodVisitor methodVisitor, VirtualMachine virtualMachine) {
-        this.scopes.add(nameScope);
+    public CompilationContext(MethodVisitor methodVisitor, VirtualMachine virtualMachine) {
         this.methodVisitor = methodVisitor;
         this.virtualMachine = virtualMachine;
         this.bytecodeHelper = new BytecodeHelper(methodVisitor);
@@ -31,6 +33,10 @@ public class CompilationContext implements NameScope {
         scopes.push(scope);
     }
 
+    public void pushMethodCallScope(MethodCallScope scope) {
+        methodCallScopes.push(scope);
+    }
+
     @Override
     public boolean canResolve(String name) {
         return scopes.stream().anyMatch(s -> s.canResolve(name));
@@ -41,5 +47,18 @@ public class CompilationContext implements NameScope {
         scopes.stream().filter(s -> s.canResolve(name)).findFirst()
               .orElseThrow(() -> new RuntimeException("Cannot find symbol "+name))
               .generateAccess(name);
+    }
+
+    @Override
+    public boolean canResolve(MethodCall methodCall) {
+        return methodCallScopes.stream().anyMatch(s -> s.canResolve(methodCall));
+    }
+
+    @Override
+    public void generateCall(UniversalCodeVisitor visitor,
+                             MethodCall methodCall) {
+        methodCallScopes.stream().filter(s -> s.canResolve(methodCall)).findFirst()
+              .orElseThrow(() -> new RuntimeException("Cannot find applicable methos "+methodCall))
+              .generateCall(visitor, methodCall);
     }
 }

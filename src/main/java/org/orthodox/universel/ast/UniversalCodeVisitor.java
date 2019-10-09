@@ -80,6 +80,7 @@ public interface UniversalCodeVisitor {
    boolean visitImportDeclaration(ImportDecl node);
    boolean visitList(ListExpr node);
    boolean visitMap(MapExpr node);
+   boolean visitMethodCall(MethodCall node);
    boolean visitName(Name node);
    boolean visitNullLiteral(NullLiteralExpr node);
 //   boolean visitMapExpression(MapExpression node);

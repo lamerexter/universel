@@ -27,7 +27,7 @@ public class TokenImage {
     /** The string image of the parsed token. */
     private String image;
 
-    public static TokenImage range(Node lhs, List<Node> rhs) {
+    public static TokenImage range(Node lhs, List<? extends Node> rhs) {
         if (lhs != null && rhs != null)
             return range(Stream.concat(singletonList(lhs).stream(), rhs.stream()).collect(Collectors.toList()));
         else if (lhs == null)

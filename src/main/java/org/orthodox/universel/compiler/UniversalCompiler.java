@@ -23,9 +23,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import static org.objectweb.asm.Opcodes.*;
 
 public class UniversalCompiler {
-    private static AtomicLong inc = new AtomicLong();
-    private VirtualMachine virtualMachine = new VirtualMachine();
-
     public Script parse(String compilationUnit) { return parse(new StringResource(compilationUnit)); }
 
     public Script parse(Resource compilationUnitResource) {
@@ -64,8 +61,10 @@ public class UniversalCompiler {
         // Generate execution method with binding
         MethodVisitor mv = bch.generateMethod(ACC_PUBLIC + ACC_FINAL + ACC_STATIC, "execute", Object.class, Map.class);
 
+        CompilationContext compilationContext = new CompilationContext(mv, new VirtualMachine(bch));
         ScriptScope scriptScope = new ScriptScope();
-        CompilationContext compilationContext = new CompilationContext(scriptScope, mv, new VirtualMachine());
+        compilationContext.pushNameScope(scriptScope);
+
         CompilingAstVisitor compilingAstVisitor = new CompilingAstVisitor(compilationContext);
         scriptScope.setCompilationContext(compilationContext);
         compilationUnitNonTerminal.accept(compilingAstVisitor);
