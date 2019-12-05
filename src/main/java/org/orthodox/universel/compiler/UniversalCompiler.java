@@ -8,7 +8,6 @@ import org.beanplanet.core.lang.TypeUtil;
 import org.beanplanet.core.util.SizeUtil;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Type;
 import org.orthodox.universal.parser.ParseException;
 import org.orthodox.universal.parser.UniversalParser;
 import org.orthodox.universel.ast.Node;
@@ -18,7 +17,6 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static org.objectweb.asm.Opcodes.*;
 
@@ -69,15 +67,25 @@ public class UniversalCompiler {
         scriptScope.setCompilationContext(compilationContext);
         compilationUnitNonTerminal.accept(compilingAstVisitor);
 
-        compilationContext.getBytecodeHelper().boxIfNeeded(compilationContext.getVirtualMachine().peekOperandStack());
-        mv.visitInsn(ARETURN);
+        if ( compilationContext.getVirtualMachine().operandStackIsEmpty() ) {
+            mv.visitInsn(RETURN);
+        } else {
+            compilationContext.getBytecodeHelper().boxIfNeeded(compilationContext.getVirtualMachine().peekOperandStack());
+            mv.visitInsn(ARETURN);
+        }
 
         mv.visitEnd();
         mv.visitMaxs(0,0);
         cw.visitEnd();
 
         long endTime = System.currentTimeMillis();
-        return new CompiledUnit(new ByteArrayResource(cw.toByteArray()), className, classBasename, endTime-startTime);
+        byte classBytes[] = cw.toByteArray();
+        return new CompiledUnit(compilationUnitNonTerminal,
+                                compilationContext.getMessages(),
+                                new ByteArrayResource(classBytes),
+                                className,
+                                classBasename,
+                                endTime-startTime);
     }
 
     public static void main(String... args) throws Exception {

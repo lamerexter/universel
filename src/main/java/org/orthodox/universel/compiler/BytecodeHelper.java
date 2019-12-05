@@ -1,6 +1,8 @@
 package org.orthodox.universel.compiler;
 
 import org.beanplanet.core.lang.TypeUtil;
+import org.beanplanet.core.lang.conversion.SystemTypeConverter;
+import org.beanplanet.core.lang.conversion.TypeConverter;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
@@ -12,6 +14,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 import static java.util.Arrays.stream;
+import static org.beanplanet.core.lang.TypeUtil.isPrimitiveType;
 import static org.objectweb.asm.Opcodes.*;
 
 /**
@@ -140,7 +143,7 @@ public class BytecodeHelper {
      * @param primitiveType the primitive type to be boxed.
      */
     public void boxIfNeeded(Class<?> primitiveType) {
-        if ( !TypeUtil.isPrimitiveType(primitiveType) ) return;
+        if ( !isPrimitiveType(primitiveType) ) return;
 
         box(primitiveType);
     }
@@ -160,6 +163,38 @@ public class BytecodeHelper {
                                             false
         );
         return primitiveWrapperType;
+    }
+
+    public void convert(Class<?> fromType, Class<?> toType) {
+        //--------------------------------------------------------------------------------------------------------------
+        // Prepare to call into the Type Converter subsystem to convert to the target type. This is Object-based, with
+        // primitives needing to be wrapped accordingly.
+        //--------------------------------------------------------------------------------------------------------------
+        Class<?> toTypeWrapped = TypeUtil.ensureNonPrimitiveType(toType);
+        MethodVisitor mv = peekMethodVisitor();
+        mv.visitMethodInsn(INVOKESTATIC, Type.getInternalName(SystemTypeConverter.class), "getInstance",
+                           Type.getMethodDescriptor(Type.getType(TypeConverter.class), EMPTY_TYPES));
+        mv.visitInsn(SWAP);
+        mv.visitLdcInsn(Type.getType(toTypeWrapped));
+        mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(TypeConverter.class), "convert",
+                           Type.getMethodDescriptor(OBJECT_TYPE, OBJECT_TYPE, Type.getType(Class.class)));
+
+        //--------------------------------------------------------------------------------------------------------------
+        // We are left with the converted value on the operand stack, exiting the Type Conversions subsystem.
+        // Unbox if the target type is primitive, or simply cast to the Object-ref target type.
+        //--------------------------------------------------------------------------------------------------------------
+        if ( isPrimitiveType(toType) ) {
+            unbox(toType);
+        } else {
+            mv.visitTypeInsn(CHECKCAST, Type.getInternalName(toType));
+        }
+    }
+
+    private void unbox(Class<?> toType) {
+        if ( toType == void.class ) return;
+
+        peekMethodVisitor().visitMethodInsn(INVOKESTATIC, Type.getInternalName(BoxingFunctions.class), toType.getName() + "Unbox",
+                           Type.getMethodDescriptor(Type.getType(toType), OBJECT_TYPE));
     }
 
     public void emitInstantiateType(Class<?> type) {

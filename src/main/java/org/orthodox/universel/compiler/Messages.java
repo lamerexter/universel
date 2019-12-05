@@ -26,22 +26,14 @@
  *
  */
 
-package org.orthodox.universel.execute.methodcall;
+package org.orthodox.universel.compiler;
 
-public class TestClass {
-    public static int oneIntParam(int a) {
-        return a * 3;
-    }
+import static org.beanplanet.messages.domain.Message.Builder;
+import static org.beanplanet.messages.domain.Message.builder;
 
-    public static Integer oneIntegerParam(Integer a) {
-        return a * 2;
-    }
-
-    public static Object overloadedMethod(int i) {
-        return i;
-    }
-
-    public static Object overloadedMethod(boolean b) {
-        return b;
+public interface Messages {
+    interface MethodCall {
+        Builder METHOD_NOT_FOUND = builder().code("uel.method.notfound").message("Method named \"{0}\" not found");
+        Builder METHOD_AMBIGUOUS = builder().code("uel.method.ambiguous").message("A call to method named \"{0}\" is ambiguous and matches {1} methods: {2}");
     }
 }

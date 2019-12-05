@@ -8,8 +8,16 @@ public class VirtualMachine {
     private BytecodeHelper bch;
     private Stack<Class<?>> operandStack = new Stack<>();
 
+    public boolean operandStackIsEmpty() {
+        return operandStack.isEmpty();
+    }
+
     public Class<?> peekOperandStack() {
         return operandStack.peek();
+    }
+
+    public Class<?> peekOperandStack(int topOffset) {
+        return operandStack.get(operandStack.size()-1+topOffset);
     }
 
     public void loadOperandConstant(boolean operand) {
@@ -58,7 +66,8 @@ public class VirtualMachine {
     }
 
     private void convert(Class<?> toType) {
-        throw new UnsupportedOperationException();
+        bch.convert(peekOperandStack(), toType);
+        replaceTopOperand(toType);
     }
 
     private void unbox() {

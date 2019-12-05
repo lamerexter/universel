@@ -34,13 +34,18 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.orthodox.universel.ast.*;
 
+import javax.lang.model.type.NullType;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.beanplanet.core.util.IterableUtil.nullSafe;
+import static org.beanplanet.core.lang.TypeUtil.ensureNonPrimitiveType;
 import static org.beanplanet.core.util.StringUtil.asDelimitedString;
+import static org.orthodox.universel.compiler.Messages.MethodCall.METHOD_AMBIGUOUS;
+import static org.orthodox.universel.compiler.Messages.MethodCall.METHOD_NOT_FOUND;
 
 public class StaticMethodCallGenerator implements MethodCallScope {
     private CompilationContext compilationContext;
@@ -54,13 +59,44 @@ public class StaticMethodCallGenerator implements MethodCallScope {
 
     @Override
     public boolean canResolve(MethodCall methodCall) {
-        return findMethodFor(methodCall) != null;
+        return true;
     }
 
     @Override
     public void generateCall(UniversalCodeVisitor visitor,
                              MethodCall methodCall) {
-        Method matchingMethod = findMethodFor(methodCall);
+        //--------------------------------------------------------------------------------------------------------------
+        // Generate for any parameters first, in order to ascertain the types of parameters
+        //--------------------------------------------------------------------------------------------------------------
+        for (Expression paramExpr : methodCall.getParameters()) {
+            paramExpr.accept(visitor);
+        }
+
+        List<Method> matchingExplicitlyImportedMethods = findMatchingMethodsFromExplicitImports(methodCall);
+        List<Method> matchingImportOnDemandNethods = findMatchingMethodsFromOnDemandImports(methodCall);
+        List<Method> matchingMethods = new ArrayList<>(matchingExplicitlyImportedMethods);
+        matchingMethods.addAll(matchingImportOnDemandNethods);
+        if (matchingMethods.isEmpty()) {
+            compilationContext.getMessages().addError(METHOD_NOT_FOUND.withParameters(methodCall.getName().getName()));
+            return;
+        } else if (matchingMethods.size() > 1) {
+            if ( matchingExplicitlyImportedMethods.size() > 1) {
+                compilationContext.getMessages().addError(METHOD_AMBIGUOUS.withParameters(
+                        methodCall.getName().getName(),
+                        matchingExplicitlyImportedMethods.size(),
+                        matchingExplicitlyImportedMethods));
+                return;
+
+            } else if ( matchingImportOnDemandNethods.size() > 1) {
+                compilationContext.getMessages().addError(METHOD_AMBIGUOUS.withParameters(
+                        methodCall.getName().getName(),
+                        matchingImportOnDemandNethods.size(),
+                        matchingImportOnDemandNethods));
+                return;
+            }
+        }
+
+        Method matchingMethod = matchingMethods.get(0);
         Assert.notNull(matchingMethod, "No such method found "+methodCall.getName());
 
         if (matchingMethod.getParameterCount() > 0) {
@@ -81,34 +117,74 @@ public class StaticMethodCallGenerator implements MethodCallScope {
         }
     }
 
-    private Method findMethodFor(final MethodCall methodCall) {
+    private List<Method> findMatchingMethodsFromExplicitImports(final MethodCall methodCall) {
         final String methodName = methodCall.getName().getName();
 
+        List<Method> matchingMethods = new ArrayList<>();
         for (int n=importDecl.getImports().size()-1; n >= 0; n--) {
             ImportStmt importStmt = importDecl.getImports().get(n);
 
-            String enclosingTypeName;
-            if ( importStmt.isOnDemand() ) {
-                enclosingTypeName = asDelimitedString(importStmt.getElements().stream().map(Name::getName).collect(Collectors.toList()), ".");
-            } else {
-                if ( importStmt.getElements().isEmpty() || !importStmt.getElements().get(importStmt.getElements().size()-1).getName().equals(methodName)) continue;
+            if ( importStmt.isOnDemand() ) continue;
+            if ( importStmt.getElements().isEmpty() || !importStmt.getElements().get(importStmt.getElements().size()-1).getName().equals(methodName)) continue;
 
-                enclosingTypeName = asDelimitedString(importStmt.getElements().subList(0, importStmt.getElements().size()-1)
-                                                                .stream().map(Name::getName).collect(Collectors.toList()), ".");
-            }
+            String enclosingTypeName = asDelimitedString(importStmt.getElements().subList(0, importStmt.getElements().size()-1)
+                                                                   .stream().map(Name::getName).collect(Collectors.toList()), ".");
 
             Class<?> enclosingType = TypeUtil.loadClassOrNull(enclosingTypeName);
             if (enclosingType == null) continue;
 
-            Optional<Method> foundMethod = TypeUtil.streamMethods(enclosingType)
-                                                   .filter(m -> Modifier.isStatic(m.getModifiers()))
-                                                   .filter(m -> Modifier.isPublic(m.getModifiers()))
-                                                   .filter(m -> m.getName().equals(methodName))
-                                                   .filter(m -> m.getParameterCount() == methodCall.getParameters().size())
-                                                   .findFirst();
-            if (foundMethod.isPresent()) return foundMethod.get();
+            collectCallableMethods(methodCall, enclosingType, matchingMethods);
         }
 
-        return null;
+        return matchingMethods;
+    }
+
+    private void collectCallableMethods(MethodCall methodCall,
+                                        Class<?> enclosingType,
+                                        Collection colllection) {
+        final String methodName = methodCall.getName().getName();
+        TypeUtil.streamMethods(enclosingType)
+                .filter(m -> Modifier.isStatic(m.getModifiers()))
+                .filter(m -> Modifier.isPublic(m.getModifiers()))
+                .filter(m -> m.getName().equals(methodName))
+                .filter(m -> m.getParameterCount() == methodCall.getParameters().size())
+                .filter(this::methodCallParemetersMatch)
+                .forEach(colllection::add);
+    }
+
+    private List<Method> findMatchingMethodsFromOnDemandImports(final MethodCall methodCall) {
+        final String methodName = methodCall.getName().getName();
+
+        List<Method> matchingMethods = new ArrayList<>();
+        for (int n=importDecl.getImports().size()-1; n >= 0; n--) {
+            ImportStmt importStmt = importDecl.getImports().get(n);
+
+            if ( !importStmt.isOnDemand() ) continue;
+
+            String enclosingTypeName = asDelimitedString(importStmt.getElements().stream().map(Name::getName).collect(Collectors.toList()), ".");
+
+            Class<?> enclosingType = TypeUtil.loadClassOrNull(enclosingTypeName);
+            if (enclosingType == null) continue;
+
+            collectCallableMethods(methodCall, enclosingType, matchingMethods);
+        }
+
+        return matchingMethods;
+    }
+
+    private boolean methodCallParemetersMatch(Method method) {
+        for (int n=0; n < method.getParameterCount(); n++) {
+            Class<?> callParamType = compilationContext.getVirtualMachine().peekOperandStack(method.getParameterCount()-1-n);
+            Class<?> methodParamType = method.getParameterTypes()[n];
+
+            if ( !(NullType.class == callParamType || callParamType.isAssignableFrom(methodParamType)
+                            || boxTypeCompatible(callParamType, methodParamType)) ) return false;
+        }
+
+        return true;
+    }
+
+    private boolean boxTypeCompatible(Class<?> type1, Class<?> type2) {
+        return ensureNonPrimitiveType(type1).equals(ensureNonPrimitiveType(type2));
     }
 }

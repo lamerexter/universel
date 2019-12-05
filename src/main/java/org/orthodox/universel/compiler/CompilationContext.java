@@ -1,12 +1,15 @@
 package org.orthodox.universel.compiler;
 
-import org.beanplanet.core.collections.DoublyLinkedListImpl;
+import org.beanplanet.messages.domain.Messages;
+import org.beanplanet.messages.domain.MessagesImpl;
 import org.objectweb.asm.MethodVisitor;
 import org.orthodox.universel.ast.MethodCall;
 import org.orthodox.universel.ast.UniversalCodeVisitor;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+
+import static org.beanplanet.messages.domain.MessagesImpl.messages;
 
 public class CompilationContext implements NameScope, MethodCallScope {
     private MethodVisitor methodVisitor;
@@ -15,10 +18,16 @@ public class CompilationContext implements NameScope, MethodCallScope {
     private Deque<NameScope> scopes = new ArrayDeque<>();
     private Deque<MethodCallScope> methodCallScopes = new ArrayDeque<>();
 
+    private Messages messages = messages();
+
     public CompilationContext(MethodVisitor methodVisitor, VirtualMachine virtualMachine) {
         this.methodVisitor = methodVisitor;
         this.virtualMachine = virtualMachine;
         this.bytecodeHelper = new BytecodeHelper(methodVisitor);
+    }
+
+    public Messages getMessages() {
+        return messages;
     }
 
     public VirtualMachine getVirtualMachine() {

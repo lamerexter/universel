@@ -30,11 +30,16 @@ package org.orthodox.universel.execute.methodcall;
 
 import org.junit.jupiter.api.Test;
 import org.orthodox.universel.ast.MethodCall;
+import org.orthodox.universel.compiler.CompiledUnit;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.orthodox.universel.Universal.compile;
 import static org.orthodox.universel.Universal.execute;
 import static org.orthodox.universel.ast.MethodCall.helloWorld;
+import static org.orthodox.universel.compiler.Messages.MethodCall.METHOD_AMBIGUOUS;
+import static org.orthodox.universel.compiler.Messages.MethodCall.METHOD_NOT_FOUND;
 
 public class StaticMethodCallTest {
     @Test
@@ -43,12 +48,77 @@ public class StaticMethodCallTest {
     }
 
     @Test
-    void oneArg_noConversion_resolveFromImport() {
+    void oneArg_resolveFromImport() {
         assertThat(execute("import " + TestClass.class.getName() + ".* oneIntParam(8)"), equalTo(TestClass.oneIntParam(8)));
     }
 
     @Test
     void oneArg_boxed_resolveFromImport() {
         assertThat(execute("import " + TestClass.class.getName() + ".* oneIntegerParam(8)"), equalTo(TestClass.oneIntegerParam(8)));
+    }
+
+    @Test
+    void oneArg_overloadedMethod_resolveWhenExactlyOneMatchesParameterTypes() {
+        assertThat(execute("import " + TestClass.class.getName() + ".* overloadedMethod(9)"), equalTo(TestClass.overloadedMethod(9)));
+        assertThat(execute("import " + TestClass.class.getName() + ".* overloadedMethod(false)"), equalTo(TestClass.overloadedMethod(false)));
+        assertThat(execute("import " + TestClass.class.getName() + ".* overloadedMethod(true)"), equalTo(TestClass.overloadedMethod(true)));
+    }
+
+    @Test
+    void oneArg_methodNotFound() {
+        CompiledUnit compiled = compile("import " + TestClass.class.getName() + ".* doesNotExist('xyz')");
+        assertThat(compiled.getMessages().getErrors().size(), equalTo(1));
+        assertThat(compiled.getMessages().hasErrorWithCode(METHOD_NOT_FOUND.getCode()), is(true));
+    }
+
+    @Test
+    void oneArg_overloadedMethod_ambiguousWhenMoreThanOneMatches() {
+        CompiledUnit compiled = compile("import " + TestClass.class.getName() + ".* overloadedMethod(null)");
+        assertThat(compiled.getMessages().getErrors().size(), equalTo(1));
+        assertThat(compiled.getMessages().hasErrorWithCode(METHOD_AMBIGUOUS.getCode()), is(true));
+    }
+
+    @Test
+    void oneArg_ambiguousWhenImportedOnDemandFromMoreThanOneType() {
+        CompiledUnit compiled = compile(
+                "import " + TestClass.class.getName() + ".*"+
+                "import " + AnotherTestClass.class.getName() + ".*"+
+                "oneIntParam(9)"
+        );
+        assertThat(compiled.getMessages().getErrors().size(), equalTo(1));
+        assertThat(compiled.getMessages().hasErrorWithCode(METHOD_AMBIGUOUS.getCode()), is(true));
+    }
+
+    @Test
+    void oneArg_resolvesWhenExplicitlyImportedFromType() {
+        CompiledUnit compiled = compile(
+                "import " + TestClass.class.getName() + ".*"+
+                "import " + AnotherTestClass.class.getName() + ".oneIntParam"+
+                " "+
+                "oneIntParam(9)"
+        );
+        assertThat(compiled.getMessages().hasErrors(), is(false));
+    }
+
+    @Test
+    void oneArg_ambiguousWhenExplicitlyImportedFromSeparateTypes() {
+        CompiledUnit compiled = compile(
+                "import " + TestClass.class.getName() + ".oneIntParam\n"+
+                "import " + AnotherTestClass.class.getName() + ".oneIntParam\n"+
+                "oneIntParam(9)"
+        );
+        assertThat(compiled.getMessages().getErrors().size(), equalTo(1));
+        assertThat(compiled.getMessages().hasErrorWithCode(METHOD_AMBIGUOUS.getCode()), is(true));
+    }
+
+    @Test
+    void oneArg_ambiguousWhenImportedOnDemandFromSeparateTypes() {
+        CompiledUnit compiled = compile(
+                "import " + TestClass.class.getName() + ".*\n"+
+                "import " + AnotherTestClass.class.getName() + ".*\n"+
+                "oneIntParam(9)"
+        );
+        assertThat(compiled.getMessages().getErrors().size(), equalTo(1));
+        assertThat(compiled.getMessages().hasErrorWithCode(METHOD_AMBIGUOUS.getCode()), is(true));
     }
 }

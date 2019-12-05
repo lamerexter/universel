@@ -10,6 +10,7 @@ import org.orthodox.universel.ast.collections.MapExpr;
 import org.orthodox.universel.ast.collections.SetExpr;
 import org.orthodox.universel.ast.literals.*;
 
+import javax.lang.model.type.NullType;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
@@ -153,7 +154,7 @@ public class CompilingAstVisitor implements UniversalCodeVisitor {
 
     @Override
     public boolean visitNullLiteral(NullLiteralExpr node) {
-        compilationContext.getVirtualMachine().loadOperandOfType(Object.class);
+        compilationContext.getVirtualMachine().loadOperandOfType(NullType.class);
         compilationContext.getBytecodeHelper().emitLoadNullOperand();
         return true;
     }

@@ -28,7 +28,7 @@
 
 package org.orthodox.universel.execute.methodcall;
 
-public class TestClass {
+public class AnotherTestClass {
     public static int oneIntParam(int a) {
         return a * 3;
     }

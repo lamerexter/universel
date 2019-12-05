@@ -96,10 +96,7 @@ public class Universal implements Logger {
      */
     @SuppressWarnings("unchecked")
     public static <T> T execute(Class<T> resultType, String script, Map<String, Object> binding) {
-        LOG.info("Beginning evaluation of script [{0}] ...", script);
-        UniversalCompiler compiler = new UniversalCompiler();
-        CompiledUnit compiledUnit = compiler.compile(script);
-        LOG.info("Compilation of script [{0}] completed", script);
+        CompiledUnit compiledUnit = compile(script);
 
         MyClassLoader classLoader = new MyClassLoader();
 
@@ -108,6 +105,22 @@ public class Universal implements Logger {
         Object result = TypeUtil.invokeStaticMethod(aClass, "execute", binding);
         LOG.info("Completed execution of script [{0}] in {1}", script, SizeUtil.getElapsedTimeSpecificationDescription(compiledUnit.getCompilationTime()));
         return (T)result;
+    }
+
+    /**
+     * Compiles the given script, returning the {@link CompiledUnit}.
+     *
+     * @param script the script to be compiled.
+     * @return the compiled unit which includes any compilation messages or erross and a
+     * reference to the compiled bytecode if compilation succeeded.
+     */
+    public static CompiledUnit compile(String script) {
+        LOG.info("Beginning compilation of script [{0}] ...", script);
+        UniversalCompiler compiler = new UniversalCompiler();
+        CompiledUnit compiledUnit = compiler.compile(script);
+        LOG.info("Compilation of script [{0}] completed", script);
+
+        return compiledUnit;
     }
 
     private static class MyClassLoader extends ClassLoader {
