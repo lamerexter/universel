@@ -41,7 +41,7 @@ public class ConstructorCallTest {
     }
 
     @Test
-    void singleArg_noboxing() {
+    void singleArg_exactTypeMatch() {
         assertThat(execute("import " + org.orthodox.universel.execute.objectcreation.TestClass.class.getName() + " TestClass(999)"), equalTo(new TestClass(999)));
     }
 
@@ -52,7 +52,13 @@ public class ConstructorCallTest {
 
     @Test
     void singleArg_unboxing() {
-        assertThat(execute("import java.lang.Long import " + org.orthodox.universel.execute.objectcreation.TestClass.class.getName() + " TestClass(Long(1234L))"), equalTo(new TestClass(1234L)));
+        // TODO: So-called redundant cast below is required because he Java compiler is converting the long to a double.
+        // Fimd the narrowing/widening or conversion rule in the JLS.
+        assertThat(execute("import java.lang.Long import " + org.orthodox.universel.execute.objectcreation.TestClass.class.getName() + " TestClass(Long(1234L))"), equalTo(new TestClass((long)1234L)));
     }
 
+    @Test
+    void multipleArgs() {
+        assertThat(execute("import " + org.orthodox.universel.execute.objectcreation.TestClass.class.getName() + " TestClass(1234, 5678L, 789d, 'Hello world')"), equalTo(new TestClass(1234, 5678L, 789d, "Hello world")));
+    }
 }

@@ -42,12 +42,22 @@ public class TestClass {
         this.intField = intField;
     }
 
+    public TestClass(long longField) {
+        this.longField = longField;
+    }
+
     public TestClass(double doubleField) {
         this.doubleField = doubleField;
     }
 
-    public TestClass(long longField) {
+    public TestClass(int intField,
+                     long longField,
+                     double doubleField,
+                     String stringField) {
+        this.intField = intField;
+        this.doubleField = doubleField;
         this.longField = longField;
+        this.stringField = stringField;
     }
 
     public TestClass(String stringField) {

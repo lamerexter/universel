@@ -86,9 +86,7 @@ public class StaticMethodCallGenerator implements MethodCallScope {
                                                                                    Type.getMethodDescriptor(Type.getType(method.getReturnType()),
                                                                                                             BytecodeHelper.typeArrayFor(method.getParameterTypes())),
                                                                                    false);
-        if ( method.getReturnType() != Void.class ) {
-            compilationContext.getVirtualMachine().loadOperandOfType(method.getReturnType());
-        }
+        compilationContext.getVirtualMachine().loadOperandOfType(method.getReturnType());
     }
 
     private void evaluateCallParameters(UniversalCodeVisitor visitor,
@@ -101,20 +99,6 @@ public class StaticMethodCallGenerator implements MethodCallScope {
                 compilationContext.getVirtualMachine().convertOrBoxOperandIfNeeded(executable.getParameterTypes()[n]);
             }
         }
-
-    }
-
-    private boolean methodCallParemetersMatch(Executable method, MethodCall methodCall) {
-
-        for (int n=0; n < method.getParameterCount(); n++) {
-            Class<?> callParamType = methodCall.getParameters().get(n).getTypeDescriptor();
-            Class<?> methodParamType = method.getParameterTypes()[n];
-
-            if ( !(NullType.class == callParamType || callParamType.isAssignableFrom(methodParamType)
-                            || boxTypeCompatible(callParamType, methodParamType)) ) return false;
-        }
-
-        return true;
     }
 
     private boolean boxTypeCompatible(Class<?> type1, Class<?> type2) {
