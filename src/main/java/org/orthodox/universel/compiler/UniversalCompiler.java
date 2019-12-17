@@ -6,21 +6,32 @@ import org.beanplanet.core.io.resource.Resource;
 import org.beanplanet.core.io.resource.StringResource;
 import org.beanplanet.core.lang.TypeUtil;
 import org.beanplanet.core.util.SizeUtil;
+import org.beanplanet.messages.domain.Messages;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.orthodox.universal.parser.ParseException;
 import org.orthodox.universal.parser.UniversalParser;
 import org.orthodox.universel.ast.Node;
 import org.orthodox.universel.ast.Script;
+import org.orthodox.universel.symanticanalysis.MethodCallAnalyser;
+import org.orthodox.universel.symanticanalysis.SemanticAnalyser;
+import org.orthodox.universel.symanticanalysis.SemanticAnalysisContext;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static java.util.Arrays.asList;
+import static org.beanplanet.messages.domain.MessagesImpl.messages;
 import static org.objectweb.asm.Opcodes.*;
 
 public class UniversalCompiler {
+    private static final List<SemanticAnalyser> SEMANTIC_AANALYSERS = asList(
+            new MethodCallAnalyser()
+    );
+
     public Script parse(String compilationUnit) { return parse(new StringResource(compilationUnit)); }
 
     public Script parse(Resource compilationUnitResource) {
@@ -42,9 +53,20 @@ public class UniversalCompiler {
         long startTime = System.currentTimeMillis();
 
         //----------------------------------------------------------------------------------------------------------
+        // Lexical Analysis:
         // Parse the compilation unit to the topmost non-terminal.
         //----------------------------------------------------------------------------------------------------------
         Node compilationUnitNonTerminal = parse(compilationUnitResource);
+
+        //----------------------------------------------------------------------------------------------------------
+        // Semantic Analysis:
+        // Iterate over the parse tree, created from the Lexical Analysis phase and perform various transformations.
+        //----------------------------------------------------------------------------------------------------------
+        final Messages messages = messages();
+        SemanticAnalysisContext semanticAnalysisContext = new SemanticAnalysisContext(messages);
+        for (SemanticAnalyser semanticAnalyser : SEMANTIC_AANALYSERS) {
+            semanticAnalyser.performAnalysis(semanticAnalysisContext, compilationUnitNonTerminal);
+        }
 
         //----------------------------------------------------------------------------------------------------------
         // Compile to bytecode.
@@ -59,7 +81,7 @@ public class UniversalCompiler {
         // Generate execution method with binding
         MethodVisitor mv = bch.generateMethod(ACC_PUBLIC + ACC_FINAL + ACC_STATIC, "execute", Object.class, Map.class);
 
-        CompilationContext compilationContext = new CompilationContext(mv, new VirtualMachine(bch));
+        CompilationContext compilationContext = new CompilationContext(mv, new VirtualMachine(bch), messages);
         ScriptScope scriptScope = new ScriptScope();
         compilationContext.pushNameScope(scriptScope);
 

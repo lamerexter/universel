@@ -35,6 +35,7 @@ import org.orthodox.universel.ast.UniversalCodeVisitor;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /**
  * An set expression on the Abstract Syntax Tree, of the form <code>{}1, 2, 3, 3, 4}</code>
@@ -52,6 +53,10 @@ public class SetExpr extends Expression {
     public SetExpr(TokenImage tokenImage, List<Node> elements) {
         super(tokenImage);
         this.elements = elements;
+    }
+
+    public Class<?> getTypeDescriptor() {
+        return Set.class;
     }
 
     /**

@@ -71,7 +71,7 @@ public class VirtualMachine {
     }
 
     private void unbox() {
-        throw new UnsupportedOperationException();
+        replaceTopOperand(bch.unbox(peekOperandStack()));
     }
 
     private void box() {

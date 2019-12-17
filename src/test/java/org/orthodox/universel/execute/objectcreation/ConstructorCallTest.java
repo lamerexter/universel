@@ -26,25 +26,33 @@
  *
  */
 
-package org.orthodox.universel.execute.methodcall;
+package org.orthodox.universel.execute.objectcreation;
 
-public class TestClass {
+import org.junit.jupiter.api.Test;
 
-    public static String noArgs() { return "Hello world"; }
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.orthodox.universel.Universal.execute;
 
-    public static int oneIntParam(int a) {
-        return a * 3;
+public class ConstructorCallTest {
+    @Test
+    void noArgs() {
+        assertThat(execute("import " + org.orthodox.universel.execute.objectcreation.TestClass.class.getName() + " TestClass()"), equalTo(new TestClass()));
     }
 
-    public static Integer oneIntegerParam(Integer a) {
-        return a * 2;
+    @Test
+    void singleArg_noboxing() {
+        assertThat(execute("import " + org.orthodox.universel.execute.objectcreation.TestClass.class.getName() + " TestClass(999)"), equalTo(new TestClass(999)));
     }
 
-    public static Object overloadedMethod(int i) {
-        return i;
+    @Test
+    void singleArg_boxing() {
+        assertThat(execute("import " + org.orthodox.universel.execute.objectcreation.TestClass.class.getName() + " TestClass(999.99)"), equalTo(new TestClass(999.99d)));
     }
 
-    public static Object overloadedMethod(boolean b) {
-        return b;
+    @Test
+    void singleArg_unboxing() {
+        assertThat(execute("import java.lang.Long import " + org.orthodox.universel.execute.objectcreation.TestClass.class.getName() + " TestClass(Long(1234L))"), equalTo(new TestClass(1234L)));
     }
+
 }

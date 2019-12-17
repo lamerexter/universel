@@ -15,4 +15,8 @@ public class OctalIntegerLiteralExpr extends Expression {
     public OctalIntegerLiteralExpr(TokenImage tokenImage) {
         super(tokenImage);
     }
+
+    public Class<?> getTypeDescriptor() {
+        return long.class;
+    }
 }

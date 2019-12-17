@@ -21,6 +21,8 @@ public class DecimalIntegerLiteralExpr extends Expression implements IntegerLite
     }
 
     public Class<?> getLiteralValueClass() {
+        if (getTokenImage() == null) return int.class;
+
         String image = getTokenImage().getImage();
         if (image.endsWith("l") || image.endsWith("L")) return long.class;
         else if (image.endsWith("I")) return BigInteger.class;
@@ -49,4 +51,7 @@ public class DecimalIntegerLiteralExpr extends Expression implements IntegerLite
         return visitor.visitDecimalIntegerLiteral(this);
     }
 
+    public Class<?> getTypeDescriptor() {
+        return getLiteralValueClass();
+    }
 }

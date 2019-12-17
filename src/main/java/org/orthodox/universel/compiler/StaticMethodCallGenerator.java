@@ -29,23 +29,22 @@
 package org.orthodox.universel.compiler;
 
 import org.beanplanet.core.lang.Assert;
-import org.beanplanet.core.lang.TypeUtil;
+import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
-import org.orthodox.universel.ast.*;
+import org.orthodox.universel.ast.Expression;
+import org.orthodox.universel.ast.ImportDecl;
+import org.orthodox.universel.ast.MethodCall;
+import org.orthodox.universel.ast.UniversalCodeVisitor;
 
 import javax.lang.model.type.NullType;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.beanplanet.core.lang.TypeUtil.ensureNonPrimitiveType;
-import static org.beanplanet.core.util.StringUtil.asDelimitedString;
-import static org.orthodox.universel.compiler.Messages.MethodCall.METHOD_AMBIGUOUS;
-import static org.orthodox.universel.compiler.Messages.MethodCall.METHOD_NOT_FOUND;
+import static org.objectweb.asm.Opcodes.*;
+import static org.orthodox.universel.compiler.BytecodeHelper.CTOR_METHOD_NAME;
 
 public class StaticMethodCallGenerator implements MethodCallScope {
     private CompilationContext compilationContext;
@@ -65,116 +64,50 @@ public class StaticMethodCallGenerator implements MethodCallScope {
     @Override
     public void generateCall(UniversalCodeVisitor visitor,
                              MethodCall methodCall) {
+        if ( methodCall.getExecutable() == null ) return;
+
+        if ( methodCall.getExecutable().getClass() == Method.class) {
+            generateForStaticMethodCall(visitor, methodCall, (Method)methodCall.getExecutable());
+        } else {
+            generateForNewObjectCreation(visitor, methodCall, (Constructor)methodCall.getExecutable());
+        }
+    }
+
+    public void generateForStaticMethodCall(UniversalCodeVisitor visitor,
+                                            MethodCall methodCall,
+                                            Method method) {
         //--------------------------------------------------------------------------------------------------------------
         // Generate for any parameters first, in order to ascertain the types of parameters
         //--------------------------------------------------------------------------------------------------------------
-        for (Expression paramExpr : methodCall.getParameters()) {
-            paramExpr.accept(visitor);
+        evaluateCallParameters(visitor, methodCall, method);
+        compilationContext.getBytecodeHelper().peekMethodVisitor().visitMethodInsn(Opcodes.INVOKESTATIC,
+                                                                                   Type.getInternalName(method.getDeclaringClass()),
+                                                                                   methodCall.getName().getName(),
+                                                                                   Type.getMethodDescriptor(Type.getType(method.getReturnType()),
+                                                                                                            BytecodeHelper.typeArrayFor(method.getParameterTypes())),
+                                                                                   false);
+        if ( method.getReturnType() != Void.class ) {
+            compilationContext.getVirtualMachine().loadOperandOfType(method.getReturnType());
         }
+    }
 
-        List<Method> matchingExplicitlyImportedMethods = findMatchingMethodsFromExplicitImports(methodCall);
-        List<Method> matchingImportOnDemandNethods = findMatchingMethodsFromOnDemandImports(methodCall);
-        List<Method> matchingMethods = new ArrayList<>(matchingExplicitlyImportedMethods);
-        matchingMethods.addAll(matchingImportOnDemandNethods);
-        if (matchingMethods.isEmpty()) {
-            compilationContext.getMessages().addError(METHOD_NOT_FOUND.withParameters(methodCall.getName().getName()));
-            return;
-        } else if (matchingMethods.size() > 1) {
-            if ( matchingExplicitlyImportedMethods.size() > 1) {
-                compilationContext.getMessages().addError(METHOD_AMBIGUOUS.withParameters(
-                        methodCall.getName().getName(),
-                        matchingExplicitlyImportedMethods.size(),
-                        matchingExplicitlyImportedMethods));
-                return;
-
-            } else if ( matchingImportOnDemandNethods.size() > 1) {
-                compilationContext.getMessages().addError(METHOD_AMBIGUOUS.withParameters(
-                        methodCall.getName().getName(),
-                        matchingImportOnDemandNethods.size(),
-                        matchingImportOnDemandNethods));
-                return;
-            }
-        }
-
-        Method matchingMethod = matchingMethods.get(0);
-        Assert.notNull(matchingMethod, "No such method found "+methodCall.getName());
-
-        if (matchingMethod.getParameterCount() > 0) {
-            for (int n=0; n < matchingMethod.getParameterCount(); n++) {
+    private void evaluateCallParameters(UniversalCodeVisitor visitor,
+                                        MethodCall methodCall,
+                                        Executable executable) {
+        if (executable.getParameterCount() > 0) {
+            for (int n=0; n < executable.getParameterCount(); n++) {
                 Expression paramExpr = methodCall.getParameters().get(n);
                 paramExpr.accept(visitor);
-                compilationContext.getVirtualMachine().convertOrBoxOperandIfNeeded(matchingMethod.getParameterTypes()[n]);
+                compilationContext.getVirtualMachine().convertOrBoxOperandIfNeeded(executable.getParameterTypes()[n]);
             }
         }
-        compilationContext.getBytecodeHelper().peekMethodVisitor().visitMethodInsn(Opcodes.INVOKESTATIC,
-                                                                                   Type.getInternalName(matchingMethod.getDeclaringClass()),
-                                                                                   methodCall.getName().getName(),
-                                                                                   Type.getMethodDescriptor(Type.getType(matchingMethod.getReturnType()),
-                                                                                                            BytecodeHelper.typeArrayFor(matchingMethod.getParameterTypes())),
-                                                                                   false);
-        if ( matchingMethod.getReturnType() != Void.class ) {
-            compilationContext.getVirtualMachine().loadOperandOfType(matchingMethod.getReturnType());
-        }
+
     }
 
-    private List<Method> findMatchingMethodsFromExplicitImports(final MethodCall methodCall) {
-        final String methodName = methodCall.getName().getName();
+    private boolean methodCallParemetersMatch(Executable method, MethodCall methodCall) {
 
-        List<Method> matchingMethods = new ArrayList<>();
-        for (int n=importDecl.getImports().size()-1; n >= 0; n--) {
-            ImportStmt importStmt = importDecl.getImports().get(n);
-
-            if ( importStmt.isOnDemand() ) continue;
-            if ( importStmt.getElements().isEmpty() || !importStmt.getElements().get(importStmt.getElements().size()-1).getName().equals(methodName)) continue;
-
-            String enclosingTypeName = asDelimitedString(importStmt.getElements().subList(0, importStmt.getElements().size()-1)
-                                                                   .stream().map(Name::getName).collect(Collectors.toList()), ".");
-
-            Class<?> enclosingType = TypeUtil.loadClassOrNull(enclosingTypeName);
-            if (enclosingType == null) continue;
-
-            collectCallableMethods(methodCall, enclosingType, matchingMethods);
-        }
-
-        return matchingMethods;
-    }
-
-    private void collectCallableMethods(MethodCall methodCall,
-                                        Class<?> enclosingType,
-                                        Collection colllection) {
-        final String methodName = methodCall.getName().getName();
-        TypeUtil.streamMethods(enclosingType)
-                .filter(m -> Modifier.isStatic(m.getModifiers()))
-                .filter(m -> Modifier.isPublic(m.getModifiers()))
-                .filter(m -> m.getName().equals(methodName))
-                .filter(m -> m.getParameterCount() == methodCall.getParameters().size())
-                .filter(this::methodCallParemetersMatch)
-                .forEach(colllection::add);
-    }
-
-    private List<Method> findMatchingMethodsFromOnDemandImports(final MethodCall methodCall) {
-        final String methodName = methodCall.getName().getName();
-
-        List<Method> matchingMethods = new ArrayList<>();
-        for (int n=importDecl.getImports().size()-1; n >= 0; n--) {
-            ImportStmt importStmt = importDecl.getImports().get(n);
-
-            if ( !importStmt.isOnDemand() ) continue;
-
-            String enclosingTypeName = asDelimitedString(importStmt.getElements().stream().map(Name::getName).collect(Collectors.toList()), ".");
-
-            Class<?> enclosingType = TypeUtil.loadClassOrNull(enclosingTypeName);
-            if (enclosingType == null) continue;
-
-            collectCallableMethods(methodCall, enclosingType, matchingMethods);
-        }
-
-        return matchingMethods;
-    }
-
-    private boolean methodCallParemetersMatch(Method method) {
         for (int n=0; n < method.getParameterCount(); n++) {
-            Class<?> callParamType = compilationContext.getVirtualMachine().peekOperandStack(method.getParameterCount()-1-n);
+            Class<?> callParamType = methodCall.getParameters().get(n).getTypeDescriptor();
             Class<?> methodParamType = method.getParameterTypes()[n];
 
             if ( !(NullType.class == callParamType || callParamType.isAssignableFrom(methodParamType)
@@ -186,5 +119,28 @@ public class StaticMethodCallGenerator implements MethodCallScope {
 
     private boolean boxTypeCompatible(Class<?> type1, Class<?> type2) {
         return ensureNonPrimitiveType(type1).equals(ensureNonPrimitiveType(type2));
+    }
+
+    public void generateForNewObjectCreation(UniversalCodeVisitor visitor,
+                                             MethodCall methodCall,
+                                             Constructor<?> constructor) {
+        String internalTypename = Type.getInternalName(constructor.getDeclaringClass());
+        MethodVisitor mv = compilationContext.getBytecodeHelper().peekMethodVisitor();
+        mv.visitTypeInsn(NEW, internalTypename);
+        mv.visitInsn(DUP);
+
+        //--------------------------------------------------------------------------------------------------------------
+        // Generate for any parameters first, in order to ascertain the types of parameters
+        //--------------------------------------------------------------------------------------------------------------
+        evaluateCallParameters(visitor, methodCall, constructor);
+
+        mv.visitMethodInsn(INVOKESPECIAL,
+                           internalTypename,
+                           CTOR_METHOD_NAME,
+                           Type.getMethodDescriptor(Type.VOID_TYPE,
+                                                    BytecodeHelper.typeArrayFor(constructor.getParameterTypes())),
+                           false);
+
+        compilationContext.getVirtualMachine().loadOperandOfType(constructor.getDeclaringClass());
     }
 }

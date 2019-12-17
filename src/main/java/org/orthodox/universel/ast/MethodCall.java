@@ -28,6 +28,8 @@
 
 package org.orthodox.universel.ast;
 
+import java.lang.reflect.Executable;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 
@@ -41,6 +43,8 @@ public class MethodCall extends Expression {
     private Name name;
     /** The parameter expressions of this method call. */
     private List<Expression> parameters;
+
+    private Executable executable;
 
     /**
      * Consructs a method call expression, consisting of a name and zero or more parameters.
@@ -81,7 +85,17 @@ public class MethodCall extends Expression {
         return visitor.visitMethodCall(this);
     }
 
-    public static String helloWorld() {
-        return "Hello World!";
+    public Class<?> getTypeDescriptor() {
+        if (executable == null) return super.getTypeDescriptor();
+        else if (executable.getClass() == Method.class) return ((Method)executable).getReturnType();
+        else return executable.getDeclaringClass();
+    }
+
+    public Executable getExecutable() {
+        return executable;
+    }
+
+    public void setExecutable(Executable executable) {
+        this.executable = executable;
     }
 }

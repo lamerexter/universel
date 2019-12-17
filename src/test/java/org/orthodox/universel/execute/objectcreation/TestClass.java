@@ -26,25 +26,46 @@
  *
  */
 
-package org.orthodox.universel.execute.methodcall;
+package org.orthodox.universel.execute.objectcreation;
+
+import java.util.Objects;
 
 public class TestClass {
+    private int intField;
+    private Double doubleField;
+    private long longField;
+    private String stringField;
 
-    public static String noArgs() { return "Hello world"; }
+    public TestClass() {}
 
-    public static int oneIntParam(int a) {
-        return a * 3;
+    public TestClass(int intField) {
+        this.intField = intField;
     }
 
-    public static Integer oneIntegerParam(Integer a) {
-        return a * 2;
+    public TestClass(double doubleField) {
+        this.doubleField = doubleField;
     }
 
-    public static Object overloadedMethod(int i) {
-        return i;
+    public TestClass(long longField) {
+        this.longField = longField;
     }
 
-    public static Object overloadedMethod(boolean b) {
-        return b;
+    public TestClass(String stringField) {
+        this.stringField = stringField;
+    }
+
+    public boolean equals(Object other) {
+        if (other == this) return true;
+        if ( !(other instanceof TestClass) ) return false;
+
+        TestClass that = (TestClass)other;
+        return Objects.equals(this.intField, that.intField)
+                && Objects.equals(this.doubleField, that.doubleField)
+                && Objects.equals(this.longField, that.longField)
+                && Objects.equals(this.stringField, that.stringField);
+    }
+
+    public int hashCode() {
+        return Objects.hash(intField, doubleField, longField, stringField);
     }
 }

@@ -190,11 +190,13 @@ public class BytecodeHelper {
         }
     }
 
-    private void unbox(Class<?> toType) {
-        if ( toType == void.class ) return;
+    public Class<?> unbox(Class<?> fromType) {
+        Class<?> toType = TypeUtil.primitiveTypeFor(fromType);
 
         peekMethodVisitor().visitMethodInsn(INVOKESTATIC, Type.getInternalName(BoxingFunctions.class), toType.getName() + "Unbox",
                            Type.getMethodDescriptor(Type.getType(toType), OBJECT_TYPE));
+
+        return toType;
     }
 
     public void emitInstantiateType(Class<?> type) {

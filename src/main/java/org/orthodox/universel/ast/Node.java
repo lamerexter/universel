@@ -123,6 +123,10 @@ public abstract class Node implements UniversalCodeVisitable {
         return this;
     }
 
+    public Class<?> getTypeDescriptor() {
+        return Object.class;
+    }
+
     @Override
     public String toString() {
         return new PropertyBasedToStringBuilder(this).build();

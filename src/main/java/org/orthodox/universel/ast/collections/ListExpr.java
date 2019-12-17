@@ -72,4 +72,8 @@ public class ListExpr extends Expression {
     public List<Node> getElements() {
         return elements == null ? Collections.emptyList() : elements;
     }
+
+    public Class<?> getTypeDescriptor() {
+        return List.class;
+    }
 }

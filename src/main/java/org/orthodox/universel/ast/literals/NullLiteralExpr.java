@@ -4,6 +4,8 @@ import org.orthodox.universel.ast.Expression;
 import org.orthodox.universel.ast.TokenImage;
 import org.orthodox.universel.ast.UniversalCodeVisitor;
 
+import javax.lang.model.type.NullType;
+
 /**
  * A null literal (<i>null</i>) on the Abstract Syntax Tree.
  */
@@ -19,5 +21,9 @@ public class NullLiteralExpr extends Expression implements IntegerLiteral {
 
     public boolean accept(UniversalCodeVisitor visitor) {
         return visitor.visitNullLiteral(this);
+    }
+
+    public Class<?> getTypeDescriptor() {
+        return NullType.class;
     }
 }

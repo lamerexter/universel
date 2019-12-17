@@ -30,4 +30,8 @@ public class BooleanLiteralExpr extends Expression implements IntegerLiteral {
     public boolean accept(UniversalCodeVisitor visitor) {
         return visitor.visitBooleanLiteral(this);
     }
+
+    public Class<?> getTypeDescriptor() {
+        return boolean.class;
+    }
 }

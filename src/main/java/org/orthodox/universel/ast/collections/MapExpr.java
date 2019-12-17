@@ -33,6 +33,7 @@ import org.orthodox.universel.ast.TokenImage;
 import org.orthodox.universel.ast.UniversalCodeVisitor;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * An map entry expression on the Abstract Syntax Tree, of the form <code>[1, 2, 3, 4]</code>
@@ -65,4 +66,7 @@ public class MapExpr extends Expression {
         return visitor.visitMap(this);
     }
 
+    public Class<?> getTypeDescriptor() {
+        return Map.class;
+    }
 }

@@ -15,4 +15,8 @@ public class OctalLongLiteralExpr extends Expression {
     public OctalLongLiteralExpr(TokenImage tokenImage) {
         super(tokenImage);
     }
+
+    public Class<?> getTypeDescriptor() {
+        return long.class;
+    }
 }

@@ -3,6 +3,8 @@ package org.orthodox.universel.ast.literals;
 import org.orthodox.universel.ast.Expression;
 import org.orthodox.universel.ast.TokenImage;
 
+import java.util.Map;
+
 /**
  * An hexadecimal integer literal on the Abstract Syntax Tree.
  */
@@ -14,5 +16,9 @@ public class HexadecimalIntegerLiteralExpr extends Expression {
      */
     public HexadecimalIntegerLiteralExpr(TokenImage tokenImage) {
         super(tokenImage);
+    }
+
+    public Class<?> getTypeDescriptor() {
+        return long.class;
     }
 }

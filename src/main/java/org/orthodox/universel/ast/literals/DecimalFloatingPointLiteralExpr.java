@@ -25,7 +25,13 @@ public class DecimalFloatingPointLiteralExpr extends Expression implements Numer
         super(tokenImage);
     }
 
+    public Class<?> getTypeDescriptor() {
+        return getLiteralValueClass();
+    }
+
     public Class<?> getLiteralValueClass() {
+        if (getTokenImage() == null) return double.class;
+
         String image = getTokenImage().getImage();
         if (image.endsWith("f") || image.endsWith("F")) return float.class;
         else if (image.endsWith("D")) return BigDecimal.class;

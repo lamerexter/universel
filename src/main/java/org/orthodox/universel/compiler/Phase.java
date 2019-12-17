@@ -26,25 +26,13 @@
  *
  */
 
-package org.orthodox.universel.execute.methodcall;
+package org.orthodox.universel.compiler;
 
-public class TestClass {
-
-    public static String noArgs() { return "Hello world"; }
-
-    public static int oneIntParam(int a) {
-        return a * 3;
-    }
-
-    public static Integer oneIntegerParam(Integer a) {
-        return a * 2;
-    }
-
-    public static Object overloadedMethod(int i) {
-        return i;
-    }
-
-    public static Object overloadedMethod(boolean b) {
-        return b;
-    }
+public enum Phase {
+    LEXICAL_ANALYSIS,
+    SYNTAX_ANALYSIS,
+    SEMANTIC_ANALYSIS,
+    INTERMEDIATE_CODE_GENERATION,
+    CODE_OPTIMISATION,
+    CODE_GENERATION
 }

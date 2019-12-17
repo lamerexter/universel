@@ -54,4 +54,8 @@ public class StringLiteralExpr extends Expression {
     public String getUndelimitedTokenImage() {
         return getTokenImage() == null ? null : getTokenImage().getImage().substring(getDelimeter().length(), getTokenImage().getImage().length()-getDelimeter().length());
     }
+
+    public Class<?> getTypeDescriptor() {
+        return String.class;
+    }
 }

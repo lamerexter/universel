@@ -1,7 +1,6 @@
 package org.orthodox.universel.compiler;
 
 import org.beanplanet.messages.domain.Messages;
-import org.beanplanet.messages.domain.MessagesImpl;
 import org.objectweb.asm.MethodVisitor;
 import org.orthodox.universel.ast.MethodCall;
 import org.orthodox.universel.ast.UniversalCodeVisitor;
@@ -9,21 +8,22 @@ import org.orthodox.universel.ast.UniversalCodeVisitor;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
-import static org.beanplanet.messages.domain.MessagesImpl.messages;
-
 public class CompilationContext implements NameScope, MethodCallScope {
-    private MethodVisitor methodVisitor;
-    private VirtualMachine virtualMachine;
-    private BytecodeHelper bytecodeHelper;
-    private Deque<NameScope> scopes = new ArrayDeque<>();
-    private Deque<MethodCallScope> methodCallScopes = new ArrayDeque<>();
+    private final MethodVisitor methodVisitor;
+    private final VirtualMachine virtualMachine;
+    private final BytecodeHelper bytecodeHelper;
+    private final Deque<NameScope> scopes = new ArrayDeque<>();
+    private final Deque<MethodCallScope> methodCallScopes = new ArrayDeque<>();
 
-    private Messages messages = messages();
+    private final Messages messages;
 
-    public CompilationContext(MethodVisitor methodVisitor, VirtualMachine virtualMachine) {
+    public CompilationContext(final MethodVisitor methodVisitor,
+                              final VirtualMachine virtualMachine,
+                              final Messages messages) {
         this.methodVisitor = methodVisitor;
         this.virtualMachine = virtualMachine;
         this.bytecodeHelper = new BytecodeHelper(methodVisitor);
+        this.messages = messages;
     }
 
     public Messages getMessages() {

@@ -26,25 +26,20 @@
  *
  */
 
-package org.orthodox.universel.execute.methodcall;
+package org.orthodox.universel.symanticanalysis;
 
-public class TestClass {
+import org.beanplanet.messages.domain.Messages;
 
-    public static String noArgs() { return "Hello world"; }
+import static org.beanplanet.messages.domain.MessagesImpl.messages;
 
-    public static int oneIntParam(int a) {
-        return a * 3;
+public class SemanticAnalysisContext {
+    private Messages messages = messages();
+
+    public SemanticAnalysisContext(Messages message) {
+        this.messages = message;
     }
 
-    public static Integer oneIntegerParam(Integer a) {
-        return a * 2;
-    }
-
-    public static Object overloadedMethod(int i) {
-        return i;
-    }
-
-    public static Object overloadedMethod(boolean b) {
-        return b;
+    public Messages getMessages() {
+        return messages;
     }
 }

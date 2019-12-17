@@ -32,6 +32,8 @@ import org.orthodox.universel.ast.Expression;
 import org.orthodox.universel.ast.Node;
 import org.orthodox.universel.ast.TokenImage;
 
+import java.util.Map;
+
 /**
  * An map entry expression on the Abstract Syntax Tree, consisting of a key and a value expression.</code>
  */
@@ -69,6 +71,10 @@ public class MapEntryExpr extends Expression {
      */
     public Node getValueExpression() {
         return valueExpression;
+    }
+
+    public Class<?> getTypeDescriptor() {
+        return Map.Entry.class;
     }
 
 }

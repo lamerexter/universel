@@ -29,7 +29,6 @@
 package org.orthodox.universel.execute.methodcall;
 
 import org.junit.jupiter.api.Test;
-import org.orthodox.universel.ast.MethodCall;
 import org.orthodox.universel.compiler.CompiledUnit;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -37,31 +36,31 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.orthodox.universel.Universal.compile;
 import static org.orthodox.universel.Universal.execute;
-import static org.orthodox.universel.ast.MethodCall.helloWorld;
 import static org.orthodox.universel.compiler.Messages.MethodCall.METHOD_AMBIGUOUS;
 import static org.orthodox.universel.compiler.Messages.MethodCall.METHOD_NOT_FOUND;
+import static org.orthodox.universel.execute.methodcall.TestClass.*;
 
 public class StaticMethodCallTest {
     @Test
     void noArgs_resolveFromImport() {
-        assertThat(execute("import " + MethodCall.class.getName() + ".helloWorld helloWorld()"), equalTo(helloWorld()));
+        assertThat(execute("import " + TestClass.class.getName() + ".noArgs noArgs()"), equalTo(noArgs()));
     }
 
     @Test
     void oneArg_resolveFromImport() {
-        assertThat(execute("import " + TestClass.class.getName() + ".* oneIntParam(8)"), equalTo(TestClass.oneIntParam(8)));
+        assertThat(execute("import " + TestClass.class.getName() + ".* oneIntParam(8)"), equalTo(oneIntParam(8)));
     }
 
     @Test
     void oneArg_boxed_resolveFromImport() {
-        assertThat(execute("import " + TestClass.class.getName() + ".* oneIntegerParam(8)"), equalTo(TestClass.oneIntegerParam(8)));
+        assertThat(execute("import " + TestClass.class.getName() + ".* oneIntegerParam(8)"), equalTo(oneIntegerParam(8)));
     }
 
     @Test
     void oneArg_overloadedMethod_resolveWhenExactlyOneMatchesParameterTypes() {
-        assertThat(execute("import " + TestClass.class.getName() + ".* overloadedMethod(9)"), equalTo(TestClass.overloadedMethod(9)));
-        assertThat(execute("import " + TestClass.class.getName() + ".* overloadedMethod(false)"), equalTo(TestClass.overloadedMethod(false)));
-        assertThat(execute("import " + TestClass.class.getName() + ".* overloadedMethod(true)"), equalTo(TestClass.overloadedMethod(true)));
+        assertThat(execute("import " + TestClass.class.getName() + ".* overloadedMethod(9)"), equalTo(overloadedMethod(9)));
+        assertThat(execute("import " + TestClass.class.getName() + ".* overloadedMethod(false)"), equalTo(overloadedMethod(false)));
+        assertThat(execute("import " + TestClass.class.getName() + ".* overloadedMethod(true)"), equalTo(overloadedMethod(true)));
     }
 
     @Test

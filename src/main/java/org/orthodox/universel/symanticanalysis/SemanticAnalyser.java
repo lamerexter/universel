@@ -26,25 +26,11 @@
  *
  */
 
-package org.orthodox.universel.execute.methodcall;
+package org.orthodox.universel.symanticanalysis;
 
-public class TestClass {
+import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.ast.UniversalCodeVisitor;
 
-    public static String noArgs() { return "Hello world"; }
-
-    public static int oneIntParam(int a) {
-        return a * 3;
-    }
-
-    public static Integer oneIntegerParam(Integer a) {
-        return a * 2;
-    }
-
-    public static Object overloadedMethod(int i) {
-        return i;
-    }
-
-    public static Object overloadedMethod(boolean b) {
-        return b;
-    }
+public interface SemanticAnalyser extends UniversalCodeVisitor {
+    void performAnalysis(SemanticAnalysisContext context, Node from);
 }
