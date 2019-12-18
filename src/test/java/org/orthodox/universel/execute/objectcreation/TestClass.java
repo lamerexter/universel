@@ -28,6 +28,7 @@
 
 package org.orthodox.universel.execute.objectcreation;
 
+import java.util.Map;
 import java.util.Objects;
 
 public class TestClass {
@@ -48,6 +49,15 @@ public class TestClass {
 
     public TestClass(double doubleField) {
         this.doubleField = doubleField;
+    }
+
+    public TestClass(Map<String, Object> fieldValues) {
+        this(
+                (Integer)fieldValues.get("intField"),
+                (Long)fieldValues.get("longField"),
+                (Double)fieldValues.get("doubleField"),
+                (String)fieldValues.get("stringField")
+        );
     }
 
     public TestClass(int intField,

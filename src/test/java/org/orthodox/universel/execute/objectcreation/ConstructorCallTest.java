@@ -61,4 +61,10 @@ public class ConstructorCallTest {
     void multipleArgs() {
         assertThat(execute("import " + org.orthodox.universel.execute.objectcreation.TestClass.class.getName() + " TestClass(1234, 5678L, 789d, 'Hello world')"), equalTo(new TestClass(1234, 5678L, 789d, "Hello world")));
     }
+
+    @Test
+    void multipleArgsViaFieldMap() {
+        assertThat(execute("import " + org.orthodox.universel.execute.objectcreation.TestClass.class.getName() + " TestClass({'intField': 1234, 'longField': 5678L, 'doubleField': 789d, 'stringField': 'Hello world'})"), equalTo(new TestClass(1234, 5678L, 789d, "Hello world")));
+    }
+
 }
