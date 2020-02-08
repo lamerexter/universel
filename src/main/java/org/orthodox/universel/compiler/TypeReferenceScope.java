@@ -32,9 +32,9 @@ import org.beanplanet.core.lang.Assert;
 import org.beanplanet.core.lang.TypeNotFoundException;
 import org.beanplanet.core.lang.TypeUtil;
 import org.beanplanet.core.util.StringUtil;
-import org.orthodox.universel.ast.ImportDecl;
-import org.orthodox.universel.ast.ImportStmt;
-import org.orthodox.universel.ast.Name;
+import org.orthodox.universel.cst.ImportDecl;
+import org.orthodox.universel.cst.ImportStmt;
+import org.orthodox.universel.cst.Name;
 
 import java.util.stream.Collectors;
 

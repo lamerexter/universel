@@ -30,8 +30,8 @@ package org.orthodox.universel.parse.collections;
 
 import org.junit.jupiter.api.Test;
 import org.orthodox.universel.Universal;
-import org.orthodox.universel.ast.collections.ListExpr;
-import org.orthodox.universel.ast.literals.*;
+import org.orthodox.universel.cst.collections.ListExpr;
+import org.orthodox.universel.cst.literals.*;
 
 import java.util.stream.Collectors;
 

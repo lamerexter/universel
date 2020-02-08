@@ -30,17 +30,13 @@ package org.orthodox.universel.parse;
 
 import org.junit.jupiter.api.Test;
 import org.orthodox.universel.Universal;
-import org.orthodox.universel.ast.ImportDecl;
-import org.orthodox.universel.ast.MethodCall;
-import org.orthodox.universel.ast.Name;
-import org.orthodox.universel.ast.literals.BooleanLiteralExpr;
-import org.orthodox.universel.ast.literals.DecimalIntegerLiteralExpr;
-import org.orthodox.universel.ast.literals.StringLiteralExpr;
+import org.orthodox.universel.cst.MethodCall;
+import org.orthodox.universel.cst.literals.BooleanLiteralExpr;
+import org.orthodox.universel.cst.literals.DecimalIntegerLiteralExpr;
+import org.orthodox.universel.cst.literals.StringLiteralExpr;
 
 import java.util.Collections;
-import java.util.stream.Collectors;
 
-import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;

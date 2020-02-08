@@ -2,8 +2,7 @@ package org.orthodox.universel.compiler;
 
 import org.beanplanet.core.io.resource.Resource;
 import org.beanplanet.messages.domain.Messages;
-import org.orthodox.universel.ast.Node;
-import org.orthodox.universel.ast.Script;
+import org.orthodox.universel.cst.Node;
 
 public class CompiledUnit {
     private Node astNode;

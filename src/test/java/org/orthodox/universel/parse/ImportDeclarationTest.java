@@ -30,8 +30,8 @@ package org.orthodox.universel.parse;
 
 import org.junit.jupiter.api.Test;
 import org.orthodox.universel.Universal;
-import org.orthodox.universel.ast.ImportDecl;
-import org.orthodox.universel.ast.Name;
+import org.orthodox.universel.cst.ImportDecl;
+import org.orthodox.universel.cst.Name;
 
 import java.util.stream.Collectors;
 

@@ -28,8 +28,8 @@
 
 package org.orthodox.universel.compiler;
 
-import org.orthodox.universel.ast.MethodCall;
-import org.orthodox.universel.ast.UniversalCodeVisitor;
+import org.orthodox.universel.cst.MethodCall;
+import org.orthodox.universel.cst.UniversalCodeVisitor;
 
 public interface MethodCallScope {
     /**

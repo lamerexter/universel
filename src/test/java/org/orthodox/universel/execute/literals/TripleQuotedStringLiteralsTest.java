@@ -83,7 +83,7 @@ public class TripleQuotedStringLiteralsTest {
         assertThat(Universal.execute("'''\\"+"u0000'''"), equalTo("\u0000")); // character 0
 
         assertThat(Universal.execute("'''\\"+"u0024'''"), equalTo("$")); // ASCII
-        assertThat(Universal.execute("'''\\"+"u00A3'''"), equalTo("£")); // Extended ASCII
+        assertThat(Universal.execute("'''\\"+"u00A3'''"), equalTo("£")); // `ed ASCII
 
         assertThat(Universal.execute("'''\\"+"u2264'''"), equalTo("\u2264")); // Less than or equal to
 

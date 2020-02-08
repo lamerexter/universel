@@ -29,7 +29,7 @@
 package org.orthodox.universel.parse;
 
 import org.junit.jupiter.api.Test;
-import org.orthodox.universel.ast.Script;
+import org.orthodox.universel.cst.Script;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;

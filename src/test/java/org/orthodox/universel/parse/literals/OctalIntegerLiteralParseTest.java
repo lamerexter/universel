@@ -3,13 +3,14 @@ package org.orthodox.universel.parse.literals;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.orthodox.universal.parser.TokenMgrException;
-import org.orthodox.universal.parser.UniversalParser;
-import org.orthodox.universel.ast.Expression;
-import org.orthodox.universel.ast.literals.OctalIntegerLiteralExpr;
+import org.orthodox.universel.Universal;
+import org.orthodox.universel.cst.Operator;
+import org.orthodox.universel.cst.UnaryExpression;
+import org.orthodox.universel.cst.literals.OctalIntegerLiteralExpr;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
 
 public class OctalIntegerLiteralParseTest {
     @Test
@@ -24,18 +25,27 @@ public class OctalIntegerLiteralParseTest {
         assertThat(expr.getTokenImage().getImage(), equalTo(input.trim()));
     }
 
-    private OctalIntegerLiteralExpr parse(String input) throws Exception {
-        // Given
-        UniversalParser parser = new UniversalParser(input);
-
+    @Test
+    public void negativeParsePosition() throws Exception{
         // When
-        Expression literalExpr = parser.Literal();
-
-        // Then
-        assertThat(literalExpr, instanceOf(OctalIntegerLiteralExpr.class));
-        return (OctalIntegerLiteralExpr)literalExpr;
+        String input = "\n  -0771";
+        UnaryExpression expr = parseUnaryMinus(input);
+        assertThat(expr.getTokenImage().getStartLine(), equalTo(2));
+        assertThat(expr.getTokenImage().getStartColumn(), equalTo(3));
+        assertThat(expr.getTokenImage().getEndLine(), equalTo(2));
+        assertThat(expr.getTokenImage().getEndColumn(), equalTo(7));
+        assertThat(input, endsWith(expr.getExpression().getTokenImage().getImage()));
     }
 
+    private OctalIntegerLiteralExpr parse(String input) throws Exception {
+        return Universal.parse(OctalIntegerLiteralExpr.class, input);
+    }
+
+    private UnaryExpression parseUnaryMinus(String input) throws Exception {
+        UnaryExpression unaryExpression = Universal.parse(UnaryExpression.class, input);
+        assertThat(unaryExpression.getOperator(), equalTo(Operator.MINUS));
+        return unaryExpression;
+    }
 
     @Test
     public void positiveIntegerLiterals() throws Exception{
@@ -57,16 +67,20 @@ public class OctalIntegerLiteralParseTest {
 
     @Test()
     public void negativeIntegerLiterals() throws Exception {
-        Assertions.assertThrows(TokenMgrException.class, () -> {
-            parse("-012");
-        }, "Unary minus is handled by the parser");
+        assertThat(parseUnaryMinus("-00").getExpression().getTokenImage().getImage(), equalTo("00"));
+        assertThat(parseUnaryMinus("-01").getExpression().getTokenImage().getImage(), equalTo("01"));
+        assertThat(parseUnaryMinus("-0127").getExpression().getTokenImage().getImage(), equalTo("0127"));
+        assertThat(parseUnaryMinus("-012__7").getExpression().getTokenImage().getImage(), equalTo("012__7"));
+        assertThat(parseUnaryMinus("-0777").getExpression().getTokenImage().getImage(), equalTo("0777"));
     }
 
     @Test()
     public void negativeLongLiterals() throws Exception {
-        Assertions.assertThrows(TokenMgrException.class, () -> {
-            parse("-012L");
-        }, "Unary minus is handled by the parser");
+        assertThat(parseUnaryMinus("-00L").getExpression().getTokenImage().getImage(), equalTo("00L"));
+        assertThat(parseUnaryMinus("-01l").getExpression().getTokenImage().getImage(), equalTo("01l"));
+        assertThat(parseUnaryMinus("-0127L").getExpression().getTokenImage().getImage(), equalTo("0127L"));
+        assertThat(parseUnaryMinus("-012__7L").getExpression().getTokenImage().getImage(), equalTo("012__7L"));
+        assertThat(parseUnaryMinus("-0777L").getExpression().getTokenImage().getImage(), equalTo("0777L"));
     }
 
 }

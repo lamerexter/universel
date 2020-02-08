@@ -28,23 +28,13 @@
 
 package org.orthodox.universel.execute.collections;
 
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.orthodox.universel.Universal;
-import org.orthodox.universel.ast.collections.ListExpr;
-import org.orthodox.universel.ast.literals.BooleanLiteralExpr;
-import org.orthodox.universel.ast.literals.DecimalFloatingPointLiteralExpr;
-import org.orthodox.universel.ast.literals.DecimalIntegerLiteralExpr;
-import org.orthodox.universel.ast.literals.StringLiteralExpr;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class ListExprTest {
@@ -59,14 +49,14 @@ public class ListExprTest {
     }
 
     @Test
-    public void multiElementList() throws Exception{
+    public void multiElementList() {
         // Then
         assertThat(Universal.execute("[1, 2, true, false, 2.5f, 3.5d, 'Hello World']"),
                    equalTo(asList(1, 2, true, false, 2.5f, 3.5d, "Hello World")));
     }
 
     @Test
-    public void stringInterpolation() throws Exception{
+    public void stringInterpolation() {
         // Given
         Map<String, Object> binding = new HashMap<>();
         binding.put("person", "Joe Bloggs");

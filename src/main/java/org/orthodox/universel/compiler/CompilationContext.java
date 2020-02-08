@@ -2,8 +2,8 @@ package org.orthodox.universel.compiler;
 
 import org.beanplanet.messages.domain.Messages;
 import org.objectweb.asm.MethodVisitor;
-import org.orthodox.universel.ast.MethodCall;
-import org.orthodox.universel.ast.UniversalCodeVisitor;
+import org.orthodox.universel.cst.MethodCall;
+import org.orthodox.universel.cst.UniversalCodeVisitor;
 
 import java.util.ArrayDeque;
 import java.util.Deque;

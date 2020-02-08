@@ -28,16 +28,14 @@
 
 package org.orthodox.universel.compiler;
 
-import org.beanplanet.core.lang.Assert;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
-import org.orthodox.universel.ast.Expression;
-import org.orthodox.universel.ast.ImportDecl;
-import org.orthodox.universel.ast.MethodCall;
-import org.orthodox.universel.ast.UniversalCodeVisitor;
+import org.orthodox.universel.cst.Expression;
+import org.orthodox.universel.cst.ImportDecl;
+import org.orthodox.universel.cst.MethodCall;
+import org.orthodox.universel.cst.UniversalCodeVisitor;
 
-import javax.lang.model.type.NullType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;

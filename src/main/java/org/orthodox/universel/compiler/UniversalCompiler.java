@@ -11,8 +11,9 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.orthodox.universal.parser.ParseException;
 import org.orthodox.universal.parser.UniversalParser;
-import org.orthodox.universel.ast.Node;
-import org.orthodox.universel.ast.Script;
+import org.orthodox.universel.ast.conversion.CstTransformer;
+import org.orthodox.universel.cst.Node;
+import org.orthodox.universel.cst.Script;
 import org.orthodox.universel.symanticanalysis.MethodCallAnalyser;
 import org.orthodox.universel.symanticanalysis.SemanticAnalyser;
 import org.orthodox.universel.symanticanalysis.SemanticAnalysisContext;
@@ -28,6 +29,8 @@ import static org.beanplanet.messages.domain.MessagesImpl.messages;
 import static org.objectweb.asm.Opcodes.*;
 
 public class UniversalCompiler {
+    private static final CstTransformer cstTransformer = new CstTransformer();
+
     private static final List<SemanticAnalyser> SEMANTIC_AANALYSERS = asList(
             new MethodCallAnalyser()
     );
@@ -36,10 +39,21 @@ public class UniversalCompiler {
 
     public Script parse(Resource compilationUnitResource) {
         try (Reader compilationUnitReader = compilationUnitResource.getReader()) {
+            //----------------------------------------------------------------------------------------------------------
+            // Lexical Analysis:
+            // Parse the source resource.
+            //----------------------------------------------------------------------------------------------------------
             UniversalParser parser = new UniversalParser(compilationUnitReader);
-            return parser.script();
+            Script script = parser.script();
+            return script;
+
+            //----------------------------------------------------------------------------------------------------------
+            // Conversion:
+            // Transform the CST into an AST
+            //----------------------------------------------------------------------------------------------------------
+//            return (Script)script.accept(cstTransformer);
         } catch (ParseException parseException) {
-            throw new CompilationException(parseException);
+            throw new CompilationParseException(parseException);
         } catch (IOException ioEx) {
             throw new IoException(String.format("I/O error occurred during compilation [%s]: ", compilationUnitResource.getCanonicalForm()), ioEx);
         }
@@ -54,6 +68,7 @@ public class UniversalCompiler {
 
         //----------------------------------------------------------------------------------------------------------
         // Lexical Analysis:
+        // Conversion:
         // Parse the compilation unit to the topmost non-terminal.
         //----------------------------------------------------------------------------------------------------------
         Node compilationUnitNonTerminal = parse(compilationUnitResource);

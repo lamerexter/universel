@@ -7,6 +7,7 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -163,6 +164,20 @@ public class BytecodeHelper {
                                             false
         );
         return primitiveWrapperType;
+    }
+
+    /**
+     * Emits instructions to call s static method on a given class. The parameters must have already been evaluated and
+     * reside on the operand stack prior to calling this method.
+     *
+     * @param method the static method for which the invocation code is to be generated.
+     */
+    public void emitInvokeStaticMethod(Method method) {
+        peekMethodVisitor().visitMethodInsn(INVOKESTATIC,
+                                            Type.getInternalName(method.getDeclaringClass()),
+                                            method.getName(),
+                                            Type.getMethodDescriptor(Type.getType(method.getReturnType()), typeArrayFor(method.getParameterTypes())),
+                                            false);
     }
 
     public void convert(Class<?> fromType, Class<?> toType) {

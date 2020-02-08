@@ -4,9 +4,11 @@ import org.beanplanet.core.lang.TypeUtil;
 import org.beanplanet.core.logging.BeanpanetLoggerFactory;
 import org.beanplanet.core.logging.Logger;
 import org.beanplanet.core.util.SizeUtil;
-import org.orthodox.universel.ast.ImportDecl;
-import org.orthodox.universel.ast.Node;
-import org.orthodox.universel.ast.Script;
+import org.orthodox.universel.compiler.CompilationErrorsException;
+import org.orthodox.universel.cst.ImportDecl;
+import org.orthodox.universel.cst.Node;
+import org.orthodox.universel.cst.ParseTree;
+import org.orthodox.universel.cst.Script;
 import org.orthodox.universel.compiler.CompiledUnit;
 import org.orthodox.universel.compiler.UniversalCompiler;
 
@@ -14,7 +16,6 @@ import java.util.Collections;
 import java.util.Map;
 
 import static java.lang.String.format;
-import static org.beanplanet.core.util.CollectionUtil.nullSafe;
 
 /**
  * Helper class for parsing and executing Universal expressions and scripts.
@@ -37,14 +38,22 @@ public class Universal implements Logger {
         Script scriptNode = parse(script);
 
         if (astType == ImportDecl.class && scriptNode.getImportDeclaration() != null) return (T)scriptNode.getImportDeclaration();
-        return nullSafe(scriptNode.getBodyElements()).stream()
-                  .filter(n -> astType.isAssignableFrom(n.getClass()))
-                  .map(n -> (T)n)
-                  .findFirst()
-                  .orElseThrow(() -> new UniversalException(format("Unable to parse expression [%s] to single given AST node of tyoe [%s]: found %d nodes when expecting 1",
-                                                             script,
-                                                             astType,
-                                                             scriptNode.getBodyElements().size())));
+        return new ParseTree(scriptNode).postorderStream()
+                                        .filter(n -> astType.isAssignableFrom(n.getClass()))
+                                        .map(n -> (T)n)
+                                        .findFirst()
+                                        .orElseThrow(() -> new UniversalException(format("Unable to parse expression [%s] to single given AST node of tyoe [%s]: found %d nodes when expecting 1",
+                                                                                         script,
+                                                                                         astType,
+                                                                                         scriptNode.getBodyElements().size())));
+//        return nullSafe(scriptNode.getBodyElements()).stream()
+//                  .filter(n -> astType.isAssignableFrom(n.getClass()))
+//                  .map(n -> (T)n)
+//                  .findFirst()
+//                  .orElseThrow(() -> new UniversalException(format("Unable to parse expression [%s] to single given AST node of tyoe [%s]: found %d nodes when expecting 1",
+//                                                             script,
+//                                                             astType,
+//                                                             scriptNode.getBodyElements().size())));
     }
 
     /**
@@ -98,6 +107,9 @@ public class Universal implements Logger {
     public static <T> T execute(Class<T> resultType, String script, Map<String, Object> binding) {
         CompiledUnit compiledUnit = compile(script);
 
+        if (compiledUnit.getMessages().hasErrors()) {
+            throw new CompilationErrorsException(compiledUnit.getMessages());
+        }
         MyClassLoader classLoader = new MyClassLoader();
 
         LOG.info("Beginning execution of script [{0}] ...", script);

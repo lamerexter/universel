@@ -1,16 +1,24 @@
 package org.orthodox.universel.compiler;
 
+import org.beanplanet.core.lang.TypeUtil;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
-import org.orthodox.universel.ast.*;
-import org.orthodox.universel.ast.collections.ListExpr;
-import org.orthodox.universel.ast.collections.MapEntryExpr;
-import org.orthodox.universel.ast.collections.MapExpr;
-import org.orthodox.universel.ast.collections.SetExpr;
-import org.orthodox.universel.ast.literals.*;
+import org.orthodox.universel.cst.*;
+import org.orthodox.universel.cst.annotation.Annotation;
+import org.orthodox.universel.cst.collections.ListExpr;
+import org.orthodox.universel.cst.collections.MapEntryExpr;
+import org.orthodox.universel.cst.collections.MapExpr;
+import org.orthodox.universel.cst.collections.SetExpr;
+import org.orthodox.universel.cst.conditionals.ElvisExpression;
+import org.orthodox.universel.cst.conditionals.TernaryExpression;
+import org.orthodox.universel.cst.literals.*;
+import org.orthodox.universel.cst.types.TypeReference;
+import org.orthodox.universel.operations.UnaryFunctions;
 
 import javax.lang.model.type.NullType;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
@@ -25,6 +33,21 @@ public class CompilingAstVisitor implements UniversalCodeVisitor {
 
     public CompilingAstVisitor(CompilationContext compilationContext) {
         this.compilationContext = compilationContext;
+    }
+
+    @Override
+    public boolean visitAnnotation(Annotation node) {
+        return false;
+    }
+
+    @Override
+    public boolean visitBetweenExpression(BetweenExpression node) {
+        return false;
+    }
+
+    @Override
+    public boolean visitBinaryExpression(BinaryExpression node) {
+        return false;
     }
 
     @Override
@@ -75,6 +98,21 @@ public class CompilingAstVisitor implements UniversalCodeVisitor {
         }
 
         return true;
+    }
+
+    @Override
+    public boolean visitElvisExpression(ElvisExpression node) {
+        return false;
+    }
+
+    @Override
+    public boolean visitInExpression(InExpression node) {
+        return false;
+    }
+
+    @Override
+    public boolean visitInstanceofExpression(InstanceofExpression node) {
+        return false;
     }
 
     @Override
@@ -142,6 +180,16 @@ public class CompilingAstVisitor implements UniversalCodeVisitor {
         return true;
     }
 
+    @Override
+    public boolean visitModifiers(Modifiers node) {
+        return false;
+    }
+
+    @Override
+    public boolean visitName(QualifiedIdentifier node) {
+        return false;
+    }
+
     private MethodVisitor mv() {
         return compilationContext.getBytecodeHelper().peekMethodVisitor();
     }
@@ -157,6 +205,16 @@ public class CompilingAstVisitor implements UniversalCodeVisitor {
         compilationContext.getVirtualMachine().loadOperandOfType(NullType.class);
         compilationContext.getBytecodeHelper().emitLoadNullOperand();
         return true;
+    }
+
+    @Override
+    public boolean visitNullTestExpression(NullTestExpression node) {
+        return false;
+    }
+
+    @Override
+    public boolean visitRangeExpression(RangeExpression node) {
+        return false;
     }
 
     @Override
@@ -226,6 +284,33 @@ public class CompilingAstVisitor implements UniversalCodeVisitor {
     public boolean visitStringLiteral(StringLiteralExpr node) {
         compilationContext.getVirtualMachine().loadOperandOfType(String.class);
         compilationContext.getBytecodeHelper().emitLoadStringOperand(unescapeUniversalCharacterEscapeSequences(node.getUndelimitedTokenImage()));
+        return true;
+    }
+
+    @Override
+    public boolean visitTernaryExpression(TernaryExpression node) {
+        return false;
+    }
+
+    @Override
+    public boolean visitTypeReference(TypeReference node) {
+        return false;
+    }
+
+    @Override
+    public boolean visitUnaryExpression(UnaryExpression node) {
+        node.getExpression().accept(this);
+
+        Class<?> unaryExprType = node.getTypeDescriptor();
+        Optional<Method> unaryMinusFunction = TypeUtil.findMethod(Modifier.PUBLIC + Modifier.STATIC, "unaryMinus", UnaryFunctions.class, unaryExprType, unaryExprType);
+
+        if ( !unaryMinusFunction.isPresent() ) {
+            compilationContext.getMessages().addError("uel.compiler.math.unary-minus.not-found", "Unable to find unary minus function for the given type: {0}", unaryExprType);
+            return true;
+        }
+
+        compilationContext.getBytecodeHelper().emitInvokeStaticMethod(unaryMinusFunction.get());
+        compilationContext.getVirtualMachine().loadOperandOfType(unaryMinusFunction.get().getReturnType());
         return true;
     }
 }

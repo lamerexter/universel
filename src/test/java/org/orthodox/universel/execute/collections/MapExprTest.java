@@ -30,9 +30,6 @@ package org.orthodox.universel.execute.collections;
 
 import org.junit.jupiter.api.Test;
 import org.orthodox.universel.Universal;
-import org.orthodox.universel.ast.collections.MapEntryExpr;
-import org.orthodox.universel.ast.collections.MapExpr;
-import org.orthodox.universel.ast.literals.*;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -44,7 +41,6 @@ import java.util.Map;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.Matchers.instanceOf;
 
 public class MapExprTest {
     @Test

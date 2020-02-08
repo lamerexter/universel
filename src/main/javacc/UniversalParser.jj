@@ -46,9 +46,15 @@ package org.orthodox.universal.parser;
 
 import java.util.List;
 import java.util.ArrayList;
-import org.orthodox.universel.ast.*;
-import org.orthodox.universel.ast.collections.*;
-import org.orthodox.universel.ast.literals.*;import java.io.StringReader;
+import java.util.Deque;
+import java.util.ArrayDeque;
+import org.orthodox.universel.cst.*;
+import org.orthodox.universel.cst.collections.*;
+import org.orthodox.universel.cst.conditionals.*;
+import org.orthodox.universel.cst.types.*;
+import org.orthodox.universel.cst.literals.*;
+import org.orthodox.universel.cst.TokenImage.TokenImageBuilder;
+import java.io.StringReader;
 
 public class UniversalParser
 {
@@ -80,6 +86,8 @@ PARSER_END(UniversalParser)
 //-------------------------------------------------------------------------------------------------
 TOKEN_MGR_DECLS:
 {
+    Deque<Integer> stateStack = new ArrayDeque();
+
     private void CommonTokenAction(Token token) {
     }
 }
@@ -90,13 +98,62 @@ SKIP :
    " " | "\t" | "\r" | "\n"
 }
 
-/**
-* Reserved words and literals.
-*/
+// Reserved words, literals and operators - case sensitive
 TOKEN :
 {
-  < NULL: "null" >
-| < RBRACE: "}" >
+  < AND: "and" > |
+  < ASSERT: "assert" > |
+  < BETWEEN: "between" > |
+  < BOOLEAN: "boolean" > |
+  < BYTE: "byte" > |
+  < CASE: "case" > |
+  < CATCH: "catch" > |
+  < CHAR: "char" > |
+  < CLASS: "class" > |
+  < CONTAINS: "contains" > |
+  < DO: "do" > |
+  < DOUBLE: "double" > |
+  < ELSE: "else" > |
+  < ELSE_IF: "else if" > |
+  < ENDCASE: "endcase" > |
+  < ENUM: "enum" > |
+  < EQ: "==" > |
+  < EQUAL: ("equals"|"equal") > |
+  < EXTENDS: "extends" > |
+  < FINALLY: "finally" > |
+  < FOR: "for" >  |
+  < FLOAT: "float" >  |
+  < FUNCTION: "function" >  |
+  < GT: ">" >  |
+  < IF: "if" > |
+  < IMPLEMENTS: "implements" > |
+  < IMPORT: "import" > |
+  < IN: "in" > |
+  < INSTANCEOF: "instanceof" > |
+  < INT: "int" > |
+  < INTERFACE: "interface" > |
+  < IS: "is" > |
+  < LONG: "long" > |
+  < NE: "!=" > |
+  < NEW: "new" > |
+  < NOT: "not" > |
+  < NOT_EQUAL: "not" ([" "])* "equal" ("s")? > |
+  < NOT_BETWEEN: "not" ([" "])* "between" > |
+  < NOT_IN: "not" ([" "])* "in" > |
+  < NULL: "null" > |
+  < OR: "or" > |
+  < PACKAGE: "package" > |
+  < RBRACE: "}" > { if ( !stateStack.isEmpty() ) { SwitchTo(stateStack.pop()); } } |
+  < RETURN: "return" > |
+  < SHORT: "short" > |
+  < THEN: "then" > |
+  < THROW: "throw" > |
+  < THROWS: "Gthrows" > |
+  < TRY: "try" > |
+  < VAR: "var" > |
+  < VOID: "void" > |
+  < WHEN: "when" > |
+  < WHILE: "while" >
 }
 
 /**
@@ -128,7 +185,6 @@ TOKEN :
     | "0" ["x","X"] (<HEX_DIGITS>)? "." <HEX_DIGITS> <HEX_EXPONENT> (["f","F","d","D"])?
   >
 | < #HEX_EXPONENT: ["p","P"] (["+","-"])? <DECIMAL_LITERAL> >
-| < IMPORT: "import" >
 }
 
 /**
@@ -335,7 +391,7 @@ TOKEN :
 
 <WITHIN_DQ_INTERP_STRING> TOKEN :
 {
-  <DQ_INTERP_STRING_COMPLEX_EXPR_START: "${"> : DEFAULT
+  <DQ_INTERP_STRING_COMPLEX_EXPR_START: "${" > { stateStack.push(WITHIN_DQ_INTERP_STRING); } : DEFAULT
   |
   <DQ_INTERP_STRING_CHAR:
     (
@@ -362,7 +418,7 @@ TOKEN :
 
 <WITHIN_TQ_INTERP_STRING> TOKEN :
 {
-  <TQ_INTERP_STRING_COMPLEX_EXPR_START: "${"> : DEFAULT
+  <TQ_INTERP_STRING_COMPLEX_EXPR_START: "${"> { stateStack.push(WITHIN_TQ_INTERP_STRING); } : DEFAULT
   |
   <TQ_INTERP_STRING_CHAR:
     (
@@ -397,11 +453,483 @@ public Script script():
     ImportDecl importDecl = null;
 }
 {
-   [ importDecl=ImportDeclaration() ]
+    [ importDecl=ImportDeclaration() ]
 
-   ( expr=Expression() { bodyElements=add(bodyElements, expr); } )*
+    ( expr=PrimaryExpression() { bodyElements=add(bodyElements, expr); } )*
 
-   { return new Script(importDecl, bodyElements); }
+    { return new Script(importDecl, bodyElements); }
+}
+
+Expression PrimaryExpression():
+{
+    Expression expr;
+}
+{
+    expr=RValueExpression()
+
+    { return expr; }
+}
+
+Expression RValueExpression():
+{
+    Expression expr;
+}
+{
+    expr=ConditionalExpression()
+
+    { return expr; }
+}
+
+Expression ConditionalExpression() :
+{
+	Expression expr;
+	Expression lhsExpr;
+	Expression rhsExpr = null;
+}
+{
+   expr=LogicalOrExpression()
+
+   [
+      (
+         "?" lhsExpr=ConditionalExpression() ":" rhsExpr=ConditionalExpression() { expr=new TernaryExpression(expr, lhsExpr, rhsExpr); }
+      )
+      |
+      (
+         "?:" lhsExpr=ConditionalExpression() { expr=new ElvisExpression(expr, lhsExpr); }
+      )
+   ]
+
+   { return expr; }
+}
+
+Expression LogicalOrExpression() :
+{
+	Expression expr;
+	Expression rhsExpr;
+}
+{
+   expr=LogicalAndExpression() ( ("||" | <OR>) rhsExpr=LogicalAndExpression() { expr=new BinaryExpression(Operator.LOGICAL_OR, expr, rhsExpr); } )*
+
+   { return expr; }
+}
+
+Expression LogicalAndExpression() :
+{
+	Expression expr;
+	Expression rhsExpr;
+}
+{
+   expr=InclusiveOrExpressionWithNullTest() ( ("&&" | <AND>) rhsExpr=InclusiveOrExpressionWithNullTest() { expr=new BinaryExpression(Operator.LOGICAL_AND, expr, rhsExpr); } )*
+
+   { return expr; }
+}
+
+Expression InclusiveOrExpressionWithNullTest() :
+{
+	Expression expr;
+}
+{
+	expr=InclusiveOrExpression()
+	[
+	   <IS> (<NULL> { expr = new NullTestExpression(expr, false); }
+	         |
+	         <NOT> <NULL> { expr = new NullTestExpression(expr, true); }
+	        )
+	]
+
+   { return expr; }
+}
+
+Expression InclusiveOrExpression() :
+{
+	Expression expr;
+	Expression rhsExpr;
+}
+{
+   expr=ExclusiveOrExpression()
+   (
+      "|"
+      rhsExpr=ExclusiveOrExpression() {  expr=new BinaryExpression(Operator.PIPE, expr, rhsExpr); }
+   )*
+
+   { return expr; }
+}
+
+Expression ExclusiveOrExpression() :
+{
+	Expression expr;
+	Expression rhsExpr;
+}
+{
+   expr=AndExpression()
+   (
+      "^"
+      rhsExpr=AndExpression() {  expr=new BinaryExpression(Operator.CARAT, expr, rhsExpr); }
+   )*
+
+   { return expr; }
+}
+
+Expression AndExpression() :
+{
+	Expression expr;
+	Expression rhsExpr;
+}
+{
+   expr=RelationalExpression()
+   (
+      "&"
+      rhsExpr=RelationalExpression() {  expr=new BinaryExpression(Operator.AMPERSAND, expr, rhsExpr); }
+   )*
+
+   { return expr; }
+}
+
+Expression RelationalExpression() :
+{
+	Expression expr;
+	Expression lhsExpr;
+	Expression rhsExpr = null;
+	TypeReference type = null;
+	List<Node> exprList = null;
+}
+{
+   expr=ShiftExpression()
+   (
+      (
+      (<EQ> | <EQUAL>) rhsExpr=ShiftExpression() {  expr=new BinaryExpression(Operator.EQUAL, expr, rhsExpr); }
+      |
+      "<"  rhsExpr=ShiftExpression() { expr=new BinaryExpression(Operator.LESS_THAN, expr, rhsExpr); }
+      |
+      ">"  rhsExpr=ShiftExpression() { expr=new BinaryExpression(Operator.GREATER_THAN, expr, rhsExpr); }
+      |
+      "<=" rhsExpr=ShiftExpression() { expr=new BinaryExpression(Operator.LESS_THAN_EQUAL, expr, rhsExpr); }
+      |
+      ">=" rhsExpr=ShiftExpression() { expr=new BinaryExpression(Operator.GREATER_THAN_EQUAL, expr, rhsExpr); }
+      |
+      <IN> rhsExpr=ShiftExpression() { expr=new InExpression(expr, rhsExpr, false); }
+      |
+      <INSTANCEOF> LOOKAHEAD(2) type=Type() { expr=new InstanceofExpression(Operator.INSTANCE_OF, expr, type); }
+      |
+      <BETWEEN> lhsExpr=ShiftExpression() <AND> rhsExpr=ShiftExpression() { expr=new BetweenExpression(expr, lhsExpr, rhsExpr, false); }
+      |
+      (<NE> | <NOT_EQUAL>) rhsExpr=ShiftExpression() {  expr=new BinaryExpression(Operator.EXCLAMATION_EQUAL, expr, rhsExpr); }
+      |
+      <NOT_BETWEEN> lhsExpr=ShiftExpression() <AND> rhsExpr=ShiftExpression() { expr=new BetweenExpression(expr, lhsExpr, rhsExpr, true); }
+      |
+      <NOT_IN> lhsExpr=ShiftExpression() <AND> rhsExpr=ShiftExpression() { expr=new BetweenExpression(expr, lhsExpr, rhsExpr, true); }
+      |
+      <CONTAINS> rhsExpr=ShiftExpression() { expr=new BinaryExpression(Operator.CONTAINS, expr, rhsExpr); }
+      )
+   )*
+
+   { return expr; }
+}
+
+TypeReference Type():
+{
+    TypeReference type;
+}
+{
+    (
+      "boolean" { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Boolean); }
+    |
+      "char" { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Char); }
+    |
+      "byte" { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Byte); }
+    |
+      "short" { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Short); }
+    |
+      "int" { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Int); }
+    |
+      "long" { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Long); }
+    |
+      "float" { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Float); }
+    |
+      "double" { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Double); }
+    )
+
+    { return type; }
+}
+
+ClassOrInterfaceType ClassOrInterfaceType() :
+{
+	String typeName;
+	TokenImageBuilder tib;
+	List<TypeReference> typeArgs = null;
+	ClassOrInterfaceType cit = null;
+}
+{
+  <IDENTIFIER> { tib=TokenImage.builder();
+                 tib.startLine(token.beginLine).startColumn(token.beginColumn);
+                 typeName = token.image;
+                 cit = new ClassOrInterfaceType(tib.build(), null, typeName, null);
+               }
+  [ LOOKAHEAD(2) typeArgs = TypeArguments() ] { tib.range(typeArgs); cit = new ClassOrInterfaceType(tib.build(), null, typeName, typeArgs); }
+  (
+      LOOKAHEAD(2) "." <IDENTIFIER> { tib.endLine(token.beginLine).endColumn(token.beginColumn); typeName = token.image; }
+      [ LOOKAHEAD(2) typeArgs = TypeArguments() ] { tib.range(typeArgs); cit = new ClassOrInterfaceType(tib.build(), cit, typeName, typeArgs); }
+  )*
+  { return cit; }
+}
+
+List<TypeReference> TypeArguments():
+{
+    List<TypeReference> types = null;
+    TypeReference type;
+}
+{
+   "<" type = TypeArgument() { types = add(types, type); } ( "," type = TypeArgument() { types = add(types, type); } )* ">"
+   { return types; }
+}
+
+TypeReference TypeArgument():
+{
+    TypeReference type;
+}
+{
+ (
+   type = Type()
+ |
+   type = Wildcard()
+ )
+ { return type; }
+}
+
+WildcardType Wildcard():
+{
+    TypeReference ext = null;
+    TypeReference sup = null;
+    int line;
+    int column;
+}
+{
+   "?" {line=token.beginLine; column=token.beginColumn;}
+   [
+        "extends" ext = Type()
+    |
+        "super" sup = Type()
+   ]
+   { return new WildcardType(tokenImage(line, column, token.endLine, token.endColumn), ext, sup); }
+}
+
+List<Expression> Arguments() :
+{
+	List<Expression> argumentsList = null;
+}
+{
+   "(" [ argumentsList=ArgumentsList() ] ")"
+
+   { return argumentsList; }
+}
+
+/* We use productions to match >>>, >> and > so that we can keep the
+ * type declaration syntax with generics clean
+ */
+
+void RUNSIGNEDSHIFT():
+{}
+{
+  ( LOOKAHEAD({ getToken(1).kind == GT && getToken(2).kind == GT && getToken(3).kind == GT } )
+   ">" ">" ">"
+  )
+}
+
+void RSIGNEDSHIFT():
+{}
+{
+  ( LOOKAHEAD({ getToken(1).kind == GT && getToken(2).kind == GT } )
+  ">" ">"
+  )
+}
+
+Expression ShiftExpression() :
+{
+	Expression expr;
+	Expression rhsExpr;
+	Operator rshiftOp;
+}
+{
+   expr=AdditiveExpression()
+   (
+      "<<" rhsExpr=AdditiveExpression() {  expr=new BinaryExpression(Operator.SHIFT_LEFT, expr, rhsExpr); }
+      |
+      RUNSIGNEDSHIFT() rhsExpr=AdditiveExpression() {  expr=new BinaryExpression(Operator.TREBLE_SHIFT_RIGHT, expr, rhsExpr); }
+      |
+      RSIGNEDSHIFT() rhsExpr=AdditiveExpression() {  expr=new BinaryExpression(Operator.SHIFT_RIGHT, expr, rhsExpr); }
+   )*
+
+   { return expr; }
+}
+
+Expression AdditiveExpression() :
+{
+	Expression expr;
+	Expression rhsExpr;
+}
+{
+   expr=MultiplicativeOrRangeExpression()
+   (
+     LOOKAHEAD(2)(
+      "+" rhsExpr=MultiplicativeOrRangeExpression() {  expr=new BinaryExpression(Operator.PLUS, expr, rhsExpr); }
+      |
+      "-" rhsExpr=MultiplicativeOrRangeExpression() {  expr=new BinaryExpression(Operator.MINUS, expr, rhsExpr); }
+     )
+   )*
+
+   { return expr; }
+}
+
+Expression MultiplicativeOrRangeExpression() :
+{
+    Expression expr;
+}
+{
+   (
+      LOOKAHEAD( RangeExpression() )
+      expr=RangeExpression()
+      |
+      expr=MultiplicativeExpression()
+   )
+
+   { return expr; }
+}
+
+RangeExpression RangeExpression() :
+{
+    Expression lhsExpr = null;
+    Expression rhsExpr = null;
+    Operator operator = null;
+}
+{
+  (
+    lhsExpr=UnaryExpression()
+
+    (
+       ".." { operator = Operator.RANGE_INCLUSIVE; }
+       |
+       "<..>" { operator = Operator.RANGE_LEFT_LT_RIGHT_GT; }
+       |
+       "<..>=" { operator = Operator.RANGE_LEFT_LT_RIGHT_GTE; }
+       |
+       "<.." { operator = Operator.RANGE_LEFT_LT_RIGHT_INCLUSIVE; }
+       |
+       "<..<" { operator = Operator.RANGE_LEFT_LT_RIGHT_LT; }
+       |
+       "<..<=" { operator = Operator.RANGE_LEFT_LT_RIGHT_LTE; }
+       |
+       "<=..>" { operator = Operator.RANGE_LEFT_LTE_RIGHT_GT; }
+       |
+       "<=..>=" { operator = Operator.RANGE_LEFT_LTE_RIGHT_GTE; }
+       |
+       "<=.." { operator = Operator.RANGE_LEFT_LTE_RIGHT_INCLUSIVE; }
+       |
+       "<=..<" { operator = Operator.RANGE_LEFT_LTE_RIGHT_LT; }
+       |
+       "<=..<=" { operator = Operator.RANGE_LEFT_LTE_RIGHT_LTE; }
+       |
+       ">..>" { operator = Operator.RANGE_LEFT_GT_RIGHT_GT; }
+       |
+       ">..>=" { operator = Operator.RANGE_LEFT_GT_RIGHT_GTE; }
+       |
+       ">.." { operator = Operator.RANGE_LEFT_GT_RIGHT_INCLUSIVE; }
+       |
+       ">..<" { operator = Operator.RANGE_LEFT_GT_RIGHT_LT; }
+       |
+       ">..<=" { operator = Operator.RANGE_LEFT_GT_RIGHT_LTE; }
+       |
+       ">=..>" { operator = Operator.RANGE_LEFT_GTE_RIGHT_GT; }
+       |
+       ">=..>=" { operator = Operator.RANGE_LEFT_GTE_RIGHT_GTE; }
+       |
+       ">=.." { operator = Operator.RANGE_LEFT_GTE_RIGHT_INCLUSIVE; }
+       |
+       ">=..<" { operator = Operator.RANGE_LEFT_GTE_RIGHT_LT; }
+       |
+       ">=..<=" { operator = Operator.RANGE_LEFT_GTE_RIGHT_LTE; }
+       |
+       "..>" { operator = Operator.RANGE_LEFT_INCLUSIVE_RIGHT_GT; }
+       |
+       "..>=" { operator = Operator.RANGE_LEFT_INCLUSIVE_RIGHT_GTE; }
+       |
+       "..<" { operator = Operator.RANGE_LEFT_INCLUSIVE_RIGHT_LT; }
+       |
+       "..<=" { operator = Operator.RANGE_LEFT_INCLUSIVE_RIGHT_LTE; }
+    )
+
+    rhsExpr=UnaryExpression()
+  )
+
+  { return new RangeExpression(operator, lhsExpr, rhsExpr); }
+}
+
+Expression MultiplicativeExpression() :
+{
+	Expression expr;
+	Expression rhsExpr;
+}
+{
+   expr=UnaryExpression()
+   (
+     LOOKAHEAD(2)(
+      "*" rhsExpr=UnaryExpression() {  expr=new BinaryExpression(Operator.STAR, expr, rhsExpr); }
+      |
+      "/" rhsExpr=UnaryExpression() {  expr=new BinaryExpression(Operator.FORWARD_SLASH, expr, rhsExpr); }
+      |
+      "%" rhsExpr=UnaryExpression() {  expr=new BinaryExpression(Operator.PERCENT, expr, rhsExpr); }
+     )
+   )*
+
+   { return expr; }
+}
+
+Expression UnaryExpression() :
+{
+    int startLine = -1, startColumn = -1;
+    String operatorSymbol;
+	Expression expr;
+}
+{
+   (
+        (
+            ("+"|"-"|"~"|"!") { startLine=token.beginLine; startColumn=token.beginColumn; operatorSymbol=token.image; }
+
+            expr=UnaryExpression() {  expr=new UnaryExpression(tokenImage(startLine,
+                                                                          startColumn,
+                                                                          expr.getTokenImage().getEndLine(),
+                                                                          expr.getTokenImage().getEndColumn()),
+                                                               Operator.forSymbol(operatorSymbol), expr); }
+        )
+    |
+    "++" expr=PostfixExpression() {  expr=new UnaryExpression(tokenImage(), Operator.PRE_INCREMENT, expr); }
+    |
+    "--" expr=PostfixExpression() {  expr=new UnaryExpression(tokenImage(), Operator.PRE_DECREMENT, expr); }
+    |
+    <NOT> expr=PostfixExpression() {  expr=new UnaryExpression(tokenImage(), Operator.NOT, expr); }
+    |
+    expr=PostfixExpression()
+   )
+
+   { return expr; }
+}
+
+Expression PostfixExpression() :
+{
+	Expression expr;
+	Operator op;
+}
+{
+   expr=Expression()
+   [
+      LOOKAHEAD(2)
+      (
+        "++" {  op = Operator.POST_INCREMENT; }
+        |
+        "--" {  op = Operator.POST_DECREMENT; }
+      ) { expr=new UnaryExpression(tokenImage(), op, expr); }
+   ]
+
+   { return expr; }
 }
 
 public Expression Expression():
@@ -474,7 +1002,7 @@ Expression InterpolatedStringLiteral() :
 
                 (part=Expression() { parts=add(parts, part); s.append(part.getTokenImage().getImage()); })?
 
-                <RBRACE> { token_source.SwitchTo(WITHIN_DQ_INTERP_STRING); }
+                <RBRACE> { System.out.println("HERE ----------------------"); token_source.SwitchTo(WITHIN_DQ_INTERP_STRING); }
             )
         )*
         <DQ_INTERP_STRING_END>
@@ -717,3 +1245,4 @@ ImportStmt ImportStatement() :
 
   { return new ImportStmt(new TokenImage(startLine, startColumn, token.endLine, token.endColumn), nameElements, isImportOnDemand); }
 }
+

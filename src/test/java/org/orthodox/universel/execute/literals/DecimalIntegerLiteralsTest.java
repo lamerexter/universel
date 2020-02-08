@@ -2,7 +2,6 @@ package org.orthodox.universel.execute.literals;
 
 import org.junit.jupiter.api.Test;
 import org.orthodox.universel.Universal;
-import org.orthodox.universel.ast.UniversalCodeVisitor;
 
 import static java.lang.Integer.MAX_VALUE;
 import static org.hamcrest.CoreMatchers.equalTo;

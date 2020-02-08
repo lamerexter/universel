@@ -3,13 +3,14 @@ package org.orthodox.universel.parse.literals;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.orthodox.universal.parser.TokenMgrException;
-import org.orthodox.universal.parser.UniversalParser;
-import org.orthodox.universel.ast.Expression;
-import org.orthodox.universel.ast.literals.HexadecimalIntegerLiteralExpr;
+import org.orthodox.universel.Universal;
+import org.orthodox.universel.cst.Operator;
+import org.orthodox.universel.cst.UnaryExpression;
+import org.orthodox.universel.cst.literals.HexadecimalIntegerLiteralExpr;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
 
 public class HexadecimalIntegerLiteralParseTest {
     @Test
@@ -24,18 +25,27 @@ public class HexadecimalIntegerLiteralParseTest {
         assertThat(expr.getTokenImage().getImage(), equalTo(input.trim()));
     }
 
-    private HexadecimalIntegerLiteralExpr parse(String input) throws Exception {
-        // Given
-        UniversalParser parser = new UniversalParser(input);
-
+    @Test
+    public void negativeParsePosition() throws Exception{
         // When
-        Expression literalExpr = parser.Literal();
-
-        // Then
-        assertThat(literalExpr, instanceOf(HexadecimalIntegerLiteralExpr.class));
-        return (HexadecimalIntegerLiteralExpr)literalExpr;
+        String input = "\n  -0xffee12";
+        UnaryExpression expr = parseUnaryMinus(input);
+        assertThat(expr.getTokenImage().getStartLine(), equalTo(2));
+        assertThat(expr.getTokenImage().getStartColumn(), equalTo(3));
+        assertThat(expr.getTokenImage().getEndLine(), equalTo(2));
+        assertThat(expr.getTokenImage().getEndColumn(), equalTo(11));
+        assertThat(input, endsWith(expr.getExpression().getTokenImage().getImage()));
     }
 
+    private HexadecimalIntegerLiteralExpr parse(String input) {
+        return Universal.parse(HexadecimalIntegerLiteralExpr.class, input);
+    }
+
+    private UnaryExpression parseUnaryMinus(String input) {
+        UnaryExpression unaryExpression = Universal.parse(UnaryExpression.class, input);
+        assertThat(unaryExpression.getOperator(), equalTo(Operator.MINUS));
+        return unaryExpression;
+    }
 
     @Test
     public void positiveIntegerLiterals() throws Exception{
@@ -47,7 +57,7 @@ public class HexadecimalIntegerLiteralParseTest {
     }
 
     @Test
-    public void positiveLongLiterals() throws Exception{
+    public void positiveLongLiterals() {
         assertThat(parse("0x0L").getTokenImage().getImage(), equalTo("0x0L"));
         assertThat(parse("0X1l").getTokenImage().getImage(), equalTo("0X1l"));
         assertThat(parse("0xffeeddL").getTokenImage().getImage(), equalTo("0xffeeddL"));
@@ -56,17 +66,21 @@ public class HexadecimalIntegerLiteralParseTest {
     }
 
     @Test()
-    public void negativeIntegerLiterals() throws Exception {
-        Assertions.assertThrows(TokenMgrException.class, () -> {
-            parse("-0xff");
-        }, "Unary minus is handled by the parser");
+    public void negativeIntegerLiterals() {
+        assertThat(parseUnaryMinus("-0x0").getExpression().getTokenImage().getImage(), equalTo("0x0"));
+        assertThat(parseUnaryMinus("-0X1").getExpression().getTokenImage().getImage(), equalTo("0X1"));
+        assertThat(parseUnaryMinus("-0xffeedd").getExpression().getTokenImage().getImage(), equalTo("0xffeedd"));
+        assertThat(parseUnaryMinus("-0xff__ee__dd").getExpression().getTokenImage().getImage(), equalTo("0xff__ee__dd"));
+        assertThat(parseUnaryMinus("-0xffffffff").getExpression().getTokenImage().getImage(), equalTo("0xffffffff"));
     }
 
 
     @Test()
-    public void negativeLongLiterals() throws Exception {
-        Assertions.assertThrows(TokenMgrException.class, () -> {
-            parse("-0xffL");
-        }, "Unary minus is handled by the parser");
+    public void negativeLongLiterals() {
+        assertThat(parseUnaryMinus("-0x0L").getExpression().getTokenImage().getImage(), equalTo("0x0L"));
+        assertThat(parseUnaryMinus("-0X1l").getExpression().getTokenImage().getImage(), equalTo("0X1l"));
+        assertThat(parseUnaryMinus("-0xffeeddL").getExpression().getTokenImage().getImage(), equalTo("0xffeeddL"));
+        assertThat(parseUnaryMinus("-0xff__ee__ddL").getExpression().getTokenImage().getImage(), equalTo("0xff__ee__ddL"));
+        assertThat(parseUnaryMinus("-0xffffffffL").getExpression().getTokenImage().getImage(), equalTo("0xffffffffL"));
     }
 }
