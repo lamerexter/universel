@@ -5,9 +5,7 @@ import org.orthodox.universel.cst.TokenImage;
 
 import java.math.BigDecimal;
 
-import static org.orthodox.universel.cst.literals.NumericLiteral.NumericPrecision.ARBITRARY;
-import static org.orthodox.universel.cst.literals.NumericLiteral.NumericPrecision.LONG;
-import static org.orthodox.universel.cst.literals.NumericLiteral.NumericPrecision.STANDARD;
+import static org.orthodox.universel.cst.literals.NumericLiteral.NumericPrecision.*;
 
 /**
  * A decimal floating point literal on the Abstract Syntax Tree.
@@ -39,12 +37,10 @@ public class HexadecimalFloatingPointLiteralExpr extends Expression {
 
     public Class<? extends Number> getLiteralValueClass() {
         switch (getPrecision()) {
-            case STANDARD: return Float.class;
-            case LONG: return Double.class;
+            case STANDARD: return float.class;
             case ARBITRARY: return BigDecimal.class;
+            default: return double.class;
         }
-
-        return Double.class;
     }
 
     public Class<?> getTypeDescriptor() {

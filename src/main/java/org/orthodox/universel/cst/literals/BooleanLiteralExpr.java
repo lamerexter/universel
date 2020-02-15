@@ -7,7 +7,7 @@ import org.orthodox.universel.cst.UniversalCodeVisitor;
 /**
  * A boolean literal (<i>true</i> or <i>false</i>) on the Abstract Syntax Tree.
  */
-public class BooleanLiteralExpr extends Expression implements IntegerLiteral {
+public class BooleanLiteralExpr extends Expression {
     /**
      * Consructs a new boolean literal node from the given parser token image.
      *

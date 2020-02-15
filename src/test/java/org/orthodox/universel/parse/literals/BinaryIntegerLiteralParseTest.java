@@ -1,20 +1,18 @@
 package org.orthodox.universel.parse.literals;
 
 import org.junit.jupiter.api.Test;
-import org.orthodox.universal.parser.UniversalParser;
-import org.orthodox.universel.cst.Expression;
-import org.orthodox.universel.cst.literals.BinaryLiteralExpr;
+import org.orthodox.universel.Universal;
+import org.orthodox.universel.cst.literals.BinaryIntegerLiteralExpr;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
 
-public class BinaryLiteralParseTest {
+public class BinaryIntegerLiteralParseTest {
     @Test
     public void parsePosition() throws Exception{
         // When
         String input = "\n  0b1010";
-        BinaryLiteralExpr expr = parse(input);
+        BinaryIntegerLiteralExpr expr = parse(input);
         assertThat(expr.getTokenImage().getStartLine(), equalTo(2));
         assertThat(expr.getTokenImage().getStartColumn(), equalTo(3));
         assertThat(expr.getTokenImage().getEndLine(), equalTo(2));
@@ -22,16 +20,8 @@ public class BinaryLiteralParseTest {
         assertThat(expr.getTokenImage().getImage(), equalTo(input.trim()));
     }
 
-    private BinaryLiteralExpr parse(String input) throws Exception {
-        // Given
-        UniversalParser parser = new UniversalParser(input);
-
-        // When
-        Expression literalExpr = parser.Literal();
-
-        // Then
-        assertThat(literalExpr, instanceOf(BinaryLiteralExpr.class));
-        return (BinaryLiteralExpr)literalExpr;
+    private BinaryIntegerLiteralExpr parse(String input) throws Exception {
+        return Universal.parse(BinaryIntegerLiteralExpr.class, input);
     }
 
 
@@ -51,6 +41,15 @@ public class BinaryLiteralParseTest {
         assertThat(parse("0b11110000L").getTokenImage().getImage(), equalTo("0b11110000L"));
         assertThat(parse("0b1111__0000L").getTokenImage().getImage(), equalTo("0b1111__0000L"));
         assertThat(parse("0b0111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111L").getTokenImage().getImage(), equalTo("0b0111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111L"));
+    }
+
+    @Test
+    public void positiveBigIntegerLiterals() throws Exception{
+        assertThat(parse("0b0I").getTokenImage().getImage(), equalTo("0b0I"));
+        assertThat(parse("0B1l").getTokenImage().getImage(), equalTo("0B1l"));
+        assertThat(parse("0b11110000I").getTokenImage().getImage(), equalTo("0b11110000I"));
+        assertThat(parse("0b1111__0000I").getTokenImage().getImage(), equalTo("0b1111__0000I"));
+        assertThat(parse("0b0111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111I").getTokenImage().getImage(), equalTo("0b0111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111I"));
     }
 
     @Test()

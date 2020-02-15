@@ -28,9 +28,9 @@
 
 package org.orthodox.universel.cst;
 
-import java.util.List;
-
 import org.orthodox.universel.cst.types.ClassOrInterfaceType;
+
+import java.util.List;
 
 /**
  * A parameterised type specification, as defined by the Java 5 SE language level specification

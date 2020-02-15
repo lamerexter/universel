@@ -10,7 +10,7 @@ import java.math.BigInteger;
 /**
  * A decimal integer literal on the Abstract Syntax Tree.
  */
-public class DecimalIntegerLiteralExpr extends Expression implements IntegerLiteral {
+public class DecimalIntegerLiteralExpr extends IntegerLiteral {
     /**
      * Consructs a new decimal integer literal node from the given parser token image.
      *
@@ -18,15 +18,6 @@ public class DecimalIntegerLiteralExpr extends Expression implements IntegerLite
      */
     public DecimalIntegerLiteralExpr(TokenImage tokenImage) {
         super(tokenImage);
-    }
-
-    public Class<?> getLiteralValueClass() {
-        if (getTokenImage() == null) return int.class;
-
-        String image = getTokenImage().getImage();
-        if (image.endsWith("l") || image.endsWith("L")) return long.class;
-        else if (image.endsWith("I")) return BigInteger.class;
-        else return int.class;
     }
 
     public int asIntValue() {
@@ -37,21 +28,7 @@ public class DecimalIntegerLiteralExpr extends Expression implements IntegerLite
         return Long.parseLong(StringUtil.rTrim(getTokenImage().getImage().trim(), "l", false));
     }
 
-    public String asBigIntegerString() {
-        return StringUtil.rTrim(getTokenImage().getImage().trim(), "I", false);
-    }
-
-    /**
-     * Called to accept a visitor.
-     *
-     * @param visitor the visitor visiting the node.
-     * @return true if visitation is to continue after this visit, false if visitation is requested to stop after this visit.
-     */
-    public boolean accept(UniversalCodeVisitor visitor) {
-        return visitor.visitDecimalIntegerLiteral(this);
-    }
-
-    public Class<?> getTypeDescriptor() {
-        return getLiteralValueClass();
+    public BigInteger asBigInteger() {
+        return new BigInteger(StringUtil.rTrim(getTokenImage().getImage().trim(), "I", false));
     }
 }

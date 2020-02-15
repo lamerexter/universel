@@ -56,6 +56,11 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
     }
 
     @Override
+    public boolean visitNumericLiteralExpression(NumericLiteral node) {
+        return false;
+    }
+
+    @Override
     public boolean visitElvisExpression(ElvisExpression node) {
         return false;
     }
@@ -77,11 +82,6 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
 
     @Override
     public boolean visitDecimalFloatingPointLiteral(DecimalFloatingPointLiteralExpr node) {
-        return true;
-    }
-
-    @Override
-    public boolean visitDecimalIntegerLiteral(DecimalIntegerLiteralExpr node) {
         return true;
     }
 

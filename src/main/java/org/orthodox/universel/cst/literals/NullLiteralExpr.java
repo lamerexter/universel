@@ -9,7 +9,7 @@ import javax.lang.model.type.NullType;
 /**
  * A null literal (<i>null</i>) on the Abstract Syntax Tree.
  */
-public class NullLiteralExpr extends Expression implements IntegerLiteral {
+public class NullLiteralExpr extends Expression {
     /**
      * Consructs a new null literal node from the given parser token image.
      *

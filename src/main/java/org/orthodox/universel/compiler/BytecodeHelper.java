@@ -47,79 +47,28 @@ public class BytecodeHelper {
     }
 
     /**
-     * Emits a constant integer value onto the evaluation stack.
+     * Emits a constant numeric value onto the evaluation stack.
      *
-     * @param value the integer constant value to emit.
+     * @param value the numeric constant value to emit.
      */
-    public void emitLoadIntegerOperand(int value) {
-        if (value >=0 && value <= 5)
-            peekMethodVisitor().visitInsn(ICONST_0+value);
-        else
+    public void emitLoadNumericOperand(Number value) {
+        if ( value.getClass() == BigInteger.class ) {
+            String className = Type.getType(BigInteger.class).getInternalName();
+            peekMethodVisitor().visitTypeInsn(NEW, className);
+            peekMethodVisitor().visitInsn(DUP);
+            peekMethodVisitor().visitLdcInsn(value.toString());
+            peekMethodVisitor().visitMethodInsn(INVOKESPECIAL, className, CTOR_METHOD_NAME, Type.getMethodDescriptor(Type.VOID_TYPE,
+                                                                                                                     Type.getType(String.class)), false);
+        } else if ( value.getClass() == BigDecimal.class ) {
+            String className = Type.getType(BigDecimal.class).getInternalName();
+            peekMethodVisitor().visitTypeInsn(NEW, className);
+            peekMethodVisitor().visitInsn(DUP);
+            peekMethodVisitor().visitLdcInsn(value.toString());
+            peekMethodVisitor().visitMethodInsn(INVOKESPECIAL, className, CTOR_METHOD_NAME, Type.getMethodDescriptor(Type.VOID_TYPE,
+                                                                                                                     Type.getType(String.class)), false);
+        } else {
             peekMethodVisitor().visitLdcInsn(value);
-    }
-
-    /**
-     * Emits a constant long value onto the evaluation stack.
-     *
-     * @param value the long constant value to emit.
-     */
-    public void emitLoadIntegerOperand(long value) {
-        if (value >=0L && value <= 1L)
-            peekMethodVisitor().visitInsn(LCONST_0+(int)value);
-        else
-            peekMethodVisitor().visitLdcInsn(value);
-    }
-
-    /**
-     * Emits a constant float value onto the evaluation stack.
-     *
-     * @param value the float constant value to emit.
-     */
-    public void emitLoadFloatOperand(float value) {
-        if (value >=0f && value <= 2f)
-            peekMethodVisitor().visitInsn(FCONST_0+(int)value);
-        else
-            peekMethodVisitor().visitLdcInsn(value);
-    }
-
-    /**
-     * Emits a constant double value onto the evaluation stack.
-     *
-     * @param value the double constant value to emit.
-     */
-    public void emitLoadDoubleOperand(double value) {
-        if (value >=0d && value <= 1d)
-            peekMethodVisitor().visitInsn(DCONST_0+(int)value);
-        else
-            peekMethodVisitor().visitLdcInsn(value);
-    }
-
-    /**
-     * Emits a constant {@link java.math.BigInteger} value onto the evaluation stack.
-     *
-     * @param value the literal string of the {@link java.math.BigInteger} constant value to emit.
-     */
-    public void emitLoadBigIntegerOperand(String value) {
-        String className = Type.getType(BigInteger.class).getInternalName();
-        peekMethodVisitor().visitTypeInsn(NEW, className);
-        peekMethodVisitor().visitInsn(DUP);
-        peekMethodVisitor().visitLdcInsn(value);
-        peekMethodVisitor().visitMethodInsn(INVOKESPECIAL, className, CTOR_METHOD_NAME, Type.getMethodDescriptor(Type.VOID_TYPE,
-                Type.getType(String.class)), false);
-    }
-
-    /**
-     * Emits a constant {@link java.math.BigDecimal} value onto the evaluation stack.
-     *
-     * @param value the literal string of the {@link java.math.BigDecimal} constant value to emit.
-     */
-    public void emitLoadBigDecimalOperand(String value) {
-        String className = Type.getType(BigDecimal.class).getInternalName();
-        peekMethodVisitor().visitTypeInsn(NEW, className);
-        peekMethodVisitor().visitInsn(DUP);
-        peekMethodVisitor().visitLdcInsn(value);
-        peekMethodVisitor().visitMethodInsn(INVOKESPECIAL, className, CTOR_METHOD_NAME, Type.getMethodDescriptor(Type.VOID_TYPE,
-                Type.getType(String.class)), false);
+        }
     }
 
     /**

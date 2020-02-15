@@ -2,7 +2,6 @@ package org.orthodox.universel.compiler;
 
 import org.beanplanet.core.lang.TypeUtil;
 import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.orthodox.universel.cst.*;
 import org.orthodox.universel.cst.annotation.Annotation;
@@ -51,6 +50,23 @@ public class CompilingAstVisitor implements UniversalCodeVisitor {
     }
 
     @Override
+    public boolean visitNumericLiteralExpression(NumericLiteral node) {
+        Class<?> fpClass = node.getTypeDescriptor();
+        compilationContext.getVirtualMachine().loadOperandOfType(fpClass);
+        compilationContext.getBytecodeHelper().emitLoadNumericOperand(node.getValue());
+//
+//        if ( int.class == fpClass ) {
+//            compilationContext.getBytecodeHelper().emitLoadIntegerOperand(node.asIntValue());
+//        } else if ( long.class == fpClass ) {
+//            compilationContext.getBytecodeHelper().emitLoadIntegerOperand(node.asLongValue());
+//        } else if ( BigInteger.class == fpClass ) {
+//            compilationContext.getBytecodeHelper().emitLoadBigIntegerOperand(node.asBigIntegerString(), node.getRadix());
+//        }
+
+        return true;
+    }
+
+    @Override
     public boolean visitBooleanLiteral(BooleanLiteralExpr node) {
         boolean booleanValue = node.getBooleanValue();
         compilationContext.getVirtualMachine().loadOperandConstant(booleanValue);
@@ -62,40 +78,19 @@ public class CompilingAstVisitor implements UniversalCodeVisitor {
     public boolean visitDecimalFloatingPointLiteral(DecimalFloatingPointLiteralExpr node) {
         Class<?> fpClass = node.getLiteralValueClass();
 
-        if ( float.class == fpClass ) {
-            float value = node.asFloat();
-            compilationContext.getVirtualMachine().loadOperandConstant(value);
-            compilationContext.getBytecodeHelper().emitLoadFloatOperand(value);
-        } else if ( double.class == fpClass ) {
-            double value = node.asDouble();
-            compilationContext.getVirtualMachine().loadOperandConstant(value);
-            compilationContext.getBytecodeHelper().emitLoadDoubleOperand(value);
-        } else if ( BigDecimal.class == fpClass ) {
-            String value = node.asBigDecimalString();
-            compilationContext.getVirtualMachine().loadOperandOfType(BigDecimal.class);
-            compilationContext.getBytecodeHelper().emitLoadBigDecimalOperand(value);
-        }
-
-        return true;
-    }
-
-    @Override
-    public boolean visitDecimalIntegerLiteral(DecimalIntegerLiteralExpr node) {
-        Class<?> integerClass = node.getLiteralValueClass();
-
-        if ( int.class == integerClass ) {
-            int value = node.asIntValue();
-            compilationContext.getVirtualMachine().loadOperandConstant(value);
-            compilationContext.getBytecodeHelper().emitLoadIntegerOperand(value);
-        } else if ( long.class == integerClass ) {
-            long value = node.asLongValue();
-            compilationContext.getVirtualMachine().loadOperandConstant(value);
-            compilationContext.getBytecodeHelper().emitLoadIntegerOperand(value);
-        } else if ( BigInteger.class == integerClass ) {
-            String value = node.asBigIntegerString();
-            compilationContext.getVirtualMachine().loadOperandOfType(BigInteger.class);
-            compilationContext.getBytecodeHelper().emitLoadBigIntegerOperand(value);
-        }
+//        if ( float.class == fpClass ) {
+//            float value = node.asFloat();
+//            compilationContext.getVirtualMachine().loadOperandConstant(value);
+//            compilationContext.getBytecodeHelper().emitLoadFloatOperand(value);
+//        } else if ( double.class == fpClass ) {
+//            double value = node.asDouble();
+//            compilationContext.getVirtualMachine().loadOperandConstant(value);
+//            compilationContext.getBytecodeHelper().emitLoadDoubleOperand(value);
+//        } else if ( BigDecimal.class == fpClass ) {
+//            String value = node.asBigDecimalString();
+//            compilationContext.getVirtualMachine().loadOperandOfType(BigDecimal.class);
+//            compilationContext.getBytecodeHelper().emitLoadBigDecimalOperand(value);
+//        }
 
         return true;
     }
@@ -133,7 +128,7 @@ public class CompilingAstVisitor implements UniversalCodeVisitor {
         if ( isNullOrEmpty(node.getElements()) ) {
             mv.visitMethodInsn(INVOKESPECIAL, className, BytecodeHelper.CTOR_METHOD_NAME, Type.getMethodDescriptor(Type.VOID_TYPE, BytecodeHelper.EMPTY_TYPES));
         } else {
-            compilationContext.getBytecodeHelper().emitLoadIntegerOperand(node.getElements().size());
+            compilationContext.getBytecodeHelper().emitLoadNumericOperand(node.getElements().size());
             mv.visitMethodInsn(INVOKESPECIAL, className, BytecodeHelper.CTOR_METHOD_NAME, Type.getMethodDescriptor(Type.VOID_TYPE, Type.INT_TYPE));
         }
 
@@ -263,8 +258,8 @@ public class CompilingAstVisitor implements UniversalCodeVisitor {
         if ( isNullOrEmpty(node.getElements()) ) {
             mv.visitMethodInsn(INVOKESPECIAL, className, BytecodeHelper.CTOR_METHOD_NAME, Type.getMethodDescriptor(Type.VOID_TYPE, BytecodeHelper.EMPTY_TYPES));
         } else {
-            compilationContext.getBytecodeHelper().emitLoadIntegerOperand(node.getElements().size());
-            mv.visitMethodInsn(INVOKESPECIAL, className, BytecodeHelper.CTOR_METHOD_NAME, Type.getMethodDescriptor(Type.VOID_TYPE, new Type[] { Type.INT_TYPE }));
+            compilationContext.getBytecodeHelper().emitLoadNumericOperand(node.getElements().size());
+            mv.visitMethodInsn(INVOKESPECIAL, className, BytecodeHelper.CTOR_METHOD_NAME, Type.getMethodDescriptor(Type.VOID_TYPE, Type.INT_TYPE));
         }
 
         for (Node itemNode : node.getElements()) {

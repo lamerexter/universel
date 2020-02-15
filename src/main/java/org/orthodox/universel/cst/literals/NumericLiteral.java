@@ -21,4 +21,8 @@ public interface NumericLiteral {
      * @see NumericPrecision
      */
     NumericPrecision getPrecision();
+
+    Class<?> getTypeDescriptor();
+
+    Number getValue();
 }

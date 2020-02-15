@@ -53,6 +53,7 @@ public interface UniversalCodeVisitor {
 //   boolean visitAssertStatement(AssertStatement node);
 //   boolean visitAssignmentExpression(AssignmentExpression node);
     boolean visitBetweenExpression(BetweenExpression node);
+    boolean visitNumericLiteralExpression(NumericLiteral node);
 
     boolean visitBinaryExpression(BinaryExpression node);
 
@@ -86,8 +87,6 @@ public interface UniversalCodeVisitor {
     boolean visitBooleanLiteral(BooleanLiteralExpr node);
 
     boolean visitDecimalFloatingPointLiteral(DecimalFloatingPointLiteralExpr node);
-
-    boolean visitDecimalIntegerLiteral(DecimalIntegerLiteralExpr node);
 
     boolean visitImportDeclaration(ImportDecl node);
 
