@@ -58,7 +58,10 @@ public class BinaryIntegerLiteralExpr extends IntegerLiteral {
 
     public int asIntValue() {
         final String signedBinaryLiteral = replaceAll(getTokenImage().getImage().substring(2), "_", "");
+        return toIntValue(signedBinaryLiteral);
+    }
 
+    public static int toIntValue(String signedBinaryLiteral) {
         if ( signedBinaryLiteral.length() == INTEGER_BIT_LEN && signedBinaryLiteral.startsWith("1") ) {
             int result = 0;
             for (int n = 0; n < INTEGER_BIT_LEN; n++) {
@@ -73,7 +76,10 @@ public class BinaryIntegerLiteralExpr extends IntegerLiteral {
 
     public long asLongValue() {
         final String signedBinaryLiteral = replaceAll(rTrim(getTokenImage().getImage().substring(2), "l", false), "_", "");
+        return toLongValue(signedBinaryLiteral);
+    }
 
+    public static long toLongValue(String signedBinaryLiteral) {
         if ( signedBinaryLiteral.length() == LONG_BIT_LEN && signedBinaryLiteral.startsWith("1") ) {
             long result = 0L;
             for (int n = 0; n < LONG_BIT_LEN; n++) {

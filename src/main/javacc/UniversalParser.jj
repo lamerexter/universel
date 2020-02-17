@@ -163,7 +163,7 @@ TOKEN :
 {
   < BOOLEAN_LITERAL: "true" | "false" >
 | < #OCTAL_LITERAL: "0" ["0"-"7"]((["0"-"7","_"])*["0"-"7"])? >
-| < OCTAL_INTEGER_LITERAL: <OCTAL_LITERAL> (["l","L"])? >
+| < OCTAL_INTEGER_LITERAL: <OCTAL_LITERAL> (["l","L","I"])? >
 | < #BINARY_LITERAL: "0" ["b","B"] ["0","1"]((["0","1","_"])*["0","1"])? >
 | < BINARY_INTEGER_LITERAL: <BINARY_LITERAL> (["l","L","I"])? >
 | < #DECIMAL_LITERAL: ["0"-"9"]((["0"-"9","_"])*["0"-"9"])? >
