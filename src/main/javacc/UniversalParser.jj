@@ -181,7 +181,7 @@ TOKEN :
 
 | < #DECIMAL_EXPONENT: ["e","E"] (["+","-"])? (<DECIMAL_LITERAL>)+ >
 | < HEX_FLOATING_POINT_LITERAL:
-      <HEX_INTEGER_LITERAL> (".")? <HEX_EXPONENT> (["f","F","d","D"])?
+      <HEX_LITERAL> (".")? <HEX_EXPONENT> (["f","F","d","D"])?
     | "0" ["x","X"] (<HEX_DIGITS>)? "." <HEX_DIGITS> <HEX_EXPONENT> (["f","F","d","D"])?
   >
 | < #HEX_EXPONENT: ["p","P"] (["+","-"])? <DECIMAL_LITERAL> >

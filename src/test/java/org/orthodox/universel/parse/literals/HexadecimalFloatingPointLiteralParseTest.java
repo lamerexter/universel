@@ -1,8 +1,6 @@
 package org.orthodox.universel.parse.literals;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.orthodox.universal.parser.TokenMgrException;
 import org.orthodox.universel.Universal;
 import org.orthodox.universel.cst.UnaryExpression;
 import org.orthodox.universel.cst.literals.HexadecimalFloatingPointLiteralExpr;
@@ -71,9 +69,6 @@ public class HexadecimalFloatingPointLiteralParseTest {
         assertThat(parse("0X1p3D").getTokenImage().getImage(), equalTo("0X1p3D"));
         assertThat(parse("0x1p3D").getTokenImage().getImage(), equalTo("0x1p3D"));
     }
-
-
-
 
     @Test
     public void negativeUntypedLiterals() throws Exception{
