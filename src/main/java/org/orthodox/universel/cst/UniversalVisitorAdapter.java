@@ -81,11 +81,6 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
     }
 
     @Override
-    public boolean visitDecimalFloatingPointLiteral(DecimalFloatingPointLiteralExpr node) {
-        return true;
-    }
-
-    @Override
     public boolean visitImportDeclaration(ImportDecl node) {
         return true;
     }

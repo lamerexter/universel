@@ -114,6 +114,10 @@ public abstract class TypeReference extends Expression {
         return dimensions;
     }
 
+    public void setDimensions(int dimensions) {
+        this.dimensions = dimensions;
+    }
+
     public boolean accept(UniversalCodeVisitor visitor) {
         return visitor.visitTypeReference(this);
     }

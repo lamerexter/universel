@@ -54,14 +54,6 @@ public class CompilingAstVisitor implements UniversalCodeVisitor {
         Class<?> fpClass = node.getTypeDescriptor();
         compilationContext.getVirtualMachine().loadOperandOfType(fpClass);
         compilationContext.getBytecodeHelper().emitLoadNumericOperand(node.getValue());
-//
-//        if ( int.class == fpClass ) {
-//            compilationContext.getBytecodeHelper().emitLoadIntegerOperand(node.asIntValue());
-//        } else if ( long.class == fpClass ) {
-//            compilationContext.getBytecodeHelper().emitLoadIntegerOperand(node.asLongValue());
-//        } else if ( BigInteger.class == fpClass ) {
-//            compilationContext.getBytecodeHelper().emitLoadBigIntegerOperand(node.asBigIntegerString(), node.getRadix());
-//        }
 
         return true;
     }
@@ -71,27 +63,6 @@ public class CompilingAstVisitor implements UniversalCodeVisitor {
         boolean booleanValue = node.getBooleanValue();
         compilationContext.getVirtualMachine().loadOperandConstant(booleanValue);
         compilationContext.getBytecodeHelper().emitLoadBooleanOperand(booleanValue);
-        return true;
-    }
-
-    @Override
-    public boolean visitDecimalFloatingPointLiteral(DecimalFloatingPointLiteralExpr node) {
-        Class<?> fpClass = node.getLiteralValueClass();
-
-//        if ( float.class == fpClass ) {
-//            float value = node.asFloat();
-//            compilationContext.getVirtualMachine().loadOperandConstant(value);
-//            compilationContext.getBytecodeHelper().emitLoadFloatOperand(value);
-//        } else if ( double.class == fpClass ) {
-//            double value = node.asDouble();
-//            compilationContext.getVirtualMachine().loadOperandConstant(value);
-//            compilationContext.getBytecodeHelper().emitLoadDoubleOperand(value);
-//        } else if ( BigDecimal.class == fpClass ) {
-//            String value = node.asBigDecimalString();
-//            compilationContext.getVirtualMachine().loadOperandOfType(BigDecimal.class);
-//            compilationContext.getBytecodeHelper().emitLoadBigDecimalOperand(value);
-//        }
-
         return true;
     }
 

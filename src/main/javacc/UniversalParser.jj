@@ -457,6 +457,8 @@ public Script script():
 
     ( expr=PrimaryExpression() { bodyElements=add(bodyElements, expr); } )*
 
+    <EOF>
+
     { return new Script(importDecl, bodyElements); }
 }
 
@@ -590,7 +592,7 @@ Expression RelationalExpression() :
 	Expression expr;
 	Expression lhsExpr;
 	Expression rhsExpr = null;
-	TypeReference type = null;
+	ReferenceType type = null;
 	List<Node> exprList = null;
 }
 {
@@ -609,7 +611,7 @@ Expression RelationalExpression() :
       |
       <IN> rhsExpr=ShiftExpression() { expr=new InExpression(expr, rhsExpr, false); }
       |
-      <INSTANCEOF> LOOKAHEAD(2) type=Type() { expr=new InstanceofExpression(Operator.INSTANCE_OF, expr, type); }
+      <INSTANCEOF> type=ReferenceType() { expr=new InstanceofExpression(Operator.INSTANCE_OF, expr, type); }
       |
       <BETWEEN> lhsExpr=ShiftExpression() <AND> rhsExpr=ShiftExpression() { expr=new BetweenExpression(expr, lhsExpr, rhsExpr, false); }
       |
@@ -652,6 +654,53 @@ TypeReference Type():
     { return type; }
 }
 
+ReferenceType ReferenceType():
+{
+    TypeReference referredType;
+    int arrayCount = 0;
+    int endLine = -1;
+    int endColumn = -1 ;
+
+}
+{
+  (
+      referredType = PrimitiveType() ( LOOKAHEAD(2) "[" "]" { arrayCount++; endLine = token.endLine; endColumn = token.endColumn; } )+
+  |
+      referredType = ClassOrInterfaceType() ( LOOKAHEAD(2) "[" "]" { arrayCount++; endLine = token.endLine; endColumn = token.endColumn; } )*
+  )
+
+  { return new ReferenceType(TokenImage.builder()
+                                       .range(referredType).endLine(endLine).endColumn(endColumn)
+                                       .build(),
+                             referredType, arrayCount); }
+}
+
+TypeReference PrimitiveType():
+{
+    TypeReference type;
+}
+{
+    (
+      "boolean" { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Boolean); }
+    |
+      "char" { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Char); }
+    |
+      "byte" { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Byte); }
+    |
+      "short" { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Short); }
+    |
+      "int" { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Int); }
+    |
+      "long" { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Long); }
+    |
+      "float" { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Float); }
+    |
+      "double" { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Double); }
+    )
+
+    { return type; }
+}
+
 ClassOrInterfaceType ClassOrInterfaceType() :
 {
 	String typeName;
@@ -662,6 +711,7 @@ ClassOrInterfaceType ClassOrInterfaceType() :
 {
   <IDENTIFIER> { tib=TokenImage.builder();
                  tib.startLine(token.beginLine).startColumn(token.beginColumn);
+                 tib.endLine(token.endLine).endColumn(token.endColumn);
                  typeName = token.image;
                  cit = new ClassOrInterfaceType(tib.build(), null, typeName, null);
                }

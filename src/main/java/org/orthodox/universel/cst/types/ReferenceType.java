@@ -28,7 +28,7 @@
 
 package org.orthodox.universel.cst.types;
 
-import org.beanplanet.core.models.path.NamePath;
+import org.orthodox.universel.cst.Expression;
 import org.orthodox.universel.cst.TokenImage;
 
 /**
@@ -36,9 +36,21 @@ import org.orthodox.universel.cst.TokenImage;
  * 
  * @author Gary Watson
  */
-public final class ReferenceType extends TypeReference {
+public final class ReferenceType extends Expression {
+    private final TypeReference referredType;
+    private final int arrayCount;
 
-   public ReferenceType(TokenImage tokenImage, NamePath name, int arrayCount) {
-       super(tokenImage, name, arrayCount);
+   public ReferenceType(TokenImage tokenImage, TypeReference referredType, int arrayCount) {
+       super(tokenImage);
+       this.referredType = referredType;
+       this.arrayCount = arrayCount;
    }
+
+    public TypeReference getReferredType() {
+        return referredType;
+    }
+
+    public int getArrayCount() {
+        return arrayCount;
+    }
 }

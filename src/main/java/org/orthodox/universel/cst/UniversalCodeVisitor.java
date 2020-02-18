@@ -86,8 +86,6 @@ public interface UniversalCodeVisitor {
 //   boolean visitListExpression(ListExpression node);
     boolean visitBooleanLiteral(BooleanLiteralExpr node);
 
-    boolean visitDecimalFloatingPointLiteral(DecimalFloatingPointLiteralExpr node);
-
     boolean visitImportDeclaration(ImportDecl node);
 
     boolean visitList(ListExpr node);
