@@ -1,7 +1,7 @@
 /*
  *  MIT Licence:
  *
- *  Copyright (c) 2019 Orthodox Engineering Ltd
+ *  Copyright (c) 2020 Orthodox Engineering Ltd
  *
  *  Permission is hereby granted, free of charge, to any person
  *  obtaining a copy of this software and associated documentation
@@ -26,17 +26,41 @@
  *
  */
 
-package org.orthodox.universel.compiler;
+package org.orthodox.universel.util;
 
-import static org.beanplanet.messages.domain.Message.Builder;
-import static org.beanplanet.messages.domain.Message.builder;
+/**
+ * Some sample reference types, used in test expressions.
+ */
+public class RefTypes {
+    public static boolean[] booleanArray() {
+        return new boolean[0];
+    }
 
-public interface Messages {
-    interface MethodCall {
-        Builder METHOD_NOT_FOUND = builder().code("uel.method.notfound").message("Method named \"{0}\" not found");
-        Builder METHOD_AMBIGUOUS = builder().code("uel.method.ambiguous").message("A call to method named \"{0}\" is ambiguous and matches {1} methods: {2}");
+    public static float[] floatArray() {
+        return new float[0];
+    }
 
-        Builder TYPE_NOT_FOUND = builder().code("uel.type.notfound").message("Type named \"{0}\" not found");
-        Builder TYPE_AMBIGUOUS = builder().code("uel.type.ambiguous").message("The type reference \"{0}\" is ambiguous and matches {1} inferred types: {2}");
+    public static double[] doubleArray() {
+        return new double[0];
+    }
+
+    public static int[] intArray() {
+        return new int[0];
+    }
+
+    public static long[] longArray() {
+        return new long[0];
+    }
+
+    public static Integer[] integerArray() {
+        return new Integer[0];
+    }
+
+    public static Integer[][] integer2Array() {
+        return new Integer[2][2];
+    }
+
+    public static AType aType() {
+        return new AType();
     }
 }

@@ -1,7 +1,7 @@
 /*
  *  MIT Licence:
  *
- *  Copyright (c) 2019 Orthodox Engineering Ltd
+ *  Copyright (c) 2020 Orthodox Engineering Ltd
  *
  *  Permission is hereby granted, free of charge, to any person
  *  obtaining a copy of this software and associated documentation
@@ -28,15 +28,8 @@
 
 package org.orthodox.universel.compiler;
 
-import static org.beanplanet.messages.domain.Message.Builder;
-import static org.beanplanet.messages.domain.Message.builder;
-
-public interface Messages {
-    interface MethodCall {
-        Builder METHOD_NOT_FOUND = builder().code("uel.method.notfound").message("Method named \"{0}\" not found");
-        Builder METHOD_AMBIGUOUS = builder().code("uel.method.ambiguous").message("A call to method named \"{0}\" is ambiguous and matches {1} methods: {2}");
-
-        Builder TYPE_NOT_FOUND = builder().code("uel.type.notfound").message("Type named \"{0}\" not found");
-        Builder TYPE_AMBIGUOUS = builder().code("uel.type.ambiguous").message("The type reference \"{0}\" is ambiguous and matches {1} inferred types: {2}");
+public class BinaryOperatorFunctions {
+    public static boolean operator_instanceOf(Object lhs, Class<?> rhs) {
+        return rhs != null && rhs.isInstance(lhs);
     }
 }

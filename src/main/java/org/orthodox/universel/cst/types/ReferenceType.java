@@ -28,8 +28,14 @@
 
 package org.orthodox.universel.cst.types;
 
+import org.beanplanet.core.util.ArrayUtil;
+import org.orthodox.universel.ast.AstVisitor;
 import org.orthodox.universel.cst.Expression;
+import org.orthodox.universel.cst.Node;
 import org.orthodox.universel.cst.TokenImage;
+import org.orthodox.universel.cst.UniversalCodeVisitor;
+
+import java.lang.reflect.Array;
 
 /**
  * An AST representation of a reference type.
@@ -52,5 +58,14 @@ public final class ReferenceType extends Expression {
 
     public int getArrayCount() {
         return arrayCount;
+    }
+
+    public boolean accept(UniversalCodeVisitor visitor) {
+        return visitor.visitReferenceType(this);
+    }
+
+    public Class<?> getTypeDescriptor() {
+        if ( referredType == null || referredType.getTypeDescriptor() == null ) return null;
+        return arrayCount == 0 ? getReferredType().getTypeDescriptor() : ArrayUtil.emptyArray(getReferredType().getTypeDescriptor(), arrayCount).getClass();
     }
 }

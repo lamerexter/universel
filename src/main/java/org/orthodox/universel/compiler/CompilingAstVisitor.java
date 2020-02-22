@@ -3,6 +3,7 @@ package org.orthodox.universel.compiler;
 import org.beanplanet.core.lang.TypeUtil;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
+import org.orthodox.universel.UniversalException;
 import org.orthodox.universel.cst.*;
 import org.orthodox.universel.cst.annotation.Annotation;
 import org.orthodox.universel.cst.collections.ListExpr;
@@ -12,6 +13,7 @@ import org.orthodox.universel.cst.collections.SetExpr;
 import org.orthodox.universel.cst.conditionals.ElvisExpression;
 import org.orthodox.universel.cst.conditionals.TernaryExpression;
 import org.orthodox.universel.cst.literals.*;
+import org.orthodox.universel.cst.types.ReferenceType;
 import org.orthodox.universel.cst.types.TypeReference;
 import org.orthodox.universel.operations.UnaryFunctions;
 
@@ -22,12 +24,15 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 
+import static java.lang.reflect.Modifier.PUBLIC;
+import static java.lang.reflect.Modifier.STATIC;
+import static org.beanplanet.core.lang.TypeUtil.findMethod;
 import static org.beanplanet.core.util.CollectionUtil.isNullOrEmpty;
 import static org.beanplanet.core.util.IterableUtil.nullSafe;
 import static org.objectweb.asm.Opcodes.*;
 import static org.orthodox.universel.StringEscapeUtil.unescapeUniversalCharacterEscapeSequences;
 
-public class CompilingAstVisitor implements UniversalCodeVisitor {
+public class CompilingAstVisitor extends UniversalVisitorAdapter {
     private CompilationContext compilationContext;
 
     public CompilingAstVisitor(CompilationContext compilationContext) {
@@ -78,6 +83,17 @@ public class CompilingAstVisitor implements UniversalCodeVisitor {
 
     @Override
     public boolean visitInstanceofExpression(InstanceofExpression node) {
+        node.getLhsExpression().accept(this);
+        compilationContext.getBytecodeHelper().boxIfNeeded(compilationContext.getVirtualMachine().peekOperandStack());
+
+        node.getRhsExpression().accept(this);
+
+        compilationContext.getBytecodeHelper().emitInvokeStaticMethod(findMethod(PUBLIC|STATIC,
+                                                                                 "operator_instanceOf",
+                                                                                 BinaryOperatorFunctions.class,
+                                                                                 boolean.class, Object.class, Class.class)
+                                                                              .orElseThrow(() -> new UniversalException("Unable to find instanceOf method in "+BinaryOperatorFunctions.class)));
+        compilationContext.getVirtualMachine().loadOperandOfType(boolean.class);
         return false;
     }
 
@@ -183,6 +199,13 @@ public class CompilingAstVisitor implements UniversalCodeVisitor {
         return false;
     }
 
+    public boolean visitReferenceType(ReferenceType node) {
+        compilationContext.getVirtualMachine().loadOperandOfType(node.getTypeDescriptor());
+        compilationContext.getBytecodeHelper().emitLoadType(node.getTypeDescriptor());
+
+        return false;
+    }
+
     @Override
     public boolean visitInterpolatedStringLiteral(InterpolatedStringLiteralExpr node) {
         compilationContext.getBytecodeHelper().emitInstantiateType(StringBuilder.class);
@@ -268,7 +291,7 @@ public class CompilingAstVisitor implements UniversalCodeVisitor {
         node.getExpression().accept(this);
 
         Class<?> unaryExprType = node.getTypeDescriptor();
-        Optional<Method> unaryMinusFunction = TypeUtil.findMethod(Modifier.PUBLIC + Modifier.STATIC, "unaryMinus", UnaryFunctions.class, unaryExprType, unaryExprType);
+        Optional<Method> unaryMinusFunction = findMethod(PUBLIC + STATIC, "unaryMinus", UnaryFunctions.class, unaryExprType, unaryExprType);
 
         if ( !unaryMinusFunction.isPresent() ) {
             compilationContext.getMessages().addError("uel.compiler.math.unary-minus.not-found", "Unable to find unary minus function for the given type: {0}", unaryExprType);

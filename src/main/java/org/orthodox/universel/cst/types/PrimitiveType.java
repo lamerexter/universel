@@ -29,11 +29,11 @@
 package org.orthodox.universel.cst.types;
 
 import org.beanplanet.core.models.path.SimpleNamePath;
-import org.beanplanet.core.util.StringUtil;
 import org.orthodox.universel.cst.TokenImage;
-import org.orthodox.universel.cst.Type;
 
 import java.util.Collections;
+
+import static org.beanplanet.core.util.StringUtil.initCap;
 
 
 /**
@@ -46,18 +46,18 @@ public final class PrimitiveType extends TypeReference {
    public enum Primitive {
        Boolean(boolean.class), Byte(byte.class), Char(char.class), Double(double.class), Float(float.class), Int(int.class), Long(long.class), Short(short.class);
 
-       private final Type type;
+       private final Class<?> typeDescriptor;
        
        Primitive(Class<?> primitiveClass) {
-          this.type = new ClassType(primitiveClass);
+          this.typeDescriptor = primitiveClass;
        }
        
        public static Primitive valueOfTypeName(String typeName) {
-          return Primitive.valueOf(StringUtil.initCap(typeName, true));
+          return Primitive.valueOf(initCap(typeName, true));
        }
        
-       public Type getType() {
-          return type;
+       public Class<?> getTypeDescriptor() {
+          return typeDescriptor;
        }
    }
 
@@ -66,6 +66,7 @@ public final class PrimitiveType extends TypeReference {
    public PrimitiveType(TokenImage tokenImage, Primitive primitive) {
        super(tokenImage, new SimpleNamePath(Collections.singletonList(primitive.name())));
        this.primitive = primitive;
+       this.typeDescriptor = primitive.getTypeDescriptor();
    }
 
    public Primitive getPrimitive() {

@@ -67,7 +67,7 @@ public class StaticMethodCallTest {
     void oneArg_methodNotFound() {
         CompiledUnit compiled = compile("import " + TestClass.class.getName() + ".* doesNotExist('xyz')");
         assertThat(compiled.getMessages().getErrors().size(), equalTo(1));
-        assertThat(compiled.getMessages().hasErrorWithCode(METHOD_NOT_FOUND.getCode()), is(true));
+        assertThat(compiled.getMessages().hasErrorWithCode( METHOD_NOT_FOUND.getCode()), is(true));
     }
 
     @Test

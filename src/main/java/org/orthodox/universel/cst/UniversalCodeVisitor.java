@@ -37,6 +37,7 @@ import org.orthodox.universel.cst.collections.SetExpr;
 import org.orthodox.universel.cst.conditionals.ElvisExpression;
 import org.orthodox.universel.cst.conditionals.TernaryExpression;
 import org.orthodox.universel.cst.literals.*;
+import org.orthodox.universel.cst.types.ReferenceType;
 import org.orthodox.universel.cst.types.TypeReference;
 
 /**
@@ -110,6 +111,8 @@ public interface UniversalCodeVisitor {
 //   boolean visitPackageDeclaration(PackageDeclaration node);
 //   boolean visitPathExpression(PathExpression node);
     boolean visitRangeExpression(RangeExpression node);
+
+    boolean visitReferenceType(ReferenceType node);
 
     //   boolean visitReturnStatement(ReturnStatement node);
     boolean visitInterpolatedStringLiteral(InterpolatedStringLiteralExpr node);

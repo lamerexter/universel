@@ -29,12 +29,9 @@
 package org.orthodox.universel.cst.types;
 
 import org.beanplanet.core.models.path.NamePath;
-import org.beanplanet.core.util.Streamable;
 import org.orthodox.universel.cst.Expression;
 import org.orthodox.universel.cst.TokenImage;
 import org.orthodox.universel.cst.UniversalCodeVisitor;
-
-import static org.beanplanet.core.util.StringUtil.asDelimitedString;
 
 /**
  * Represents a referred to type, such as java.lang.String or com.acme.MyClass. The referenced type may be an existing
@@ -44,7 +41,7 @@ import static org.beanplanet.core.util.StringUtil.asDelimitedString;
  */
 public abstract class TypeReference extends Expression {
     private NamePath name;
-    private int dimensions;
+    protected Class<?> typeDescriptor;
 
     /**
      * Constructs a new type AST node instance.
@@ -56,7 +53,6 @@ public abstract class TypeReference extends Expression {
     public TypeReference(TokenImage tokenImage, NamePath name, int dimensions) {
         super(tokenImage);
         this.name = name;
-        this.dimensions = dimensions;
     }
 
     /**
@@ -78,44 +74,13 @@ public abstract class TypeReference extends Expression {
         return name;
     }
 
-    /**
-     * Returns the simple type name of this type, excluding any prefixes and suffixes such as array indices.
-     *
-     * @return the simple type name associated with this type.
-     */
-    public String getSimpleName() {
-        return getName().getLastElement();
+    @Override
+    public Class<?> getTypeDescriptor() {
+        return typeDescriptor;
     }
 
-    /**
-     * Returns the fully qualified name of the type, such as <code>a.b.c.D</code>.
-     *
-     * @return the fully qualified type name, including package prefix, delimited by dot (.).
-     */
-    public String getFullyQualifiedName() {
-        return asDelimitedString((Streamable<String>) getName(), ".");
-    }
-
-    /**
-     * Returns whether this type represents an array.
-     *
-     * @return true if this type is an array type, false otherwise.
-     */
-    public boolean isArray() {
-        return dimensions > 0;
-    }
-
-    /**
-     * Returns the number of dimensions of the array type reference.
-     *
-     * @return the number of dimensions on this array reference type, or zero if this type reference is not an array type.
-     */
-    public int getDimensions() {
-        return dimensions;
-    }
-
-    public void setDimensions(int dimensions) {
-        this.dimensions = dimensions;
+    public void setTypeDescriptor(Class<?> typeDescriptor) {
+        this.typeDescriptor = typeDescriptor;
     }
 
     public boolean accept(UniversalCodeVisitor visitor) {

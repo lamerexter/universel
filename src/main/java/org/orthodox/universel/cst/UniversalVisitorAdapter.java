@@ -35,6 +35,7 @@ import org.orthodox.universel.cst.collections.SetExpr;
 import org.orthodox.universel.cst.conditionals.ElvisExpression;
 import org.orthodox.universel.cst.conditionals.TernaryExpression;
 import org.orthodox.universel.cst.literals.*;
+import org.orthodox.universel.cst.types.ReferenceType;
 import org.orthodox.universel.cst.types.TypeReference;
 
 import static org.beanplanet.core.util.CollectionUtil.nullSafe;
@@ -72,6 +73,8 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
 
     @Override
     public boolean visitInstanceofExpression(InstanceofExpression node) {
+        node.getLhsExpression().accept(this);
+        node.getRhsExpression().accept(this);
         return false;
     }
 
@@ -138,6 +141,11 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
 
     @Override
     public boolean visitRangeExpression(RangeExpression node) {
+        return false;
+    }
+
+    @Override
+    public boolean visitReferenceType(ReferenceType node) {
         return false;
     }
 

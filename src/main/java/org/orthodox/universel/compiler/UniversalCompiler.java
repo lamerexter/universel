@@ -1,5 +1,6 @@
 package org.orthodox.universel.compiler;
 
+import jdk.nashorn.internal.codegen.CompilationException;
 import org.beanplanet.core.io.IoException;
 import org.beanplanet.core.io.resource.ByteArrayResource;
 import org.beanplanet.core.io.resource.Resource;
@@ -17,6 +18,7 @@ import org.orthodox.universel.cst.Script;
 import org.orthodox.universel.symanticanalysis.MethodCallAnalyser;
 import org.orthodox.universel.symanticanalysis.SemanticAnalyser;
 import org.orthodox.universel.symanticanalysis.SemanticAnalysisContext;
+import org.orthodox.universel.symanticanalysis.StaticTypeAnalyser;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -32,7 +34,8 @@ public class UniversalCompiler {
     private static final CstTransformer cstTransformer = new CstTransformer();
 
     private static final List<SemanticAnalyser> SEMANTIC_AANALYSERS = asList(
-            new MethodCallAnalyser()
+            new MethodCallAnalyser(),
+            new StaticTypeAnalyser()
     );
 
     public Script parse(String compilationUnit) { return parse(new StringResource(compilationUnit)); }
@@ -84,41 +87,46 @@ public class UniversalCompiler {
         }
 
         //----------------------------------------------------------------------------------------------------------
-        // Compile to bytecode.
+        // If there are no errors compile to bytecode.
         //----------------------------------------------------------------------------------------------------------
-        String classBasename = "UniScript"  + UUID.randomUUID().hashCode();
-        String className = UniversalCompiler.class.getPackage().getName().replace('.','/')+"/"+classBasename;
+        byte classBytes[] = null;
+        String classBasename = "UniScript" + UUID.randomUUID().hashCode();
+        String className = UniversalCompiler.class.getPackage().getName().replace('.', '/') + "/" + classBasename;
+        long endTime = System.currentTimeMillis();
 
-        // Define top-level script class
-        BytecodeHelper bch = new BytecodeHelper();
-        ClassWriter cw = bch.generateClass(V1_8, ACC_PUBLIC, className, Object.class);
+        if ( !messages.hasErrors() ) {
+            // Define top-level script class
+            BytecodeHelper bch = new BytecodeHelper();
+            ClassWriter cw = bch.generateClass(V1_8, ACC_PUBLIC, className, Object.class);
 
-        // Generate execution method with binding
-        MethodVisitor mv = bch.generateMethod(ACC_PUBLIC + ACC_FINAL + ACC_STATIC, "execute", Object.class, Map.class);
+            // Generate execution method with binding
+            MethodVisitor mv = bch.generateMethod(ACC_PUBLIC + ACC_FINAL + ACC_STATIC, "execute", Object.class, Map.class);
 
-        CompilationContext compilationContext = new CompilationContext(mv, new VirtualMachine(bch), messages);
-        ScriptScope scriptScope = new ScriptScope();
-        compilationContext.pushNameScope(scriptScope);
+            CompilationContext compilationContext = new CompilationContext(mv, new VirtualMachine(bch), messages);
+            ScriptScope scriptScope = new ScriptScope();
+            compilationContext.pushNameScope(scriptScope);
 
-        CompilingAstVisitor compilingAstVisitor = new CompilingAstVisitor(compilationContext);
-        scriptScope.setCompilationContext(compilationContext);
-        compilationUnitNonTerminal.accept(compilingAstVisitor);
+            CompilingAstVisitor compilingAstVisitor = new CompilingAstVisitor(compilationContext);
+            scriptScope.setCompilationContext(compilationContext);
+            compilationUnitNonTerminal.accept(compilingAstVisitor);
 
-        if ( compilationContext.getVirtualMachine().operandStackIsEmpty() ) {
-            mv.visitInsn(RETURN);
-        } else {
-            compilationContext.getBytecodeHelper().boxIfNeeded(compilationContext.getVirtualMachine().peekOperandStack());
-            mv.visitInsn(ARETURN);
+            if (compilationContext.getVirtualMachine().operandStackIsEmpty()) {
+                mv.visitInsn(RETURN);
+            } else {
+                compilationContext.getBytecodeHelper().boxIfNeeded(compilationContext.getVirtualMachine().peekOperandStack());
+                mv.visitInsn(ARETURN);
+            }
+
+            mv.visitEnd();
+            mv.visitMaxs(0, 0);
+            cw.visitEnd();
+
+            endTime = System.currentTimeMillis();
+            classBytes = cw.toByteArray();
         }
 
-        mv.visitEnd();
-        mv.visitMaxs(0,0);
-        cw.visitEnd();
-
-        long endTime = System.currentTimeMillis();
-        byte classBytes[] = cw.toByteArray();
         return new CompiledUnit(compilationUnitNonTerminal,
-                                compilationContext.getMessages(),
+                                messages,
                                 new ByteArrayResource(classBytes),
                                 className,
                                 classBasename,
