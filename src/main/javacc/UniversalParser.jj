@@ -208,20 +208,7 @@ TOKEN :
       "'"
   >
 |
-  < TQ_STRING:
-      "'''"
-      (   (~["'","\\"])
-        | ("\\"
-            ( ["n","t","b","r","f","\\","'","\""]
-            | ["0"-"7"] ( ["0"-"7"] )?
-            | ["0"-"3"] ["0"-"7"] ["0"-"7"]
-            )
-          )
-        | "'"
-        | <UNICODE_ESCAPE>
-      )*
-      "'''"
-  >
+  < TQ_STRING_START: "'''" > : WITHIN_TQ_STRING
 |
   < DQ_INTERP_STRING_START: "\"" > : WITHIN_DQ_INTERP_STRING
 |
@@ -387,6 +374,25 @@ TOKEN :
          "\uffe5"-"\uffe6",  "\ufff9"-"\ufffb" ]
         | <UNICODE_ESCAPE>
   >
+}
+
+<WITHIN_TQ_STRING> TOKEN :
+{
+  <TQ_STRING_CHAR:
+    (
+        ~["'","\\"]
+         | ("\\"
+             ( ["n","t","b","r","f","\\","'","\""]
+             | ["0"-"7"] ( ["0"-"7"] )?
+             | ["0"-"3"] ["0"-"7"] ["0"-"7"]
+             )
+           )
+         | "'"
+         | <UNICODE_ESCAPE>
+    )
+  >
+  |
+  <TQ_STRING_END: ("'")* "'''" > : DEFAULT
 }
 
 <WITHIN_DQ_INTERP_STRING> TOKEN :
@@ -1024,12 +1030,35 @@ public Expression Literal():
 	  |
 	  <SQ_STRING> { ret = new StringLiteralExpr(tokenImage(), "'"); }
 	  |
-	  <TQ_STRING> { ret = new StringLiteralExpr(tokenImage(), "'''"); }
+	  ret=TripleQuoteStringLiteral()
 	  |
 	  ret=InterpolatedStringLiteral()
   )
 
   { return ret; }
+}
+
+Expression TripleQuoteStringLiteral() :
+{
+    Node part = null;
+    List<Node> parts = null;
+    StringBuilder s = new StringBuilder();
+    StringBuilder p = new StringBuilder();
+    int startLine = -1, startColumn = -1;
+    int partStartLine = -1, partStartColumn = -1, partEndLine = -1, partEndColumn = -1;
+}
+{
+    <TQ_STRING_START> { startLine=token.beginLine; startColumn=token.beginColumn; s.append(token.image);}
+    (
+        <TQ_STRING_CHAR> { s.append(token.image); }
+    )*
+    <TQ_STRING_END>
+
+    {
+         s.append(token.image);
+
+         return new StringLiteralExpr(new TokenImage(startLine, startColumn, token.endLine, token.endColumn, s.toString()), "'''");
+    }
 }
 
 Expression InterpolatedStringLiteral() :

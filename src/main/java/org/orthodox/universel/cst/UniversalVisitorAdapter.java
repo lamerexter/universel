@@ -32,7 +32,6 @@ import org.orthodox.universel.cst.annotation.Annotation;
 import org.orthodox.universel.cst.collections.ListExpr;
 import org.orthodox.universel.cst.collections.MapExpr;
 import org.orthodox.universel.cst.collections.SetExpr;
-import org.orthodox.universel.cst.conditionals.ElvisExpression;
 import org.orthodox.universel.cst.conditionals.TernaryExpression;
 import org.orthodox.universel.cst.literals.*;
 import org.orthodox.universel.cst.types.ReferenceType;
@@ -58,11 +57,6 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
 
     @Override
     public boolean visitNumericLiteralExpression(NumericLiteral node) {
-        return false;
-    }
-
-    @Override
-    public boolean visitElvisExpression(ElvisExpression node) {
         return false;
     }
 

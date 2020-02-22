@@ -32,4 +32,8 @@ public class BinaryOperatorFunctions {
     public static boolean operator_instanceOf(Object lhs, Class<?> rhs) {
         return rhs != null && rhs.isInstance(lhs);
     }
+
+    public static Object operator_ELVIS(Object lhs, Object rhs) {
+        return lhs != null ? lhs : rhs;
+    }
 }

@@ -331,10 +331,10 @@ public class TokenImage {
                     if (node == null || node.getTokenImage() == null)
                         continue;
 
+                    startColumn = (first && startColumn == -1) || (node.getTokenImage().getStartLine() <= startLine && node.getTokenImage().getStartColumn() < startColumn) ? node.getTokenImage().getStartColumn() : startColumn;
                     startLine = (first && startLine == -1) || node.getTokenImage().getStartLine() < startLine ? node.getTokenImage().getStartLine() : startLine;
-                    startColumn = (first && startColumn == -1)|| node.getTokenImage().getStartColumn() < startColumn ? node.getTokenImage().getStartColumn() : startColumn;
+                    endColumn = (first && endColumn == -1) || (node.getTokenImage().getEndLine() >= endLine && node.getTokenImage().getEndColumn() > endColumn) ? node.getTokenImage().getEndColumn() : endColumn;
                     endLine = (first && endLine == -1) || node.getTokenImage().getEndLine() > endLine ? node.getTokenImage().getEndLine() : endLine;
-                    endColumn = (first && endColumn == -1) || node.getTokenImage().getEndColumn() > endColumn ? node.getTokenImage().getEndColumn() : endColumn;
                     first = false;
                 }
 

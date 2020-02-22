@@ -51,6 +51,20 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
 
     @Override
     public boolean visitBinaryExpression(BinaryExpression node) {
+        node.getLhsExpression().accept(this);
+        compilationContext.getBytecodeHelper().boxIfNeeded(compilationContext.getVirtualMachine().peekOperandStack());
+
+        node.getRhsExpression().accept(this);
+
+        final Class<?> expressionType = node.getRhsExpression().getTypeDescriptor();
+        final String operatorMethodName = "operator_"+node.getOperator().name();
+        compilationContext.getBytecodeHelper().emitInvokeStaticMethod(findMethod(PUBLIC|STATIC,
+                                                                                 operatorMethodName,
+                                                                                 BinaryOperatorFunctions.class,
+                                                                                 Object.class, Object.class, Object.class)
+                                                                              .orElseThrow(() -> new UniversalException("Unable to find binary operator ["+node.getOperator()
+                                                                                                                        +"] method in "+BinaryOperatorFunctions.class)));
+        compilationContext.getVirtualMachine().loadOperandOfType(node.getRhsExpression().getTypeDescriptor());
         return false;
     }
 
@@ -69,11 +83,6 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
         compilationContext.getVirtualMachine().loadOperandConstant(booleanValue);
         compilationContext.getBytecodeHelper().emitLoadBooleanOperand(booleanValue);
         return true;
-    }
-
-    @Override
-    public boolean visitElvisExpression(ElvisExpression node) {
-        return false;
     }
 
     @Override

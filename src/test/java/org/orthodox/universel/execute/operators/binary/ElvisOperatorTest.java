@@ -1,7 +1,7 @@
 /*
  *  MIT Licence:
  *
- *  Copyright (c) 2019 Orthodox Engineering Ltd
+ *  Copyright (c) 2020 Orthodox Engineering Ltd
  *
  *  Permission is hereby granted, free of charge, to any person
  *  obtaining a copy of this software and associated documentation
@@ -25,23 +25,23 @@
  *  DEALINGS IN THE SOFTWARE.
  *
  */
-package org.orthodox.universel.cst.conditionals;
 
-import org.orthodox.universel.cst.BinaryExpression;
-import org.orthodox.universel.cst.Expression;
-import org.orthodox.universel.cst.Operator;
-import org.orthodox.universel.cst.UniversalCodeVisitor;
+package org.orthodox.universel.execute.operators.binary;
 
-import java.util.Objects;
+import org.junit.jupiter.api.Test;
 
-public class ElvisExpression extends BinaryExpression {
-    protected Expression testExpression;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.orthodox.universel.Universal.execute;
 
-    protected Expression expression;
+public class ElvisOperatorTest {
+    @Test
+    void returnsLhs_whenNotNull() {
+        assertThat(execute("'''This ain't null''' ?: '''Hey Ma'am, it was null!'''"), equalTo("This ain't null"));
+    }
 
-    public ElvisExpression(Expression testExpression, Expression expression) {
-        super(Operator.ELVIS, testExpression, expression);
-        this.testExpression = testExpression;
-        this.expression = expression;
+    @Test
+    void handles_null() {
+        assertThat(execute("null ?: '''Hey Ma'am, it was null!'''"), equalTo("Hey Ma'am, it was null!"));
     }
 }

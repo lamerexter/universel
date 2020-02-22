@@ -67,7 +67,6 @@ public interface UniversalCodeVisitor {
 //   boolean visitCompoundBlock(CompoundBlock node);
 //   boolean visitConstructorDeclaration(ConstructorDeclaration node);
 //   boolean visitDoStatement(DoStatement node);
-    boolean visitElvisExpression(ElvisExpression node);
 
     //   boolean visitEnumDeclaration(EnumDeclaration node);
 //   boolean visitEmptyStatement(EmptyStatement node);

@@ -45,7 +45,7 @@ import static org.orthodox.universel.Universal.parse;
 
 public class InstanceOfParseTest {
     @Test
-    public void parsePosition() throws Exception{
+    public void parsePosition() {
         // When
         String input = " 'Hello world' instanceof String";
         InstanceofExpression ioe = parse(InstanceofExpression.class, input);
@@ -66,7 +66,7 @@ public class InstanceOfParseTest {
     }
 
     @Test
-    public void arrayClassOrInterfaceReferenceType() throws Exception{
+    public void arrayClassOrInterfaceReferenceType() {
         // When
         InstanceofExpression ioe = Universal.parse(InstanceofExpression.class, "[1,2,3] instanceof Integer[][][]");
 
@@ -87,7 +87,7 @@ public class InstanceOfParseTest {
     }
 
     @Test
-    public void arrayPrimitiveReferenceType() throws Exception{
+    public void arrayPrimitiveReferenceType() {
         // When
         InstanceofExpression ioe = Universal.parse(InstanceofExpression.class, "133 instanceof boolean[][]");
 

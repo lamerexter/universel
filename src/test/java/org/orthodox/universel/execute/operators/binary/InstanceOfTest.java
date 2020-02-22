@@ -33,6 +33,9 @@ import org.orthodox.universel.compiler.CompiledUnit;
 import org.orthodox.universel.util.AType;
 import org.orthodox.universel.util.RefTypes;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -141,4 +144,12 @@ public class InstanceOfTest {
         assertThat(compiled.getMessages().hasErrors(), is(true));
         assertThat(compiled.getMessages().hasErrorWithCode(TYPE_AMBIGUOUS.getCode()), is(true));
     }
+
+    @Test
+    void letsDoThis() {
+        Map<String, Object> binding = new HashMap<>();
+        binding.put("theValue", 123);
+        System.out.println(execute(boolean.class, "theValue instanceof Boolean", binding));
+    }
+
 }
