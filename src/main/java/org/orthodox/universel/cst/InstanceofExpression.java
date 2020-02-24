@@ -34,9 +34,9 @@ public class InstanceofExpression extends BinaryExpression {
    public InstanceofExpression(Operator operator, Expression lhsExpr, ReferenceType type) {
       super(operator, lhsExpr, type);
    }
-
-   public boolean accept(UniversalCodeVisitor visitor) {
-      visitor.visitInstanceofExpression(this);
-      return true;
-   }
+//
+//   public boolean accept(UniversalCodeVisitor visitor) {
+//      visitor.visitInstanceofExpression(this);
+//      return true;
+//   }
 }

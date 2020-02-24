@@ -58,13 +58,15 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
 
         final Class<?> expressionType = node.getRhsExpression().getTypeDescriptor();
         final String operatorMethodName = "operator_"+node.getOperator().name();
-        compilationContext.getBytecodeHelper().emitInvokeStaticMethod(findMethod(PUBLIC|STATIC,
-                                                                                 operatorMethodName,
-                                                                                 BinaryOperatorFunctions.class,
-                                                                                 Object.class, Object.class, Object.class)
-                                                                              .orElseThrow(() -> new UniversalException("Unable to find binary operator ["+node.getOperator()
+        Optional<Method> operatorMethod = findMethod(PUBLIC | STATIC,
+                                                     operatorMethodName,
+                                                     BinaryOperatorFunctions.class,
+                                                     null,
+                                                     compilationContext.getVirtualMachine().peekOperandStack(1),
+                                                     compilationContext.getVirtualMachine().peekOperandStack());
+        compilationContext.getBytecodeHelper().emitInvokeStaticMethod(operatorMethod.orElseThrow(() -> new UniversalException("Unable to find binary operator ["+node.getOperator()
                                                                                                                         +"] method in "+BinaryOperatorFunctions.class)));
-        compilationContext.getVirtualMachine().loadOperandOfType(node.getRhsExpression().getTypeDescriptor());
+        compilationContext.getVirtualMachine().loadOperandOfType(operatorMethod.get().getReturnType());
         return false;
     }
 
@@ -87,22 +89,6 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
 
     @Override
     public boolean visitInExpression(InExpression node) {
-        return false;
-    }
-
-    @Override
-    public boolean visitInstanceofExpression(InstanceofExpression node) {
-        node.getLhsExpression().accept(this);
-        compilationContext.getBytecodeHelper().boxIfNeeded(compilationContext.getVirtualMachine().peekOperandStack());
-
-        node.getRhsExpression().accept(this);
-
-        compilationContext.getBytecodeHelper().emitInvokeStaticMethod(findMethod(PUBLIC|STATIC,
-                                                                                 "operator_instanceOf",
-                                                                                 BinaryOperatorFunctions.class,
-                                                                                 boolean.class, Object.class, Class.class)
-                                                                              .orElseThrow(() -> new UniversalException("Unable to find instanceOf method in "+BinaryOperatorFunctions.class)));
-        compilationContext.getVirtualMachine().loadOperandOfType(boolean.class);
         return false;
     }
 

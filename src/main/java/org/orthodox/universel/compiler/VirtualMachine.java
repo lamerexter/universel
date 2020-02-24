@@ -17,7 +17,7 @@ public class VirtualMachine {
     }
 
     public Class<?> peekOperandStack(int topOffset) {
-        return operandStack.get(operandStack.size()-1+topOffset);
+        return operandStack.get(operandStack.size()-1-topOffset);
     }
 
     public void loadOperandConstant(boolean operand) {

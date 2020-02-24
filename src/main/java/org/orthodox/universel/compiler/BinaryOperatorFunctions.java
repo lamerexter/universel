@@ -29,7 +29,7 @@
 package org.orthodox.universel.compiler;
 
 public class BinaryOperatorFunctions {
-    public static boolean operator_instanceOf(Object lhs, Class<?> rhs) {
+    public static boolean operator_INSTANCE_OF(Object lhs, Class<?> rhs) {
         return rhs != null && rhs.isInstance(lhs);
     }
 
