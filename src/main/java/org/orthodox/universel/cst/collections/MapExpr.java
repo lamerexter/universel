@@ -28,17 +28,16 @@
 
 package org.orthodox.universel.cst.collections;
 
-import org.orthodox.universel.cst.Expression;
-import org.orthodox.universel.cst.TokenImage;
-import org.orthodox.universel.cst.UniversalCodeVisitor;
+import org.orthodox.universel.cst.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 /**
  * An map entry expression on the Abstract Syntax Tree, of the form <code>[1, 2, 3, 4]</code>
  */
-public class MapExpr extends Expression {
+public class MapExpr extends Expression implements CompositeNode {
     /** The element expressions of this map entry expression. */
     private List<MapEntryExpr> entries;
 
@@ -50,7 +49,7 @@ public class MapExpr extends Expression {
      */
     public MapExpr(TokenImage tokenImage, List<MapEntryExpr> entries) {
         super(tokenImage);
-        this.entries = entries;
+        this.entries = entries == null ? Collections.emptyList() : entries;
     }
 
     /**
@@ -68,5 +67,10 @@ public class MapExpr extends Expression {
 
     public Class<?> getTypeDescriptor() {
         return Map.class;
+    }
+
+    @Override
+    public List<Node> getChildNodes() {
+        return (List)entries;
     }
 }

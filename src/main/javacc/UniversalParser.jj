@@ -397,7 +397,7 @@ TOKEN :
 
 <WITHIN_DQ_INTERP_STRING> TOKEN :
 {
-  <DQ_INTERP_STRING_COMPLEX_EXPR_START: "${" > { stateStack.push(WITHIN_DQ_INTERP_STRING); } : DEFAULT
+  <DQ_INTERP_STRING_COMPLEX_EXPR_START: "${" > { System.out.println("*********** Pushing state "+WITHIN_DQ_INTERP_STRING); stateStack.push(WITHIN_DQ_INTERP_STRING); } : DEFAULT
   |
   <DQ_INTERP_STRING_CHAR:
     (
@@ -1081,7 +1081,7 @@ Expression InterpolatedStringLiteral() :
 
                 (part=Expression() { parts=add(parts, part); s.append(part.getTokenImage().getImage()); })?
 
-                <RBRACE> { System.out.println("HERE ----------------------"); token_source.SwitchTo(WITHIN_DQ_INTERP_STRING); }
+                <RBRACE> { s.append(token.image); }
             )
         )*
         <DQ_INTERP_STRING_END>
@@ -1128,7 +1128,7 @@ Expression InterpolatedStringLiteral() :
 
                     (part=Expression() { parts=add(parts, part); s.append(part.getTokenImage().getImage()); })?
 
-                    <RBRACE> { s.append(token.image); token_source.SwitchTo(WITHIN_TQ_INTERP_STRING); }
+                    <RBRACE> { s.append(token.image); }
                 )
             )*
             <TQ_INTERP_STRING_END>

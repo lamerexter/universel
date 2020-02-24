@@ -28,16 +28,20 @@
 
 package org.orthodox.universel.cst.collections;
 
+import org.orthodox.universel.cst.CompositeNode;
 import org.orthodox.universel.cst.Expression;
 import org.orthodox.universel.cst.Node;
 import org.orthodox.universel.cst.TokenImage;
 
+import java.util.List;
 import java.util.Map;
+
+import static org.beanplanet.core.util.ArrayUtil.asListOfNotNull;
 
 /**
  * An map entry expression on the Abstract Syntax Tree, consisting of a key and a value expression.</code>
  */
-public class MapEntryExpr extends Expression {
+public class MapEntryExpr extends Expression implements CompositeNode {
     /** The key expression of this map entry expression. */
     private Node keyExpression;
     /** The value expression of this map entry expression. */
@@ -77,4 +81,8 @@ public class MapEntryExpr extends Expression {
         return Map.Entry.class;
     }
 
+    @Override
+    public List<Node> getChildNodes() {
+        return asListOfNotNull(keyExpression, valueExpression);
+    }
 }

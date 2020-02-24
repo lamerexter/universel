@@ -27,9 +27,12 @@
  */
 package org.orthodox.universel.cst;
 
+import java.util.List;
 import java.util.Objects;
 
-public class BinaryExpression extends Expression {
+import static org.beanplanet.core.util.ArrayUtil.asListOfNotNull;
+
+public class BinaryExpression extends Expression implements CompositeNode {
     protected Operator operator;
 
     protected Expression lhsExpression;
@@ -90,5 +93,10 @@ public class BinaryExpression extends Expression {
     public boolean accept(UniversalCodeVisitor visitor) {
         visitor.visitBinaryExpression(this);
         return true;
+    }
+
+    @Override
+    public List<Node> getChildNodes() {
+        return asListOfNotNull(lhsExpression, rhsExpression);
     }
 }

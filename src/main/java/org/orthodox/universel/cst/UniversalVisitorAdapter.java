@@ -52,6 +52,8 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
 
     @Override
     public boolean visitBinaryExpression(BinaryExpression node) {
+        node.getLhsExpression().accept(this);
+        node.getRhsExpression().accept(this);
         return false;
     }
 

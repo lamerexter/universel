@@ -38,7 +38,7 @@ public class Universal implements Logger {
         Script scriptNode = parse(script);
 
         if (astType == ImportDecl.class && scriptNode.getImportDeclaration() != null) return (T)scriptNode.getImportDeclaration();
-        return new ParseTree(scriptNode).postorderStream()
+        return new ParseTree(scriptNode).preorderStream()
                                         .filter(n -> astType.isAssignableFrom(n.getClass()))
                                         .map(n -> (T)n)
                                         .findFirst()
