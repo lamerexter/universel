@@ -134,6 +134,7 @@ TOKEN :
   < INTERFACE: "interface" > |
   < IS: "is" > |
   < LONG: "long" > |
+  < LBRACE: "{" > { stateStack.push(curLexState); } |
   < NE: "!=" > |
   < NEW: "new" > |
   < NOT: "not" > |
@@ -397,7 +398,7 @@ TOKEN :
 
 <WITHIN_DQ_INTERP_STRING> TOKEN :
 {
-  <DQ_INTERP_STRING_COMPLEX_EXPR_START: "${" > { System.out.println("*********** Pushing state "+WITHIN_DQ_INTERP_STRING); stateStack.push(WITHIN_DQ_INTERP_STRING); } : DEFAULT
+  <DQ_INTERP_STRING_COMPLEX_EXPR_START: "${" > { stateStack.push(WITHIN_DQ_INTERP_STRING); } : DEFAULT
   |
   <DQ_INTERP_STRING_CHAR:
     (
@@ -1074,12 +1075,38 @@ Expression InterpolatedStringLiteral() :
     (
         <DQ_INTERP_STRING_START> { startLine=token.beginLine; startColumn=token.beginColumn; s.append("\"");}
         (
-            <DQ_INTERP_STRING_CHAR> { parts=add(parts, new StringLiteralExpr(tokenImage())); s.append(token.image); }
+            <DQ_INTERP_STRING_CHAR> {
+                                        s.append(token.image);
+
+                                        if (p.length() == 0) {
+                                            partStartLine = token.beginLine;
+                                            partStartColumn = token.beginColumn;
+                                        }
+                                        partEndLine = token.endLine;
+                                        partEndColumn = token.endColumn;
+                                        p.append(token.image);
+                                    }
             |
             (
                 <DQ_INTERP_STRING_COMPLEX_EXPR_START>
 
-                (part=Expression() { parts=add(parts, part); s.append(part.getTokenImage().getImage()); })?
+                                    {
+                                        s.append(token.image);
+
+                                        // Deal with any preceding character data
+                                        if (p.length() > 0) {
+                                            parts=add(parts,
+                                                      new StringLiteralExpr(new TokenImage(partStartLine,
+                                                                                           partStartColumn,
+                                                                                           partEndLine,
+                                                                                           partEndColumn,
+                                                                                           p.toString())));
+                                            p.setLength(0);
+                                        }
+                                    }
+
+
+                ( part=Expression() { parts=add(parts, part); s.append(part.getTokenImage().getImage()); })?
 
                 <RBRACE> { s.append(token.image); }
             )
@@ -1087,6 +1114,16 @@ Expression InterpolatedStringLiteral() :
         <DQ_INTERP_STRING_END>
         {
              s.append(token.image);
+
+             // Deal with any remaining character data
+             if (p.length() > 0) {
+                 parts=add(parts,
+                           new StringLiteralExpr(new TokenImage(partStartLine,
+                                                                partStartColumn,
+                                                                partEndLine,
+                                                                partEndColumn,
+                                                                p.toString())));
+             }
 
              return new InterpolatedStringLiteralExpr(new TokenImage(startLine, startColumn, token.endLine, token.endColumn, s.toString()), parts, "\"");
         }
@@ -1238,18 +1275,18 @@ Expression MapOrSetExpression() :
      |
      (
         (
-            keyExpr=Expression() { addedFirst = false; }
+            keyExpr=PrimaryExpression() { addedFirst = false; }
         )
 
         [
             (
-              ("," valueExpr=Expression() { if (!addedFirst) { expressionList=add(expressionList, keyExpr); addedFirst = true; }  expressionList=add(expressionList, valueExpr); } )+
+              ("," valueExpr=PrimaryExpression() { if (!addedFirst) { expressionList=add(expressionList, keyExpr); addedFirst = true; }  expressionList=add(expressionList, valueExpr); } )+
             )
             |
             (
                 (":" { isSet = false; }
                     [
-                       valueExpr=Expression() { expressionList=add(expressionList,
+                       valueExpr=PrimaryExpression() { expressionList=add(expressionList,
                                                                    new MapEntryExpr(new TokenImage(keyExpr.getTokenImage().getStartLine(),
                                                                                                    keyExpr.getTokenImage().getStartColumn(),
                                                                                                    valueExpr.getTokenImage().getEndLine(),
@@ -1259,9 +1296,9 @@ Expression MapOrSetExpression() :
                                               }
                        (
                            ","
-                           keyExpr=Expression()
+                           keyExpr=PrimaryExpression()
                            ":"
-                           valueExpr=Expression() { expressionList=add(expressionList,
+                           valueExpr=PrimaryExpression() { expressionList=add(expressionList,
                                                                        new MapEntryExpr(new TokenImage(keyExpr.getTokenImage().getStartLine(),
                                                                                                        keyExpr.getTokenImage().getStartColumn(),
                                                                                                        valueExpr.getTokenImage().getEndLine(),

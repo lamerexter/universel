@@ -36,4 +36,20 @@ public class BinaryOperatorFunctions {
     public static Object operator_ELVIS(Object lhs, Object rhs) {
         return lhs != null ? lhs : rhs;
     }
+
+    public static boolean operator_GREATER_THAN(int lhs, int rhs) {
+        return lhs > rhs;
+    }
+
+    public static int operator_STAR(int lhs, int rhs) {
+        return lhs * rhs;
+    }
+
+    public static int operator_FORWARD_SLASH(int lhs, int rhs) {
+        return lhs / rhs;
+    }
+
+    public static int operator_MINUS(int lhs, int rhs) {
+        return lhs - rhs;
+    }
 }

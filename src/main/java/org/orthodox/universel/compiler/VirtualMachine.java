@@ -53,6 +53,12 @@ public class VirtualMachine {
         return (Class<T>)operandStack.pop();
     }
 
+    public void boxIfNeeded() {
+        if ( TypeUtil.isPrimitiveType(peekOperandStack()) ) {
+            box();
+        }
+    }
+
     public void convertOrBoxOperandIfNeeded(Class<?> toType) {
         Class<?> operandType = peekOperandStack();
         if ( toType.isAssignableFrom(operandType) ) return; // Compatible

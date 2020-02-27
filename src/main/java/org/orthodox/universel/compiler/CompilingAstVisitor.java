@@ -1,5 +1,6 @@
 package org.orthodox.universel.compiler;
 
+import org.beanplanet.core.Predicates;
 import org.beanplanet.core.lang.TypeUtil;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
@@ -10,7 +11,6 @@ import org.orthodox.universel.cst.collections.ListExpr;
 import org.orthodox.universel.cst.collections.MapEntryExpr;
 import org.orthodox.universel.cst.collections.MapExpr;
 import org.orthodox.universel.cst.collections.SetExpr;
-import org.orthodox.universel.cst.conditionals.ElvisExpression;
 import org.orthodox.universel.cst.conditionals.TernaryExpression;
 import org.orthodox.universel.cst.literals.*;
 import org.orthodox.universel.cst.types.ReferenceType;
@@ -20,12 +20,10 @@ import org.orthodox.universel.operations.UnaryFunctions;
 import javax.lang.model.type.NullType;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.*;
+import java.util.stream.Stream;
 
-import static java.lang.reflect.Modifier.PUBLIC;
-import static java.lang.reflect.Modifier.STATIC;
+import static java.lang.reflect.Modifier.*;
 import static org.beanplanet.core.lang.TypeUtil.findMethod;
 import static org.beanplanet.core.util.CollectionUtil.isNullOrEmpty;
 import static org.beanplanet.core.util.IterableUtil.nullSafe;
@@ -51,23 +49,36 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
 
     @Override
     public boolean visitBinaryExpression(BinaryExpression node) {
-        node.getLhsExpression().accept(this);
-        compilationContext.getBytecodeHelper().boxIfNeeded(compilationContext.getVirtualMachine().peekOperandStack());
-
-        node.getRhsExpression().accept(this);
-
-        final Class<?> expressionType = node.getRhsExpression().getTypeDescriptor();
         final String operatorMethodName = "operator_"+node.getOperator().name();
-        Optional<Method> operatorMethod = findMethod(PUBLIC | STATIC,
-                                                     operatorMethodName,
-                                                     BinaryOperatorFunctions.class,
-                                                     null,
-                                                     compilationContext.getVirtualMachine().peekOperandStack(1),
-                                                     compilationContext.getVirtualMachine().peekOperandStack());
-        compilationContext.getBytecodeHelper().emitInvokeStaticMethod(operatorMethod.orElseThrow(() -> new UniversalException("Unable to find binary operator ["+node.getOperator()
-                                                                                                                        +"] method in "+BinaryOperatorFunctions.class)));
-        compilationContext.getVirtualMachine().loadOperandOfType(operatorMethod.get().getReturnType());
-        return false;
+        Stream<Method> binaryImplMethods = TypeUtil.streamMethods(BinaryOperatorFunctions.class)
+                                                   .filter(m -> m.getName().equals(operatorMethodName))
+                                                   .filter(m -> isPublic(m.getModifiers()))
+                                                   .filter(m -> isStatic(m.getModifiers()))
+                                                   .filter(m -> m.getParameterCount() == 2)
+                                                   .filter(m -> m.getParameterTypes()[0].isAssignableFrom(compilationContext.getVirtualMachine().peekOperandStack(1)) );
+
+        // Separately implemented, for now...
+        if ( Operator.ELVIS == node.getOperator() || Operator.INSTANCE_OF == node.getOperator()) {
+            node.getLhsExpression().accept(this);
+            compilationContext.getVirtualMachine().boxIfNeeded();
+
+            node.getRhsExpression().accept(this);
+            compilationContext.getVirtualMachine().boxIfNeeded();
+
+            binaryImplMethods = binaryImplMethods.filter(m -> m.getParameterTypes()[1].isInstance(Class.class));
+        } else {
+            node.getLhsExpression().accept(this);
+
+            node.getRhsExpression().accept(this);
+
+            binaryImplMethods = binaryImplMethods.filter(m -> m.getParameterTypes()[1].isAssignableFrom(compilationContext.getVirtualMachine().peekOperandStack(1)) );
+        }
+
+        Method binaryImplMethod = binaryImplMethods.findFirst().orElseThrow(() -> new UniversalException("Unable to find binary operator [" + node.getOperator() + "] method in " + BinaryOperatorFunctions.class));
+
+        compilationContext.getBytecodeHelper().emitInvokeStaticMethod(binaryImplMethod);
+        compilationContext.getVirtualMachine().loadOperandOfType(binaryImplMethod.getReturnType());
+        return true;
     }
 
     @Override

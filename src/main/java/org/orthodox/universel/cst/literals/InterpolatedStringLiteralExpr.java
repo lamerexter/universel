@@ -1,9 +1,6 @@
 package org.orthodox.universel.cst.literals;
 
-import org.orthodox.universel.cst.Expression;
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.TokenImage;
-import org.orthodox.universel.cst.UniversalCodeVisitor;
+import org.orthodox.universel.cst.*;
 
 import java.util.Collections;
 import java.util.List;
@@ -11,7 +8,7 @@ import java.util.List;
 /**
  * An interpolated string literal on the Abstract Syntax Tree.
  */
-public class InterpolatedStringLiteralExpr extends Expression {
+public class InterpolatedStringLiteralExpr extends Expression implements CompositeNode {
     /** The delimiter of this string. */
     private String delimeter = "";
 
@@ -64,5 +61,10 @@ public class InterpolatedStringLiteralExpr extends Expression {
 
     public Class<?> getTypeDescriptor() {
         return String.class;
+    }
+
+    @Override
+    public List<Node> getChildNodes() {
+        return parts != null ? parts : Collections.emptyList();
     }
 }

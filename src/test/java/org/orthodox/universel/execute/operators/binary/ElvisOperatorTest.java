@@ -41,7 +41,12 @@ public class ElvisOperatorTest {
     }
 
     @Test
-    void handles_null() {
+    void returnsRhs_whenLhs_null() {
         assertThat(execute("null ?: '''Hey Ma'am, it was null!'''"), equalTo("Hey Ma'am, it was null!"));
+    }
+
+    @Test
+    void returnsRhsBoxed_whenLhs_null() {
+        assertThat(execute("null ?: 1"), equalTo(1));
     }
 }

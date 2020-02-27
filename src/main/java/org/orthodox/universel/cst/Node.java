@@ -27,7 +27,6 @@
  */
 package org.orthodox.universel.cst;
 
-import org.beanplanet.core.util.PropertyBasedToStringBuilder;
 import org.orthodox.universel.ast.AstVisitor;
 
 /**
@@ -132,8 +131,8 @@ public abstract class Node implements UniversalCodeVisitable {
         return Object.class;
     }
 
-    @Override
-    public String toString() {
-        return new PropertyBasedToStringBuilder(this).build();
-    }
+//    @Override
+//    public String toString() {
+//        return new PropertyBasedToStringBuilder(this).build();
+//    }
 }

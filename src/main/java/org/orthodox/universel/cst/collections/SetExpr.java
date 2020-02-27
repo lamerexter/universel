@@ -28,10 +28,7 @@
 
 package org.orthodox.universel.cst.collections;
 
-import org.orthodox.universel.cst.Expression;
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.TokenImage;
-import org.orthodox.universel.cst.UniversalCodeVisitor;
+import org.orthodox.universel.cst.*;
 
 import java.util.Collections;
 import java.util.List;
@@ -40,7 +37,7 @@ import java.util.Set;
 /**
  * An set expression on the Abstract Syntax Tree, of the form <code>{}1, 2, 3, 3, 4}</code>
  */
-public class SetExpr extends Expression {
+public class SetExpr extends Expression implements CompositeNode {
     /** The element expressions of this set expression. */
     private List<Node> elements;
 
@@ -76,5 +73,10 @@ public class SetExpr extends Expression {
      */
     public List<Node> getElements() {
         return elements == null ? Collections.emptyList() : elements;
+    }
+
+    @Override
+    public List<Node> getChildNodes() {
+        return elements;
     }
 }

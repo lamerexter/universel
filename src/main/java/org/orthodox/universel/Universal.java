@@ -25,11 +25,11 @@ public class Universal implements Logger {
 
     public static final Script parse(String script) {
         long startTimeMillis = System.currentTimeMillis();
-        LOG.info("Start parse of script [{0}] ...", script);
+//        LOG.info("Start parse of script [{0}] ...", script);
         UniversalCompiler compiler = new UniversalCompiler();
         Script scriptTerminal = compiler.parse(script);
         long endTimeMillis = System.currentTimeMillis();
-        LOG.info("End parse of script [{0}] in {1}", script, SizeUtil.getElapsedTimeSpecificationDescription(endTimeMillis-startTimeMillis));
+//        LOG.info("End parse of script [{0}] in {1}", script, SizeUtil.getElapsedTimeSpecificationDescription(endTimeMillis-startTimeMillis));
         return scriptTerminal;
     }
 
@@ -112,10 +112,10 @@ public class Universal implements Logger {
         }
         MyClassLoader classLoader = new MyClassLoader();
 
-        LOG.info("Beginning execution of script [{0}] ...", script);
+//        LOG.info("Beginning execution of script [{0}] ...", script);
         Class aClass = classLoader.defineClass(compiledUnit.getFullyQualifiedName().replace('/','.'), compiledUnit.getCode().readFullyAsBytes());
         Object result = TypeUtil.invokeStaticMethod(aClass, "execute", binding);
-        LOG.info("Completed execution of script [{0}] in {1}", script, SizeUtil.getElapsedTimeSpecificationDescription(compiledUnit.getCompilationTime()));
+//        LOG.info("Completed execution of script [{0}] in {1}", script, SizeUtil.getElapsedTimeSpecificationDescription(compiledUnit.getCompilationTime()));
         return (T)result;
     }
 
@@ -127,10 +127,10 @@ public class Universal implements Logger {
      * reference to the compiled bytecode if compilation succeeded.
      */
     public static CompiledUnit compile(String script) {
-        LOG.info("Beginning compilation of script [{0}] ...", script);
+//        LOG.info("Beginning compilation of script [{0}] ...", script);
         UniversalCompiler compiler = new UniversalCompiler();
         CompiledUnit compiledUnit = compiler.compile(script);
-        LOG.info("Compilation of script [{0}] completed", script);
+//        LOG.info("Compilation of script [{0}] completed", script);
 
         return compiledUnit;
     }
