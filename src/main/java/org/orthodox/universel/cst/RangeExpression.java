@@ -32,8 +32,8 @@ public class RangeExpression extends BinaryExpression {
    public RangeExpression(Operator operator, Expression lhsExpr, Expression rhsExpr) {
       super(operator, lhsExpr, rhsExpr);
    }
-
-   public boolean accept(UniversalCodeVisitor visitor) {
-      return visitor.visitRangeExpression(this);
-   }
+//
+//   public boolean accept(UniversalCodeVisitor visitor) {
+//      return visitor.visitRangeExpression(this);
+//   }
 }

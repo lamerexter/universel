@@ -28,6 +28,7 @@
 package org.orthodox.universel.cst.conditionals;
 
 import org.orthodox.universel.cst.Expression;
+import org.orthodox.universel.cst.Node;
 import org.orthodox.universel.cst.UniversalCodeVisitor;
 
 import static org.orthodox.universel.cst.TokenImage.range;
@@ -72,7 +73,7 @@ public class TernaryExpression extends Expression {
       this.rhsExpression = rhsExpression;
    }
 
-   public boolean accept(UniversalCodeVisitor visitor) {
+   public Node accept(UniversalCodeVisitor visitor) {
       return visitor.visitTernaryExpression(this);
    }
 }

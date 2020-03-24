@@ -133,6 +133,8 @@ TOKEN :
   < INT: "int" > |
   < INTERFACE: "interface" > |
   < IS: "is" > |
+  < LT: "<" > |
+  < LTGT: "<>" > |
   < LONG: "long" > |
   < LBRACE: "{" > { stateStack.push(curLexState); } |
   < NE: "!=" > |
@@ -144,9 +146,11 @@ TOKEN :
   < NULL: "null" > |
   < OR: "or" > |
   < PACKAGE: "package" > |
+  < RANGE_INCLUSIVE: ".." > |
   < RBRACE: "}" > { if ( !stateStack.isEmpty() ) { SwitchTo(stateStack.pop()); } } |
   < RETURN: "return" > |
   < SHORT: "short" > |
+  < TEQ: "===" > |
   < THEN: "then" > |
   < THROW: "throw" > |
   < THROWS: "Gthrows" > |
@@ -179,7 +183,25 @@ TOKEN :
     | <DECIMAL_LITERAL> <DECIMAL_EXPONENT> (["f","F","d","D"])?
     | <DECIMAL_LITERAL> (<DECIMAL_EXPONENT>)? ["f","F","d","D"]
   >
-
+   {
+     // Special case for decimals ending in dot (such as 1.) which are really the
+     // start of a range (e.g. 1..2).  Look ahead and change matched token, if necessary
+     if ( matchedToken.image.endsWith(".") ) {
+       try {
+         char ch = input_stream.readChar();
+         if (ch == '.') {
+           matchedToken.kind = DECIMAL_INTEGER_LITERAL;
+           matchedToken.endColumn--;
+           image.setLength(image.length()-1);
+           matchedToken.image = image.toString();
+           input_stream.backup(2);
+         }
+       }
+       catch (java.io.IOException ioEx){
+         // An EOF or IO error here will unfold later
+       }
+     }
+   }
 | < #DECIMAL_EXPONENT: ["e","E"] (["+","-"])? (<DECIMAL_LITERAL>)+ >
 | < HEX_FLOATING_POINT_LITERAL:
       <HEX_LITERAL> (".")? <HEX_EXPONENT> (["f","F","d","D"])?
@@ -608,6 +630,8 @@ Expression RelationalExpression() :
       (
       (<EQ> | <EQUAL>) rhsExpr=ShiftExpression() {  expr=new BinaryExpression(Operator.EQUAL, expr, rhsExpr); }
       |
+      <TEQ>  rhsExpr=ShiftExpression() { expr=new BinaryExpression(Operator.TREBLE_EQUAL, expr, rhsExpr); }
+      |
       "<"  rhsExpr=ShiftExpression() { expr=new BinaryExpression(Operator.LESS_THAN, expr, rhsExpr); }
       |
       ">"  rhsExpr=ShiftExpression() { expr=new BinaryExpression(Operator.GREATER_THAN, expr, rhsExpr); }
@@ -621,6 +645,8 @@ Expression RelationalExpression() :
       <INSTANCEOF> type=ReferenceType() { expr=new InstanceofExpression(Operator.INSTANCE_OF, expr, type); }
       |
       <BETWEEN> lhsExpr=ShiftExpression() <AND> rhsExpr=ShiftExpression() { expr=new BetweenExpression(expr, lhsExpr, rhsExpr, false); }
+      |
+      <LTGT> rhsExpr=ShiftExpression() {  expr=new BinaryExpression(Operator.LESS_GREATER_THAN, expr, rhsExpr); }
       |
       (<NE> | <NOT_EQUAL>) rhsExpr=ShiftExpression() {  expr=new BinaryExpression(Operator.EXCLAMATION_EQUAL, expr, rhsExpr); }
       |
@@ -1106,7 +1132,7 @@ Expression InterpolatedStringLiteral() :
                                     }
 
 
-                ( part=Expression() { parts=add(parts, part); s.append(part.getTokenImage().getImage()); })?
+                ( part=PrimaryExpression() { parts=add(parts, part); s.append(part.getTokenImage().getImage()); })?
 
                 <RBRACE> { s.append(token.image); }
             )
@@ -1163,7 +1189,7 @@ Expression InterpolatedStringLiteral() :
                             }
                         }
 
-                    (part=Expression() { parts=add(parts, part); s.append(part.getTokenImage().getImage()); })?
+                    (part=PrimaryExpression() { parts=add(parts, part); s.append(part.getTokenImage().getImage()); })?
 
                     <RBRACE> { s.append(token.image); }
                 )
@@ -1234,7 +1260,7 @@ List<Expression> ArgumentsList() :
 	Expression expr;
 }
 {
-   expr=Expression() { argumentsList=add(argumentsList, expr); } ("," expr=Expression() { argumentsList=add(argumentsList, expr); } )*
+   expr=PrimaryExpression() { argumentsList=add(argumentsList, expr); } ("," expr=PrimaryExpression() { argumentsList=add(argumentsList, expr); } )*
 
    { return argumentsList; }
 }

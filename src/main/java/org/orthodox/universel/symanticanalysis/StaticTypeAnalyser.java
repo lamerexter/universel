@@ -60,25 +60,25 @@ public class StaticTypeAnalyser extends UniversalVisitorAdapter implements Seman
     private ImportDecl importDecl;
 
     @Override
-    public void performAnalysis(SemanticAnalysisContext context, Node from) {
+    public Node performAnalysis(SemanticAnalysisContext context, Node from) {
         this.context = context;
-        from.accept(this);
+        return from.accept(this);
     }
 
     @Override
-    public boolean visitImportDeclaration(ImportDecl node) {
+    public Node visitImportDeclaration(ImportDecl node) {
         this.importDecl = node;
-        return true;
+        return node;
     }
 
     @Override
-    public boolean visitReferenceType(ReferenceType node) {
+    public Node visitReferenceType(ReferenceType node) {
         node.getReferredType().accept(this);
 
         Class<?> resolvedType = determineTypeOfReference(node);
         node.getReferredType().setTypeDescriptor(resolvedType);
 
-        return true;
+        return node;
     }
 
     private Class<?> determineTypeOfReference(ReferenceType node) {
@@ -186,7 +186,7 @@ public class StaticTypeAnalyser extends UniversalVisitorAdapter implements Seman
     }
 
     @Override
-    public  boolean visitTypeReference(TypeReference node) {
-        return true;
+    public Node visitTypeReference(TypeReference node) {
+        return node;
     }
 }

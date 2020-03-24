@@ -30,6 +30,7 @@ package org.orthodox.universel.parse.operators.binary;
 
 import org.junit.jupiter.api.Test;
 import org.orthodox.universel.cst.Expression;
+import org.orthodox.universel.cst.Node;
 import org.orthodox.universel.cst.conditionals.ElvisExpression;
 import org.orthodox.universel.cst.literals.StringLiteralExpr;
 
@@ -52,13 +53,13 @@ public class ElvisOperatorTest {
         assertThat(elvis.getLhsExpression(), instanceOf(StringLiteralExpr.class));
         assertThat(elvis.getRhsExpression(), instanceOf(StringLiteralExpr.class));
 
-        Expression lhs = elvis.getLhsExpression();
+        Node lhs = elvis.getLhsExpression();
         assertThat(lhs.getTokenImage().getStartLine(), equalTo(elvis.getTokenImage().getStartLine()));
         assertThat(lhs.getTokenImage().getStartColumn(), equalTo(elvis.getTokenImage().getStartColumn()));
         assertThat(lhs.getTokenImage().getEndLine(), equalTo(1));
         assertThat(lhs.getTokenImage().getEndColumn(), equalTo(14));
 
-        Expression rhs = elvis.getRhsExpression();
+        Node rhs = elvis.getRhsExpression();
         assertThat(rhs.getTokenImage().getStartLine(), equalTo(2));
         assertThat(rhs.getTokenImage().getStartColumn(), equalTo(1));
         assertThat(rhs.getTokenImage().getEndLine(), equalTo(elvis.getTokenImage().getEndLine()));

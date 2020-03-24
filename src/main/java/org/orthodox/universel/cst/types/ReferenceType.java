@@ -60,7 +60,7 @@ public final class ReferenceType extends Expression {
         return arrayCount;
     }
 
-    public boolean accept(UniversalCodeVisitor visitor) {
+    public Node accept(UniversalCodeVisitor visitor) {
         return visitor.visitReferenceType(this);
     }
 

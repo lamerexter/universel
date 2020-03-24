@@ -29,6 +29,8 @@ package org.orthodox.universel.cst;
 
 import org.orthodox.universel.ast.AstVisitor;
 
+import java.util.Objects;
+
 /**
  * The superclass of all UEL Abstact Syntax Tree (AST) elements.
  *
@@ -44,6 +46,8 @@ public abstract class Node implements UniversalCodeVisitable {
      * The parser token image backing this node.
      */
     private TokenImage tokenImage;
+
+    protected Class<?> typeDescriptor = Object.class;
 
 
     /**
@@ -61,8 +65,8 @@ public abstract class Node implements UniversalCodeVisitable {
         this.tokenImage = tokenImage;
     }
 
-    public boolean accept(UniversalCodeVisitor visitor) {
-        return true;
+    public Node accept(UniversalCodeVisitor visitor) {
+        return this;
     }
 
     public Node accept(AstVisitor visitor) {
@@ -128,11 +132,27 @@ public abstract class Node implements UniversalCodeVisitable {
     }
 
     public Class<?> getTypeDescriptor() {
-        return Object.class;
+        return typeDescriptor;
     }
 
-//    @Override
-//    public String toString() {
-//        return new PropertyBasedToStringBuilder(this).build();
-//    }
+    public void setTypeDescriptor(Class<?> typeDescriptor) {
+        this.typeDescriptor = typeDescriptor;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (!(o instanceof Node))
+            return false;
+        Node node = (Node) o;
+        return Objects.equals(parent, node.parent)
+               && Objects.equals(tokenImage, node.tokenImage)
+               && Objects.equals(typeDescriptor, node.typeDescriptor);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(parent, tokenImage, typeDescriptor);
+    }
 }

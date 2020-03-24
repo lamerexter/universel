@@ -70,7 +70,7 @@ public class Script extends Node implements CompositeNode {
         return bodyElements;
     }
 
-    public boolean accept(UniversalCodeVisitor visitor) {
+    public Node accept(UniversalCodeVisitor visitor) {
         return visitor.visitScript(this);
     }
 

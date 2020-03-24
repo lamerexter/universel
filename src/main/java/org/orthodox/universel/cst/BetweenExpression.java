@@ -103,7 +103,7 @@ public class BetweenExpression extends Expression {
       return Objects.hash(testExpression, lhsExpression, rhsExpression, not);
    }
 
-   public boolean accept(UniversalCodeVisitor visitor) {
+   public Node accept(UniversalCodeVisitor visitor) {
       return visitor.visitBetweenExpression(this);
    }
 }

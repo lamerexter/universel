@@ -35,30 +35,30 @@ import static org.beanplanet.core.util.ArrayUtil.asListOfNotNull;
 public class BinaryExpression extends Expression implements CompositeNode {
     protected Operator operator;
 
-    protected Expression lhsExpression;
+    protected Node lhsExpression;
 
-    protected Expression rhsExpression;
+    protected Node rhsExpression;
 
-    public BinaryExpression(Operator operator, Expression lhsExpr, Expression rhsExpr) {
+    public BinaryExpression(Operator operator, Node lhsExpr, Node rhsExpr) {
         super(TokenImage.range(lhsExpr, rhsExpr));
         setLhsExpression(lhsExpr);
         setRhsExpression(rhsExpr);
         setOperator(operator);
     }
 
-    public Expression getLhsExpression() {
+    public Node getLhsExpression() {
         return lhsExpression;
     }
 
-    public void setLhsExpression(Expression lhsExpression) {
+    public void setLhsExpression(Node lhsExpression) {
         this.lhsExpression = lhsExpression;
     }
 
-    public Expression getRhsExpression() {
+    public Node getRhsExpression() {
         return rhsExpression;
     }
 
-    public void setRhsExpression(Expression rhsExpression) {
+    public void setRhsExpression(Node rhsExpression) {
         this.rhsExpression = rhsExpression;
     }
 
@@ -80,7 +80,8 @@ public class BinaryExpression extends Expression implements CompositeNode {
         if (!(o instanceof BinaryExpression))
             return false;
         BinaryExpression that = (BinaryExpression) o;
-        return operator == that.operator
+        return super.equals(o)
+               && operator == that.operator
                && Objects.equals(lhsExpression, that.lhsExpression)
                && Objects.equals(rhsExpression, that.rhsExpression);
     }
@@ -90,9 +91,8 @@ public class BinaryExpression extends Expression implements CompositeNode {
         return Objects.hash(operator, lhsExpression, rhsExpression);
     }
 
-    public boolean accept(UniversalCodeVisitor visitor) {
-        visitor.visitBinaryExpression(this);
-        return true;
+    public Node accept(UniversalCodeVisitor visitor) {
+        return visitor.visitBinaryExpression(this);
     }
 
     @Override

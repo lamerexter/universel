@@ -81,6 +81,9 @@ public interface AstVisitor {
     Node visitNullLiteral(NullLiteralExpr node);
 
     Node visitNullTestExpression(NullTestExpression node);
+
+    Node visitNumericLiteralExpression(NumericLiteral node);
+
     Node visitRangeExpression(RangeExpression node);
 
     Node visitInterpolatedStringLiteral(InterpolatedStringLiteralExpr node);

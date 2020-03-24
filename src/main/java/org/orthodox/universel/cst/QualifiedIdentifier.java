@@ -79,7 +79,7 @@ public class QualifiedIdentifier extends Expression {
       this.name = name;
    }
 
-   public boolean accept(UniversalCodeVisitor visitor) {
+   public Node accept(UniversalCodeVisitor visitor) {
       return visitor.visitName(this);
    }
 }

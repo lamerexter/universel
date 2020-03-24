@@ -32,5 +32,5 @@ import org.orthodox.universel.cst.Node;
 import org.orthodox.universel.cst.UniversalCodeVisitor;
 
 public interface SemanticAnalyser extends UniversalCodeVisitor {
-    void performAnalysis(SemanticAnalysisContext context, Node from);
+    Node performAnalysis(SemanticAnalysisContext context, Node from);
 }

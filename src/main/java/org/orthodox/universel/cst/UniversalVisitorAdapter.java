@@ -36,122 +36,124 @@ import org.orthodox.universel.cst.conditionals.TernaryExpression;
 import org.orthodox.universel.cst.literals.*;
 import org.orthodox.universel.cst.types.ReferenceType;
 import org.orthodox.universel.cst.types.TypeReference;
+import org.orthodox.universel.symanticanalysis.conversion.TypeConversion;
 
 import static org.beanplanet.core.util.CollectionUtil.nullSafe;
 
 public class UniversalVisitorAdapter implements UniversalCodeVisitor {
     @Override
-    public boolean visitAnnotation(Annotation node) {
-        return false;
+    public Node visitAnnotation(Annotation node) {
+        return node;
     }
 
     @Override
-    public boolean visitBetweenExpression(BetweenExpression node) {
-        return false;
+    public Node visitBetweenExpression(BetweenExpression node) {
+        return node;
     }
 
     @Override
-    public boolean visitBinaryExpression(BinaryExpression node) {
+    public Node visitBinaryExpression(BinaryExpression node) {
         node.getLhsExpression().accept(this);
         node.getRhsExpression().accept(this);
-        return false;
+        return node;
     }
 
     @Override
-    public boolean visitNumericLiteralExpression(NumericLiteral node) {
-        return false;
+    public Node visitNumericLiteralExpression(NumericLiteral node) {
+        return (Node)node;
     }
 
     @Override
-    public boolean visitInExpression(InExpression node) {
-        return false;
+    public Node visitInExpression(InExpression node) {
+        return node;
     }
 
     @Override
-    public boolean visitInstanceofExpression(InstanceofExpression node) {
+    public Node visitInstanceofExpression(InstanceofExpression node) {
         node.getLhsExpression().accept(this);
         node.getRhsExpression().accept(this);
-        return false;
+        return node;
     }
 
     @Override
-    public boolean visitBooleanLiteral(BooleanLiteralExpr node) {
-        return true;
+    public Node visitBooleanLiteral(BooleanLiteralExpr node) {
+        return node;
     }
 
     @Override
-    public boolean visitImportDeclaration(ImportDecl node) {
-        return true;
+    public Node visitImportDeclaration(ImportDecl node) {
+        return node;
     }
 
     @Override
-    public boolean visitList(ListExpr node) {
+    public Node visitList(ListExpr node) {
         for (Node child : node.getElements()) {
             child.accept(this);
         }
-        return true;
+        return node;
     }
 
     @Override
-    public boolean visitMap(MapExpr node) {
+    public Node visitMap(MapExpr node) {
         for (Node child : nullSafe(node.getEntries())) {
             child.accept(this);
         }
 
-        return true;
+        return node;
     }
 
     @Override
-    public boolean visitMethodCall(MethodCall node) {
+    public Node visitMethodCall(MethodCall node) {
         for (Node child : node.getParameters()) {
             child.accept(this);
         }
 
-        return true;
+        return node;
     }
 
     @Override
-    public boolean visitModifiers(Modifiers node) {
-        return false;
+    public Node visitModifiers(Modifiers node) {
+        return node;
     }
 
     @Override
-    public boolean visitName(QualifiedIdentifier node) {
-        return false;
+    public Node visitName(QualifiedIdentifier node) {
+        return node;
     }
 
     @Override
-    public boolean visitName(Name node) {
-        return true;
+    public Node visitName(Name node) {
+        return node;
     }
 
     @Override
-    public boolean visitNullLiteral(NullLiteralExpr node) {
-        return true;
+    public Node visitNullLiteral(NullLiteralExpr node) {
+        return node;
     }
 
     @Override
-    public boolean visitNullTestExpression(NullTestExpression node) {
-        return false;
+    public Node visitNullTestExpression(NullTestExpression node) {
+        return node;
+    }
+
+//    @Override
+//    public Node visitRangeExpression(RangeExpression node) {
+//        return node;
+//    }
+
+    @Override
+    public Node visitReferenceType(ReferenceType node) {
+        return node;
     }
 
     @Override
-    public boolean visitRangeExpression(RangeExpression node) {
-        return false;
+    public Node visitInterpolatedStringLiteral(InterpolatedStringLiteralExpr node) {
+        node.getParts().stream().forEach(c -> c.accept(this));
+        return node;
     }
 
     @Override
-    public boolean visitReferenceType(ReferenceType node) {
-        return false;
-    }
-
-    @Override
-    public boolean visitInterpolatedStringLiteral(InterpolatedStringLiteralExpr node) {
-        return true;
-    }
-
-    @Override
-    public boolean visitScript(Script node) {
+    public Node visitScript(Script node) {
         if ( node.getImportDeclaration() != null ) {
             node.getImportDeclaration().accept(this);
         }
@@ -160,35 +162,44 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
             child.accept(this);
         }
 
-        return true;
+        return node;
     }
 
     @Override
-    public boolean visitSet(SetExpr node) {
+    public Node visitSet(SetExpr node) {
         for (Node child : node.getElements()) {
             child.accept(this);
         }
 
-        return true;
+        return node;
     }
 
     @Override
-    public boolean visitStringLiteral(StringLiteralExpr node) {
-        return true;
+    public Node visitStringLiteral(StringLiteralExpr node) {
+        return node;
     }
 
     @Override
-    public boolean visitTernaryExpression(TernaryExpression node) {
-        return false;
+    public Node visitTernaryExpression(TernaryExpression node) {
+        return node;
     }
 
     @Override
-    public boolean visitTypeReference(TypeReference node) {
-        return false;
+    public Node visitTypeReference(TypeReference node) {
+        return node;
     }
 
     @Override
-    public boolean visitUnaryExpression(UnaryExpression node) {
-        return node.getExpression() == null || node.getExpression().accept(this);
+    public Node visitTypeConversion(TypeConversion node) {
+        if ( node.getSource() != null ) {
+            node.getSource().accept(this);
+        }
+        return node;
+    }
+
+    @Override
+    public Node visitUnaryExpression(UnaryExpression node) {
+        node.getExpression().accept(this);
+        return node;
     }
 }

@@ -1,6 +1,5 @@
 package org.orthodox.universel.compiler;
 
-import jdk.nashorn.internal.codegen.CompilationException;
 import org.beanplanet.core.io.IoException;
 import org.beanplanet.core.io.resource.ByteArrayResource;
 import org.beanplanet.core.io.resource.Resource;
@@ -15,10 +14,8 @@ import org.orthodox.universal.parser.UniversalParser;
 import org.orthodox.universel.ast.conversion.CstTransformer;
 import org.orthodox.universel.cst.Node;
 import org.orthodox.universel.cst.Script;
-import org.orthodox.universel.symanticanalysis.MethodCallAnalyser;
-import org.orthodox.universel.symanticanalysis.SemanticAnalyser;
-import org.orthodox.universel.symanticanalysis.SemanticAnalysisContext;
-import org.orthodox.universel.symanticanalysis.StaticTypeAnalyser;
+import org.orthodox.universel.symanticanalysis.*;
+import org.orthodox.universel.symanticanalysis.conversion.WideningNumericConversionAnalyser;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -35,7 +32,8 @@ public class UniversalCompiler {
 
     private static final List<SemanticAnalyser> SEMANTIC_AANALYSERS = asList(
             new MethodCallAnalyser(),
-            new StaticTypeAnalyser()
+            new StaticTypeAnalyser(),
+            new CopyOnChangeAstVisitor(new WideningNumericConversionAnalyser())
     );
 
     public Script parse(String compilationUnit) { return parse(new StringResource(compilationUnit)); }
@@ -66,7 +64,7 @@ public class UniversalCompiler {
         return compile(new StringResource(compilationUnit));
     }
 
-    private CompiledUnit compile(Resource compilationUnitResource) {
+    public CompiledUnit compile(Resource compilationUnitResource) {
         long startTime = System.currentTimeMillis();
 
         //----------------------------------------------------------------------------------------------------------
@@ -83,7 +81,7 @@ public class UniversalCompiler {
         final Messages messages = messages();
         SemanticAnalysisContext semanticAnalysisContext = new SemanticAnalysisContext(messages);
         for (SemanticAnalyser semanticAnalyser : SEMANTIC_AANALYSERS) {
-            semanticAnalyser.performAnalysis(semanticAnalysisContext, compilationUnitNonTerminal);
+            compilationUnitNonTerminal = semanticAnalyser.performAnalysis(semanticAnalysisContext, compilationUnitNonTerminal);
         }
 
         //----------------------------------------------------------------------------------------------------------
@@ -100,7 +98,7 @@ public class UniversalCompiler {
             ClassWriter cw = bch.generateClass(V1_8, ACC_PUBLIC, className, Object.class);
 
             // Generate execution method with binding
-            MethodVisitor mv = bch.generateMethod(ACC_PUBLIC + ACC_FINAL + ACC_STATIC, "execute", Object.class, Map.class);
+            MethodVisitor mv = bch.generateMethod(ACC_PUBLIC + ACC_FINAL + ACC_STATIC, "exec", Object.class, Map.class);
 
             CompilationContext compilationContext = new CompilationContext(mv, new VirtualMachine(bch), messages);
             ScriptScope scriptScope = new ScriptScope();

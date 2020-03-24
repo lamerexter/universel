@@ -1,7 +1,5 @@
 package org.orthodox.universel.compiler;
 
-import org.beanplanet.core.Predicates;
-import org.beanplanet.core.lang.TypeUtil;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.orthodox.universel.UniversalException;
@@ -15,15 +13,18 @@ import org.orthodox.universel.cst.conditionals.TernaryExpression;
 import org.orthodox.universel.cst.literals.*;
 import org.orthodox.universel.cst.types.ReferenceType;
 import org.orthodox.universel.cst.types.TypeReference;
-import org.orthodox.universel.operations.UnaryFunctions;
+import org.orthodox.universel.exec.operators.binary.BinaryOperatorRegistry;
+import org.orthodox.universel.exec.operators.binary.ConcurrentBinaryOperatorRegistry;
+import org.orthodox.universel.exec.operators.binary.PackageScanBinaryOperatorLoader;
+import org.orthodox.universel.exec.operators.unary.UnaryFunctions;
+import org.orthodox.universel.symanticanalysis.conversion.TypeConversion;
 
 import javax.lang.model.type.NullType;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.*;
-import java.util.stream.Stream;
 
-import static java.lang.reflect.Modifier.*;
+import static java.lang.reflect.Modifier.PUBLIC;
+import static java.lang.reflect.Modifier.STATIC;
 import static org.beanplanet.core.lang.TypeUtil.findMethod;
 import static org.beanplanet.core.util.CollectionUtil.isNullOrEmpty;
 import static org.beanplanet.core.util.IterableUtil.nullSafe;
@@ -31,88 +32,104 @@ import static org.objectweb.asm.Opcodes.*;
 import static org.orthodox.universel.StringEscapeUtil.unescapeUniversalCharacterEscapeSequences;
 
 public class CompilingAstVisitor extends UniversalVisitorAdapter {
+    private static BinaryOperatorRegistry binaryOperatorRegistry;
     private CompilationContext compilationContext;
+
+    private synchronized void checkLoaded() {
+        if ( binaryOperatorRegistry != null ) return;
+
+        PackageScanBinaryOperatorLoader loader = new PackageScanBinaryOperatorLoader();
+        BinaryOperatorRegistry newBinaryOperatorRegistry = new ConcurrentBinaryOperatorRegistry();
+        loader.load(newBinaryOperatorRegistry);
+        binaryOperatorRegistry = newBinaryOperatorRegistry;
+    }
 
     public CompilingAstVisitor(CompilationContext compilationContext) {
         this.compilationContext = compilationContext;
     }
 
     @Override
-    public boolean visitAnnotation(Annotation node) {
-        return false;
+    public Node visitAnnotation(Annotation node) {
+        return node;
     }
 
     @Override
-    public boolean visitBetweenExpression(BetweenExpression node) {
-        return false;
+    public Node visitBetweenExpression(BetweenExpression node) {
+        return node;
     }
 
     @Override
-    public boolean visitBinaryExpression(BinaryExpression node) {
-        final String operatorMethodName = "operator_"+node.getOperator().name();
-        Stream<Method> binaryImplMethods = TypeUtil.streamMethods(BinaryOperatorFunctions.class)
-                                                   .filter(m -> m.getName().equals(operatorMethodName))
-                                                   .filter(m -> isPublic(m.getModifiers()))
-                                                   .filter(m -> isStatic(m.getModifiers()))
-                                                   .filter(m -> m.getParameterCount() == 2)
-                                                   .filter(m -> m.getParameterTypes()[0].isAssignableFrom(compilationContext.getVirtualMachine().peekOperandStack(1)) );
+    public Node visitBinaryExpression(BinaryExpression node) {
+        checkLoaded();
+
+        Class<?> lhsType;
+        Class<?> rhsType;
 
         // Separately implemented, for now...
         if ( Operator.ELVIS == node.getOperator() || Operator.INSTANCE_OF == node.getOperator()) {
             node.getLhsExpression().accept(this);
             compilationContext.getVirtualMachine().boxIfNeeded();
+            lhsType = compilationContext.getVirtualMachine().peekOperandStack();
 
             node.getRhsExpression().accept(this);
             compilationContext.getVirtualMachine().boxIfNeeded();
-
-            binaryImplMethods = binaryImplMethods.filter(m -> m.getParameterTypes()[1].isInstance(Class.class));
+            rhsType = compilationContext.getVirtualMachine().peekOperandStack();
         } else {
             node.getLhsExpression().accept(this);
+            lhsType = compilationContext.getVirtualMachine().peekOperandStack();
 
             node.getRhsExpression().accept(this);
-
-            binaryImplMethods = binaryImplMethods.filter(m -> m.getParameterTypes()[1].isAssignableFrom(compilationContext.getVirtualMachine().peekOperandStack(1)) );
+            rhsType = compilationContext.getVirtualMachine().peekOperandStack();
         }
 
-        Method binaryImplMethod = binaryImplMethods.findFirst().orElseThrow(() -> new UniversalException("Unable to find binary operator [" + node.getOperator() + "] method in " + BinaryOperatorFunctions.class));
+        if ( Operator.INSTANCE_OF == node.getOperator() ) {
+            rhsType = Class.class;
+        }
 
-        compilationContext.getBytecodeHelper().emitInvokeStaticMethod(binaryImplMethod);
-        compilationContext.getVirtualMachine().loadOperandOfType(binaryImplMethod.getReturnType());
-        return true;
+
+        Method binaryOperatorMethod = binaryOperatorRegistry.lookup(node.getOperator(), lhsType, rhsType)
+                                                            .orElseThrow(() -> new UniversalException("Unable to find applicable binary operator [" + node.getOperator() + "] method."));
+
+        if ( binaryOperatorMethod.getParameterTypes().length == 3 && Operator.class.isAssignableFrom(binaryOperatorMethod.getParameterTypes()[2]) ) {
+            compilationContext.getBytecodeHelper().emitLoadEnum(node.getOperator());
+        }
+        compilationContext.getBytecodeHelper().emitInvokeStaticMethod(binaryOperatorMethod);
+        compilationContext.getVirtualMachine().loadOperandOfType(binaryOperatorMethod.getReturnType());
+        return node;
     }
 
     @Override
-    public boolean visitNumericLiteralExpression(NumericLiteral node) {
+    public Node visitNumericLiteralExpression(NumericLiteral node) {
         Class<?> fpClass = node.getTypeDescriptor();
         compilationContext.getVirtualMachine().loadOperandOfType(fpClass);
         compilationContext.getBytecodeHelper().emitLoadNumericOperand(node.getValue());
 
-        return true;
+        return (Node)node;
     }
 
     @Override
-    public boolean visitBooleanLiteral(BooleanLiteralExpr node) {
+    public Node visitBooleanLiteral(BooleanLiteralExpr node) {
         boolean booleanValue = node.getBooleanValue();
         compilationContext.getVirtualMachine().loadOperandConstant(booleanValue);
         compilationContext.getBytecodeHelper().emitLoadBooleanOperand(booleanValue);
-        return true;
+        return node;
     }
 
     @Override
-    public boolean visitInExpression(InExpression node) {
-        return false;
+    public Node visitInExpression(InExpression node) {
+        return node;
     }
 
     @Override
-    public boolean visitImportDeclaration(ImportDecl node) {
+    public Node visitImportDeclaration(ImportDecl node) {
         compilationContext.pushNameScope(new TypeReferenceScope(compilationContext, node));
         compilationContext.pushMethodCallScope(new StaticMethodCallGenerator(compilationContext, node));
 
-        return false;
+        return node;
     }
 
     @Override
-    public boolean visitList(ListExpr node) {
+    public Node visitList(ListExpr node) {
         MethodVisitor mv = compilationContext.getBytecodeHelper().peekMethodVisitor();
         String className = Type.getInternalName(ArrayList.class);
         mv.visitTypeInsn(NEW, className);
@@ -135,11 +152,11 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
         }
         compilationContext.getVirtualMachine().loadOperandOfType(ArrayList.class);
 
-        return true;
+        return node;
     }
 
     @Override
-    public boolean visitMap(MapExpr node) {
+    public Node visitMap(MapExpr node) {
         MethodVisitor mv = compilationContext.getBytecodeHelper().peekMethodVisitor();
         String className = Type.getInternalName(LinkedHashMap.class);
         mv.visitTypeInsn(NEW, className);
@@ -159,23 +176,23 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
 
         compilationContext.getVirtualMachine().loadOperandOfType(LinkedHashMap.class);
 
-        return true;
+        return node;
     }
 
     @Override
-    public boolean visitMethodCall(MethodCall node) {
+    public Node visitMethodCall(MethodCall node) {
         compilationContext.generateCall(this, node);
-        return true;
+        return node;
     }
 
     @Override
-    public boolean visitModifiers(Modifiers node) {
-        return false;
+    public Node visitModifiers(Modifiers node) {
+        return node;
     }
 
     @Override
-    public boolean visitName(QualifiedIdentifier node) {
-        return false;
+    public Node visitName(QualifiedIdentifier node) {
+        return node;
     }
 
     private MethodVisitor mv() {
@@ -183,37 +200,32 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
     }
 
     @Override
-    public boolean visitName(Name node) {
+    public Node visitName(Name node) {
         compilationContext.generateAccess(node.getName());
-        return true;
+        return node;
     }
 
     @Override
-    public boolean visitNullLiteral(NullLiteralExpr node) {
+    public Node visitNullLiteral(NullLiteralExpr node) {
         compilationContext.getVirtualMachine().loadOperandOfType(NullType.class);
         compilationContext.getBytecodeHelper().emitLoadNullOperand();
-        return true;
+        return node;
     }
 
     @Override
-    public boolean visitNullTestExpression(NullTestExpression node) {
-        return false;
+    public Node visitNullTestExpression(NullTestExpression node) {
+        return node;
     }
 
-    @Override
-    public boolean visitRangeExpression(RangeExpression node) {
-        return false;
-    }
-
-    public boolean visitReferenceType(ReferenceType node) {
+    public Node visitReferenceType(ReferenceType node) {
         compilationContext.getVirtualMachine().loadOperandOfType(node.getTypeDescriptor());
         compilationContext.getBytecodeHelper().emitLoadType(node.getTypeDescriptor());
 
-        return false;
+        return node;
     }
 
     @Override
-    public boolean visitInterpolatedStringLiteral(InterpolatedStringLiteralExpr node) {
+    public Node visitInterpolatedStringLiteral(InterpolatedStringLiteralExpr node) {
         compilationContext.getBytecodeHelper().emitInstantiateType(StringBuilder.class);
 
         for (Node expr : nullSafe(node.getParts())) {
@@ -230,12 +242,12 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
         compilationContext.getBytecodeHelper().emitInvokeInstanceMethod(StringBuilder.class, "toString", String.class);
         compilationContext.getVirtualMachine().loadOperandOfType(String.class);
 
-        return true;
+        return node;
     }
 
 
     @Override
-    public boolean visitScript(Script node) {
+    public Node visitScript(Script node) {
         // Visit the import declaration section, if present
         if (node.getImportDeclaration() != null) {
             node.getImportDeclaration().accept(this);
@@ -245,11 +257,11 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
         for (Node child : nullSafe(node.getBodyElements())) {
             child.accept(this);
         }
-        return false;
+        return node;
     }
 
     @Override
-    public boolean visitSet(SetExpr node) {
+    public Node visitSet(SetExpr node) {
         MethodVisitor mv = compilationContext.getBytecodeHelper().peekMethodVisitor();
         String className = Type.getInternalName(LinkedHashSet.class);
         mv.visitTypeInsn(NEW, className);
@@ -272,28 +284,38 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
         }
         compilationContext.getVirtualMachine().loadOperandOfType(LinkedHashSet.class);
 
-        return true;
+        return node;
     }
 
     @Override
-    public boolean visitStringLiteral(StringLiteralExpr node) {
+    public Node visitStringLiteral(StringLiteralExpr node) {
         compilationContext.getVirtualMachine().loadOperandOfType(String.class);
         compilationContext.getBytecodeHelper().emitLoadStringOperand(unescapeUniversalCharacterEscapeSequences(node.getUndelimitedTokenImage()));
-        return true;
+        return node;
     }
 
     @Override
-    public boolean visitTernaryExpression(TernaryExpression node) {
-        return false;
+    public Node visitTernaryExpression(TernaryExpression node) {
+        return node;
     }
 
     @Override
-    public boolean visitTypeReference(TypeReference node) {
-        return false;
+    public Node visitTypeConversion(TypeConversion node) {
+        node.getSource().accept(this);
+
+        compilationContext.getVirtualMachine().boxIfNeeded();
+        compilationContext.getVirtualMachine().convert(node.getTargetType());
+
+        return node;
     }
 
     @Override
-    public boolean visitUnaryExpression(UnaryExpression node) {
+    public Node visitTypeReference(TypeReference node) {
+        return node;
+    }
+
+    @Override
+    public Node visitUnaryExpression(UnaryExpression node) {
         node.getExpression().accept(this);
 
         Class<?> unaryExprType = node.getTypeDescriptor();
@@ -301,11 +323,11 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
 
         if ( !unaryMinusFunction.isPresent() ) {
             compilationContext.getMessages().addError("uel.compiler.math.unary-minus.not-found", "Unable to find unary minus function for the given type: {0}", unaryExprType);
-            return true;
+            return node;
         }
 
         compilationContext.getBytecodeHelper().emitInvokeStaticMethod(unaryMinusFunction.get());
         compilationContext.getVirtualMachine().loadOperandOfType(unaryMinusFunction.get().getReturnType());
-        return true;
+        return node;
     }
 }

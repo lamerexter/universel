@@ -279,7 +279,7 @@ public final class Modifiers extends AbstractCompositeNode {
         return modifiers;
     }
 
-    public boolean accept(UniversalCodeVisitor visitor) {
+    public Node accept(UniversalCodeVisitor visitor) {
         return visitor.visitModifiers(this);
     }
 }

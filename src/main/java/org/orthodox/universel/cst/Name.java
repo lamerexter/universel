@@ -69,7 +69,7 @@ public class Name extends Expression implements Named {
     }
 
     @Override
-    public boolean accept(UniversalCodeVisitor visitor) {
+    public Node accept(UniversalCodeVisitor visitor) {
         return visitor.visitName(this);
     }
 }

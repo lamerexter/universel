@@ -39,6 +39,7 @@ import org.orthodox.universel.cst.conditionals.TernaryExpression;
 import org.orthodox.universel.cst.literals.*;
 import org.orthodox.universel.cst.types.ReferenceType;
 import org.orthodox.universel.cst.types.TypeReference;
+import org.orthodox.universel.symanticanalysis.conversion.TypeConversion;
 
 /**
  * A use of the <a href="">visitor pattern</a> for working with AST nodes. There is a <code>visit&lt;AstNode&gt;(&lt;AstNode&gt)</code>
@@ -47,88 +48,90 @@ import org.orthodox.universel.cst.types.TypeReference;
  * @author Gary Watson
  */
 public interface UniversalCodeVisitor {
-    boolean visitAnnotation(Annotation node);
+    Node visitAnnotation(Annotation node);
 
-    //   boolean visitAnnotationDeclaration(AnnotationDeclaration node);
-//   boolean visitArrayCreationExpression(ArrayCreationExpression node);
-//   boolean visitAssertStatement(AssertStatement node);
-//   boolean visitAssignmentExpression(AssignmentExpression node);
-    boolean visitBetweenExpression(BetweenExpression node);
-    boolean visitNumericLiteralExpression(NumericLiteral node);
+    //   Node visitAnnotationDeclaration(AnnotationDeclaration node);
+//   Node visitArrayCreationExpression(ArrayCreationExpression node);
+//   Node visitAssertStatement(AssertStatement node);
+//   Node visitAssignmentExpression(AssignmentExpression node);
+    Node visitBetweenExpression(BetweenExpression node);
+    Node visitNumericLiteralExpression(NumericLiteral node);
 
-    boolean visitBinaryExpression(BinaryExpression node);
+    Node visitBinaryExpression(BinaryExpression node);
 
-    //   boolean visitAxisStepExpression(AxisStepExpression node);
-    //   boolean visitBlockStatement(BlockStatement node);
-//   boolean visitCaseExpression(CaseExpression node);
-//   boolean visitClassDeclaration(ClassDeclaration node);
-//   boolean visitClassExpression(ClassExpression node);
-//   boolean visitComment(Comment node);
-//   boolean visitCompoundBlock(CompoundBlock node);
-//   boolean visitConstructorDeclaration(ConstructorDeclaration node);
-//   boolean visitDoStatement(DoStatement node);
+    //   Node visitAxisStepExpression(AxisStepExpression node);
+    //   Node visitBlockStatement(BlockStatement node);
+//   Node visitCaseExpression(CaseExpression node);
+//   Node visitClassDeclaration(ClassDeclaration node);
+//   Node visitClassExpression(ClassExpression node);
+//   Node visitComment(Comment node);
+//   Node visitCompoundBlock(CompoundBlock node);
+//   Node visitConstructorDeclaration(ConstructorDeclaration node);
+//   Node visitDoStatement(DoStatement node);
 
-    //   boolean visitEnumDeclaration(EnumDeclaration node);
-//   boolean visitEmptyStatement(EmptyStatement node);
-//   boolean visitFieldDeclaration(FieldDeclaration node);
-//   boolean visitFieldExpression(FieldExpression node);
-//   boolean visitFilterExpression(FilterExpression node);
-//   boolean visitForEachStatement(ForEachStatement node);
-//   boolean visitForStatement(ForStatement node);
-//   boolean visitFunction(Function node);
+    //   Node visitEnumDeclaration(EnumDeclaration node);
+//   Node visitEmptyStatement(EmptyStatement node);
+//   Node visitFieldDeclaration(FieldDeclaration node);
+//   Node visitFieldExpression(FieldExpression node);
+//   Node visitFilterExpression(FilterExpression node);
+//   Node visitForEachStatement(ForEachStatement node);
+//   Node visitForStatement(ForStatement node);
+//   Node visitFunction(Function node);
 
-    boolean visitInExpression(InExpression node);
-//   boolean visitIfStatement(IfStatement node);
-//   boolean visitImportDeclaration(ImportDeclaration node);
-//   boolean visitInterfaceDeclaration(InterfaceDeclaration node);
-   boolean visitInstanceofExpression(InstanceofExpression node);
-//   boolean visitJUELStringExpression(JUELStringExpression node);
-//   boolean visitListExpression(ListExpression node);
-    boolean visitBooleanLiteral(BooleanLiteralExpr node);
+    Node visitInExpression(InExpression node);
+//   Node visitIfStatement(IfStatement node);
+//   Node visitImportDeclaration(ImportDeclaration node);
+//   Node visitInterfaceDeclaration(InterfaceDeclaration node);
+   Node visitInstanceofExpression(InstanceofExpression node);
+//   Node visitJUELStringExpression(JUELStringExpression node);
+//   Node visitListExpression(ListExpression node);
+    Node visitBooleanLiteral(BooleanLiteralExpr node);
 
-    boolean visitImportDeclaration(ImportDecl node);
+    Node visitImportDeclaration(ImportDecl node);
 
-    boolean visitList(ListExpr node);
+    Node visitList(ListExpr node);
 
-    boolean visitMap(MapExpr node);
+    Node visitMap(MapExpr node);
 
-    boolean visitMethodCall(MethodCall node);
+    Node visitMethodCall(MethodCall node);
 
-    boolean visitModifiers(Modifiers node);
+    Node visitModifiers(Modifiers node);
 
-    boolean visitName(QualifiedIdentifier node);
+    Node visitName(QualifiedIdentifier node);
 
-    boolean visitName(Name node);
+    Node visitName(Name node);
 
-    boolean visitNullLiteral(NullLiteralExpr node);
+    Node visitNullLiteral(NullLiteralExpr node);
 
-    //   boolean visitMapExpression(MapExpression node);
-//   boolean visitMethodDeclaration(MethodDeclaration node);
+    //   Node visitMapExpression(MapExpression node);
+//   Node visitMethodDeclaration(MethodDeclaration node);
 
-    boolean visitNullTestExpression(NullTestExpression node);
-//   boolean visitObjectCreationExpression(ObjectCreationExpression node);
-//   boolean visitPackageDeclaration(PackageDeclaration node);
-//   boolean visitPathExpression(PathExpression node);
-    boolean visitRangeExpression(RangeExpression node);
+    Node visitNullTestExpression(NullTestExpression node);
+//   Node visitObjectCreationExpression(ObjectCreationExpression node);
+//   Node visitPackageDeclaration(PackageDeclaration node);
+//   Node visitPathExpression(PathExpression node);
+//    Node visitRangeExpression(RangeExpression node);
 
-    boolean visitReferenceType(ReferenceType node);
+    Node visitReferenceType(ReferenceType node);
 
-    //   boolean visitReturnStatement(ReturnStatement node);
-    boolean visitInterpolatedStringLiteral(InterpolatedStringLiteralExpr node);
+    //   Node visitReturnStatement(ReturnStatement node);
+    Node visitInterpolatedStringLiteral(InterpolatedStringLiteralExpr node);
 
-    boolean visitScript(Script node);
+    Node visitScript(Script node);
 
-    boolean visitSet(SetExpr node);
+    Node visitSet(SetExpr node);
 
-    boolean visitStringLiteral(StringLiteralExpr node);
+    Node visitStringLiteral(StringLiteralExpr node);
 
-    //   boolean visitSetExpression(SetExpression node);
-    boolean visitTernaryExpression(TernaryExpression node);
+    //   Node visitSetExpression(SetExpression node);
+    Node visitTernaryExpression(TernaryExpression node);
 
-    //   boolean visitThrowStatement(ThrowStatement node);
-    boolean visitTypeReference(TypeReference node);
-//   boolean visitTryStatement(TryStatement node);
-    boolean visitUnaryExpression(UnaryExpression node);
+    //   Node visitThrowStatement(ThrowStatement node);
+    Node visitTypeReference(TypeReference node);
+
+    Node visitTypeConversion(TypeConversion node);
+//   Node visitTryStatement(TryStatement node);
+    Node visitUnaryExpression(UnaryExpression node);
 //   boolean visitVariableDeclaration(VariableDeclaration node);
 //   boolean visitVariableDeclarationExpression(VariableDeclarationExpression node);
 //   boolean visitWhileLoop(WhileStatement node);

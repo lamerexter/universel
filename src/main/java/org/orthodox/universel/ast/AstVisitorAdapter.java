@@ -130,6 +130,11 @@ public class AstVisitorAdapter implements AstVisitor {
     }
 
     @Override
+    public Node visitNumericLiteralExpression(NumericLiteral node) {
+        return (Node)node;
+    }
+
+    @Override
     public Node visitRangeExpression(RangeExpression node) {
         return node;
     }

@@ -61,7 +61,7 @@ public class MapExpr extends Expression implements CompositeNode {
         return entries;
     }
 
-    public boolean accept(UniversalCodeVisitor visitor) {
+    public Node accept(UniversalCodeVisitor visitor) {
         return visitor.visitMap(this);
     }
 

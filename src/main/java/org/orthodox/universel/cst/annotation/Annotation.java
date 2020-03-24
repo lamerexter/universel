@@ -71,7 +71,7 @@ public abstract class Annotation extends Node {
       this.name = name;
    }
 
-   public boolean accept(UniversalCodeVisitor visitor) {
+   public Node accept(UniversalCodeVisitor visitor) {
       return visitor.visitAnnotation(this);
    }
 }

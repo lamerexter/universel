@@ -29,6 +29,7 @@
 package org.orthodox.universel.cst.literals;
 
 import org.orthodox.universel.cst.Expression;
+import org.orthodox.universel.cst.Node;
 import org.orthodox.universel.cst.TokenImage;
 import org.orthodox.universel.cst.UniversalCodeVisitor;
 
@@ -93,7 +94,7 @@ public abstract class FloatingPointLiteral extends Expression implements Numeric
      * @param visitor the visitor visiting the node.
      * @return true if visitation is to continue after this visit, false if visitation is requested to stop after this visit.
      */
-    public boolean accept(UniversalCodeVisitor visitor) {
+    public Node accept(UniversalCodeVisitor visitor) {
         return visitor.visitNumericLiteralExpression(this);
     }
 }

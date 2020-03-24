@@ -30,6 +30,7 @@ package org.orthodox.universel.cst.types;
 
 import org.beanplanet.core.models.path.NamePath;
 import org.orthodox.universel.cst.Expression;
+import org.orthodox.universel.cst.Node;
 import org.orthodox.universel.cst.TokenImage;
 import org.orthodox.universel.cst.UniversalCodeVisitor;
 
@@ -83,7 +84,7 @@ public abstract class TypeReference extends Expression {
         this.typeDescriptor = typeDescriptor;
     }
 
-    public boolean accept(UniversalCodeVisitor visitor) {
+    public Node accept(UniversalCodeVisitor visitor) {
         return visitor.visitTypeReference(this);
     }
 }

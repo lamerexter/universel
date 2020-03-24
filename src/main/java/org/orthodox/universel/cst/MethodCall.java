@@ -32,13 +32,14 @@ import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.orthodox.universel.cst.TokenImage.range;
 
 /**
  * A method call expression, consisting of a name and zero or more parameter expressions.
  */
-public class MethodCall extends Expression {
+public class MethodCall extends Expression implements CompositeNode {
     /** The name of the method. */
     private Name name;
     /** The parameter expressions of this method call. */
@@ -81,7 +82,7 @@ public class MethodCall extends Expression {
      * @param visitor the visitor visiting the node.
      * @return true if visitation is to continue after this visit, false if visitation is requested to stop after this visit.
      */
-    public boolean accept(UniversalCodeVisitor visitor) {
+    public Node accept(UniversalCodeVisitor visitor) {
         return visitor.visitMethodCall(this);
     }
 
@@ -97,5 +98,11 @@ public class MethodCall extends Expression {
 
     public void setExecutable(Executable executable) {
         this.executable = executable;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Node> getChildNodes() {
+        return parameters == null ? Collections.emptyList() : (List)parameters;
     }
 }

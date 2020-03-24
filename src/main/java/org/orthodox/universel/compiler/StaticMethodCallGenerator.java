@@ -96,6 +96,8 @@ public class StaticMethodCallGenerator implements MethodCallScope {
                 paramExpr.accept(visitor);
                 compilationContext.getVirtualMachine().convertOrBoxOperandIfNeeded(executable.getParameterTypes()[n]);
             }
+
+            methodCall.getParameters().forEach( i -> compilationContext.getVirtualMachine().popOperand() );
         }
     }
 

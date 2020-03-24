@@ -66,8 +66,7 @@ public class NullTestExpression extends Expression {
         this.not = nullTest;
     }
 
-    public boolean accept(UniversalCodeVisitor visitor) {
-        visitor.visitNullTestExpression(this);
-        return true;
+    public Node accept(UniversalCodeVisitor visitor) {
+        return visitor.visitNullTestExpression(this);
     }
 }

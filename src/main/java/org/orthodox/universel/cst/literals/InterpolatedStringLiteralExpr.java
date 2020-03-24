@@ -33,7 +33,7 @@ public class InterpolatedStringLiteralExpr extends Expression implements Composi
      * @param visitor the visitor visiting the node.
      * @return true if visitation is to continue after this visit, false if visitation is requested to stop after this visit.
      */
-    public boolean accept(UniversalCodeVisitor visitor) {
+    public Node accept(UniversalCodeVisitor visitor) {
         return visitor.visitInterpolatedStringLiteral(this);
     }
 

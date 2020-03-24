@@ -74,7 +74,7 @@ public class UnaryExpression extends Expression implements CompositeNode {
         this.operator = operator;
     }
 
-    public boolean accept(UniversalCodeVisitor visitor) {
+    public Node accept(UniversalCodeVisitor visitor) {
         return visitor.visitUnaryExpression(this);
     }
 

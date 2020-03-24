@@ -1,6 +1,7 @@
 package org.orthodox.universel.cst.literals;
 
 import org.orthodox.universel.cst.Expression;
+import org.orthodox.universel.cst.Node;
 import org.orthodox.universel.cst.TokenImage;
 import org.orthodox.universel.cst.UniversalCodeVisitor;
 
@@ -19,7 +20,7 @@ public class NullLiteralExpr extends Expression {
         super(tokenImage);
     }
 
-    public boolean accept(UniversalCodeVisitor visitor) {
+    public Node accept(UniversalCodeVisitor visitor) {
         return visitor.visitNullLiteral(this);
     }
 

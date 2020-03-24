@@ -6,6 +6,7 @@ import org.beanplanet.core.lang.conversion.TypeConverter;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
+import org.orthodox.universel.cst.Operator;
 
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -248,5 +249,9 @@ public class BytecodeHelper {
         return Arrays.stream(types)
               .map(Type::getType)
               .toArray(Type[]::new);
+    }
+
+    public void emitLoadEnum(Operator operator) {
+        peekMethodVisitor().visitFieldInsn(GETSTATIC, Type.getInternalName(operator.getClass()), operator.name(), Type.getDescriptor(operator.getClass()));
     }
 }

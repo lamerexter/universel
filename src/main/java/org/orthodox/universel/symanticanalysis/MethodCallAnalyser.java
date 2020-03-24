@@ -52,22 +52,22 @@ public class MethodCallAnalyser extends UniversalVisitorAdapter implements Seman
     private ImportDecl importDecl;
 
     @Override
-    public void performAnalysis(SemanticAnalysisContext context, Node from) {
+    public Node performAnalysis(SemanticAnalysisContext context, Node from) {
         this.context = context;
-        from.accept(this);
+        return from.accept(this);
     }
 
     @Override
-    public boolean visitImportDeclaration(ImportDecl node) {
+    public Node visitImportDeclaration(ImportDecl node) {
         this.importDecl = node;
-        return true;
+        return node;
     }
 
     @Override
-    public boolean visitMethodCall(MethodCall methodCall) {
-        visitChildren(methodCall.getParameters());
-        resolveMethodCalls(methodCall);
-        return true;
+    public Node visitMethodCall(MethodCall node) {
+        visitChildren(node.getParameters());
+        resolveMethodCalls(node);
+        return node;
     }
 
     private void visitChildren(List<? extends Node> children) {
@@ -220,7 +220,7 @@ public class MethodCallAnalyser extends UniversalVisitorAdapter implements Seman
             Class<?> callParamType = methodCall.getParameters().get(n).getTypeDescriptor();
             Class<?> methodParamType = method.getParameterTypes()[n];
 
-            if ( !(NullType.class == callParamType || callParamType.isAssignableFrom(methodParamType)
+            if ( !(NullType.class == callParamType || methodParamType.isAssignableFrom(callParamType)
                    || boxTypeCompatible(callParamType, methodParamType)) ) return false;
         }
 

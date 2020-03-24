@@ -71,16 +71,16 @@ public class VirtualMachine {
             convert(toType);
     }
 
-    private void convert(Class<?> toType) {
+    public void convert(Class<?> toType) {
         bch.convert(peekOperandStack(), toType);
         replaceTopOperand(toType);
     }
 
-    private void unbox() {
+    public void unbox() {
         replaceTopOperand(bch.unbox(peekOperandStack()));
     }
 
-    private void box() {
+    public void box() {
         replaceTopOperand(bch.box(peekOperandStack()));
     }
 

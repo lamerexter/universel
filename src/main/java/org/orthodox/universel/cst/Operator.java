@@ -32,24 +32,26 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public enum Operator {
+    // Alphabetical Order please
     AMPERSAND("&"),
     AMPERSAND_ASSIGN("&=", true),
     ASSIGN("=", true),
     BETWEEN("between"),
-    CONTAINS("contains"),
-    ENDS_WITH("ends-with"),
-    EQUAL("=="), EXCLAMATION("!"),
-    EXCLAMATION_EQUAL("!="),
     CARAT("^"),
     CARAT_ASSIGN("^=", true),
+    CONTAINS("contains"),
     ELVIS("?:", true),
+    ENDS_WITH("ends-with"),
+    EQUAL("=="),
+    EXCLAMATION("!"),
+    EXCLAMATION_EQUAL("!="),
     FORWARD_SLASH("/"),
     FORWARD_SLASH_ASSIGN("/=", true),
     GREATER_THAN(">"),
     GREATER_THAN_EQUAL(">="),
     IN("in"),
     INSTANCE_OF("instanceof"),
-    SHIFT_LEFT_ASSIGN("<<=", true),
+    LESS_GREATER_THAN("<>"),
     LESS_THAN("<"),
     LESS_THAN_EQUAL("<="),
     LOGICAL_OR("or", true),
@@ -94,14 +96,17 @@ public enum Operator {
     RANGE_LEFT_INCLUSIVE_RIGHT_LT("..<"),
     RANGE_LEFT_INCLUSIVE_RIGHT_LTE("..<="),
     SELECTION("[...]"),
-    SHIFT_RIGHT_ASSIGN(">>=", true),
     SHIFT_LEFT("<<"),
+    SHIFT_LEFT_ASSIGN("<<=", true),
     SHIFT_RIGHT(">>"),
+    SHIFT_RIGHT_ASSIGN(">>=", true),
     STAR("*"),
     STAR_ASSIGN("*=", true),
     STARTS_WITH("starts-with"),
+    TREBLE_EQUAL("==="),
     TREBLE_SHIFT_RIGHT_ASSIGN(">>>=", true),
-    TREBLE_SHIFT_RIGHT(">>>"), TILDA("~");
+    TREBLE_SHIFT_RIGHT(">>>"),
+    TILDA("~");
 
     private final String symbol;
     private final boolean lValue;

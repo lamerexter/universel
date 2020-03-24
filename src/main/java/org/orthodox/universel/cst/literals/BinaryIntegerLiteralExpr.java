@@ -28,7 +28,6 @@
 
 package org.orthodox.universel.cst.literals;
 
-import org.beanplanet.core.util.StringUtil;
 import org.orthodox.universel.cst.TokenImage;
 
 import java.math.BigInteger;

@@ -29,15 +29,9 @@
 package org.orthodox.universel.ast.conversion;
 
 import org.orthodox.universel.ast.AstVisitor;
-import org.orthodox.universel.cst.*;
-import org.orthodox.universel.cst.annotation.Annotation;
-import org.orthodox.universel.cst.collections.ListExpr;
-import org.orthodox.universel.cst.collections.MapExpr;
-import org.orthodox.universel.cst.collections.SetExpr;
-import org.orthodox.universel.cst.conditionals.ElvisExpression;
-import org.orthodox.universel.cst.conditionals.TernaryExpression;
-import org.orthodox.universel.cst.literals.*;
-import org.orthodox.universel.cst.types.TypeReference;
+import org.orthodox.universel.ast.AstVisitorAdapter;
+import org.orthodox.universel.cst.Node;
+import org.orthodox.universel.cst.Script;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,110 +46,10 @@ import java.util.List;
  *     made to the tree. That is, tends towards an AST through iterative application of a number of specific trabsformers.
  * </p>
  */
-public class CstTransformer implements AstVisitor {
+public class CstTransformer extends AstVisitorAdapter {
     private static final List<AstVisitor> cstTransformers = Arrays.asList(
 //        new UnaryMinusLiteralTransformer()
     );
-
-    @Override
-    public Node visitAnnotation(Annotation node) {
-        return node;
-    }
-
-    @Override
-    public Node visitBetweenExpression(BetweenExpression node) {
-        return node;
-    }
-
-    @Override
-    public Node visitBinaryExpression(BinaryExpression node) {
-        return node;
-    }
-
-    @Override
-    public Node visitElvisExpression(ElvisExpression node) {
-        return node;
-    }
-
-    @Override
-    public Node visitInExpression(InExpression node) {
-        return node;
-    }
-
-    @Override
-    public Node visitInstanceofExpression(InstanceofExpression node) {
-        return node;
-    }
-
-    @Override
-    public Node visitBooleanLiteral(BooleanLiteralExpr node) {
-        return node;
-    }
-
-    @Override
-    public Node visitDecimalFloatingPointLiteral(DecimalFloatingPointLiteralExpr node) {
-        return node;
-    }
-
-    @Override
-    public Node visitDecimalIntegerLiteral(DecimalIntegerLiteralExpr node) {
-        return node;
-    }
-
-    @Override
-    public Node visitImportDeclaration(ImportDecl node) {
-        return node;
-    }
-
-    @Override
-    public Node visitList(ListExpr node) {
-        return node;
-    }
-
-    @Override
-    public Node visitMap(MapExpr node) {
-        return node;
-    }
-
-    @Override
-    public Node visitMethodCall(MethodCall node) {
-        return node;
-    }
-
-    @Override
-    public Node visitModifiers(Modifiers node) {
-        return node;
-    }
-
-    @Override
-    public Node visitName(QualifiedIdentifier node) {
-        return node;
-    }
-
-    @Override
-    public Node visitName(Name node) {
-        return node;
-    }
-
-    @Override
-    public Node visitNullLiteral(NullLiteralExpr node) {
-        return node;
-    }
-
-    @Override
-    public Node visitNullTestExpression(NullTestExpression node) {
-        return node;
-    }
-
-    @Override
-    public Node visitRangeExpression(RangeExpression node) {
-        return node;
-    }
-
-    @Override
-    public Node visitInterpolatedStringLiteral(InterpolatedStringLiteralExpr node) {
-        return node;
-    }
 
     @Override
     public Node visitScript(Script node) {
@@ -174,30 +68,5 @@ public class CstTransformer implements AstVisitor {
         }
 
         return newNode;
-    }
-
-    @Override
-    public Node visitSet(SetExpr node) {
-        return node;
-    }
-
-    @Override
-    public Node visitStringLiteral(StringLiteralExpr node) {
-        return node;
-    }
-
-    @Override
-    public Node visitTernaryExpression(TernaryExpression node) {
-        return node;
-    }
-
-    @Override
-    public Node visitTypeReference(TypeReference node) {
-        return node;
-    }
-
-    @Override
-    public Node visitUnaryExpression(UnaryExpression node) {
-        return transform(node);
     }
 }

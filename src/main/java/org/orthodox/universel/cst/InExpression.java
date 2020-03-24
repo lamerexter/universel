@@ -50,7 +50,7 @@ public class InExpression extends BinaryExpression {
      * @return the left-hand-side test operand expression of the InExpression.
      * @see #getLhsExpression()
      */
-    public Expression getTestExpression() {
+    public Node getTestExpression() {
         return getLhsExpression();
     }
 
@@ -58,7 +58,7 @@ public class InExpression extends BinaryExpression {
      * Sets the test operand expression of the InExpression.
      *
      * @param testExpression the left-hand-side test operand expression to set.
-     * @see #setLhsExpression(Expression)
+     * @see #setLhsExpression(Node)
      */
     public void setTestExpression(Expression testExpression) {
         setLhsExpression(testExpression);
@@ -70,7 +70,7 @@ public class InExpression extends BinaryExpression {
      * @return the right-hand-side operand expression of the InExpression.
      * @see #getRhsExpression()
      */
-    public Expression getInExpresion() {
+    public Node getInExpresion() {
         return getRhsExpression();
     }
 
@@ -78,7 +78,7 @@ public class InExpression extends BinaryExpression {
      * Sets the right-hand-side in operand expression of the InExpression.
      *
      * @param inExpression the right-hand-side in operand expression of the InExpression to set.
-     * @see #setRhsExpression(Expression)
+     * @see #setRhsExpression(Node)
      */
     public void setExpressionList(Expression inExpression) {
         setRhsExpression(inExpression);
@@ -97,9 +97,9 @@ public class InExpression extends BinaryExpression {
     public void setNot(boolean not) {
         setOperator(not ? Operator.NOT_IN : Operator.IN);
     }
-
-    public boolean accept(UniversalCodeVisitor visitor) {
-        visitor.visitInExpression(this);
-        return true;
-    }
+//
+//    public boolean accept(UniversalCodeVisitor visitor) {
+//        visitor.visitInExpression(this);
+//        return true;
+//    }
 }
