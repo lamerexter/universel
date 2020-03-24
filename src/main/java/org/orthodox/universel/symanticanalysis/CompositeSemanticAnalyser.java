@@ -1,7 +1,7 @@
 /*
  *  MIT Licence:
  *
- *  Copyright (c) 2019 Orthodox Engineering Ltd
+ *  Copyright (c) 2020 Orthodox Engineering Ltd
  *
  *  Permission is hereby granted, free of charge, to any person
  *  obtaining a copy of this software and associated documentation
@@ -29,8 +29,31 @@
 package org.orthodox.universel.symanticanalysis;
 
 import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.UniversalCodeVisitor;
+import org.orthodox.universel.cst.UniversalVisitorAdapter;
 
-public interface SemanticAnalyser {
-    Node performAnalysis(SemanticAnalysisContext context, Node from);
+/**
+ * Iterates over the AST, performing a depth-first post-order traversal to establish the types on the AST. Essentially,
+ * known types flow upwards from the leaves on the tree, forming a type tree from the ground up.
+ *
+ * <ul>
+ * <li>{@link org.orthodox.universel.cst.types.ReferenceType}
+ * </ul>
+ *
+ * and resolving them to actiual types.
+ */
+public class CompositeSemanticAnalyser implements SemanticAnalyser {
+    private final SemanticAnalyser[] analysers;
+
+    public CompositeSemanticAnalyser(final SemanticAnalyser ... analysers) {
+        this.analysers = analysers;
+    }
+
+    @Override
+    public Node performAnalysis(final SemanticAnalysisContext context, Node from) {
+        for (SemanticAnalyser analyser : analysers) {
+            from = analyser.performAnalysis(context, from);
+        }
+
+        return from;
+    }
 }

@@ -39,4 +39,9 @@ public interface Messages {
         Builder TYPE_NOT_FOUND = builder().code("uel.type.notfound").message("Type named \"{0}\" not found");
         Builder TYPE_AMBIGUOUS = builder().code("uel.type.ambiguous").message("The type reference \"{0}\" is ambiguous and matches {1} inferred types: {2}");
     }
+
+    interface ConditionalExpression {
+        Builder AMBIGUOUS_TYPE = builder().code("uel.ternary.type.ambiguous").message("The type of the conditional expression cannot be determined");
+    }
+
 }

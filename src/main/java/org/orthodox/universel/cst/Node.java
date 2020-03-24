@@ -47,7 +47,7 @@ public abstract class Node implements UniversalCodeVisitable {
      */
     private TokenImage tokenImage;
 
-    protected Class<?> typeDescriptor = Object.class;
+    protected Class<?> typeDescriptor;
 
 
     /**

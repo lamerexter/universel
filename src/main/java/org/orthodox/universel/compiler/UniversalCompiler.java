@@ -28,13 +28,35 @@ import static org.beanplanet.messages.domain.MessagesImpl.messages;
 import static org.objectweb.asm.Opcodes.*;
 
 public class UniversalCompiler {
-    private static final CstTransformer cstTransformer = new CstTransformer();
-
-    private static final List<SemanticAnalyser> SEMANTIC_AANALYSERS = asList(
+    private static final SemanticAnalyser SEMANTIC_ANALYSER = new CompositeSemanticAnalyser(
             new MethodCallAnalyser(),
-            new StaticTypeAnalyser(),
+            new ReferenceTypeAnalyser(),
             new CopyOnChangeAstVisitor(new WideningNumericConversionAnalyser())
     );
+
+    private Node parsePhases(Resource compilationUnitResource, Messages messages) {
+        try (Reader compilationUnitReader = compilationUnitResource.getReader()) {
+            //----------------------------------------------------------------------------------------------------------
+            // Lexical Analysis:
+            // Parse the source resource.
+            //----------------------------------------------------------------------------------------------------------
+            UniversalParser parser = new UniversalParser(compilationUnitReader);
+            Script script = parser.script();
+
+            //----------------------------------------------------------------------------------------------------------
+            // Semantic Analysis:
+            // Perform widening conversions, where applicable and realise types depth-first, post-order.
+            //----------------------------------------------------------------------------------------------------------
+            SemanticAnalysisContext semanticAnalysisContext = new SemanticAnalysisContext(messages);
+            Node node = SEMANTIC_ANALYSER.performAnalysis(semanticAnalysisContext, script);
+
+            return node;
+        } catch (ParseException parseException) {
+            throw new CompilationParseException(parseException);
+        } catch (IOException ioEx) {
+            throw new IoException(String.format("I/O error occurred during compilation [%s]: ", compilationUnitResource.getCanonicalForm()), ioEx);
+        }
+    }
 
     public Script parse(String compilationUnit) { return parse(new StringResource(compilationUnit)); }
 
@@ -47,12 +69,6 @@ public class UniversalCompiler {
             UniversalParser parser = new UniversalParser(compilationUnitReader);
             Script script = parser.script();
             return script;
-
-            //----------------------------------------------------------------------------------------------------------
-            // Conversion:
-            // Transform the CST into an AST
-            //----------------------------------------------------------------------------------------------------------
-//            return (Script)script.accept(cstTransformer);
         } catch (ParseException parseException) {
             throw new CompilationParseException(parseException);
         } catch (IOException ioEx) {
@@ -66,23 +82,12 @@ public class UniversalCompiler {
 
     public CompiledUnit compile(Resource compilationUnitResource) {
         long startTime = System.currentTimeMillis();
-
-        //----------------------------------------------------------------------------------------------------------
-        // Lexical Analysis:
-        // Conversion:
-        // Parse the compilation unit to the topmost non-terminal.
-        //----------------------------------------------------------------------------------------------------------
-        Node compilationUnitNonTerminal = parse(compilationUnitResource);
-
-        //----------------------------------------------------------------------------------------------------------
-        // Semantic Analysis:
-        // Iterate over the parse tree, created from the Lexical Analysis phase and perform various transformations.
-        //----------------------------------------------------------------------------------------------------------
         final Messages messages = messages();
-        SemanticAnalysisContext semanticAnalysisContext = new SemanticAnalysisContext(messages);
-        for (SemanticAnalyser semanticAnalyser : SEMANTIC_AANALYSERS) {
-            compilationUnitNonTerminal = semanticAnalyser.performAnalysis(semanticAnalysisContext, compilationUnitNonTerminal);
-        }
+
+        //----------------------------------------------------------------------------------------------------------
+        // Analysis: Lexical and Semantic
+        //----------------------------------------------------------------------------------------------------------
+        Node compilationUnitNonTerminal = parsePhases(compilationUnitResource, messages);
 
         //----------------------------------------------------------------------------------------------------------
         // If there are no errors compile to bytecode.

@@ -34,7 +34,6 @@ import org.beanplanet.core.util.StringUtil;
 import org.orthodox.universel.cst.*;
 import org.orthodox.universel.cst.types.PrimitiveType;
 import org.orthodox.universel.cst.types.ReferenceType;
-import org.orthodox.universel.cst.types.TypeReference;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,15 +46,16 @@ import static org.orthodox.universel.compiler.Messages.MethodCall.TYPE_AMBIGUOUS
 import static org.orthodox.universel.compiler.Messages.MethodCall.TYPE_NOT_FOUND;
 
 /**
- * Iterates over the AST, looking for instances of
+ * Iterates over the AST, performing a depth-first post-order traversal to establish the types on the AST. Essentially,
+ * known types flow upwards from the leaves on the tree, forming a type tree from the ground up.
  *
  * <ul>
- * <li>{@link org.orthodox.universel.cst.types.ReferenceType}
+ * <li>{@link ReferenceType}
  * </ul>
  *
  * and resolving them to actiual types.
  */
-public class StaticTypeAnalyser extends UniversalVisitorAdapter implements SemanticAnalyser {
+public class ReferenceTypeAnalyser extends UniversalVisitorAdapter implements SemanticAnalyser {
     private SemanticAnalysisContext context;
     private ImportDecl importDecl;
 
@@ -183,10 +183,5 @@ public class StaticTypeAnalyser extends UniversalVisitorAdapter implements Seman
         }
 
         return matchingTypes;
-    }
-
-    @Override
-    public Node visitTypeReference(TypeReference node) {
-        return node;
     }
 }

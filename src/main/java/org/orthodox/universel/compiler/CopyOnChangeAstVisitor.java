@@ -28,11 +28,7 @@
 
 package org.orthodox.universel.compiler;
 
-import org.orthodox.universel.ast.AstVisitor;
-import org.orthodox.universel.cst.BinaryExpression;
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.Script;
-import org.orthodox.universel.cst.UniversalVisitorAdapter;
+import org.orthodox.universel.cst.*;
 import org.orthodox.universel.symanticanalysis.SemanticAnalyser;
 import org.orthodox.universel.symanticanalysis.SemanticAnalysisContext;
 
@@ -56,9 +52,9 @@ import java.util.stream.Collectors;
  * </p>
  */
 public class CopyOnChangeAstVisitor extends UniversalVisitorAdapter implements SemanticAnalyser {
-    private final UniversalVisitorAdapter delegate;
+    private final UniversalCodeVisitor delegate;
 
-    public CopyOnChangeAstVisitor(UniversalVisitorAdapter delegate) {
+    public CopyOnChangeAstVisitor(UniversalCodeVisitor delegate) {
         this.delegate = delegate;
     }
 
