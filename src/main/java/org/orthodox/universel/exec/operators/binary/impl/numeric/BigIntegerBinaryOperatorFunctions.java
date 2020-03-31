@@ -28,7 +28,10 @@
 
 package org.orthodox.universel.exec.operators.binary.impl.numeric;
 
+import org.orthodox.universel.cst.Operator;
 import org.orthodox.universel.exec.operators.binary.BinaryOperator;
+import org.orthodox.universel.exec.operators.range.BigIntegerRange;
+import org.orthodox.universel.exec.operators.range.Range;
 
 import java.math.BigInteger;
 
@@ -105,6 +108,18 @@ public class BigIntegerBinaryOperatorFunctions {
     @BinaryOperator(PLUS)
     public static BigInteger plus(BigInteger lhs, BigInteger rhs) {
         return lhs.add(rhs);
+    }
+
+    @BinaryOperator({
+            RANGE_INCLUSIVE,
+            RANGE_LEFT_LT_RIGHT_INCLUSIVE, RANGE_LEFT_LT_RIGHT_LT, RANGE_LEFT_LT_RIGHT_LTE, RANGE_LEFT_LT_RIGHT_GT, RANGE_LEFT_LT_RIGHT_GTE,
+            RANGE_LEFT_LTE_RIGHT_GT, RANGE_LEFT_LTE_RIGHT_GTE, RANGE_LEFT_LTE_RIGHT_INCLUSIVE, RANGE_LEFT_LTE_RIGHT_LT, RANGE_LEFT_LTE_RIGHT_LTE,
+            RANGE_LEFT_GT_RIGHT_GT, RANGE_LEFT_GT_RIGHT_GTE, RANGE_LEFT_GT_RIGHT_INCLUSIVE, RANGE_LEFT_GT_RIGHT_LT, RANGE_LEFT_GT_RIGHT_LTE,
+            RANGE_LEFT_GTE_RIGHT_GT, RANGE_LEFT_GTE_RIGHT_GTE, RANGE_LEFT_GTE_RIGHT_INCLUSIVE, RANGE_LEFT_GTE_RIGHT_LT, RANGE_LEFT_GTE_RIGHT_LTE,
+            RANGE_LEFT_INCLUSIVE_RIGHT_GT, RANGE_LEFT_INCLUSIVE_RIGHT_GTE, RANGE_LEFT_INCLUSIVE_RIGHT_LT, RANGE_LEFT_INCLUSIVE_RIGHT_LTE
+    })
+    public static Range<BigInteger> bigInteger(BigInteger lhs, BigInteger rhs, Operator operator) {
+        return new BigIntegerRange(operator, lhs, rhs);
     }
 
     @BinaryOperator(SHIFT_LEFT)

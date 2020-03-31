@@ -796,9 +796,9 @@ WildcardType Wildcard():
    { return new WildcardType(tokenImage(line, column, token.endLine, token.endColumn), ext, sup); }
 }
 
-List<Expression> Arguments() :
+List<Node> Arguments() :
 {
-	List<Expression> argumentsList = null;
+	List<Node> argumentsList = null;
 }
 {
    "(" [ argumentsList=ArgumentsList() ] ")"
@@ -1228,7 +1228,7 @@ Expression InterpolatedStringLiteral() :
 
 public Expression IdentifierPrefixed():
 {
-    List<Expression> argumentsList = null;
+    List<Node> argumentsList = null;
     Expression ret;
 }
 {
@@ -1254,9 +1254,9 @@ public Name Identifier():
     { return name; }
 }
 
-List<Expression> ArgumentsList() :
+List<Node> ArgumentsList() :
 {
-	List<Expression> argumentsList = null;
+	List<Node> argumentsList = null;
 	Expression expr;
 }
 {

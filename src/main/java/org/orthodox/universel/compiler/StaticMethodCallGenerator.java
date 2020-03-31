@@ -31,9 +31,9 @@ package org.orthodox.universel.compiler;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
-import org.orthodox.universel.cst.Expression;
 import org.orthodox.universel.cst.ImportDecl;
 import org.orthodox.universel.cst.MethodCall;
+import org.orthodox.universel.cst.Node;
 import org.orthodox.universel.cst.UniversalCodeVisitor;
 
 import java.lang.reflect.Constructor;
@@ -92,7 +92,7 @@ public class StaticMethodCallGenerator implements MethodCallScope {
                                         Executable executable) {
         if (executable.getParameterCount() > 0) {
             for (int n=0; n < executable.getParameterCount(); n++) {
-                Expression paramExpr = methodCall.getParameters().get(n);
+                Node paramExpr = methodCall.getParameters().get(n);
                 paramExpr.accept(visitor);
                 compilationContext.getVirtualMachine().convertOrBoxOperandIfNeeded(executable.getParameterTypes()[n]);
             }

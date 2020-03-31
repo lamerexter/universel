@@ -36,7 +36,13 @@ import org.orthodox.universel.cst.conditionals.TernaryExpression;
 import org.orthodox.universel.cst.literals.*;
 import org.orthodox.universel.cst.types.ReferenceType;
 import org.orthodox.universel.cst.types.TypeReference;
+import org.orthodox.universel.symanticanalysis.conversion.BinaryExpressionOperatorMethodCall;
+import org.orthodox.universel.symanticanalysis.conversion.BoxConversion;
 import org.orthodox.universel.symanticanalysis.conversion.TypeConversion;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 import static org.beanplanet.core.util.CollectionUtil.nullSafe;
 
@@ -52,9 +58,20 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
     }
 
     @Override
+    public Node visitBoxConversion(BoxConversion node) {
+        return node.getSource().accept(this);
+    }
+
+    @Override
     public Node visitBinaryExpression(BinaryExpression node) {
         node.getLhsExpression().accept(this);
         node.getRhsExpression().accept(this);
+        return node;
+    }
+
+    @Override
+    public Node visitBinaryExpression(BinaryExpressionOperatorMethodCall node) {
+        node.getParameters().forEach(p -> p.accept(this));
         return node;
     }
 
@@ -154,15 +171,19 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
 
     @Override
     public Node visitScript(Script node) {
+        ImportDecl transformedImport = null;
         if ( node.getImportDeclaration() != null ) {
-            node.getImportDeclaration().accept(this);
+            transformedImport = (ImportDecl)node.getImportDeclaration().accept(this);
         }
 
+        List<Node> transformedBodyElements = new ArrayList<>(node.getBodyElements().size());
         for (Node child : node.getBodyElements()) {
-            child.accept(this);
+            transformedBodyElements.add(child.accept(this));
         }
 
-        return node;
+        boolean noTransformationChanges = Objects.equals(node.getImportDeclaration(), transformedImport)
+                                          && Objects.equals(node.getBodyElements(), transformedBodyElements);
+        return noTransformationChanges ? node : new Script(transformedImport, transformedBodyElements);
     }
 
     @Override
@@ -191,10 +212,12 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
 
     @Override
     public Node visitTypeConversion(TypeConversion node) {
+        Node transformedSource = null;
         if ( node.getSource() != null ) {
-            node.getSource().accept(this);
+            transformedSource = node.getSource().accept(this);
         }
-        return node;
+
+        return Objects.equals(node.getSource(), transformedSource) ? node : new TypeConversion(transformedSource, node.getTargetType());
     }
 
     @Override

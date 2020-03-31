@@ -28,8 +28,11 @@
 
 package org.orthodox.universel.symanticanalysis;
 
+import org.beanplanet.core.logging.Logger;
 import org.orthodox.universel.cst.Node;
 import org.orthodox.universel.cst.UniversalVisitorAdapter;
+
+import java.util.Objects;
 
 /**
  * Iterates over the AST, performing a depth-first post-order traversal to establish the types on the AST. Essentially,
@@ -41,8 +44,10 @@ import org.orthodox.universel.cst.UniversalVisitorAdapter;
  *
  * and resolving them to actiual types.
  */
-public class CompositeSemanticAnalyser implements SemanticAnalyser {
+public class CompositeSemanticAnalyser implements SemanticAnalyser, Logger {
     private final SemanticAnalyser[] analysers;
+
+    private static final int MAX_CHANGE_ITERATIONS = 20;
 
     public CompositeSemanticAnalyser(final SemanticAnalyser ... analysers) {
         this.analysers = analysers;
@@ -50,8 +55,18 @@ public class CompositeSemanticAnalyser implements SemanticAnalyser {
 
     @Override
     public Node performAnalysis(final SemanticAnalysisContext context, Node from) {
-        for (SemanticAnalyser analyser : analysers) {
-            from = analyser.performAnalysis(context, from);
+        int i=0;
+        Node lastNode = from;
+        while (++i <= MAX_CHANGE_ITERATIONS)  {
+            for (SemanticAnalyser analyser : analysers) {
+                from = analyser.performAnalysis(context, from);
+            }
+            if ( Objects.equals(lastNode, from) ) break;
+            lastNode = from;
+        }
+
+        if ( i == MAX_CHANGE_ITERATIONS ) {
+            warning("Maximum semantic analysis iterations reached. This could indicate a compilation issue.");
         }
 
         return from;

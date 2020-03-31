@@ -17,6 +17,8 @@ import org.orthodox.universel.exec.operators.binary.BinaryOperatorRegistry;
 import org.orthodox.universel.exec.operators.binary.ConcurrentBinaryOperatorRegistry;
 import org.orthodox.universel.exec.operators.binary.PackageScanBinaryOperatorLoader;
 import org.orthodox.universel.exec.operators.unary.UnaryFunctions;
+import org.orthodox.universel.symanticanalysis.conversion.BinaryExpressionOperatorMethodCall;
+import org.orthodox.universel.symanticanalysis.conversion.BoxConversion;
 import org.orthodox.universel.symanticanalysis.conversion.TypeConversion;
 
 import javax.lang.model.type.NullType;
@@ -95,6 +97,27 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
         }
         compilationContext.getBytecodeHelper().emitInvokeStaticMethod(binaryOperatorMethod);
         compilationContext.getVirtualMachine().loadOperandOfType(binaryOperatorMethod.getReturnType());
+        return node;
+    }
+
+    @Override
+    public Node visitBinaryExpression(BinaryExpressionOperatorMethodCall node) {
+        node.getParameters().forEach(p -> p.accept(this));
+
+        final Method operatorMethod = node.getOperatorMethod();
+        if ( operatorMethod.getParameterTypes().length == 3 && Operator.class.isAssignableFrom(operatorMethod.getParameterTypes()[2]) ) {
+            compilationContext.getBytecodeHelper().emitLoadEnum(node.getOperator());
+        }
+        compilationContext.getBytecodeHelper().emitInvokeStaticMethod(operatorMethod);
+        compilationContext.getVirtualMachine().loadOperandOfType(operatorMethod.getReturnType());
+
+        return node;
+    }
+
+    @Override
+    public Node visitBoxConversion(BoxConversion node) {
+        node.getSource().accept(this);
+        compilationContext.getVirtualMachine().box();
         return node;
     }
 

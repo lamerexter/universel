@@ -28,7 +28,10 @@
 
 package org.orthodox.universel.exec.operators.binary.impl.numeric;
 
+import org.orthodox.universel.cst.Operator;
 import org.orthodox.universel.exec.operators.binary.BinaryOperator;
+import org.orthodox.universel.exec.operators.range.FloatRange;
+import org.orthodox.universel.exec.operators.range.Range;
 
 import static org.orthodox.universel.cst.Operator.*;
 
@@ -93,6 +96,18 @@ public class FloatBinaryOperatorFunctions {
     @BinaryOperator(PLUS)
     public static float plus(float lhs, float rhs) {
         return lhs + rhs;
+    }
+
+    @BinaryOperator({
+            RANGE_INCLUSIVE,
+            RANGE_LEFT_LT_RIGHT_INCLUSIVE, RANGE_LEFT_LT_RIGHT_LT, RANGE_LEFT_LT_RIGHT_LTE, RANGE_LEFT_LT_RIGHT_GT, RANGE_LEFT_LT_RIGHT_GTE,
+            RANGE_LEFT_LTE_RIGHT_GT, RANGE_LEFT_LTE_RIGHT_GTE, RANGE_LEFT_LTE_RIGHT_INCLUSIVE, RANGE_LEFT_LTE_RIGHT_LT, RANGE_LEFT_LTE_RIGHT_LTE,
+            RANGE_LEFT_GT_RIGHT_GT, RANGE_LEFT_GT_RIGHT_GTE, RANGE_LEFT_GT_RIGHT_INCLUSIVE, RANGE_LEFT_GT_RIGHT_LT, RANGE_LEFT_GT_RIGHT_LTE,
+            RANGE_LEFT_GTE_RIGHT_GT, RANGE_LEFT_GTE_RIGHT_GTE, RANGE_LEFT_GTE_RIGHT_INCLUSIVE, RANGE_LEFT_GTE_RIGHT_LT, RANGE_LEFT_GTE_RIGHT_LTE,
+            RANGE_LEFT_INCLUSIVE_RIGHT_GT, RANGE_LEFT_INCLUSIVE_RIGHT_GTE, RANGE_LEFT_INCLUSIVE_RIGHT_LT, RANGE_LEFT_INCLUSIVE_RIGHT_LTE
+    })
+    public static Range<Float> floatRange(float lhs, float rhs, Operator operator) {
+        return new FloatRange(operator, lhs, rhs);
     }
 
     @BinaryOperator(STAR)

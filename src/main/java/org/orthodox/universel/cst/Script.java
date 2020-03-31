@@ -30,6 +30,7 @@ package org.orthodox.universel.cst;
 import org.orthodox.universel.ast.AstVisitor;
 
 import java.util.List;
+import java.util.Objects;
 
 import static java.util.Arrays.asList;
 import static org.orthodox.universel.cst.TokenImage.range;
@@ -81,5 +82,22 @@ public class Script extends Node implements CompositeNode {
     @Override
     public List<Node> getChildNodes() {
         return getBodyElements();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (!(o instanceof Script))
+            return false;
+        if (!super.equals(o))
+            return false;
+        Script nodes = (Script) o;
+        return Objects.equals(importDeclaration, nodes.importDeclaration) && Objects.equals(bodyElements, nodes.bodyElements);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), importDeclaration, bodyElements);
     }
 }

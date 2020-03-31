@@ -69,7 +69,7 @@ public class CompilationContext implements NameScope, MethodCallScope {
     public void generateCall(UniversalCodeVisitor visitor,
                              MethodCall methodCall) {
         methodCallScopes.stream().filter(s -> s.canResolve(methodCall)).findFirst()
-              .orElseThrow(() -> new RuntimeException("Cannot find applicable methos "+methodCall))
+              .orElseThrow(() -> new RuntimeException("Cannot find applicable method "+methodCall))
               .generateCall(visitor, methodCall);
     }
 }

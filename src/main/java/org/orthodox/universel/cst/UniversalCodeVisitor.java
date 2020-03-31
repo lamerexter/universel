@@ -34,11 +34,12 @@ import org.orthodox.universel.cst.annotation.Annotation;
 import org.orthodox.universel.cst.collections.ListExpr;
 import org.orthodox.universel.cst.collections.MapExpr;
 import org.orthodox.universel.cst.collections.SetExpr;
-import org.orthodox.universel.cst.conditionals.ElvisExpression;
 import org.orthodox.universel.cst.conditionals.TernaryExpression;
 import org.orthodox.universel.cst.literals.*;
 import org.orthodox.universel.cst.types.ReferenceType;
 import org.orthodox.universel.cst.types.TypeReference;
+import org.orthodox.universel.symanticanalysis.conversion.BinaryExpressionOperatorMethodCall;
+import org.orthodox.universel.symanticanalysis.conversion.BoxConversion;
 import org.orthodox.universel.symanticanalysis.conversion.TypeConversion;
 
 /**
@@ -55,9 +56,11 @@ public interface UniversalCodeVisitor {
 //   Node visitAssertStatement(AssertStatement node);
 //   Node visitAssignmentExpression(AssignmentExpression node);
     Node visitBetweenExpression(BetweenExpression node);
+    Node visitBoxConversion(BoxConversion node);
     Node visitNumericLiteralExpression(NumericLiteral node);
 
     Node visitBinaryExpression(BinaryExpression node);
+    Node visitBinaryExpression(BinaryExpressionOperatorMethodCall node);
 
     //   Node visitAxisStepExpression(AxisStepExpression node);
     //   Node visitBlockStatement(BlockStatement node);

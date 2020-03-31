@@ -28,7 +28,10 @@
 
 package org.orthodox.universel.exec.operators.binary.impl.numeric;
 
+import org.orthodox.universel.cst.Operator;
 import org.orthodox.universel.exec.operators.binary.BinaryOperator;
+import org.orthodox.universel.exec.operators.range.IntegerRange;
+import org.orthodox.universel.exec.operators.range.Range;
 
 import static org.orthodox.universel.cst.Operator.*;
 
@@ -123,6 +126,18 @@ public class IntegerBinaryOperatorFunctions {
     @BinaryOperator(TREBLE_SHIFT_RIGHT)
     public static int zeroFillShiftRight(int lhs, int rhs) {
         return lhs >>> rhs;
+    }
+
+    @BinaryOperator({
+            RANGE_INCLUSIVE,
+            RANGE_LEFT_LT_RIGHT_INCLUSIVE, RANGE_LEFT_LT_RIGHT_LT, RANGE_LEFT_LT_RIGHT_LTE, RANGE_LEFT_LT_RIGHT_GT, RANGE_LEFT_LT_RIGHT_GTE,
+            RANGE_LEFT_LTE_RIGHT_GT, RANGE_LEFT_LTE_RIGHT_GTE, RANGE_LEFT_LTE_RIGHT_INCLUSIVE, RANGE_LEFT_LTE_RIGHT_LT, RANGE_LEFT_LTE_RIGHT_LTE,
+            RANGE_LEFT_GT_RIGHT_GT, RANGE_LEFT_GT_RIGHT_GTE, RANGE_LEFT_GT_RIGHT_INCLUSIVE, RANGE_LEFT_GT_RIGHT_LT, RANGE_LEFT_GT_RIGHT_LTE,
+            RANGE_LEFT_GTE_RIGHT_GT, RANGE_LEFT_GTE_RIGHT_GTE, RANGE_LEFT_GTE_RIGHT_INCLUSIVE, RANGE_LEFT_GTE_RIGHT_LT, RANGE_LEFT_GTE_RIGHT_LTE,
+            RANGE_LEFT_INCLUSIVE_RIGHT_GT, RANGE_LEFT_INCLUSIVE_RIGHT_GTE, RANGE_LEFT_INCLUSIVE_RIGHT_LT, RANGE_LEFT_INCLUSIVE_RIGHT_LTE
+    })
+    public static Range<Integer> intRange(int lhs, int rhs, Operator operator) {
+        return new IntegerRange(operator, lhs, rhs);
     }
 
     @BinaryOperator(STAR)

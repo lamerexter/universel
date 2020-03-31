@@ -11,24 +11,23 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.orthodox.universal.parser.ParseException;
 import org.orthodox.universal.parser.UniversalParser;
-import org.orthodox.universel.ast.conversion.CstTransformer;
 import org.orthodox.universel.cst.Node;
 import org.orthodox.universel.cst.Script;
 import org.orthodox.universel.symanticanalysis.*;
+import org.orthodox.universel.symanticanalysis.conversion.BinaryExpressionOperatorMethodConverter;
 import org.orthodox.universel.symanticanalysis.conversion.WideningNumericConversionAnalyser;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static java.util.Arrays.asList;
 import static org.beanplanet.messages.domain.MessagesImpl.messages;
 import static org.objectweb.asm.Opcodes.*;
 
 public class UniversalCompiler {
     private static final SemanticAnalyser SEMANTIC_ANALYSER = new CompositeSemanticAnalyser(
+            new CopyOnChangeAstVisitor(new BinaryExpressionOperatorMethodConverter()),
             new MethodCallAnalyser(),
             new ReferenceTypeAnalyser(),
             new CopyOnChangeAstVisitor(new WideningNumericConversionAnalyser())

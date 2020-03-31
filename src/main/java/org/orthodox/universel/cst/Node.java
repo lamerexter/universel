@@ -62,7 +62,30 @@ public abstract class Node implements UniversalCodeVisitable {
      * @param tokenImage the parser token image backing this node.
      */
     public Node(TokenImage tokenImage) {
+        this(tokenImage, null);
+    }
+
+    /**
+     * Constructs the node.
+     *
+     * @param tokenImage the parser token image backing this node.
+     * @param typeDescriptor the type of the node, or null if unknown at this time.
+     */
+    public Node(TokenImage tokenImage, Class<?> typeDescriptor) {
+        this(null, tokenImage, typeDescriptor);
+    }
+
+    /**
+     * All args constructor.
+     *
+     * @param parent the parent node, which may be null to indicate none.
+     * @param tokenImage the parser token image backing this node.
+     * @param typeDescriptor the type of the node, or null if unknown at this time.
+     */
+    public Node(Node parent, TokenImage tokenImage, Class<?> typeDescriptor) {
+        this.parent = parent;
         this.tokenImage = tokenImage;
+        this.typeDescriptor = typeDescriptor;
     }
 
     public Node accept(UniversalCodeVisitor visitor) {

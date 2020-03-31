@@ -32,7 +32,7 @@ import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 import static org.orthodox.universel.cst.TokenImage.range;
 
@@ -40,10 +40,14 @@ import static org.orthodox.universel.cst.TokenImage.range;
  * A method call expression, consisting of a name and zero or more parameter expressions.
  */
 public class MethodCall extends Expression implements CompositeNode {
-    /** The name of the method. */
+    /**
+     * The name of the method.
+     */
     private Name name;
-    /** The parameter expressions of this method call. */
-    private List<Expression> parameters;
+    /**
+     * The parameter expressions of this method call.
+     */
+    private List<Node> parameters;
 
     private Executable executable;
 
@@ -52,10 +56,32 @@ public class MethodCall extends Expression implements CompositeNode {
      *
      * @param parameters the parameter expressions of this method call.
      */
-    public MethodCall(Name name, List<Expression> parameters) {
+    public MethodCall(Name name, List<Node> parameters) {
+        this(range(name, parameters), name, parameters, null);
+    }
+
+    public MethodCall(TokenImage tokenImage, Name name, List<Node> parameters, Executable executable) {
         super(range(name, parameters));
         this.name = name;
         this.parameters = parameters;
+        this.executable = executable;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (!(o instanceof MethodCall))
+            return false;
+        if (!super.equals(o))
+            return false;
+        MethodCall nodes = (MethodCall) o;
+        return Objects.equals(name, nodes.name) && Objects.equals(parameters, nodes.parameters) && Objects.equals(executable, nodes.executable);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), name, parameters, executable);
     }
 
     /**
@@ -72,7 +98,7 @@ public class MethodCall extends Expression implements CompositeNode {
      *
      * @return he parameter expressions of this method call.
      */
-    public List<Expression> getParameters() {
+    public List<Node> getParameters() {
         return parameters != null ? parameters : Collections.emptyList();
     }
 
@@ -87,9 +113,12 @@ public class MethodCall extends Expression implements CompositeNode {
     }
 
     public Class<?> getTypeDescriptor() {
-        if (executable == null) return super.getTypeDescriptor();
-        else if (executable.getClass() == Method.class) return ((Method)executable).getReturnType();
-        else return executable.getDeclaringClass();
+        if (executable == null)
+            return super.getTypeDescriptor();
+        else if (executable.getClass() == Method.class)
+            return ((Method) executable).getReturnType();
+        else
+            return executable.getDeclaringClass();
     }
 
     public Executable getExecutable() {
@@ -103,6 +132,6 @@ public class MethodCall extends Expression implements CompositeNode {
     @SuppressWarnings("unchecked")
     @Override
     public List<Node> getChildNodes() {
-        return parameters == null ? Collections.emptyList() : (List)parameters;
+        return parameters == null ? Collections.emptyList() : (List) parameters;
     }
 }
