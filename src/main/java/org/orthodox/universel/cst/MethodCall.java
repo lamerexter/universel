@@ -54,14 +54,24 @@ public class MethodCall extends Expression implements CompositeNode {
     /**
      * Consructs a method call expression, consisting of a name and zero or more parameters.
      *
+     * @param tokenImage the parser token image.
+     * @param name the method name.
      * @param parameters the parameter expressions of this method call.
      */
-    public MethodCall(Name name, List<Node> parameters) {
-        this(range(name, parameters), name, parameters, null);
+    public MethodCall(TokenImage tokenImage, Name name, List<Node> parameters) {
+        this(tokenImage, name, parameters, null);
     }
 
-    public MethodCall(TokenImage tokenImage, Name name, List<Node> parameters, Executable executable) {
-        super(range(name, parameters));
+    /**
+     * Consructs a method call expression, consisting of a name and zero or more parameters.
+     *
+     * @param tokenImage the parser token image.
+     * @param name the method name.
+     * @param parameters the parameter expressions of this method call.
+     * @param executable the corresponding constructor method call.
+     */
+   public MethodCall(TokenImage tokenImage, Name name, List<Node> parameters, Executable executable) {
+        super(tokenImage);
         this.name = name;
         this.parameters = parameters;
         this.executable = executable;

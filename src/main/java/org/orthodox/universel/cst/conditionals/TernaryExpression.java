@@ -27,53 +27,62 @@
  */
 package org.orthodox.universel.cst.conditionals;
 
+import org.orthodox.universel.cst.CompositeNode;
 import org.orthodox.universel.cst.Expression;
 import org.orthodox.universel.cst.Node;
 import org.orthodox.universel.cst.UniversalCodeVisitor;
 
+import java.util.List;
+
+import static org.beanplanet.core.util.ArrayUtil.asListOfNotNull;
 import static org.orthodox.universel.cst.TokenImage.range;
 
-public class TernaryExpression extends Expression {
-   protected Expression testExpression;
+public class TernaryExpression extends Expression implements CompositeNode {
+   protected Node testExpression;
 
-   protected Expression lhsExpression;
+   protected Node lhsExpression;
 
-   protected Expression rhsExpression;
+   protected Node rhsExpression;
 
-   public TernaryExpression(Expression testExpression,
-                            Expression lhsExpression,
-                            Expression rhsExpression) {
+   public TernaryExpression(Node testExpression,
+                            Node lhsExpression,
+                            Node rhsExpression) {
       super(range(testExpression, lhsExpression, rhsExpression));
       this.testExpression = testExpression;
       this.lhsExpression = lhsExpression;
       this.rhsExpression = rhsExpression;
    }
 
-   public Expression getTestExpression() {
+   public Node getTestExpression() {
       return testExpression;
    }
 
-   public void setTestExpression(Expression testExpression) {
+   public void setTestExpression(Node testExpression) {
       this.testExpression = testExpression;
    }
 
-   public Expression getLhsExpression() {
+   public Node getLhsExpression() {
       return lhsExpression;
    }
 
-   public void setLhsExpression(Expression lhsExpression) {
+   public void setLhsExpression(Node lhsExpression) {
       this.lhsExpression = lhsExpression;
    }
 
-   public Expression getRhsExpression() {
+   public Node getRhsExpression() {
       return rhsExpression;
    }
 
-   public void setRhsExpression(Expression rhsExpression) {
+   public void setRhsExpression(Node rhsExpression) {
       this.rhsExpression = rhsExpression;
    }
 
    public Node accept(UniversalCodeVisitor visitor) {
       return visitor.visitTernaryExpression(this);
+   }
+
+   @Override
+   public List<Node> getChildNodes() {
+      return asListOfNotNull(testExpression, lhsExpression, rhsExpression);
    }
 }

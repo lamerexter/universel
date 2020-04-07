@@ -1023,7 +1023,7 @@ public Expression Expression():
     (
         ret = Literal()
         |
-        ret = IdentifierPrefixed()
+        ret = NavigationStream()
         |
         ret = ListExpression()
         |
@@ -1226,16 +1226,40 @@ Expression InterpolatedStringLiteral() :
     )
 }
 
-public Expression IdentifierPrefixed():
+public NavigationStream NavigationStream():
 {
-    List<Node> argumentsList = null;
-    Expression ret;
+    List<Node> steps = null;
+    Node step;
 }
 {
     (
-        ret = Identifier()
+        step = NavigationStep()               { steps=add(steps, step); }
 
-        [ "(" [ argumentsList=ArgumentsList() ] ")"  { ret = new MethodCall((Name)ret, argumentsList); } ]
+        (
+            ("\\"|".")
+
+            step = NavigationStep()           { steps.add(step); }
+        )*
+    )
+
+    { return new NavigationStream(steps); }
+}
+
+public Expression NavigationStep():
+{
+    List<Node> argumentsList = null;
+    Name name;
+    Expression ret = null;
+}
+{
+    (
+        name = Identifier()
+
+        [ "(" [ argumentsList=ArgumentsList() ] ")"  { ret = new MethodCall(TokenImage.builder().range(name)
+                                                                               .endLine(token.endLine)
+                                                                               .endColumn(token.endColumn).build(),
+                                                                                name, argumentsList); }
+        ]
 
     )
 
@@ -1274,8 +1298,8 @@ ListExpr ListExpression() :
 {
   "[" {startLine=token.beginLine; startColumn=token.beginColumn;}
 	   [
-	     expr=Expression() { expressionList=add(expressionList, expr); }
-	     ("," expr=Expression() { expressionList=add(expressionList, expr); } )*
+	     expr=PrimaryExpression() { expressionList=add(expressionList, expr); }
+	     ("," expr=PrimaryExpression() { expressionList=add(expressionList, expr); } )*
 	   ]
   "]"
 

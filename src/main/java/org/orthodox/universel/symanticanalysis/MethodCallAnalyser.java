@@ -111,15 +111,19 @@ public class MethodCallAnalyser extends UniversalVisitorAdapter implements Seman
         if ( matchingExplicitlyImportedMethods.isEmpty()
              && matchingImportOnDemandNethods.isEmpty()
              && matchingExplicitlyImporteConsructors.isEmpty() ) {
-            context.getMessages().addError(METHOD_NOT_FOUND.withParameters(methodCall.getName().getName()));
+            context.getMessages().addError(METHOD_NOT_FOUND.relatedObject(methodCall).withParameters(methodCall.getName().getName()));
         } else if ( matchingExplicitlyImportedMethods.size() > 1
                     || matchingExplicitlyImporteConsructors.size() > 1 ) {
-            context.getMessages().addError(METHOD_AMBIGUOUS.withParameters(
+            context.getMessages().addError(METHOD_AMBIGUOUS
+                                                   .relatedObject(methodCall)
+                                                   .withParameters(
                     methodCall.getName().getName(),
                     matchingExplicitlyImportedMethods.size(),
                     matchingExplicitlyImportedMethods));
         } if ( matchingImportOnDemandNethods.size() > 1) {
-            context.getMessages().addError(METHOD_AMBIGUOUS.withParameters(
+            context.getMessages().addError(METHOD_AMBIGUOUS
+                                                   .relatedObject(methodCall)
+                                                   .withParameters(
                     methodCall.getName().getName(),
                     matchingImportOnDemandNethods.size(),
                     matchingImportOnDemandNethods));

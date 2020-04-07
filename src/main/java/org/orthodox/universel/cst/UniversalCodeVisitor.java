@@ -110,6 +110,8 @@ public interface UniversalCodeVisitor {
 //   Node visitMethodDeclaration(MethodDeclaration node);
 
     Node visitNullTestExpression(NullTestExpression node);
+    Node visitNavigationStream(NavigationStream node);
+
 //   Node visitObjectCreationExpression(ObjectCreationExpression node);
 //   Node visitPackageDeclaration(PackageDeclaration node);
 //   Node visitPathExpression(PathExpression node);

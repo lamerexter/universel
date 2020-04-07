@@ -153,6 +153,17 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
         return node;
     }
 
+    @Override
+    public Node visitNavigationStream(NavigationStream node) {
+        List<Node> transformedSteps = new ArrayList<>(node.getSteps().size());
+        for (Node child : node.getSteps()) {
+            transformedSteps.add(child.accept(this));
+        }
+
+        boolean noTransformationChanges = Objects.equals(node.getSteps(), transformedSteps);
+        return noTransformationChanges ? node : new NavigationStream(transformedSteps);
+    }
+
 //    @Override
 //    public Node visitRangeExpression(RangeExpression node) {
 //        return node;
@@ -202,7 +213,17 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
 
     @Override
     public Node visitTernaryExpression(TernaryExpression node) {
-        return node;
+        Node transformedTest = null;
+        Node transformedLhs = null;
+        Node transformedRhs = null;
+
+        if (node.getTestExpression() != null) transformedTest = node.getTestExpression().accept(this);
+        if (node.getLhsExpression() != null) transformedLhs = node.getLhsExpression().accept(this);
+        if (node.getRhsExpression() != null) transformedRhs = node.getRhsExpression().accept(this);
+
+        return Objects.equals(node.getTestExpression(), transformedTest)
+                && Objects.equals(node.getLhsExpression(), transformedLhs)
+                && Objects.equals(node.getLhsExpression(), transformedLhs) ? node : new TernaryExpression(transformedTest, transformedLhs, transformedRhs);
     }
 
     @Override

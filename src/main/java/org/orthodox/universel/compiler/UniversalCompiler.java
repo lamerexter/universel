@@ -40,7 +40,13 @@ public class UniversalCompiler {
             // Parse the source resource.
             //----------------------------------------------------------------------------------------------------------
             UniversalParser parser = new UniversalParser(compilationUnitReader);
-            Script script = parser.script();
+            Script script;
+            try {
+                script = parser.script();
+            } catch (ParseException ex) {
+                messages.addError(ex, "uel.syntax", ex.getMessage().replace("{", "'{'"));
+                return null;
+            }
 
             //----------------------------------------------------------------------------------------------------------
             // Semantic Analysis:
@@ -50,8 +56,6 @@ public class UniversalCompiler {
             Node node = SEMANTIC_ANALYSER.performAnalysis(semanticAnalysisContext, script);
 
             return node;
-        } catch (ParseException parseException) {
-            throw new CompilationParseException(parseException);
         } catch (IOException ioEx) {
             throw new IoException(String.format("I/O error occurred during compilation [%s]: ", compilationUnitResource.getCanonicalForm()), ioEx);
         }
