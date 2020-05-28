@@ -1,39 +1,58 @@
 package org.orthodox.universel.compiler;
 
 import org.beanplanet.core.io.IoException;
-import org.beanplanet.core.io.resource.ByteArrayResource;
 import org.beanplanet.core.io.resource.Resource;
 import org.beanplanet.core.io.resource.StringResource;
-import org.beanplanet.core.lang.TypeUtil;
-import org.beanplanet.core.util.SizeUtil;
 import org.beanplanet.messages.domain.Messages;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.MethodVisitor;
 import org.orthodox.universal.parser.ParseException;
 import org.orthodox.universal.parser.UniversalParser;
 import org.orthodox.universel.cst.Node;
 import org.orthodox.universel.cst.Script;
+import org.orthodox.universel.exec.navigation.ConcurrentNavigatorRegistry;
+import org.orthodox.universel.exec.navigation.NavigatorLoader;
+import org.orthodox.universel.exec.navigation.NavigatorRegistry;
+import org.orthodox.universel.exec.navigation.PackageScanNavigatorLoader;
 import org.orthodox.universel.symanticanalysis.*;
 import org.orthodox.universel.symanticanalysis.conversion.BinaryExpressionOperatorMethodConverter;
 import org.orthodox.universel.symanticanalysis.conversion.WideningNumericConversionAnalyser;
+import org.orthodox.universel.symanticanalysis.methods.ImplicitMethodModifiersDecorator;
+import org.orthodox.universel.symanticanalysis.methods.ImplicitReturnStatementDecorator;
+import org.orthodox.universel.symanticanalysis.methods.UnresolvedMethodCallReporter;
+import org.orthodox.universel.symanticanalysis.name.IfStatementImplicitResultValueResolver;
+import org.orthodox.universel.symanticanalysis.name.NavigationResolver;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.Map;
-import java.util.UUID;
 
 import static org.beanplanet.messages.domain.MessagesImpl.messages;
-import static org.objectweb.asm.Opcodes.*;
 
 public class UniversalCompiler {
-    private static final SemanticAnalyser SEMANTIC_ANALYSER = new CompositeSemanticAnalyser(
-            new CopyOnChangeAstVisitor(new BinaryExpressionOperatorMethodConverter()),
-            new MethodCallAnalyser(),
-            new ReferenceTypeAnalyser(),
-            new CopyOnChangeAstVisitor(new WideningNumericConversionAnalyser())
-    );
+    private static NavigatorRegistry navigatorRegistry = new ConcurrentNavigatorRegistry();
+    private static NavigatorLoader loader = new PackageScanNavigatorLoader();
 
-    private Node parsePhases(Resource compilationUnitResource, Messages messages) {
+    public UniversalCompiler() {
+        loader.load(navigatorRegistry);
+    }
+
+    private SemanticAnalyser getSemanticAnalyser() {
+        return new CompositeSemanticAnalyser(
+            new MethodDeclarationDeclaringTypeDecorator(),
+            new ScriptAssembler(),
+            new CopyOnChangeAstVisitor(new BinaryExpressionOperatorMethodConverter()),
+//            new MethodCallAnalyser(),
+            new ConditionalExpressionAnalyser(),
+            new ImplicitMethodModifiersDecorator(),
+            new CopyOnChangeAstVisitor(new WideningNumericConversionAnalyser()),
+            new NodeSequenceLastValueAnalyser(),
+//            new NavigationContextResolver(),
+            new NavigationResolver(),
+            new IfStatementImplicitResultValueResolver(),
+            new UnresolvedMethodCallReporter(),
+            new ImplicitReturnStatementDecorator()
+        );
+    }
+
+    private <T> Node parsePhases(CompilationContext compilationContext, Resource compilationUnitResource, Class<T> bindingType, Messages messages) {
         try (Reader compilationUnitReader = compilationUnitResource.getReader()) {
             //----------------------------------------------------------------------------------------------------------
             // Lexical Analysis:
@@ -52,8 +71,9 @@ public class UniversalCompiler {
             // Semantic Analysis:
             // Perform widening conversions, where applicable and realise types depth-first, post-order.
             //----------------------------------------------------------------------------------------------------------
-            SemanticAnalysisContext semanticAnalysisContext = new SemanticAnalysisContext(messages);
-            Node node = SEMANTIC_ANALYSER.performAnalysis(semanticAnalysisContext, script);
+            SemanticAnalysisContext semanticAnalysisContext = new SemanticAnalysisContext(compilationContext.getDefaultImports(), bindingType, messages, navigatorRegistry);
+            semanticAnalysisContext.pushScope(new ScriptScope(bindingType, navigatorRegistry));
+            Node node = getSemanticAnalyser().performAnalysis(semanticAnalysisContext, script);
 
             return node;
         } catch (IOException ioEx) {
@@ -79,79 +99,80 @@ public class UniversalCompiler {
         }
     }
 
-    public CompiledUnit compile(String compilationUnit) {
+    public CompiledUnit<?> compile(String compilationUnit) {
         return compile(new StringResource(compilationUnit));
     }
 
-    public CompiledUnit compile(Resource compilationUnitResource) {
-        long startTime = System.currentTimeMillis();
+    public <B> CompiledUnit<B> compile(String compilationUnit, Class<B> bindingType) {
+        return compile(new StringResource(compilationUnit), bindingType);
+    }
+
+    public CompiledUnit<?> compile(Resource compilationUnitResource) {
+        return compile(compilationUnitResource, null);
+    }
+
+    public <B> CompiledUnit<B> compile(Resource compilationUnitResource, Class<B> bindingType) {
         final Messages messages = messages();
+        CompilationContext compilationContext = new CompilationContext(bindingType, new VirtualMachine(new BytecodeHelper()), messages);
 
         //----------------------------------------------------------------------------------------------------------
         // Analysis: Lexical and Semantic
         //----------------------------------------------------------------------------------------------------------
-        Node compilationUnitNonTerminal = parsePhases(compilationUnitResource, messages);
+        long startTime = System.currentTimeMillis();
+        Script compilationUnitNonTerminal = (Script)parsePhases(compilationContext, compilationUnitResource, bindingType, messages);
+        long endTime = System.currentTimeMillis();
 
         //----------------------------------------------------------------------------------------------------------
         // If there are no errors compile to bytecode.
         //----------------------------------------------------------------------------------------------------------
-        byte classBytes[] = null;
-        String classBasename = "UniScript" + UUID.randomUUID().hashCode();
-        String className = UniversalCompiler.class.getPackage().getName().replace('.', '/') + "/" + classBasename;
-        long endTime = System.currentTimeMillis();
-
+//        byte[] classBytes = null;
+//        final String classBasename = "UniScript" + UUID.randomUUID().hashCode();
+//        NamePath className = null;
         if ( !messages.hasErrors() ) {
-            // Define top-level script class
-            BytecodeHelper bch = new BytecodeHelper();
-            ClassWriter cw = bch.generateClass(V1_8, ACC_PUBLIC, className, Object.class);
+//            final NamePath pkgName = compilationUnitNonTerminal.getPackageDeclaration() != null ? compilationUnitNonTerminal.getPackageDeclaration().getName() : NamePath.EMPTY_NAME_PATH;
+//            className = pkgName.joinSingleton(classBasename);
+//            final String fqClassName = className.join("/");
+//
+//            // Define top-level script class
+//            BytecodeHelper bch = new BytecodeHelper();
+//            ClassWriter cw = bch.generateClass(V1_8, ACC_PUBLIC, fqClassName, Object.class);
+//
+//            // Generate execution method with binding
+//                MethodVisitor mv = bch.generateMethod(ACC_PUBLIC + ACC_FINAL + ACC_STATIC, "exec", Object.class, bindingType == null ? Object.class : bindingType);
 
-            // Generate execution method with binding
-            MethodVisitor mv = bch.generateMethod(ACC_PUBLIC + ACC_FINAL + ACC_STATIC, "exec", Object.class, Map.class);
-
-            CompilationContext compilationContext = new CompilationContext(mv, new VirtualMachine(bch), messages);
-            ScriptScope scriptScope = new ScriptScope();
+//            CompilationContext compilationContext = new CompilationContext(bindingType, new VirtualMachine(bch), messages);
+            BoundScope scriptScope = new ScriptScope(bindingType, navigatorRegistry);
             compilationContext.pushNameScope(scriptScope);
 
             CompilingAstVisitor compilingAstVisitor = new CompilingAstVisitor(compilationContext);
-            scriptScope.setCompilationContext(compilationContext);
             compilationUnitNonTerminal.accept(compilingAstVisitor);
 
-            if (compilationContext.getVirtualMachine().operandStackIsEmpty()) {
-                mv.visitInsn(RETURN);
-            } else {
-                compilationContext.getBytecodeHelper().boxIfNeeded(compilationContext.getVirtualMachine().peekOperandStack());
-                mv.visitInsn(ARETURN);
-            }
-
-            mv.visitEnd();
-            mv.visitMaxs(0, 0);
-            cw.visitEnd();
+//            if (compilationContext.getVirtualMachine().operandStackIsEmpty()) {
+//                bch.emitLoadNullOperand();
+//                mv.visitInsn(ARETURN);
+//            } else {
+//                compilationContext.getBytecodeHelper().boxIfNeeded(compilationContext.getVirtualMachine().peekOperandStack());
+//                mv.visitInsn(ARETURN);
+//            }
+//
+//            mv.visitEnd();
+//            mv.visitMaxs(0, 0);
+//            cw.visitEnd();
 
             endTime = System.currentTimeMillis();
-            classBytes = cw.toByteArray();
+//            classBytes = cw.toByteArray();
         }
 
-        return new CompiledUnit(compilationUnitNonTerminal,
-                                messages,
-                                new ByteArrayResource(classBytes),
-                                className,
-                                classBasename,
-                                endTime-startTime);
-    }
-
-    public static void main(String... args) throws Exception {
-        String script = args[0];
-        UniversalCompiler compiler = new UniversalCompiler();
-        CompiledUnit compiledUnit = compiler.compile(script);
-
-        MyClassLoader classLoader = new MyClassLoader();
-        Class aClass = classLoader.defineClass(compiledUnit.getFullyQualifiedName().replace('/','.'), compiledUnit.getCode().readFullyAsBytes());
-        Object result = TypeUtil.invokeStaticMethod(aClass, "main");
-        System.out.println("Compilation completed in: "+ SizeUtil.getElapsedTimeSpecificationDescription(compiledUnit.getCompilationTime())+" result="+result);
+        return new CompiledUnit<>(bindingType,
+                                  compilationUnitNonTerminal,
+                                  messages,
+                                  compilationContext.getCompiledClassResources(),
+                                  endTime - startTime
+        );
     }
 
     private static class MyClassLoader extends ClassLoader {
-        public Class defineClass(String name, byte[] b) {
+        public Class<?> defineClass(String name, byte[] b) {
             return defineClass(name, b, 0, b.length);
         }
     }

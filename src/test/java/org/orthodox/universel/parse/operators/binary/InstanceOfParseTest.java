@@ -34,9 +34,9 @@ import org.orthodox.universel.cst.InstanceofExpression;
 import org.orthodox.universel.cst.collections.ListExpr;
 import org.orthodox.universel.cst.literals.DecimalIntegerLiteralExpr;
 import org.orthodox.universel.cst.literals.StringLiteralExpr;
-import org.orthodox.universel.cst.types.ClassOrInterfaceType;
-import org.orthodox.universel.cst.types.PrimitiveType;
-import org.orthodox.universel.cst.types.ReferenceType;
+import org.orthodox.universel.cst.type.reference.ClassOrInterfaceType;
+import org.orthodox.universel.cst.type.reference.PrimitiveType;
+import org.orthodox.universel.cst.type.reference.ReferenceType;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;

@@ -34,6 +34,7 @@ import org.orthodox.universel.cst.UniversalCodeVisitor;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import static org.beanplanet.core.lang.TypeUtil.ensureNonPrimitiveType;
 
@@ -56,5 +57,22 @@ public class BoxConversion extends Node implements CompositeNode {
     @Override
     public List<Node> getChildNodes() {
         return source == null ? Collections.emptyList() : Collections.singletonList(source);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o)
+            return true;
+        if (!(o instanceof BoxConversion))
+            return false;
+        if (!super.equals(o))
+            return false;
+        BoxConversion nodes = (BoxConversion) o;
+        return Objects.equals(getSource(), nodes.getSource());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), getSource());
     }
 }

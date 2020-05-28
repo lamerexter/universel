@@ -28,8 +28,12 @@
 
 package org.orthodox.universel.cst;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static java.util.Arrays.stream;
 
 /**
  * An import statement on the Abstract Syntax Tree, of the form:
@@ -51,12 +55,23 @@ public class ImportStmt extends Expression {
      * Consructs set expression from the given parser token image.
      *
      * @param tokenImage the parser token image.
+     * @param isOnDemand whether the import is an on-demand wildcard (*) import.
      * @param elements the element expressions of this set expression, which may be empty.
      */
     public ImportStmt(TokenImage tokenImage, List<Name> elements, boolean isOnDemand) {
         super(tokenImage);
         this.elements = elements;
         this.isOnDemand = isOnDemand;
+    }
+
+    /**
+     * Consructs set expression from the given parser token image.
+     *
+     * @param isOnDemand whether the import is an on-demand wildcard (*) import.
+     * @param elements the name elements which comprise the import path.
+     */
+    public ImportStmt(boolean isOnDemand, String ... elements) {
+        this(null, stream(elements).map(Name::new).collect(Collectors.toList()), isOnDemand);
     }
 
     /**
@@ -69,11 +84,20 @@ public class ImportStmt extends Expression {
     }
 
     /**
-     * Whether this import was an on-demand import.
+     * Whether this import is an on-demand import.
      *
      * @return true is this import is an on-demand import, false otherwise.
      */
     public boolean isOnDemand() {
         return isOnDemand;
+    }
+
+    /**
+     * Whether this import is not an on-demand import.
+     *
+     * @return true is this import is no an on-demand import, false if it is on-demand.
+     */
+    public boolean isNotOnDemand() {
+        return !isOnDemand();
     }
 }

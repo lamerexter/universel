@@ -28,6 +28,7 @@
 package org.orthodox.universel.cst;
 
 import org.orthodox.universel.ast.AstVisitor;
+import org.orthodox.universel.cst.literals.DecimalFloatingPointLiteralExpr;
 
 import java.util.Collections;
 import java.util.List;
@@ -89,5 +90,12 @@ public class UnaryExpression extends Expression implements CompositeNode {
     @Override
     public List<Node> getChildNodes() {
         return Collections.singletonList(getExpression());
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if ( !(o instanceof UnaryExpression) ) return false;
+        return super.equals(o);
     }
 }

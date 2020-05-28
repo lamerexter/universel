@@ -30,7 +30,7 @@ package org.orthodox.universel.symanticanalysis;
 
 import org.beanplanet.core.logging.Logger;
 import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.UniversalVisitorAdapter;
+import org.orthodox.universel.cst.type.reference.ReferenceType;
 
 import java.util.Objects;
 
@@ -39,7 +39,7 @@ import java.util.Objects;
  * known types flow upwards from the leaves on the tree, forming a type tree from the ground up.
  *
  * <ul>
- * <li>{@link org.orthodox.universel.cst.types.ReferenceType}
+ * <li>{@link ReferenceType}
  * </ul>
  *
  * and resolving them to actiual types.
@@ -56,13 +56,14 @@ public class CompositeSemanticAnalyser implements SemanticAnalyser, Logger {
     @Override
     public Node performAnalysis(final SemanticAnalysisContext context, Node from) {
         int i=0;
-        Node lastNode = from;
         while (++i <= MAX_CHANGE_ITERATIONS)  {
+            Node lastNode = from;
             for (SemanticAnalyser analyser : analysers) {
-                from = analyser.performAnalysis(context, from);
+                from = analyser.performAnalysis(context, lastNode);
+                if ( !Objects.equals(lastNode, from) ) break;
+                lastNode = from;
             }
             if ( Objects.equals(lastNode, from) ) break;
-            lastNode = from;
         }
 
         if ( i == MAX_CHANGE_ITERATIONS ) {

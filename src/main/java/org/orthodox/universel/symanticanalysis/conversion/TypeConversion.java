@@ -39,9 +39,8 @@ public class TypeConversion extends Node implements CompositeNode {
     private final Node source;
 
     public TypeConversion(Node source, Class<?> targetType) {
-        super(source.getTokenImage());
+        super(source.getTokenImage(), targetType);
         this.source = source;
-        this.typeDescriptor = targetType;
     }
 
     public Node getSource() {

@@ -4,6 +4,7 @@ import org.orthodox.universel.cst.*;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * An interpolated string literal on the Abstract Syntax Tree.
@@ -66,5 +67,20 @@ public class InterpolatedStringLiteralExpr extends Expression implements Composi
     @Override
     public List<Node> getChildNodes() {
         return parts != null ? parts : Collections.emptyList();
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (!(o instanceof InterpolatedStringLiteralExpr)) return false;
+        if (!super.equals(o)) return false;
+        InterpolatedStringLiteralExpr nodes = (InterpolatedStringLiteralExpr) o;
+        return Objects.equals(getDelimeter(), nodes.getDelimeter()) &&
+               Objects.equals(getParts(), nodes.getParts());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), getDelimeter(), getParts());
     }
 }

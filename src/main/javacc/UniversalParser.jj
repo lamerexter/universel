@@ -48,6 +48,11 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.ArrayDeque;
+import org.beanplanet.core.models.path.NamePath;
+import org.orthodox.universel.ast.*;
+import org.orthodox.universel.ast.allocation.*;
+import org.orthodox.universel.ast.conditionals.*;
+import org.orthodox.universel.ast.navigation.*;
 import org.orthodox.universel.cst.*;
 import org.orthodox.universel.cst.collections.*;
 import org.orthodox.universel.cst.conditionals.*;
@@ -55,6 +60,8 @@ import org.orthodox.universel.cst.types.*;
 import org.orthodox.universel.cst.literals.*;
 import org.orthodox.universel.cst.TokenImage.TokenImageBuilder;
 import java.io.StringReader;
+
+import static org.orthodox.universel.ast.NodeSequence.NodeSequenceBuilder;
 
 public class UniversalParser
 {
@@ -101,6 +108,7 @@ SKIP :
 // Reserved words, literals and operators - case sensitive
 TOKEN :
 {
+  < ABSTRACT: "abstract" > |
   < AND: "and" > |
   < ASSERT: "assert" > |
   < BETWEEN: "between" > |
@@ -120,6 +128,7 @@ TOKEN :
   < EQ: "==" > |
   < EQUAL: ("equals"|"equal") > |
   < EXTENDS: "extends" > |
+  < FINAL: "final" > |
   < FINALLY: "finally" > |
   < FOR: "for" >  |
   < FLOAT: "float" >  |
@@ -137,6 +146,7 @@ TOKEN :
   < LTGT: "<>" > |
   < LONG: "long" > |
   < LBRACE: "{" > { stateStack.push(curLexState); } |
+  < NATIVE: "native" > |
   < NE: "!=" > |
   < NEW: "new" > |
   < NOT: "not" > |
@@ -146,17 +156,25 @@ TOKEN :
   < NULL: "null" > |
   < OR: "or" > |
   < PACKAGE: "package" > |
+  < PRIVATE: "private" > |
+  < PROTECTED: "protected" > |
+  < PUBLIC: "public" > |
   < RANGE_INCLUSIVE: ".." > |
   < RBRACE: "}" > { if ( !stateStack.isEmpty() ) { SwitchTo(stateStack.pop()); } } |
   < RETURN: "return" > |
   < SHORT: "short" > |
+  < STATIC: "static" > |
+  < STRICTFP: "strictfp" > |
+  < SYNCHRONIZED: "synchronized" > |
   < TEQ: "===" > |
   < THEN: "then" > |
   < THROW: "throw" > |
   < THROWS: "Gthrows" > |
+  < TRANSIENT: "transient" > |
   < TRY: "try" > |
   < VAR: "var" > |
   < VOID: "void" > |
+  < VOLATILE: "volatile" > |
   < WHEN: "when" > |
   < WHILE: "while" >
 }
@@ -477,19 +495,196 @@ TOKEN :
 public Script script():
 {
     TokenImage tokenImage = null;
+    PackageDeclaration pkg = null;
+    ImportDecl importDecl = null;
     List<Node> bodyElements = null;
     Node expr = null;
-    ImportDecl importDecl = null;
 }
 {
+    [ pkg=PackageDeclaration() ]
+
     [ importDecl=ImportDeclaration() ]
 
-    ( expr=PrimaryExpression() { bodyElements=add(bodyElements, expr); } )*
+    bodyElements=BodyElements()
 
     <EOF>
 
-    { return new Script(importDecl, bodyElements); }
+    { return new Script(pkg, importDecl, bodyElements); }
 }
+
+List<Node> BodyElements() :
+{
+    Node node;
+    List<Node> nodes = null;
+}
+{
+    (
+      (
+        LOOKAHEAD(2)node=ClassOrInterfaceBodyDeclaration()  // Lookahead because class can start a type decl or be a path step
+        |
+        node=StatementOrExpression()
+      ) { nodes = add(nodes, node); }
+    )*
+
+    { return nodes; }
+}
+
+Node StatementOrExpression() :
+{
+    Node expr = null;
+}
+{
+   (
+      expr=Statement()
+      |
+      expr=PrimaryExpression()
+   )
+
+   { return expr; }
+}
+
+Statement Statement() :
+{
+    Statement statement;
+}
+{
+   (
+//      LOOKAHEAD(2)
+//      ret = LabeledStatement()
+//    |
+//      ret = Block()
+//    |
+//      statement=ExpressionStatement()
+//    |
+//      ret = SwitchStatement()
+//    |
+//      ret = BreakStatement()
+//    |
+//      ret = ContinueStatement()
+//    |
+//      ret = SynchronizedStatement()
+
+//     statement=AssertStatement()
+//     |
+// Causing a clash between Set and BlockStatement
+//     statement=Block()
+//     |
+     statement = IfStatement()
+//     |
+//     statement = ThrowStatement()
+//     |
+//     statement = DoStatement()
+//     |
+//     statement = EmptyStatement()
+//     |
+//     statement = ForStatement()
+//     |
+//     statement = WhileStatement()
+//     |
+//     statement = VariableDeclarationSection()
+     |
+     statement = ReturnStatement()
+//     |
+//     statement = TryStatement()
+   )
+
+   { return statement; }
+}
+
+IfStatement IfStatement() :
+{
+    Expression testExpr;
+    Node thenExpression;
+    List<IfStatement.ElseIf> elseIfExpressions = null;
+    Expression elseIfTestExpr;
+    Node elseIfBodyExpr;
+    Node elseExpression = null;
+    Expression messageExpr = null;
+    int startLine = -1, startColumn = -1, elseStartLine = -1, elseStartColumn = -1;
+}
+{
+   <IF> { startLine=token.beginLine; startColumn=token.beginColumn; }
+
+   "(" testExpr=PrimaryExpression() ")"
+
+   thenExpression=BlockOrSingleStatement()
+
+   ( LOOKAHEAD(2)<ELSE_IF> { elseStartLine=token.beginLine; elseStartColumn=token.beginColumn; }
+      "(" elseIfTestExpr=PrimaryExpression() ")"
+
+      elseIfBodyExpr=BlockOrSingleStatement()   { elseIfExpressions = add(elseIfExpressions, new IfStatement.ElseIf(tokenImage(elseStartLine, elseStartColumn, token.beginLine, token.beginColumn), elseIfTestExpr, elseIfBodyExpr)); }
+   )*
+
+   [ LOOKAHEAD(2)<ELSE> elseExpression=BlockOrSingleStatement() ]
+
+   { return new IfStatement(tokenImage(startLine, startColumn, token.beginLine, token.beginColumn), testExpr, thenExpression, elseIfExpressions, elseExpression); }
+}
+
+ReturnStatement ReturnStatement():
+{
+    Expression expr = null;
+    int startLine = -1, startColumn = -1;
+}
+{
+  "return" {startLine=token.beginLine; startColumn=token.beginColumn;} [ LOOKAHEAD(2) expr = PrimaryExpression() ]
+  { return new ReturnStatement(tokenImage(startLine, startColumn, token.endLine, token.endColumn), expr); }
+}
+
+Node BlockOrSingleStatement() :
+{
+    Node blockOrStatement;
+}
+{
+    (LOOKAHEAD(3)blockOrStatement=Block() | blockOrStatement=StatementOrExpression())
+
+  { return blockOrStatement; }
+}
+
+NodeSequence<Node> Block() :
+{
+    TokenImageBuilder tib = TokenImage.builder();
+    List<Node> statements;
+}
+{
+  "{"        { tib.startLine(token.beginLine); tib.startColumn(token.beginColumn); }
+    statements = Statements()
+  "}"        { tib.endLine(token.endLine); tib.endColumn(token.endColumn); }
+
+  { return new NodeSequence<Node>(tib.build(), statements); }
+}
+
+List<Node> Statements() :
+{
+    List<Node> statements = null;
+    Node node;
+}
+{
+    ( node=BlockStatement() { statements=add(statements, node); } )*
+    { return statements; }
+}
+
+Node BlockStatement():
+{
+    Node node;
+//    Expression expr;
+//    ClassOrInterfaceDeclaration typeDecl;
+//    Modifier modifier;
+}
+{
+  (
+//      LOOKAHEAD( Modifiers() ("class" | "interface") )
+//      { pushJavadoc(); }
+//      modifier = Modifiers()
+//      typeDecl = ClassOrInterfaceDeclaration(modifier) { statement=new TypeDeclarationStmt(typeDecl.getBeginLine(), typeDecl.getBeginColumn(), typeDecl); }
+//    |
+//      LOOKAHEAD(VariableDeclarationExpression() )
+//      node = VariableDeclarationExpression()
+//      |
+      node = StatementOrExpression ()
+  )
+  { return node; }
+}
+
 
 Expression PrimaryExpression():
 {
@@ -661,31 +856,32 @@ Expression RelationalExpression() :
    { return expr; }
 }
 
+TypeReference ResultType():
+{
+    TypeReference type;
+}
+{
+  (
+    "void"           { type = new VoidType(tokenImage()); }
+    |
+    type = Type()
+  )
+  { return type; }
+}
+
 TypeReference Type():
 {
     TypeReference type;
 }
 {
     (
-      "boolean" { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Boolean); }
-    |
-      "char" { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Char); }
-    |
-      "byte" { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Byte); }
-    |
-      "short" { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Short); }
-    |
-      "int" { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Int); }
-    |
-      "long" { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Long); }
-    |
-      "float" { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Float); }
-    |
-      "double" { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Double); }
+        LOOKAHEAD(2) type = ReferenceType()
+        |
+        type = PrimitiveType()
     )
-
     { return type; }
 }
+
 
 ReferenceType ReferenceType():
 {
@@ -714,21 +910,21 @@ TypeReference PrimitiveType():
 }
 {
     (
-      "boolean" { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Boolean); }
+      <BOOLEAN> { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Boolean); }
     |
-      "char" { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Char); }
+      <BYTE> { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Byte); }
     |
-      "byte" { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Byte); }
+      <CHAR> { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Char); }
     |
-      "short" { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Short); }
+      <DOUBLE> { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Double); }
     |
-      "int" { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Int); }
+      <FLOAT> { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Float); }
     |
-      "long" { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Long); }
+      <INT> { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Int); }
     |
-      "float" { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Float); }
+      <LONG> { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Long); }
     |
-      "double" { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Double); }
+      <SHORT> { type = new PrimitiveType(tokenImage(), PrimitiveType.Primitive.Short); }
     )
 
     { return type; }
@@ -1017,20 +1213,24 @@ Expression PostfixExpression() :
 
 public Expression Expression():
 {
-    Expression ret;
+    Expression expr;
 }
 {
     (
-        ret = Literal()
+        expr = Literal()
         |
-        ret = NavigationStream()
+        expr = NavigationStream()
         |
-        ret = ListExpression()
+        expr = ListExpression()
         |
-        ret = MapOrSetExpression()
+        expr = MapOrSetExpression()
+        |
+        expr=AllocationExpression()
+        |
+        "(" expr=Expression() ")"
     )
 
-    { return ret; }
+    { return expr; }
 }
 
 public Expression Literal():
@@ -1245,25 +1445,29 @@ public NavigationStream NavigationStream():
     { return new NavigationStream(steps); }
 }
 
-public Expression NavigationStep():
+public Node NavigationStep():
 {
     List<Node> argumentsList = null;
-    Name name;
-    Expression ret = null;
+    Name name = null;
+    NodeTest nodeTest = null;
 }
 {
     (
-        name = Identifier()
+        name = Identifier()  { nodeTest = new NameTest(name.getTokenImage(), name.getName()); }
 
-        [ "(" [ argumentsList=ArgumentsList() ] ")"  { ret = new MethodCall(TokenImage.builder().range(name)
-                                                                               .endLine(token.endLine)
-                                                                               .endColumn(token.endColumn).build(),
-                                                                                name, argumentsList); }
+        [ "(" [ argumentsList=ArgumentsList() ] ")"  { nodeTest = new MethodCall(TokenImage.builder().range(name)
+                                                                                            .endLine(token.endLine)
+                                                                                             .endColumn(token.endColumn).build(),
+                                                                                 name, argumentsList); }
         ]
 
     )
 
-    { return ret; }
+    { return new NavigationStep<NodeTest>(TokenImage.builder()
+                                                    .range(name)
+                                                    .endLine(token.endLine)
+                                                    .endColumn(token.endColumn)
+                                                    .build(), NavigationAxis.DEFAULT, nodeTest); }
 }
 
 public Name Identifier():
@@ -1382,6 +1586,21 @@ Expression MapOrSetExpression() :
     }
 }
 
+PackageDeclaration PackageDeclaration():
+{
+    List<Name> name;
+    TokenImageBuilder tib;
+
+    int startLine = -1, startColumn = -1;
+}
+{
+  <PACKAGE> { tib=TokenImage.builder().startLine(token.beginLine).startColumn(token.beginColumn); }
+
+   name=NamePath()
+
+  { return new PackageDeclaration(tib.range(name).build(), name); }
+}
+
 ImportDecl ImportDeclaration() :
 {
 	ImportStmt imp;
@@ -1412,3 +1631,304 @@ ImportStmt ImportStatement() :
   { return new ImportStmt(new TokenImage(startLine, startColumn, token.endLine, token.endColumn), nameElements, isImportOnDemand); }
 }
 
+List<Name> NamePath() :
+{
+	Name name;
+	List<Name> names = null;
+}
+{
+  name=Identifier() { names=add(names, name); }
+
+  ( "." name=Identifier() { names=add(names, name); } )*
+
+  { return names; }
+}
+
+Modifiers Modifiers():
+{
+   int modifiers = 0;
+   TokenImageBuilder tib = TokenImage.builder();
+}
+{
+    (
+        (
+            <PUBLIC> { modifiers = Modifiers.addModifier(modifiers, Modifiers.PUBLIC); }
+            |
+            <STATIC> { modifiers = Modifiers.addModifier(modifiers, Modifiers.STATIC); }
+            |
+            <PROTECTED> { modifiers = Modifiers.addModifier(modifiers, Modifiers.PROTECTED); }
+            |
+            <PRIVATE> { modifiers = Modifiers.addModifier(modifiers, Modifiers.PRIVATE); }
+            |
+            <FINAL> { modifiers = Modifiers.addModifier(modifiers, Modifiers.FINAL); }
+            |
+            <ABSTRACT> { modifiers = Modifiers.addModifier(modifiers, Modifiers.ABSTRACT); }
+            |
+            <SYNCHRONIZED> { modifiers = Modifiers.addModifier(modifiers, Modifiers.SYNCHRONIZED); }
+            |
+            <NATIVE> { modifiers = Modifiers.addModifier(modifiers, Modifiers.NATIVE); }
+            |
+            <TRANSIENT> { modifiers = Modifiers.addModifier(modifiers, Modifiers.TRANSIENT); }
+            |
+            <VOLATILE> { modifiers = Modifiers.addModifier(modifiers, Modifiers.VOLATILE); }
+            |
+            <STRICTFP> { modifiers = Modifiers.addModifier(modifiers, Modifiers.STRICTFP); }
+        )
+
+        { tib.add(tokenImage()); }
+     )*
+
+     {
+        return modifiers == 0 ? null : new Modifiers(tib.build(), modifiers);
+     }
+}
+
+Node ClassOrInterfaceBodyDeclaration():
+{
+   Modifiers modifiers;
+   Node member;
+}
+{
+//  { pushJavadoc(); }
+  (
+//      LOOKAHEAD(2)
+//      ret = InitializerDeclaration()
+//      {
+//         if (isInterface)
+//            throw new ParseException(token, "An interface cannot have initializers");
+//      }
+//    |
+      modifiers = Modifiers() // Just get all the modifiers out of the way. If you want to do
+                              // more checks, pass the modifiers down to the member
+      (
+//          member = ClassOrInterfaceDeclaration(modifiers)
+//          |
+//          member = EnumDeclaration(modifiers)
+//          |
+//          member = AnnotationDeclaration(modifiers)
+//          |
+//          LOOKAHEAD( [ TypeParameters() ] <IDENTIFIER> "(" )
+//          member = ConstructorDeclaration(modifiers)
+//          |
+//          LOOKAHEAD( [TypeParameters()] ResultType() <IDENTIFIER> "(" )
+          member = MethodDeclaration(modifiers)
+//          |
+//          member = FieldDeclaration(modifiers)
+      )
+//    |
+//      ";" { ret = new EmptyMemberDeclaration(token.beginLine, token.beginColumn)); }
+  )
+  { return member; }
+}
+
+MethodDeclaration MethodDeclaration(Modifiers modifiers):
+{
+    NodeSequence<TypeParameter> typeParameters = null;
+    Name name;
+    NodeSequence<Parameter> parameters;
+//    List<QualifiedIdentifier> throwNames = null;
+    TypeReference resultType;
+    NodeSequence<Node> block = null;
+}
+{
+  // Modifiers matched in the caller
+  [ typeParameters = TypeParameters() ]
+  resultType=ResultType()
+  name=Identifier()
+
+  parameters=FormalParameters()
+
+  block = Block()
+
+  { return new MethodDeclaration(modifiers, typeParameters, resultType, name.getName(), parameters, block); }
+}
+
+NodeSequence<Parameter> FormalParameters():
+{
+    TokenImageBuilder tib = TokenImage.builder();
+    List<Parameter> parameters = null;
+    Parameter parameter;
+}
+{
+    "("                                     { tib.startLine(token.beginLine); tib.startColumn(token.beginColumn); }
+
+    [ parameter=FormalParameter()           { tib.range(parameter); parameters=add(parameters, parameter); }
+        ( "," parameter=FormalParameter()   { tib.range(parameter); parameters=add(parameters, parameter); } )*
+    ]
+
+    ")"                                     { tib.endLine(token.endLine); tib.endColumn(token.endColumn); }
+
+  { return new NodeSequence<Parameter>(tib.build(), parameters); }
+}
+
+Parameter FormalParameter():
+{
+    Modifiers modifiers;
+    TypeReference type;
+    boolean isVarArg = false;
+    Name name;
+}
+{
+  modifiers=Modifiers()
+  type=Type()
+  [ "..." { isVarArg = true; } ]
+  name=Identifier()
+  { return new Parameter(modifiers, type, isVarArg, name); }
+}
+
+NodeSequence<TypeParameter> TypeParameters():
+{
+    TokenImageBuilder tib = TokenImage.builder();
+    List<TypeParameter> typeParameters = null;
+    TypeParameter typeParameter;
+}
+{
+   "<"                                            { tib.startLine(token.beginLine); tib.startColumn(token.beginColumn); }
+        typeParameter = TypeParameter()           { tib.range(typeParameter); typeParameters=add(typeParameters, typeParameter); }
+            ( "," typeParameter = TypeParameter() { tib.range(typeParameter); typeParameters=add(typeParameters, typeParameter); } )*
+
+   ">"                                            { tib.endLine(token.endLine); tib.endColumn(token.endColumn); }
+   { return new NodeSequence<TypeParameter>(tib.build(), typeParameters); }
+}
+
+TypeParameter TypeParameter():
+{
+    TypeParameter tp = null;
+    Name name;
+}
+{
+   name=Identifier()
+
+   [ tp=TypeBound(name) ]
+   { return tp == null ? new TypeParameter(name, null, null) : tp; }
+}
+
+TypeParameter TypeBound(Name name):
+{
+    List<ClassOrInterfaceType> boundingTypes = null;
+    ClassOrInterfaceType cit;
+    ParameterisedTypeBinding tb = null;
+}
+{
+   "extends" cit = ClassOrInterfaceType() { tb = ParameterisedTypeBinding.EXTENDS;
+                                            boundingTypes=add(boundingTypes, cit);
+                                          }
+
+   ( "&"     cit = ClassOrInterfaceType() { boundingTypes=add(boundingTypes, cit); } )*
+
+   { return new TypeParameter(name, tb, boundingTypes); }
+}
+
+Expression AllocationExpression() :
+{
+    TypeReference type;
+	String typeName;
+	ArrayDimensionsAndInitialiser adi = null;
+	List<Node> args = null;
+	int startLine, startColumn;
+	Expression expr;
+	ClassOrInterfaceType cit = null;
+}
+{
+    (
+        LOOKAHEAD(2)
+	    <NEW>                       {startLine=token.beginLine; startColumn=token.beginColumn;}
+	    type=PrimitiveType()
+	    adi=ArrayDimsAndInits()
+		                            {
+		                                expr = new ArrayCreationExpression(TokenImage.builder()
+		                                                                             .startLine(startLine)
+		                                                                             .startColumn(startColumn)
+		                                                                             .range(type)
+		                                                                             .range(adi)
+		                                                                             .build(),
+		                                                                   type, adi.getDimSizes(), adi.getArrayInitialiserExpression());
+		                            }
+	    |
+	    <NEW>                       {startLine=token.beginLine; startColumn=token.beginColumn;}
+	    type=ClassOrInterfaceType()
+        (
+            adi=ArrayDimsAndInits()
+				                    {
+				                        expr = new ArrayCreationExpression(TokenImage.builder()
+				                                                                      .startLine(startLine)
+                                                                           		      .startColumn(startColumn)
+                                                                           		      .range(adi)
+                                                                           		      .build(),
+                                                                           type, adi.getDimSizes(), adi.getArrayInitialiserExpression());
+				                    }
+	    	|
+            args=Arguments()        {
+                                        expr = new ObjectCreationExpression(TokenImage.builder()
+                                                                                       .startLine(startLine)
+                                                                                       .startColumn(startColumn)
+                                                                                       .range(args)
+                                                                                       .build(), type, args);
+                                    }
+	    )
+	)
+
+	{ return expr; }
+}
+
+ArrayDimensionsAndInitialiser ArrayDimsAndInits():
+{
+	int startLine = -1, startColumn = -1, endLine = -1, endColumn = -1;
+	boolean firstToken = true;
+    Expression expr;
+    List<Node> dimSizes = null;
+	ArrayInitialiserExpression arrInit = null;
+}
+{
+    (
+        LOOKAHEAD(2)
+	    (
+	        LOOKAHEAD(2)
+	        "["                     { if (firstToken) { firstToken=false; startLine=token.beginLine; startColumn=token.beginColumn; } }
+	            expr=Expression()   { dimSizes=add(dimSizes, expr); }
+	        "]"                     { endLine=token.endLine; endColumn=token.endColumn; }
+	    )+
+	    |
+	    (
+	        "["                     { if (firstToken) { firstToken=false; startLine=token.beginLine; startColumn=token.beginColumn; } }
+	        "]"                     { dimSizes=add(dimSizes, null); endLine=token.endLine; endColumn=token.endColumn; }
+	    )+
+	    arrInit=ArrayInitializer()  { endLine=arrInit.getTokenImage().getEndLine(); endColumn=arrInit.getTokenImage().getEndColumn(); }
+    )
+
+    { return new ArrayDimensionsAndInitialiser(tokenImage(startLine, startColumn, endLine, endColumn), dimSizes, arrInit); }
+}
+
+ArrayInitialiserExpression ArrayInitializer() :
+{
+	int startLine, startColumn;
+	List<Node> values = null;
+	Expression expr;
+}
+{
+    "{"                             { startLine=token.beginLine; startColumn=token.beginColumn; }
+
+    [
+        expr=VariableInitializer() { values=add(values, expr); }
+        ( LOOKAHEAD(2) "," expr=VariableInitializer() { values=add(values, expr); } )*
+    ]
+
+    "}"
+
+    { return new ArrayInitialiserExpression(tokenImage(startLine, startColumn, token.endLine, token.endColumn), values); }
+}
+
+Expression VariableInitializer() :
+{
+	Expression expr;
+}
+{
+    (
+        LOOKAHEAD(3)
+	    expr=ArrayInitializer()
+	    |
+	    expr=Expression()
+    )
+
+    { return expr; }
+}

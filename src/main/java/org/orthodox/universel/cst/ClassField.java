@@ -28,8 +28,6 @@
 
 package org.orthodox.universel.cst;
 
-import org.orthodox.universel.cst.types.ClassType;
-
 /**
  * Represents a field of an existing class.
  *

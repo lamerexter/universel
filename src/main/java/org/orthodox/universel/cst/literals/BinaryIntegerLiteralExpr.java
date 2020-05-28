@@ -94,4 +94,11 @@ public class BinaryIntegerLiteralExpr extends IntegerLiteral {
     public BigInteger asBigInteger() {
         return new BigInteger(replaceAll(rTrim(getTokenImage().getImage().substring(2), "I", false), "_", ""), 2);
     }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if ( !(o instanceof BinaryIntegerLiteralExpr) ) return false;
+        return super.equals(o);
+    }
 }

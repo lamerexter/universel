@@ -1,31 +1,44 @@
 package org.orthodox.universel.compiler;
 
-import org.beanplanet.core.lang.conversion.SystemTypeConverter;
-import org.beanplanet.core.lang.conversion.TypeConverter;
+import org.beanplanet.core.io.resource.Resource;
+import org.beanplanet.core.models.NameValue;
+import org.beanplanet.core.models.SimpleNameValue;
 import org.beanplanet.messages.domain.Messages;
-import org.objectweb.asm.MethodVisitor;
-import org.orthodox.universel.cst.MethodCall;
-import org.orthodox.universel.cst.UniversalCodeVisitor;
+import org.orthodox.universel.ast.navigation.NavigationStep;
+import org.orthodox.universel.cst.ImportStmt;
+import org.orthodox.universel.cst.Node;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
+import java.util.*;
 
-public class CompilationContext implements NameScope, MethodCallScope {
-    private final MethodVisitor methodVisitor;
+import static java.util.Arrays.asList;
+import static org.beanplanet.core.util.IteratorUtil.asStream;
+
+public class CompilationContext implements NameScope {
+    private final Class<?> bindingType;
     private final VirtualMachine virtualMachine;
-    private final BytecodeHelper bytecodeHelper;
+    private final Deque<NameValue<Resource>> compiledClassResources = new ArrayDeque<>();
     private final Deque<NameScope> scopes = new ArrayDeque<>();
-    private final Deque<MethodCallScope> methodCallScopes = new ArrayDeque<>();
 
     private final Messages messages;
 
-    public CompilationContext(final MethodVisitor methodVisitor,
+    private static final List<ImportStmt> DEFAULT_IMPORTS = asList(
+        new ImportStmt(true, "java", "lang"),
+        new ImportStmt(true, "java", "util"),
+        new ImportStmt(true, "java", "lang", "Math")
+    );
+
+    private final List<ImportStmt> getDefaultImports = DEFAULT_IMPORTS;
+
+    public CompilationContext(final Class<?> bindingType,
                               final VirtualMachine virtualMachine,
                               final Messages messages) {
-        this.methodVisitor = methodVisitor;
+        this.bindingType = bindingType;
         this.virtualMachine = virtualMachine;
-        this.bytecodeHelper = new BytecodeHelper(methodVisitor);
         this.messages = messages;
+    }
+
+    public Class<?> getBindingType() {
+        return bindingType;
     }
 
     public Messages getMessages() {
@@ -37,15 +50,24 @@ public class CompilationContext implements NameScope, MethodCallScope {
     }
 
     public BytecodeHelper getBytecodeHelper() {
-        return bytecodeHelper;
+        return getVirtualMachine().getBytecodeHelper();
     }
 
     public void pushNameScope(NameScope scope) {
         scopes.push(scope);
     }
 
-    public void pushMethodCallScope(MethodCallScope scope) {
-        methodCallScopes.push(scope);
+    public List<ImportStmt> getDefaultImports() {
+        return getDefaultImports;
+    }
+
+    @Override
+    public Node navigate(final NavigationStep step) {
+        return asStream(scopes.descendingIterator())
+                    .map(s -> s.navigate(step))
+                    .filter(Objects::nonNull)
+                    .filter(transformedNode -> !Objects.equals(transformedNode, step))
+                    .findFirst().orElse(null);
     }
 
     @Override
@@ -60,16 +82,11 @@ public class CompilationContext implements NameScope, MethodCallScope {
               .generateAccess(name);
     }
 
-    @Override
-    public boolean canResolve(MethodCall methodCall) {
-        return methodCallScopes.stream().anyMatch(s -> s.canResolve(methodCall));
+    public void addCompiledType(final String fqClassName, Resource classBytes) {
+        compiledClassResources.push(new SimpleNameValue<Resource>(fqClassName, classBytes));
     }
 
-    @Override
-    public void generateCall(UniversalCodeVisitor visitor,
-                             MethodCall methodCall) {
-        methodCallScopes.stream().filter(s -> s.canResolve(methodCall)).findFirst()
-              .orElseThrow(() -> new RuntimeException("Cannot find applicable method "+methodCall))
-              .generateCall(visitor, methodCall);
+    public List<NameValue<Resource>> getCompiledClassResources() {
+        return new ArrayList<>(compiledClassResources);
     }
 }

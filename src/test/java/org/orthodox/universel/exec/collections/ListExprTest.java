@@ -36,33 +36,36 @@ import java.util.*;
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.orthodox.universel.Universal.execute;
 
 public class ListExprTest {
     @Test
     public void emptyList() {
-        assertThat(Universal.execute("[]"), equalTo(Collections.emptyList()));
+        assertThat(execute("[]"), equalTo(Collections.emptyList()));
     }
 
     @Test
     public void singletonList() {
-        assertThat(Universal.execute("[true]"), equalTo(asList(true)));
+        assertThat(execute("[true]"), equalTo(asList(true)));
     }
 
     @Test
     public void multiElementList() {
         // Then
-        assertThat(Universal.execute("[1, 2, true, false, 2.5f, 3.5d, 'Hello World']"),
+        assertThat(execute("[1, 2, true, false, 2.5f, 3.5d, 'Hello World']"),
                    equalTo(asList(1, 2, true, false, 2.5f, 3.5d, "Hello World")));
+    }
+
+    public static class Person {
+        public String getName() {
+            return "Joe Bloggs";
+        }
     }
 
     @Test
     public void stringInterpolation() {
-        // Given
-        Map<String, Object> binding = new HashMap<>();
-        binding.put("person", "Joe Bloggs");
-
         // Then
-        assertThat(Universal.execute("[\"Hello there ${person}!\"]", binding), equalTo(asList("Hello there Joe Bloggs!")));
+        assertThat(execute("[\"Hello there ${name}!\"]", new Person()), equalTo(asList("Hello there Joe Bloggs!")));
     }
 
 }

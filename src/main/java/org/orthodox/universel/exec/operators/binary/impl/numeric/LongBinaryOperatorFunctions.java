@@ -141,7 +141,7 @@ public class LongBinaryOperatorFunctions {
     }
 
     @BinaryOperator(STAR)
-    public static long operator_STAR(long lhs, long rhs) {
+    public static long multiply(long lhs, long rhs) {
         return lhs * rhs;
     }
 }

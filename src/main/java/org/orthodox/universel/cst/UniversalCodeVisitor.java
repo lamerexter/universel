@@ -30,17 +30,30 @@
 package org.orthodox.universel.cst;
 
 
+import org.orthodox.universel.ast.*;
+import org.orthodox.universel.ast.allocation.ObjectCreationExpression;
+import org.orthodox.universel.ast.conditionals.IfStatement;
+import org.orthodox.universel.ast.navigation.NameTest;
+import org.orthodox.universel.ast.navigation.NavigationStep;
+import org.orthodox.universel.ast.navigation.NavigationStream;
+import org.orthodox.universel.ast.navigation.NodeTest;
 import org.orthodox.universel.cst.annotation.Annotation;
 import org.orthodox.universel.cst.collections.ListExpr;
+import org.orthodox.universel.cst.collections.MapEntryExpr;
 import org.orthodox.universel.cst.collections.MapExpr;
 import org.orthodox.universel.cst.collections.SetExpr;
 import org.orthodox.universel.cst.conditionals.TernaryExpression;
 import org.orthodox.universel.cst.literals.*;
-import org.orthodox.universel.cst.types.ReferenceType;
-import org.orthodox.universel.cst.types.TypeReference;
+import org.orthodox.universel.cst.type.MethodDeclaration;
+import org.orthodox.universel.cst.type.declaration.ClassDeclaration;
+import org.orthodox.universel.cst.type.declaration.InterfaceDeclaration;
+import org.orthodox.universel.cst.type.reference.TypeReference;
+import org.orthodox.universel.symanticanalysis.JvmInstructionNode;
+import org.orthodox.universel.symanticanalysis.ValueConsumingNode;
 import org.orthodox.universel.symanticanalysis.conversion.BinaryExpressionOperatorMethodCall;
 import org.orthodox.universel.symanticanalysis.conversion.BoxConversion;
 import org.orthodox.universel.symanticanalysis.conversion.TypeConversion;
+import org.orthodox.universel.symanticanalysis.name.InternalNodeSequence;
 
 /**
  * A use of the <a href="">visitor pattern</a> for working with AST nodes. There is a <code>visit&lt;AstNode&gt;(&lt;AstNode&gt)</code>
@@ -56,16 +69,22 @@ public interface UniversalCodeVisitor {
 //   Node visitAssertStatement(AssertStatement node);
 //   Node visitAssignmentExpression(AssignmentExpression node);
     Node visitBetweenExpression(BetweenExpression node);
+
+    Node visitBooleanLiteral(BooleanLiteralExpr node);
+
     Node visitBoxConversion(BoxConversion node);
+
+    Node visitClassDeclaration(ClassDeclaration node);
+
     Node visitNumericLiteralExpression(NumericLiteral node);
 
     Node visitBinaryExpression(BinaryExpression node);
+
     Node visitBinaryExpression(BinaryExpressionOperatorMethodCall node);
 
     //   Node visitAxisStepExpression(AxisStepExpression node);
     //   Node visitBlockStatement(BlockStatement node);
 //   Node visitCaseExpression(CaseExpression node);
-//   Node visitClassDeclaration(ClassDeclaration node);
 //   Node visitClassExpression(ClassExpression node);
 //   Node visitComment(Comment node);
 //   Node visitCompoundBlock(CompoundBlock node);
@@ -82,27 +101,52 @@ public interface UniversalCodeVisitor {
 //   Node visitFunction(Function node);
 
     Node visitInExpression(InExpression node);
-//   Node visitIfStatement(IfStatement node);
-//   Node visitImportDeclaration(ImportDeclaration node);
-//   Node visitInterfaceDeclaration(InterfaceDeclaration node);
-   Node visitInstanceofExpression(InstanceofExpression node);
-//   Node visitJUELStringExpression(JUELStringExpression node);
-//   Node visitListExpression(ListExpression node);
-    Node visitBooleanLiteral(BooleanLiteralExpr node);
 
+    Node visitIfStatement(IfStatement node);
+
+    Node visitInternalNodeSequence(InternalNodeSequence node);
+
+    //   Node visitImportDeclaration(ImportDeclaration node);
+//   Node visitInterfaceDeclaration(InterfaceDeclaration node);
+    Node visitInstanceofExpression(InstanceofExpression node);
+
+    //   Node visitJUELStringExpression(JUELStringExpression node);
+//   Node visitListExpression(ListExpression node);
     Node visitImportDeclaration(ImportDecl node);
+
+    Node visitInterfaceDeclaration(InterfaceDeclaration node);
+
+    Node visitInterpolatedStringLiteral(InterpolatedStringLiteralExpr node);
 
     Node visitList(ListExpr node);
 
+    Node visitLoadLocal(LoadLocal node);
+
+    MapEntryExpr visitMapEntry(MapEntryExpr node);
+
     Node visitMap(MapExpr node);
+
+    Node visitMethodDeclaration(MethodDeclaration node);
 
     Node visitMethodCall(MethodCall node);
 
-    Node visitModifiers(Modifiers node);
+    Node visitMethodCall(StaticMethodCall node);
+
+    Node visitMethodCall(InstanceMethodCall node);
+
+    Modifiers visitModifiers(Modifiers node);
 
     Node visitName(QualifiedIdentifier node);
 
-    Node visitName(Name node);
+    Name visitName(Name node);
+
+    Node visitNameTest(NameTest nameTest);
+
+    <T extends NodeTest> Node visitNavigationStep(NavigationStep<T> node);
+
+    Node visitNavigationStream(NavigationStream node);
+
+    Node visitNodeSequence(NodeSequence<? extends Node> node);
 
     Node visitNullLiteral(NullLiteralExpr node);
 
@@ -110,17 +154,14 @@ public interface UniversalCodeVisitor {
 //   Node visitMethodDeclaration(MethodDeclaration node);
 
     Node visitNullTestExpression(NullTestExpression node);
-    Node visitNavigationStream(NavigationStream node);
 
-//   Node visitObjectCreationExpression(ObjectCreationExpression node);
-//   Node visitPackageDeclaration(PackageDeclaration node);
+    Node visitObjectCreationExpression(ObjectCreationExpression node);
+
+    PackageDeclaration visitPackageDeclaration(PackageDeclaration node);
 //   Node visitPathExpression(PathExpression node);
 //    Node visitRangeExpression(RangeExpression node);
 
-    Node visitReferenceType(ReferenceType node);
-
-    //   Node visitReturnStatement(ReturnStatement node);
-    Node visitInterpolatedStringLiteral(InterpolatedStringLiteralExpr node);
+    Node visitReturnStatement(ReturnStatement node);
 
     Node visitScript(Script node);
 
@@ -132,11 +173,17 @@ public interface UniversalCodeVisitor {
     Node visitTernaryExpression(TernaryExpression node);
 
     //   Node visitThrowStatement(ThrowStatement node);
-    Node visitTypeReference(TypeReference node);
+    TypeReference visitTypeReference(TypeReference node);
 
     Node visitTypeConversion(TypeConversion node);
-//   Node visitTryStatement(TryStatement node);
+
+    //   Node visitTryStatement(TryStatement node);
     Node visitUnaryExpression(UnaryExpression node);
+
+    Node visitValueConsumingNode(ValueConsumingNode node);
+
+    Node visitJvmInstruction(JvmInstructionNode jvmInstructionNode);
+
 //   boolean visitVariableDeclaration(VariableDeclaration node);
 //   boolean visitVariableDeclarationExpression(VariableDeclarationExpression node);
 //   boolean visitWhileLoop(WhileStatement node);

@@ -27,13 +27,19 @@
  */
 package org.orthodox.universel.cst;
 
+import java.util.Objects;
+
 public class NullTestExpression extends Expression {
-    protected Expression expression;
+    protected Node expression;
 
     protected boolean not;
 
-    public NullTestExpression(Expression expression, boolean not) {
-        super(expression.getTokenImage());
+    public NullTestExpression(Node expression, boolean not) {
+        this(expression.getTokenImage(), expression, not);
+    }
+
+    public NullTestExpression(TokenImage tokenImage, Node expression, boolean not) {
+        super(tokenImage, boolean.class);
         this.expression = expression;
         this.not = not;
     }
@@ -41,15 +47,8 @@ public class NullTestExpression extends Expression {
     /**
      * @return the expression
      */
-    public Expression getExpression() {
+    public Node getExpression() {
         return expression;
-    }
-
-    /**
-     * @param expression the expression to set
-     */
-    public void setExpression(Expression expression) {
-        this.expression = expression;
     }
 
     /**
@@ -59,14 +58,24 @@ public class NullTestExpression extends Expression {
         return not;
     }
 
-    /**
-     * @param nullTest the nullTest to set
-     */
-    public void setNot(boolean nullTest) {
-        this.not = nullTest;
-    }
-
     public Node accept(UniversalCodeVisitor visitor) {
         return visitor.visitNullTestExpression(this);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (!(o instanceof NullTestExpression))
+            return false;
+        if (!super.equals(o))
+            return false;
+        NullTestExpression that = (NullTestExpression) o;
+        return isNot() == that.isNot() && Objects.equals(getExpression(), that.getExpression());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), getExpression(), isNot());
     }
 }

@@ -31,4 +31,11 @@ public class DecimalIntegerLiteralExpr extends IntegerLiteral {
     public BigInteger asBigInteger() {
         return new BigInteger(StringUtil.rTrim(getTokenImage().getImage().trim(), "I", false));
     }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if ( !(o instanceof DecimalIntegerLiteralExpr) ) return false;
+        return super.equals(o);
+    }
 }

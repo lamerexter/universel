@@ -32,8 +32,19 @@ import java.util.Iterator;
 import java.util.List;
 
 public interface CompositeNode extends Iterable<Node> {
+   /**
+    * Gets a list of the children of this node.
+    *
+    * @return the children of this node, which may be empty but not null.
+    */
    List<Node> getChildNodes();
 
+   /**
+    * Returns an iterator over the children of this node.
+    *
+    * @return an iterator over the children of this node.
+    * @see #getChildNodes()
+    */
    default Iterator<Node> iterator() {
       return getChildNodes().iterator();
    }

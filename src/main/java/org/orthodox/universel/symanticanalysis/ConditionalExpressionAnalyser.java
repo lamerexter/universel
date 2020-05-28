@@ -30,18 +30,13 @@ package org.orthodox.universel.symanticanalysis;
 
 import org.beanplanet.core.lang.TypeUtil;
 import org.beanplanet.core.models.path.NamePath;
+import org.beanplanet.core.models.path.SimpleNamePath;
 import org.beanplanet.core.util.StringUtil;
+import org.orthodox.universel.ast.NodeSequence;
 import org.orthodox.universel.cst.*;
-import org.orthodox.universel.cst.annotation.Annotation;
-import org.orthodox.universel.cst.collections.ListExpr;
-import org.orthodox.universel.cst.collections.MapExpr;
-import org.orthodox.universel.cst.collections.SetExpr;
 import org.orthodox.universel.cst.conditionals.TernaryExpression;
-import org.orthodox.universel.cst.literals.*;
-import org.orthodox.universel.cst.types.PrimitiveType;
-import org.orthodox.universel.cst.types.ReferenceType;
-import org.orthodox.universel.cst.types.TypeReference;
-import org.orthodox.universel.symanticanalysis.conversion.TypeConversion;
+import org.orthodox.universel.cst.type.*;
+import org.orthodox.universel.cst.type.reference.*;
 
 import javax.lang.model.type.NullType;
 import java.util.*;
@@ -49,8 +44,8 @@ import java.util.stream.Collectors;
 
 import static org.beanplanet.core.util.StringUtil.asDelimitedString;
 import static org.orthodox.universel.compiler.Messages.ConditionalExpression.AMBIGUOUS_TYPE;
-import static org.orthodox.universel.compiler.Messages.MethodCall.TYPE_AMBIGUOUS;
-import static org.orthodox.universel.compiler.Messages.MethodCall.TYPE_NOT_FOUND;
+import static org.orthodox.universel.compiler.Messages.TYPE.TYPE_AMBIGUOUS;
+import static org.orthodox.universel.compiler.Messages.TYPE.TYPE_NOT_FOUND;
 
 /**
  * Iterates over the AST, performing a depth-first post-order traversal to establish the types on the AST. Essentially,
@@ -73,139 +68,8 @@ public class ConditionalExpressionAnalyser extends UniversalVisitorAdapter imple
     }
 
     @Override
-    public Node visitAnnotation(Annotation node) {
-        return node;
-    }
-
-    @Override
-    public Node visitBetweenExpression(BetweenExpression node) {
-        return node;
-    }
-
-    @Override
-    public Node visitNumericLiteralExpression(NumericLiteral node) {
-        Node numericLiteralNode = (Node)node;
-        numericLiteralNode.setTypeDescriptor(node.getTypeDescriptor());
-        return numericLiteralNode;
-    }
-
-    @Override
-    public Node visitBinaryExpression(BinaryExpression node) {
-        return node;
-    }
-
-    @Override
-    public Node visitInExpression(InExpression node) {
-        node.setTypeDescriptor(boolean.class);
-        return node;
-    }
-
-    @Override
-    public Node visitInstanceofExpression(InstanceofExpression node) {
-        node.setTypeDescriptor(boolean.class);
-        return node;
-    }
-
-    @Override
-    public Node visitBooleanLiteral(BooleanLiteralExpr node) {
-        node.setTypeDescriptor(boolean.class);
-        return node;
-    }
-
-    @Override
     public Node visitImportDeclaration(ImportDecl node) {
         this.importDecl = node;
-        return node;
-    }
-
-    @Override
-    public Node visitList(ListExpr node) {
-        node.setTypeDescriptor(List.class);
-        return node;
-    }
-
-    @Override
-    public Node visitMap(MapExpr node) {
-        node.setTypeDescriptor(Map.class);
-        return node;
-    }
-
-    @Override
-    public Node visitMethodCall(MethodCall node) {
-        return node;
-    }
-
-    @Override
-    public Node visitModifiers(Modifiers node) {
-        return node;
-    }
-
-    @Override
-    public Node visitName(QualifiedIdentifier node) {
-        return node;
-    }
-
-    @Override
-    public Node visitName(Name node) {
-        return node;
-    }
-
-    @Override
-    public Node visitNullLiteral(NullLiteralExpr node) {
-        node.setTypeDescriptor(NullType.class);
-        return node;
-    }
-
-    @Override
-    public Node visitNullTestExpression(NullTestExpression node) {
-        node.setTypeDescriptor(boolean.class);
-        return node;
-    }
-
-    @Override
-    public Node visitReferenceType(ReferenceType node) {
-        node.getReferredType().accept(this);
-
-        Class<?> resolvedType = determineTypeOfReference(node);
-        node.getReferredType().setTypeDescriptor(resolvedType);
-
-        return node;
-    }
-
-    @Override
-    public Node visitInterpolatedStringLiteral(InterpolatedStringLiteralExpr node) {
-        node.setTypeDescriptor(String.class);
-        return node;
-    }
-
-    @Override
-    public Node visitScript(Script node) {
-        if ( node.getImportDeclaration() != null ) {
-            node.getImportDeclaration().accept(this);
-        }
-
-        Class<?> establishedType = null;
-        for (Node child : node.getBodyElements()) {
-            child.accept(this);
-            establishedType = child.getTypeDescriptor();
-        }
-
-        if ( establishedType != null ) {
-            node.setTypeDescriptor(establishedType);
-        }
-
-        return node;
-    }
-
-    @Override
-    public Node visitSet(SetExpr node) {
-        node.setTypeDescriptor(Set.class);
-        return node;
-    }
-
-    @Override
-    public Node visitStringLiteral(StringLiteralExpr node) {
-        node.setTypeDescriptor(String.class);
         return node;
     }
 
@@ -246,12 +110,12 @@ public class ConditionalExpressionAnalyser extends UniversalVisitorAdapter imple
         return null;
     }
 
-    private Class<?> determineTypeOfReference(ReferenceType node) {
+    private Class<?> determineTypeOfReference(TypeReference node) {
         //--------------------------------------------------------------------------------------------------------------
         // Find matching primitive types
         //--------------------------------------------------------------------------------------------------------------
-        if ( node.getReferredType() instanceof PrimitiveType) {
-            return node.getReferredType().getTypeDescriptor();
+        if (node instanceof PrimitiveType || node instanceof VoidType) {
+            return node.getTypeDescriptor();
         }
 
         //--------------------------------------------------------------------------------------------------------------
@@ -278,11 +142,11 @@ public class ConditionalExpressionAnalyser extends UniversalVisitorAdapter imple
         if ( matchingTypesImportedExplicitly.isEmpty()
              && matchingTypesImportedOnDemand.isEmpty()
              && matchingTypesImportedImplicitly.isEmpty() ) {
-            context.getMessages().addError(TYPE_NOT_FOUND.withParameters(node.getReferredType().getName().getElement()));
+            context.getMessages().addError(TYPE_NOT_FOUND.withParameters(node.getName().getElement()));
         } else if ( matchingTypesImportedOnDemand.size() > 1
                     || matchingTypesImportedImplicitly.size() > 1 ) {
             context.getMessages().addError(TYPE_AMBIGUOUS.withParameters(
-                    node.getReferredType().getName().getElement(),
+                    node.getName().getElement(),
                     matchingTypesImportedOnDemand.size(),
                     matchingTypesImportedOnDemand));
         }
@@ -290,8 +154,8 @@ public class ConditionalExpressionAnalyser extends UniversalVisitorAdapter imple
         return null;
     }
 
-    private List<Class<?>> findTypesMatchingImplicitImports(ReferenceType referenceType) {
-        final NamePath typeReferenceName = referenceType.getReferredType().getName();
+    private List<Class<?>> findTypesMatchingImplicitImports(TypeReference referenceType) {
+        final NamePath typeReferenceName = referenceType.getName();
         final String[][] implicitImports = { {"java", "lang"}, {"java", "util"}, {"java", "math"} };
 
         List<Class<?>> matchingTypes = new ArrayList<>();
@@ -310,10 +174,10 @@ public class ConditionalExpressionAnalyser extends UniversalVisitorAdapter imple
         return matchingTypes;
     }
 
-    private List<Class<?>> findTypesMatchingOnDemandImports(ReferenceType referenceType) {
+    private List<Class<?>> findTypesMatchingOnDemandImports(TypeReference referenceType) {
         if ( importDecl == null ) return Collections.emptyList();
 
-        final NamePath typeReferenceName = referenceType.getReferredType().getName();
+        final NamePath typeReferenceName = referenceType.getName();
 
         List<Class<?>> matchingTypes = new ArrayList<>();
         for (int n=importDecl.getImports().size()-1; n >= 0; n--) {
@@ -330,10 +194,10 @@ public class ConditionalExpressionAnalyser extends UniversalVisitorAdapter imple
         return matchingTypes;
     }
 
-    private List<Class<?>> findTypesMatchingExplicitImports(ReferenceType referenceType) {
+    private List<Class<?>> findTypesMatchingExplicitImports(TypeReference referenceType) {
         if ( importDecl == null ) return Collections.emptyList();
 
-        final NamePath typeReferenceName = referenceType.getReferredType().getName();
+        final NamePath typeReferenceName = referenceType.getName();
 
         List<Class<?>> matchingTypes = new ArrayList<>();
         for (int n=importDecl.getImports().size()-1; n >= 0; n--) {
@@ -341,9 +205,14 @@ public class ConditionalExpressionAnalyser extends UniversalVisitorAdapter imple
 
             if ( importStmt.isOnDemand() ) continue;
 
-            String importedTypeFqn = asDelimitedString(importStmt.getElements().stream().map(Name::getName).collect(Collectors.toList()), ".");
+            NamePath importedTypeFqn = new SimpleNamePath(importStmt.getElements().stream().map(Name::getName).collect(Collectors.toList()));
+            if ( importStmt.isOnDemand() ) {
+                importedTypeFqn = (NamePath)importedTypeFqn.join(typeReferenceName);
+            } else if ( !typeReferenceName.getElement().equals(importedTypeFqn.getLastElement()) ) {
+                continue;
+            }
 
-            Class<?> importedType = TypeUtil.loadClassOrNull(importedTypeFqn);
+            Class<?> importedType = TypeUtil.loadClassOrNull(importedTypeFqn.join("."));
             if (importedType != null) matchingTypes.add(importedType);
         }
 
@@ -351,17 +220,52 @@ public class ConditionalExpressionAnalyser extends UniversalVisitorAdapter imple
     }
 
     @Override
-    public Node visitTypeReference(TypeReference node) {
-        return node;
-    }
+    public Node visitMethodDeclaration(MethodDeclaration node) {
+        if (node.getReturnType().getTypeDescriptor() != null && node.getParameters().getNodes().stream().map(Node::getTypeDescriptor).allMatch(Objects::nonNull)) return node;
+
+        TypeReference transformedReturnTypeReference;
+        if ( node.getReturnType().getTypeDescriptor() != null ) {
+            transformedReturnTypeReference = node.getReturnType();
+        } else {
+            Class<?> resolvedType = determineTypeOfReference(node.getReturnType());
+            transformedReturnTypeReference = resolvedType == null ? node.getReturnType() : new ResolvedTypeReference(node.getTokenImage(),
+                                                                                                                     resolvedType,
+                                                                                                                     node.getReturnType().getName(),
+                                                                                                                     node.getReturnType().getDimensions());
+
+        }
+
+        NodeSequence.NodeSequenceBuilder<Parameter> nodeSequenceBuilder = NodeSequence.<Parameter>builder().tokenImage(node.getParameters().getTokenImage());
+        List<Parameter> transformedParametersList = new ArrayList<>(node.getParameters().size());
+        for (Parameter parameter : node.getParameters().getNodes()) {
+            TypeReference resolvedTypeReference;
+            if ( parameter.getTypeDescriptor() != null ) {
+                resolvedTypeReference = parameter.getType();
+            } else {
+                Class<?> resolvedType = determineTypeOfReference(parameter.getType());
+                resolvedTypeReference = resolvedType == null ? parameter.getType() : new ResolvedTypeReference(node.getTokenImage(), resolvedType, parameter.getType().getName(), parameter.getType().getDimensions());
+            }
+            transformedParametersList.add(new Parameter(parameter.getModifiers(), resolvedTypeReference, parameter.isVarArgs(), parameter.getName()));
+        }
+        nodeSequenceBuilder.addAll(transformedParametersList);
+        final NodeSequence<Parameter> transformedParameters = nodeSequenceBuilder.build();
+
+        boolean noTransformationChanges = Objects.equals(transformedReturnTypeReference, node.getReturnType()) &&
+                                          Objects.equals(transformedParameters, node.getParameters());
+        return noTransformationChanges ? node : new MethodDeclaration(node.getModifiers(),
+                                                                      node.getTypeParameters(),
+                                                                      transformedReturnTypeReference,
+                                                                      node.getName(),
+                                                                      transformedParameters,
+                                                                      node.getBody());
+   }
+
 
     @Override
-    public Node visitTypeConversion(TypeConversion node) {
-        return node;
-    }
+    public TypeReference visitTypeReference(TypeReference node) {
+        if (node instanceof ResolvedTypeReference) return node;
 
-    @Override
-    public Node visitUnaryExpression(UnaryExpression node) {
-        return node;
+        Class<?> resolvedType = determineTypeOfReference(node);
+        return new ResolvedTypeReference(node.getTokenImage(), resolvedType, node.getName(), node.getDimensions());
     }
 }

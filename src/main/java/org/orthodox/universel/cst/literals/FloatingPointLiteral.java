@@ -97,4 +97,17 @@ public abstract class FloatingPointLiteral extends Expression implements Numeric
     public Node accept(UniversalCodeVisitor visitor) {
         return visitor.visitNumericLiteralExpression(this);
     }
+
+    @Override
+    public boolean equals(final Object o) {
+        if ( this == o ) return true;
+        if ( o == null || o.getClass() != getClass() ) return false;
+
+        return super.equals(o);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
 }

@@ -78,4 +78,11 @@ public class HexadecimalIntegerLiteralExpr extends IntegerLiteral {
         String trimmedBinary = lTrim(s.toString(), "0");
         return trimmedBinary.isEmpty() ? "0" : trimmedBinary;
     }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if ( !(o instanceof HexadecimalIntegerLiteralExpr) ) return false;
+        return super.equals(o);
+    }
 }

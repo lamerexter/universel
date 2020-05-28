@@ -77,57 +77,57 @@ public class MethodCallAnalyser extends UniversalVisitorAdapter implements Seman
     }
 
     public void resolveMethodCalls(MethodCall methodCall) {
-        //--------------------------------------------------------------------------------------------------------------
-        // Collect the callable methods + constructors (in that order), which match the method call semantics.
-        // Methods take precedence here because the source code has used the "methodCall(...)" quick syntax, as opposes to
-        // the "new constructorName(..,)", if a new object instance was intended.
-        //--------------------------------------------------------------------------------------------------------------
-        // Methods
-        //--------------------------------------------------------------------------------------------------------------
-        List<Method> matchingExplicitlyImportedMethods = findMatchingMethodsFromExplicitImports(methodCall);
-        if (matchingExplicitlyImportedMethods.size() == 1) {
-            methodCall.setExecutable(matchingExplicitlyImportedMethods.get(0));
-            return;
-        }
-
-        List<Method> matchingImportOnDemandNethods = findMatchingMethodsFromOnDemandImports(methodCall);
-        if (matchingImportOnDemandNethods.size() == 1) {
-            methodCall.setExecutable(matchingImportOnDemandNethods.get(0));
-            return;
-        }
-
-        //--------------------------------------------------------------------------------------------------------------
-        // Constructors
-        //--------------------------------------------------------------------------------------------------------------
-        List<Constructor> matchingExplicitlyImporteConsructors = findMatchingConstructorsFromExplicitImports(methodCall);
-        if (matchingExplicitlyImporteConsructors.size() == 1) {
-            methodCall.setExecutable(matchingExplicitlyImporteConsructors.get(0));
-            return;
-        }
-
-        //--------------------------------------------------------------------------------------------------------------
-        // Unable to find methods or new instance creation matching the call. Add appropriate compilation errors.
-        //--------------------------------------------------------------------------------------------------------------
-        if ( matchingExplicitlyImportedMethods.isEmpty()
-             && matchingImportOnDemandNethods.isEmpty()
-             && matchingExplicitlyImporteConsructors.isEmpty() ) {
-            context.getMessages().addError(METHOD_NOT_FOUND.relatedObject(methodCall).withParameters(methodCall.getName().getName()));
-        } else if ( matchingExplicitlyImportedMethods.size() > 1
-                    || matchingExplicitlyImporteConsructors.size() > 1 ) {
-            context.getMessages().addError(METHOD_AMBIGUOUS
-                                                   .relatedObject(methodCall)
-                                                   .withParameters(
-                    methodCall.getName().getName(),
-                    matchingExplicitlyImportedMethods.size(),
-                    matchingExplicitlyImportedMethods));
-        } if ( matchingImportOnDemandNethods.size() > 1) {
-            context.getMessages().addError(METHOD_AMBIGUOUS
-                                                   .relatedObject(methodCall)
-                                                   .withParameters(
-                    methodCall.getName().getName(),
-                    matchingImportOnDemandNethods.size(),
-                    matchingImportOnDemandNethods));
-        }
+//        //--------------------------------------------------------------------------------------------------------------
+//        // Collect the callable methods + constructors (in that order), which match the method call semantics.
+//        // Methods take precedence here because the source code has used the "methodCall(...)" quick syntax, as opposes to
+//        // the "new constructorName(..,)", if a new object instance was intended.
+//        //--------------------------------------------------------------------------------------------------------------
+//        // Methods
+//        //--------------------------------------------------------------------------------------------------------------
+//        List<Method> matchingExplicitlyImportedMethods = findMatchingMethodsFromExplicitImports(methodCall);
+//        if (matchingExplicitlyImportedMethods.size() == 1) {
+//            methodCall.setExecutable(matchingExplicitlyImportedMethods.get(0));
+//            return;
+//        }
+//
+//        List<Method> matchingImportOnDemandNethods = findMatchingMethodsFromOnDemandImports(methodCall);
+//        if (matchingImportOnDemandNethods.size() == 1) {
+//            methodCall.setExecutable(matchingImportOnDemandNethods.get(0));
+//            return;
+//        }
+//
+//        //--------------------------------------------------------------------------------------------------------------
+//        // Constructors
+//        //--------------------------------------------------------------------------------------------------------------
+//        List<Constructor> matchingExplicitlyImporteConsructors = findMatchingConstructorsFromExplicitImports(methodCall);
+//        if (matchingExplicitlyImporteConsructors.size() == 1) {
+//            methodCall.setExecutable(matchingExplicitlyImporteConsructors.get(0));
+//            return;
+//        }
+//
+//        //--------------------------------------------------------------------------------------------------------------
+//        // Unable to find methods or new instance creation matching the call. Add appropriate compilation errors.
+//        //--------------------------------------------------------------------------------------------------------------
+//        if ( matchingExplicitlyImportedMethods.isEmpty()
+//             && matchingImportOnDemandNethods.isEmpty()
+//             && matchingExplicitlyImporteConsructors.isEmpty() ) {
+//            context.getMessages().addError(METHOD_NOT_FOUND.relatedObject(methodCall).withParameters(methodCall.getName().getName()));
+//        } else if ( matchingExplicitlyImportedMethods.size() > 1
+//                    || matchingExplicitlyImporteConsructors.size() > 1 ) {
+//            context.getMessages().addError(METHOD_AMBIGUOUS
+//                                                   .relatedObject(methodCall)
+//                                                   .withParameters(
+//                    methodCall.getName().getName(),
+//                    matchingExplicitlyImportedMethods.size(),
+//                    matchingExplicitlyImportedMethods));
+//        } if ( matchingImportOnDemandNethods.size() > 1) {
+//            context.getMessages().addError(METHOD_AMBIGUOUS
+//                                                   .relatedObject(methodCall)
+//                                                   .withParameters(
+//                    methodCall.getName().getName(),
+//                    matchingImportOnDemandNethods.size(),
+//                    matchingImportOnDemandNethods));
+//        }
     }
 
     private List<Method> findMatchingMethodsFromExplicitImports(final MethodCall methodCall) {

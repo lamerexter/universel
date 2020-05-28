@@ -41,8 +41,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.orthodox.universel.Universal.compile;
 import static org.orthodox.universel.Universal.execute;
-import static org.orthodox.universel.compiler.Messages.MethodCall.TYPE_AMBIGUOUS;
-import static org.orthodox.universel.compiler.Messages.MethodCall.TYPE_NOT_FOUND;
+import static org.orthodox.universel.compiler.Messages.TYPE.TYPE_AMBIGUOUS;
+import static org.orthodox.universel.compiler.Messages.TYPE.TYPE_NOT_FOUND;
 
 public class InstanceOfTest {
     @Test

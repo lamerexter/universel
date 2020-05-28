@@ -28,18 +28,75 @@
 
 package org.orthodox.universel.symanticanalysis;
 
+import org.beanplanet.messages.domain.Message;
 import org.beanplanet.messages.domain.Messages;
+import org.orthodox.universel.compiler.Scope;
+import org.orthodox.universel.cst.ImportStmt;
+import org.orthodox.universel.cst.Node;
+import org.orthodox.universel.exec.navigation.NavigatorRegistry;
 
-import static org.beanplanet.messages.domain.MessagesImpl.messages;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 public class SemanticAnalysisContext {
-    private Messages messages = messages();
+    private final List<ImportStmt> defaultImports;
 
-    public SemanticAnalysisContext(Messages message) {
+    private final Class<?> bindingType;
+    private final Messages messages;
+    private final NavigatorRegistry navigatorRegistry;
+    private final Deque<Scope> scopes = new ArrayDeque<>();
+
+    public SemanticAnalysisContext(List<ImportStmt> defaultImports,
+                                   Class<?> bindingType,
+                                   Messages message,
+                                   NavigatorRegistry navigatorRegistry) {
+        this.defaultImports = defaultImports;
+        this.bindingType = bindingType;
         this.messages = message;
+        this.navigatorRegistry = navigatorRegistry;
+    }
+
+    public List<ImportStmt> getDefaultImports() {
+        return defaultImports;
+    }
+
+    public Class<?> getBindingType() {
+        return bindingType;
     }
 
     public Messages getMessages() {
         return messages;
+    }
+
+    public Messages addError(Message message) {
+        return addError(message, m -> Objects.equals(m, message));
+    }
+
+    public Messages addError(Message message, Predicate<Message> noMatchingErrorCondition) {
+        if ( getMessages().getErrors().stream().noneMatch(noMatchingErrorCondition) ) {
+            return getMessages().addError(message);
+        }
+
+        return getMessages();
+    }
+
+    public NavigatorRegistry getNavigatorRegistry() {
+        return navigatorRegistry;
+    }
+
+    public void pushScope(Scope scope) {
+        scopes.push(scope);
+    }
+
+    public Scope popScope() {
+        return scopes.pop();
+    }
+
+    public Stream<Scope> scopes() {
+        return scopes.stream();
     }
 }

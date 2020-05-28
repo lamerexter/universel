@@ -53,7 +53,7 @@ public class ConstructorCallTest {
     @Test
     void singleArg_unboxing() {
         // TODO: So-called redundant cast below is required because he Java compiler is converting the long to a double.
-        // Fimd the narrowing/widening or conversion rule in the JLS.
+        // Find the narrowing/widening or conversion rule in the JLS.
         assertThat(execute("import java.lang.Long import " + org.orthodox.universel.exec.objectcreation.TestClass.class.getName() + " TestClass(Long(1234L))"), equalTo(new TestClass((long)1234L)));
     }
 

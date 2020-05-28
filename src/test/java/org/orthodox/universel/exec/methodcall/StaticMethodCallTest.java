@@ -42,12 +42,12 @@ import static org.orthodox.universel.exec.methodcall.TestClass.*;
 
 public class StaticMethodCallTest {
     @Test
-    void noArgs_resolveFromImport() {
+    void noArgs_resolveFromExplicitImport() {
         assertThat(execute("import " + TestClass.class.getName() + ".noArgs noArgs()"), equalTo(noArgs()));
     }
 
     @Test
-    void oneArg_resolveFromImport() {
+    void oneArg_resolveFromExplicitImport() {
         assertThat(execute("import " + TestClass.class.getName() + ".* oneIntParam(8)"), equalTo(oneIntParam(8)));
     }
 
@@ -65,32 +65,29 @@ public class StaticMethodCallTest {
 
     @Test
     void oneArg_methodNotFound() {
-        CompiledUnit compiled = compile("import " + TestClass.class.getName() + ".* doesNotExist('xyz')");
-        assertThat(compiled.getMessages().getErrors().size(), equalTo(1));
+        CompiledUnit<?> compiled = compile("import " + TestClass.class.getName() + ".* doesNotExist('xyz')");
         assertThat(compiled.getMessages().hasErrorWithCode( METHOD_NOT_FOUND.getCode()), is(true));
     }
 
     @Test
     void oneArg_overloadedMethod_ambiguousWhenMoreThanOneMatches() {
-        CompiledUnit compiled = compile("import " + TestClass.class.getName() + ".* overloadedMethod(null)");
-        assertThat(compiled.getMessages().getErrors().size(), equalTo(1));
+        CompiledUnit<?> compiled = compile("import " + TestClass.class.getName() + ".* overloadedMethod(null)");
         assertThat(compiled.getMessages().hasErrorWithCode(METHOD_AMBIGUOUS.getCode()), is(true));
     }
 
     @Test
     void oneArg_ambiguousWhenImportedOnDemandFromMoreThanOneType() {
-        CompiledUnit compiled = compile(
+        CompiledUnit<?> compiled = compile(
                 "import " + TestClass.class.getName() + ".*"+
                 "import " + AnotherTestClass.class.getName() + ".*"+
                 "oneIntParam(9)"
         );
-        assertThat(compiled.getMessages().getErrors().size(), equalTo(1));
         assertThat(compiled.getMessages().hasErrorWithCode(METHOD_AMBIGUOUS.getCode()), is(true));
     }
 
     @Test
     void oneArg_resolvesWhenExplicitlyImportedFromType() {
-        CompiledUnit compiled = compile(
+        CompiledUnit<?> compiled = compile(
                 "import " + TestClass.class.getName() + ".*"+
                 "import " + AnotherTestClass.class.getName() + ".oneIntParam"+
                 " "+
@@ -101,23 +98,21 @@ public class StaticMethodCallTest {
 
     @Test
     void oneArg_ambiguousWhenExplicitlyImportedFromSeparateTypes() {
-        CompiledUnit compiled = compile(
+        CompiledUnit<?> compiled = compile(
                 "import " + TestClass.class.getName() + ".oneIntParam\n"+
                 "import " + AnotherTestClass.class.getName() + ".oneIntParam\n"+
                 "oneIntParam(9)"
         );
-        assertThat(compiled.getMessages().getErrors().size(), equalTo(1));
         assertThat(compiled.getMessages().hasErrorWithCode(METHOD_AMBIGUOUS.getCode()), is(true));
     }
 
     @Test
     void oneArg_ambiguousWhenImportedOnDemandFromSeparateTypes() {
-        CompiledUnit compiled = compile(
+        CompiledUnit<?> compiled = compile(
                 "import " + TestClass.class.getName() + ".*\n"+
                 "import " + AnotherTestClass.class.getName() + ".*\n"+
                 "oneIntParam(9)"
         );
-        assertThat(compiled.getMessages().getErrors().size(), equalTo(1));
         assertThat(compiled.getMessages().hasErrorWithCode(METHOD_AMBIGUOUS.getCode()), is(true));
     }
 }

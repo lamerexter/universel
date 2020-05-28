@@ -32,9 +32,11 @@ import org.beanplanet.core.lang.Assert;
 import org.beanplanet.core.lang.TypeNotFoundException;
 import org.beanplanet.core.lang.TypeUtil;
 import org.beanplanet.core.util.StringUtil;
+import org.orthodox.universel.ast.navigation.NavigationStep;
 import org.orthodox.universel.cst.ImportDecl;
 import org.orthodox.universel.cst.ImportStmt;
 import org.orthodox.universel.cst.Name;
+import org.orthodox.universel.cst.Node;
 
 import java.util.stream.Collectors;
 
@@ -52,6 +54,11 @@ public class TypeReferenceScope implements NameScope {
     public TypeReferenceScope(CompilationContext compilationContext, ImportDecl importDecl) {
         this.compilationContext = compilationContext;
         this.importDecl = importDecl;
+    }
+
+    @Override
+    public Node navigate(final NavigationStep step) {
+        return null;
     }
 
     @Override

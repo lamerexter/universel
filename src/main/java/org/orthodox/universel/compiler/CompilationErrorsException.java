@@ -32,6 +32,8 @@ import org.beanplanet.core.util.StringUtil;
 import org.beanplanet.messages.domain.Message;
 import org.beanplanet.messages.domain.Messages;
 import org.orthodox.universel.UniversalException;
+import org.orthodox.universel.cst.Node;
+import org.orthodox.universel.cst.TokenImage;
 
 import java.io.File;
 
@@ -50,9 +52,24 @@ public class CompilationErrorsException extends UniversalException {
         StringBuilder s = new StringBuilder();
         int errorNum = 1;
         for (Message error : messages.getErrors()) {
-            s.append(errorNum++).append(": ").append(error.getRenderedMessage()).append(System.lineSeparator());
+            String position = determineMessagePosition(error);
+            s.append(errorNum++).append(": ").append(position == null ? "" : position+" ").append(error.getRenderedMessage()).append(System.lineSeparator());
         }
 
         return s.toString();
+    }
+
+    private static String determineMessagePosition(final Message msg) {
+        if ( !(msg.getRelatedObject() instanceof Node) ) return null;
+
+        Node associatedNode = msg.getRelatedObject();
+        TokenImage tokenImage = associatedNode.getTokenImage();
+        if ( tokenImage == null || tokenImage.getStartLine() < 0 ) return null;
+
+        return ""+
+               (tokenImage.getStartLine() < 0 ? "_" : tokenImage.getStartLine()) +
+               ":"+(tokenImage.getStartColumn() < 0 ? "_" : tokenImage.getStartColumn())+
+               "-"+(tokenImage.getEndLine() < 0 ? "_" : tokenImage.getEndLine())+
+               ":"+(tokenImage.getEndColumn() < 0 ? "_" : tokenImage.getEndColumn());
     }
 }

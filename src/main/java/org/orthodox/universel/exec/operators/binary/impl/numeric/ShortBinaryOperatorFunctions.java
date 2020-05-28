@@ -141,7 +141,7 @@ public class ShortBinaryOperatorFunctions {
     }
 
     @BinaryOperator(STAR)
-    public static int operator_STAR(short lhs, short rhs) {
+    public static int multiply(short lhs, short rhs) {
         return lhs * rhs;
     }
 }

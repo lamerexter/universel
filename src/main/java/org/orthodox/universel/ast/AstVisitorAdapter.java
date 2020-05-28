@@ -36,7 +36,7 @@ import org.orthodox.universel.cst.collections.SetExpr;
 import org.orthodox.universel.cst.conditionals.ElvisExpression;
 import org.orthodox.universel.cst.conditionals.TernaryExpression;
 import org.orthodox.universel.cst.literals.*;
-import org.orthodox.universel.cst.types.TypeReference;
+import org.orthodox.universel.cst.type.reference.TypeReference;
 
 public class AstVisitorAdapter implements AstVisitor {
     @Override

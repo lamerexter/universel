@@ -27,7 +27,10 @@
  */
 package org.orthodox.universel.cst;
 
+import org.beanplanet.core.models.path.DelimitedNamePath;
 import org.orthodox.universel.ast.AstVisitor;
+import org.orthodox.universel.cst.type.reference.ResolvedTypeReference;
+import org.orthodox.universel.cst.type.reference.TypeReference;
 
 import java.util.Objects;
 
@@ -49,6 +52,8 @@ public abstract class Node implements UniversalCodeVisitable {
 
     protected Class<?> typeDescriptor;
 
+    private TypeReference type;
+
 
     /**
      * Constructs a new AST node instance, with no initial configuration.
@@ -62,7 +67,7 @@ public abstract class Node implements UniversalCodeVisitable {
      * @param tokenImage the parser token image backing this node.
      */
     public Node(TokenImage tokenImage) {
-        this(tokenImage, null);
+        this(tokenImage, (Class<?>)null);
     }
 
     /**
@@ -76,6 +81,16 @@ public abstract class Node implements UniversalCodeVisitable {
     }
 
     /**
+     * Constructs the node.
+     *
+     * @param tokenImage the parser token image backing this node.
+     * @param type  the type of the node, or null if unknown at this time.
+     */
+    public Node(TokenImage tokenImage, TypeReference type) {
+        this(null, tokenImage, type);
+    }
+
+    /**
      * All args constructor.
      *
      * @param parent the parent node, which may be null to indicate none.
@@ -86,6 +101,21 @@ public abstract class Node implements UniversalCodeVisitable {
         this.parent = parent;
         this.tokenImage = tokenImage;
         this.typeDescriptor = typeDescriptor;
+        this.type = null;
+    }
+
+    /**
+     * All args constructor.
+     *
+     * @param parent the parent node, which may be null to indicate none.
+     * @param tokenImage the parser token image backing this node.
+     * @param type the type of the node, or null if unknown at this time.
+     */
+    public Node(Node parent, TokenImage tokenImage, TypeReference type) {
+        this.parent = parent;
+        this.tokenImage = tokenImage;
+        this.typeDescriptor = null;
+        this.type = type;
     }
 
     public Node accept(UniversalCodeVisitor visitor) {
@@ -156,6 +186,10 @@ public abstract class Node implements UniversalCodeVisitable {
 
     public Class<?> getTypeDescriptor() {
         return typeDescriptor;
+    }
+
+    public TypeReference getType() {
+        return type;
     }
 
     public void setTypeDescriptor(Class<?> typeDescriptor) {

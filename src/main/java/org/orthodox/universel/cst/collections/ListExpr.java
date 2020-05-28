@@ -32,6 +32,7 @@ import org.orthodox.universel.cst.*;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * An list expression on the Abstract Syntax Tree, of the form <code>[1, 2, 3, 4]</code>
@@ -77,5 +78,19 @@ public class ListExpr extends Expression implements CompositeNode {
     @Override
     public List<Node> getChildNodes() {
         return elements;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ListExpr)) return false;
+        if (!super.equals(o)) return false;
+        ListExpr nodes = (ListExpr) o;
+        return Objects.equals(getElements(), nodes.getElements());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), getElements());
     }
 }

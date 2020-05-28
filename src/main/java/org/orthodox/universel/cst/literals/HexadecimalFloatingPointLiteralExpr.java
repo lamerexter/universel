@@ -86,4 +86,11 @@ public class HexadecimalFloatingPointLiteralExpr extends FloatingPointLiteral {
 
         return value;
     }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if ( !(o instanceof HexadecimalFloatingPointLiteralExpr) ) return false;
+        return super.equals(o);
+    }
 }

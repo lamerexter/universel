@@ -35,4 +35,11 @@ public class BooleanLiteralExpr extends Expression {
     public Class<?> getTypeDescriptor() {
         return boolean.class;
     }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if ( !(o instanceof BooleanLiteralExpr) ) return false;
+        return super.equals(o);
+    }
 }

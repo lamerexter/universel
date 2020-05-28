@@ -3,20 +3,22 @@ package org.orthodox.universel.compiler;
 import org.beanplanet.core.lang.TypeUtil;
 import org.beanplanet.core.lang.conversion.SystemTypeConverter;
 import org.beanplanet.core.lang.conversion.TypeConverter;
+import org.beanplanet.core.models.path.NamePath;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.orthodox.universel.cst.Operator;
+import org.orthodox.universel.cst.type.reference.TypeReference;
 
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.LinkedList;
-import java.util.Queue;
 
 import static java.util.Arrays.stream;
-import static org.beanplanet.core.lang.TypeUtil.isPrimitiveType;
+import static org.beanplanet.core.lang.TypeUtil.*;
 import static org.objectweb.asm.Opcodes.*;
 
 /**
@@ -29,8 +31,8 @@ public class BytecodeHelper {
     public static final Type[] OBJECT_TYPE_ARRAY = new Type[] { OBJECT_TYPE };
 
 
-    private Queue<ClassWriter> cwStack = new LinkedList<>();
-    private Queue<MethodVisitor> mvStack = new LinkedList<>();
+    private Deque<ClassWriter> cwStack = new LinkedList<>();
+    private Deque<MethodVisitor> mvStack = new LinkedList<>();
 
     public BytecodeHelper() {}
 
@@ -106,7 +108,7 @@ public class BytecodeHelper {
      * @return the primtive wrapper type employed to box the given primitive type.
      */
     public Class<?> box(Class<?> primitiveType) {
-        Class<?> primitiveWrapperType = TypeUtil.getPrimitiveWrapperType(primitiveType);
+        Class<?> primitiveWrapperType = getPrimitiveWrapperType(primitiveType);
         peekMethodVisitor().visitMethodInsn(INVOKESTATIC,
                                             Type.getInternalName(BoxingFunctions.class),
                                             "box",
@@ -123,14 +125,60 @@ public class BytecodeHelper {
      * @param method the static method for which the invocation code is to be generated.
      */
     public void emitInvokeStaticMethod(Method method) {
+//        peekMethodVisitor().visitMethodInsn(INVOKESTATIC,
+//                                            Type.getInternalName(method.getDeclaringClass()),
+//                                            method.getName(),
+//                                            Type.getMethodDescriptor(Type.getType(method.getReturnType()), typeArrayFor(method.getParameterTypes())),
+//                                            false);
+        emitInvokeStaticMethod(method.getDeclaringClass(), method.getReturnType(), method.getName(), method.getParameterTypes());
+    }
+
+    /**
+     * Emits instructions to call s static method on a given class. The parameters must have already been evaluated and
+     * reside on the operand stack prior to calling this method.
+     *
+     * @param declaringType the enclosing type within which the static method is declared.
+     * @param returnType the return type of the method.
+     * @param name the method name.
+     * @param parameterTypes the types of the parameters.
+     */
+    public void emitInvokeStaticMethod(Class<?> declaringType,
+                                       Class<?> returnType,
+                                       String name,
+                                       Class<?> ... parameterTypes) {
         peekMethodVisitor().visitMethodInsn(INVOKESTATIC,
-                                            Type.getInternalName(method.getDeclaringClass()),
-                                            method.getName(),
-                                            Type.getMethodDescriptor(Type.getType(method.getReturnType()), typeArrayFor(method.getParameterTypes())),
+                                            Type.getInternalName(declaringType),
+                                            name,
+                                            Type.getMethodDescriptor(Type.getType(returnType), typeArrayFor(parameterTypes)),
                                             false);
     }
 
-    public void convert(Class<?> fromType, Class<?> toType) {
+    /**
+     * Emits instructions to call s static method on a given class. The parameters must have already been evaluated and
+     * reside on the operand stack prior to calling this method.
+     *
+     * @param declaringType the enclosing type within which the static method is declared.
+     * @param returnType the return type of the method.
+     * @param name the method name.
+     * @param parameterTypes the types of the parameters.
+     */
+    public void emitInvokeStaticMethod(TypeReference declaringType,
+                                       Class<?> returnType,
+                                       String name,
+                                       Class<?> ... parameterTypes) {
+        peekMethodVisitor().visitMethodInsn(INVOKESTATIC,
+                                            declaringType.getName().join("/"),
+                                            name,
+                                            Type.getMethodDescriptor(Type.getType(returnType), typeArrayFor(parameterTypes)),
+                                            false);
+    }
+
+    public void convert(final Class<?> fromType, final Class<?> toType) {
+        //--------------------------------------------------------------------------------------------------------------
+        // Runtime type conversion, via TypeConverter, is reference-based so may need to convert a primitive
+        //--------------------------------------------------------------------------------------------------------------
+        if ( isPrimitiveType(fromType) ) box(fromType);
+
         //--------------------------------------------------------------------------------------------------------------
         // Prepare to call into the Type Converter subsystem to convert to the target type. This is Object-based, with
         // primitives needing to be wrapped accordingly.
@@ -175,7 +223,7 @@ public class BytecodeHelper {
         peekMethodVisitor().visitInsn(DUP);
     }
 
-    public void emitInvokeInstanceMethod(Class<?> type, String methodName, Class<?> returnType, Class<?> ... paramTypes) {
+    public void emitInvokeInstanceMethod(Class<?> type, Class<?> returnType, String methodName, Class<?> ... paramTypes) {
         String className = Type.getInternalName(type);
         peekMethodVisitor().visitMethodInsn(
                 type.isInterface() ? INVOKEINTERFACE : INVOKEVIRTUAL,
@@ -185,6 +233,25 @@ public class BytecodeHelper {
                 type.isInterface());
     }
 
+    /**
+     * Emits instructions to call an instance method on a given class. The parameters must have already been evaluated and
+     * reside on the operand stack prior to calling this method.
+     *
+     * @param declaringType the enclosing type within which the static method is declared.
+     * @param returnType the return type of the method.
+     * @param name the method name.
+     * @param parameterTypes the types of the parameters.
+     */
+    public void emitInvokeInstanceMethod(TypeReference declaringType,
+                                         Class<?> returnType,
+                                         String name,
+                                         Class<?> ... parameterTypes) {
+        peekMethodVisitor().visitMethodInsn(declaringType.isInterface() ? INVOKEINTERFACE : INVOKEVIRTUAL,
+                                            declaringType.getName().join("/"),
+                                            name,
+                                            Type.getMethodDescriptor(Type.getType(returnType), typeArrayFor(parameterTypes)),
+                                            false);
+    }
 
     private static Type[] toTypes(Class<?>[] paramTypes) {
         return paramTypes == null ? null : stream(paramTypes).map(Type::getType).toArray(Type[]::new);
@@ -199,21 +266,21 @@ public class BytecodeHelper {
         return mvStack.peek();
     }
 
-    public ClassWriter generateClass(int classVersion, int modifiers, String className, Class<?> superTyoe, Class<?> ... interfaceTypes) {
+    public ClassWriter generateClass(int classVersion, int modifiers, NamePath className, Class<?> superType, Class<?> ... interfaceTypes) {
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS + ClassWriter.COMPUTE_FRAMES);
 
-        cw.visit(classVersion, modifiers, className, null, Type.getInternalName(superTyoe),
+        cw.visit(classVersion, modifiers, className.join("/"), null, superType == null ? Type.getInternalName(Object.class) : Type.getInternalName(superType),
                  interfaceTypes == null ? null : stream(interfaceTypes).map(Type::getDescriptor).toArray(String[]::new));
 
-        cwStack.add(cw);
+        cwStack.push(cw);
         return cw;
     }
 
     public MethodVisitor generateMethod(int modifiers, String methodName, Class<?> returnType, Class<?> ... paramTypes) {
         MethodVisitor mv = peekClassWriter().visitMethod(modifiers, methodName, Type.getMethodDescriptor(Type.getType(returnType),
-                                                                                                         paramTypes == null ? null : stream(paramTypes).map(Type::getType).toArray(Type[]::new)), null, null);
+                                                                                                         paramTypes == null ? EMPTY_TYPES : stream(paramTypes).map(Type::getType).toArray(Type[]::new)), null, null);
         mv.visitCode();
-        mvStack.add(mv);
+        mvStack.push(mv);
         return mv;
     }
 
@@ -238,6 +305,27 @@ public class BytecodeHelper {
         }
     }
 
+    public void emitLoadLocal(boolean staticMethod, int paramPosition, TypeReference type) {
+        int varPosition = staticMethod ? paramPosition : paramPosition+1;
+        if (type.isPrimitiveType()) {
+            if (type.getTypeDescriptor() == boolean.class
+                || type.getTypeDescriptor() == int.class
+                || type.getTypeDescriptor() == char.class
+                || type.getTypeDescriptor() == short.class
+                || type.getTypeDescriptor() == byte.class ) {
+                peekMethodVisitor().visitVarInsn(ILOAD, varPosition);
+            } else if (type.getTypeDescriptor() == double.class) {
+                peekMethodVisitor().visitVarInsn(DLOAD, varPosition);
+            } else if (type.getTypeDescriptor() == float.class) {
+                peekMethodVisitor().visitVarInsn(FLOAD, varPosition);
+            } else if (type.getTypeDescriptor() == long.class) {
+                peekMethodVisitor().visitVarInsn(LLOAD, varPosition);
+            }
+        } else {
+            peekMethodVisitor().visitVarInsn(ALOAD, varPosition);
+        }
+    }
+
     public void emitLoadType(Class<?> typeName) {
         peekMethodVisitor().visitLdcInsn(Type.getType(typeName));
     }
@@ -253,5 +341,90 @@ public class BytecodeHelper {
 
     public void emitLoadEnum(Operator operator) {
         peekMethodVisitor().visitFieldInsn(GETSTATIC, Type.getInternalName(operator.getClass()), operator.name(), Type.getDescriptor(operator.getClass()));
+    }
+
+    public void castIfNeeded(Class<?> sourceType, Class<?> targetType) {
+        if (sourceType == targetType || targetType.isAssignableFrom(sourceType))
+            return;
+
+        // If both source and target are primitive then emit
+        // inline JVM instructions for direct conversion (very efficient)
+        if (isPrimitiveType(sourceType) && isPrimitiveType(targetType)) {
+            PrimitiveCastingCodeGenerator.cast(peekMethodVisitor(), sourceType, targetType);
+        } else if (isPrimitiveType(targetType)) {
+            unbox(targetType);
+        } else if (isPrimitiveType(sourceType) && isPrimitiveTypeWrapperClass(targetType)) {
+            box(targetType);
+        } else if (isPrimitiveType(sourceType) && targetType == Object.class) {
+            box(sourceType);
+        } else {
+            convert(sourceType, targetType);
+        }
+    }
+
+    public void convertIfNeeded(Class<?> sourceType, Class<?> targetType) {
+        if (sourceType == targetType || targetType.isAssignableFrom(sourceType))
+            return;
+
+        // If both source and target are primitive then emit
+        // inline JVM instructions for direct conversion (very efficient)
+        if (isPrimitiveType(sourceType) && isPrimitiveType(targetType)) {
+            PrimitiveCastingCodeGenerator.cast(peekMethodVisitor(), sourceType, targetType);
+        } else if (isPrimitiveTypeWrapperClass(sourceType) && isPrimitiveType(targetType)) {
+            unbox(targetType);
+        } else if (isPrimitiveType(sourceType) && (isPrimitiveTypeWrapperClass(targetType) || targetType == Object.class)) {
+            box(targetType);
+        } else {
+            convert(sourceType, targetType);
+        }
+    }
+
+    public ClassWriter popClassWriter() {
+        return cwStack.pop();
+    }
+
+    public MethodVisitor popMethodVisitor() {
+        return mvStack.pop();
+    }
+
+    public void autoboxIfNeeded(final Class<?> sourceType, final Class<?> targetType) {
+        if (sourceType == targetType || targetType.isAssignableFrom(sourceType))
+            return;
+
+        // If both source and target are primitive then emit
+        // inline JVM instructions for direct conversion (very efficient)
+        if (isPrimitiveType(sourceType) && isPrimitiveType(targetType)) {
+            PrimitiveCastingCodeGenerator.cast(peekMethodVisitor(), sourceType, targetType);
+        } else if (isPrimitiveTypeWrapperClass(sourceType) && isPrimitiveType(targetType)) {
+            unbox(targetType);
+        } else if (isPrimitiveType(sourceType) && (isPrimitiveTypeWrapperClass(targetType) || targetType == Object.class)) {
+            box(targetType);
+        }
+    }
+
+    public final void emitReturn(Class<?> returnType) {
+        if (returnType == void.class) {
+            peekMethodVisitor().visitInsn(RETURN);
+        } else if (returnType.isPrimitive()) {
+            if (returnType == boolean.class) {
+                peekMethodVisitor().visitInsn(IRETURN);
+            } else if (returnType == byte.class) {
+                peekMethodVisitor().visitInsn(IRETURN);
+            } else if (returnType == char.class) {
+                peekMethodVisitor().visitInsn(IRETURN);
+            } else if (returnType == double.class) {
+                peekMethodVisitor().visitInsn(DRETURN);
+            } else if (returnType == float.class) {
+                peekMethodVisitor().visitInsn(FRETURN);
+            } else if (returnType == int.class) {
+                peekMethodVisitor().visitInsn(IRETURN);
+            } else if (returnType == long.class) {
+                peekMethodVisitor().visitInsn(LRETURN);
+            } else if (returnType == short.class) {
+                peekMethodVisitor().visitInsn(IRETURN);
+            }
+        } else {
+            peekMethodVisitor().visitInsn(ARETURN);
+        }
     }
 }

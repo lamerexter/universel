@@ -44,7 +44,7 @@ import static org.beanplanet.core.lang.TypeUtil.ensureNonPrimitiveType;
 import static org.objectweb.asm.Opcodes.*;
 import static org.orthodox.universel.compiler.BytecodeHelper.CTOR_METHOD_NAME;
 
-public class StaticMethodCallGenerator implements MethodCallScope {
+public class StaticMethodCallGenerator { //}
     private CompilationContext compilationContext;
     private ImportDecl importDecl;
 
@@ -54,21 +54,21 @@ public class StaticMethodCallGenerator implements MethodCallScope {
         this.importDecl = importDecl;
     }
 
-    @Override
+//    @Override
     public boolean canResolve(MethodCall methodCall) {
         return true;
     }
 
-    @Override
+//    @Override
     public void generateCall(UniversalCodeVisitor visitor,
                              MethodCall methodCall) {
-        if ( methodCall.getExecutable() == null ) return;
-
-        if ( methodCall.getExecutable().getClass() == Method.class) {
-            generateForStaticMethodCall(visitor, methodCall, (Method)methodCall.getExecutable());
-        } else {
-            generateForNewObjectCreation(visitor, methodCall, (Constructor)methodCall.getExecutable());
-        }
+//        if ( methodCall.getExecutable() == null ) return;
+//
+//        if ( methodCall.getExecutable().getClass() == Method.class) {
+//            generateForStaticMethodCall(visitor, methodCall, (Method)methodCall.getExecutable());
+//        } else {
+//            generateForNewObjectCreation(visitor, methodCall, (Constructor)methodCall.getExecutable());
+//        }
     }
 
     public void generateForStaticMethodCall(UniversalCodeVisitor visitor,
@@ -94,7 +94,7 @@ public class StaticMethodCallGenerator implements MethodCallScope {
             for (int n=0; n < executable.getParameterCount(); n++) {
                 Node paramExpr = methodCall.getParameters().get(n);
                 paramExpr.accept(visitor);
-                compilationContext.getVirtualMachine().convertOrBoxOperandIfNeeded(executable.getParameterTypes()[n]);
+                compilationContext.getVirtualMachine().convertOrAutoboxOperandIfNeeded(executable.getParameterTypes()[n]);
             }
 
             methodCall.getParameters().forEach( i -> compilationContext.getVirtualMachine().popOperand() );

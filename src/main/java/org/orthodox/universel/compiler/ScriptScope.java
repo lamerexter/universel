@@ -28,25 +28,36 @@
 
 package org.orthodox.universel.compiler;
 
-import java.util.Map;
+import org.beanplanet.core.collections.ListBuilder;
+import org.orthodox.universel.ast.LoadLocal;
+import org.orthodox.universel.ast.navigation.NavigationAxis;
+import org.orthodox.universel.ast.navigation.NavigationStep;
+import org.orthodox.universel.ast.navigation.NodeType;
+import org.orthodox.universel.cst.Node;
+import org.orthodox.universel.exec.navigation.NavigatorRegistry;
+import org.orthodox.universel.symanticanalysis.name.InternalNodeSequence;
 
-public class ScriptScope implements NameScope {
-    private CompilationContext compilationContext;
+import java.util.Objects;
 
-    public void setCompilationContext(CompilationContext compilationContext) {
-        this.compilationContext = compilationContext;
+public class ScriptScope extends BoundScope {
+
+    public static final int SCRIPT_BINDING_LOCAL_OFFSET = 0;
+
+    public ScriptScope(final Class<?> bindingType, final NavigatorRegistry navigatorRegistry) {
+        super(bindingType, navigatorRegistry);
     }
 
     @Override
-    public boolean canResolve(String name) {
-        return true; // Will always attempt to resolve the name
-    }
+    public Node navigate(final NavigationStep<?> step) {
+        if ( step.getAxis().equals(NavigationAxis.SELF.getCanonicalName()) && step.getNodeTest() instanceof NodeType ) {
+            return new LoadLocal(step.getTokenImage(), getBindingType(), SCRIPT_BINDING_LOCAL_OFFSET);
+        }
 
-    @Override
-    public void generateAccess(String name) {
-        compilationContext.getBytecodeHelper().emitLoadLocal(true, 0, Map.class);
-        compilationContext.getBytecodeHelper().emitLoadStringOperand(name);
-        compilationContext.getBytecodeHelper().emitInvokeInstanceMethod(Map.class, "get", Object.class, Object.class);
-        compilationContext.getVirtualMachine().loadOperandOfType(Object.class);
+        Node transformedNode = super.navigate(step);
+
+        return Objects.equals(transformedNode, step) ? step : new InternalNodeSequence(ListBuilder.<Node>builder()
+                                                                                           .add(new LoadLocal(step.getTokenImage(), getBindingType(), SCRIPT_BINDING_LOCAL_OFFSET))
+                                                                                           .add(transformedNode)
+                                                                                           .build());
     }
 }

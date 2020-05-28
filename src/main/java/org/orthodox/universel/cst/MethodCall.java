@@ -28,28 +28,29 @@
 
 package org.orthodox.universel.cst;
 
+import org.orthodox.universel.ast.navigation.NodeTest;
+import org.orthodox.universel.cst.type.MethodDeclaration;
+
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import static org.orthodox.universel.cst.TokenImage.range;
+import static org.orthodox.universel.compiler.TransformationUtil.callableTypesMatch;
 
 /**
  * A method call expression, consisting of a name and zero or more parameter expressions.
  */
-public class MethodCall extends Expression implements CompositeNode {
+public class MethodCall extends Expression implements NodeTest, CompositeNode {
     /**
      * The name of the method.
      */
-    private Name name;
+    private final Name name;
     /**
      * The parameter expressions of this method call.
      */
-    private List<Node> parameters;
-
-    private Executable executable;
+    private final List<Node> parameters;
 
     /**
      * Consructs a method call expression, consisting of a name and zero or more parameters.
@@ -58,23 +59,10 @@ public class MethodCall extends Expression implements CompositeNode {
      * @param name the method name.
      * @param parameters the parameter expressions of this method call.
      */
-    public MethodCall(TokenImage tokenImage, Name name, List<Node> parameters) {
-        this(tokenImage, name, parameters, null);
-    }
-
-    /**
-     * Consructs a method call expression, consisting of a name and zero or more parameters.
-     *
-     * @param tokenImage the parser token image.
-     * @param name the method name.
-     * @param parameters the parameter expressions of this method call.
-     * @param executable the corresponding constructor method call.
-     */
-   public MethodCall(TokenImage tokenImage, Name name, List<Node> parameters, Executable executable) {
+   public MethodCall(TokenImage tokenImage, Name name, List<Node> parameters) {
         super(tokenImage);
         this.name = name;
         this.parameters = parameters;
-        this.executable = executable;
     }
 
     @Override
@@ -86,12 +74,13 @@ public class MethodCall extends Expression implements CompositeNode {
         if (!super.equals(o))
             return false;
         MethodCall nodes = (MethodCall) o;
-        return Objects.equals(name, nodes.name) && Objects.equals(parameters, nodes.parameters) && Objects.equals(executable, nodes.executable);
+        return Objects.equals(name, nodes.name) &&
+               Objects.equals(parameters, nodes.parameters);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), name, parameters, executable);
+        return Objects.hash(super.hashCode(), name, parameters);
     }
 
     /**
@@ -118,30 +107,24 @@ public class MethodCall extends Expression implements CompositeNode {
      * @param visitor the visitor visiting the node.
      * @return true if visitation is to continue after this visit, false if visitation is requested to stop after this visit.
      */
+    @Override
     public Node accept(UniversalCodeVisitor visitor) {
         return visitor.visitMethodCall(this);
-    }
-
-    public Class<?> getTypeDescriptor() {
-        if (executable == null)
-            return super.getTypeDescriptor();
-        else if (executable.getClass() == Method.class)
-            return ((Method) executable).getReturnType();
-        else
-            return executable.getDeclaringClass();
-    }
-
-    public Executable getExecutable() {
-        return executable;
-    }
-
-    public void setExecutable(Executable executable) {
-        this.executable = executable;
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public List<Node> getChildNodes() {
-        return parameters == null ? Collections.emptyList() : (List) parameters;
+        return parameters == null ? Collections.emptyList() : parameters;
+    }
+
+    /**
+     * Determines whether this method call can be applied to the given method.
+     *
+     * @param methodDeclaration the method to e determined as callable.
+     * @return true if all of the parameters of this method call type match all of the parameters of the given method, false otherwise.
+     */
+    public boolean parameterTypesMatch(MethodDeclaration methodDeclaration) {
+        return callableTypesMatch(this, methodDeclaration);
     }
 }

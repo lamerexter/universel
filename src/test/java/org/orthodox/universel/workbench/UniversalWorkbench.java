@@ -36,7 +36,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -62,7 +61,6 @@ import org.orthodox.universel.cst.Node;
 import org.orthodox.universel.cst.ParseTree;
 import org.orthodox.universel.cst.Script;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -78,7 +76,7 @@ public class UniversalWorkbench extends Application implements Logger {
     public void start(Stage stage) {
 
         // Create the Scene
-        Parent mainPanel = execute(Parent.class, new UrlResource(getClass().getResource("workbench.uni")));
+        Parent mainPanel = new SplitPane(); //)execute(Parent.class, new UrlResource(getClass().getResource("workbench.uni")));
 
         Scene scene = new Scene(mainPanel);
         scene.getStylesheets().addAll(getClass().getResource("/styles.css").toExternalForm());
@@ -106,7 +104,7 @@ public class UniversalWorkbench extends Application implements Logger {
                 return new TextFieldTreeCell<>(new StringConverter<Node>() {
                     @Override
                     public String toString(Node node) {
-                        return node.getClass().getSimpleName();
+                        return node == null ? null : node.getClass().getSimpleName();
                     }
 
                     @Override
@@ -151,7 +149,7 @@ public class UniversalWorkbench extends Application implements Logger {
         Button compileScriptButton = new Button("Compile");
         Button executeScriptButton = new Button("Execute");
         executeScriptButton.setOnAction(e -> {
-            CompiledUnit compiled = Universal.compile(scriptTextArea.getText());
+            CompiledUnit<Map<String, Object>> compiled = (CompiledUnit)Universal.compile(scriptTextArea.getText(), Map.class);
 
             if ( compiled.getMessages().hasErrors() ) {
                 compilerMessagesPanel.toFront();
@@ -164,7 +162,7 @@ public class UniversalWorkbench extends Application implements Logger {
                 resultValuesPanel.toFront();
 
                 Map<String, Object> binding = createBinding();
-                Object result = execute(scriptTextArea.getText(), binding);
+                Object result = execute(compiled, binding);
                 commandNavView.setRoot(createAbstractSyntaxTree(new ParseTree(compiled.getAstNode())));
                 resultTextArea.setText(String.valueOf(result));
             }

@@ -8,8 +8,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
-import static java.util.Collections.singletonList;
+import static org.beanplanet.core.util.CollectionUtil.nullSafe;
 
 /**
  * Represents the token, its position in the input stream and the string image of the token itself.
@@ -27,15 +28,19 @@ public class TokenImage {
     /** The string image of the parsed token. */
     private String image;
 
-    public static TokenImage range(Node lhs, List<? extends Node> rhs) {
-        return builder().add(lhs).range(rhs).build();
+    public static TokenImage range(final Node node1, final List<? extends Node> nodeList) {
+        return builder().add(node1).range(nodeList).build();
     }
 
-    public static TokenImage range(Node ... nodeList) {
+    public static TokenImage range(final Node node1, final Node node2, final List<? extends Node> nodeList) {
+        return builder().add(node1).add(node2).range(nodeList).build();
+    }
+
+    public static TokenImage range(final Node ... nodeList) {
         return builder().range(nodeList).build();
     }
 
-    public static TokenImage range(List<? extends Node> nodeList) {
+    public static TokenImage range(final List<? extends Node> nodeList) {
         return builder().range(nodeList).build();
     }
 
@@ -269,8 +274,8 @@ public class TokenImage {
         /** The source image. */
         private String image;
 
-        /** The child/composite nodes whose token images will be used to build the token image. */
-        private List<? extends Node> compositeNodeRange;
+        /** Other token images that will be used to build the token image. */
+        private List<TokenImage> tokenImages;
 
         public TokenImageBuilder startLine(int startLine) {
             this.startLine = startLine;
@@ -299,7 +304,7 @@ public class TokenImage {
 
         public TokenImageBuilder add(Node child) {
             if ( child == null ) return this;
-            return range(singletonList(child));
+            return add(child.getTokenImage());
         }
 
         public TokenImageBuilder range(Node ... children) {
@@ -308,14 +313,41 @@ public class TokenImage {
         }
 
         @SuppressWarnings("unchecked")
-        public TokenImageBuilder range(List<? extends Node> children) {
-            if ( children == null ) return this;
-
-            if ( compositeNodeRange == null ) {
-                compositeNodeRange = new ArrayList<>(children.size());
+        public TokenImageBuilder range(List<? extends Node> nodes) {
+            if ( nodes != null ) {
+                for (Node node : nodes) {
+                    add(node.getTokenImage());
+                }
             }
 
-            compositeNodeRange.addAll((List)children);
+            return this;
+        }
+
+        public TokenImageBuilder add(TokenImage tokenImage) {
+            if ( tokenImage == null ) return this;
+
+            if ( this.tokenImages == null ) {
+                this.tokenImages = new ArrayList<>();
+            }
+
+            this.tokenImages.add(tokenImage);
+
+            return this;
+        }
+
+        public TokenImageBuilder range(TokenImage ... tokenImages) {
+            if ( tokenImages != null ) {
+                rangeTokens(asList(tokenImages));
+            }
+            return this;
+        }
+
+        public TokenImageBuilder rangeTokens(List<TokenImage> tokenImages) {
+            if ( tokenImages != null ) {
+                for (TokenImage tokenImage : tokenImages) {
+                    add(tokenImage);
+                }
+            }
             return this;
         }
 
@@ -325,19 +357,15 @@ public class TokenImage {
             int endLine = this.endLine == null ? -1 : this.endLine;
             int endColumn = this.endColumn == null ? -1 : this.endColumn;
 
-            if ( compositeNodeRange != null ) {
-                boolean first = true;
-                for (Node node : compositeNodeRange) {
-                    if (node == null || node.getTokenImage() == null)
-                        continue;
+            boolean first = true;
+            for (TokenImage tokenImage : nullSafe(tokenImages)) {
+                if (tokenImage == null) continue;
 
-                    startColumn = (first && startColumn == -1) || (node.getTokenImage().getStartLine() <= startLine && node.getTokenImage().getStartColumn() < startColumn) ? node.getTokenImage().getStartColumn() : startColumn;
-                    startLine = (first && startLine == -1) || node.getTokenImage().getStartLine() < startLine ? node.getTokenImage().getStartLine() : startLine;
-                    endColumn = (first && endColumn == -1) || (node.getTokenImage().getEndLine() >= endLine && node.getTokenImage().getEndColumn() > endColumn) ? node.getTokenImage().getEndColumn() : endColumn;
-                    endLine = (first && endLine == -1) || node.getTokenImage().getEndLine() > endLine ? node.getTokenImage().getEndLine() : endLine;
-                    first = false;
-                }
-
+                startColumn = (first && startColumn == -1) || (tokenImage.getStartLine() < startLine || (tokenImage.getStartLine() == startLine && tokenImage.getStartColumn() < startColumn)) ? tokenImage.getStartColumn() : startColumn;
+                startLine = (first && startLine == -1) || tokenImage.getStartLine() < startLine ? tokenImage.getStartLine() : startLine;
+                endColumn = (first && endColumn == -1) || (tokenImage.getEndLine() > endLine || (tokenImage.getEndLine() == endLine && tokenImage.getEndColumn() > endColumn)) ? tokenImage.getEndColumn() : endColumn;
+                endLine = (first && endLine == -1) || tokenImage.getEndLine() > endLine ? tokenImage.getEndLine() : endLine;
+                first = false;
             }
 
             return new TokenImage(startLine, startColumn, endLine, endColumn, image);

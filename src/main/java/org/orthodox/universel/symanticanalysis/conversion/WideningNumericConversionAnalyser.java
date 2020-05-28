@@ -29,12 +29,9 @@
 package org.orthodox.universel.symanticanalysis.conversion;
 
 import org.orthodox.universel.cst.BinaryExpression;
-import org.orthodox.universel.cst.ImportDecl;
 import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.UniversalVisitorAdapter;
 import org.orthodox.universel.cst.literals.NumericLiteral;
-import org.orthodox.universel.symanticanalysis.SemanticAnalyser;
-import org.orthodox.universel.symanticanalysis.SemanticAnalysisContext;
+import org.orthodox.universel.symanticanalysis.AbstractSemanticAnalyser;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -42,6 +39,8 @@ import java.util.*;
 
 import static java.util.Arrays.asList;
 import static org.beanplanet.core.lang.conversion.SystemTypeConverter.systemTypeConverter;
+import static org.orthodox.universel.compiler.TransformationUtil.determineWidestNumericOperandType;
+import static org.orthodox.universel.compiler.TransformationUtil.isNumericExpressionType;
 
 /**
  * <p>
@@ -54,9 +53,7 @@ import static org.beanplanet.core.lang.conversion.SystemTypeConverter.systemType
  * </p>
  *
  */
-public class WideningNumericConversionAnalyser extends UniversalVisitorAdapter implements SemanticAnalyser {
-    private SemanticAnalysisContext context;
-    private ImportDecl importDecl;
+public class WideningNumericConversionAnalyser extends AbstractSemanticAnalyser {
 
     private static final Map<Set<Class<?>>, Class<?>> standardPromotionMap = new HashMap<>();
 
@@ -97,13 +94,6 @@ public class WideningNumericConversionAnalyser extends UniversalVisitorAdapter i
 
     private static final List<Class<?>> widenNumericalTypeOrder = asList(short.class, int.class, long.class, BigInteger.class,
                                                                          float.class, double.class, BigDecimal.class);
-
-    @Override
-    public Node performAnalysis(SemanticAnalysisContext context, Node from) {
-        this.context = context;
-        return from.accept(this);
-    }
-
     @Override
     public Node visitBinaryExpression(BinaryExpression node) {
 
@@ -111,24 +101,17 @@ public class WideningNumericConversionAnalyser extends UniversalVisitorAdapter i
                                                                 node.getLhsExpression().accept(this),
                                                                 node.getRhsExpression().accept(this));
         if ( isNumericExpressionType(transformedNode.getLhsExpression()) && isNumericExpressionType(transformedNode.getRhsExpression()) ) {
-            Class<?> resulting = standardPromotionMap.get(typeOperationKey(transformedNode.getLhsExpression(), transformedNode.getRhsExpression()));
-            if ( resulting != null ) {
-                transformedNode.setTypeDescriptor(resulting);
-            }
-
-            if ( !Objects.equals(transformedNode.getLhsExpression().getTypeDescriptor(), transformedNode.getRhsExpression().getTypeDescriptor()) ) {
-                transformedNode = performWideningConversion(transformedNode);
+            Optional<Class<?>> wideningType = determineWidestNumericOperandType(node.getLhsExpression().getTypeDescriptor(), node.getRhsExpression().getTypeDescriptor());
+            if ( wideningType.isPresent() ) {
+                transformedNode.setTypeDescriptor(wideningType.get());
+                transformedNode = performWideningConversion(transformedNode, wideningType.get());
             }
         }
 
         return Objects.equals(node, transformedNode) ? node : transformedNode;
     }
 
-    private boolean isNumericExpressionType(Node node) {
-        return widenNumericalTypeOrder.contains(node.getTypeDescriptor());
-    }
-
-    private BinaryExpression performWideningConversion(BinaryExpression node) {
+    private BinaryExpression performWideningConversion(BinaryExpression node, Class<?> resultingType) {
         //--------------------------------------------------------------------------------------------------------------
         // Deal with short-circuit where both operands are numeric literals and can be compile-time substituted.
         // Otherwise we're dealing with one or both operands being dynamic runtime values and we'll need to convert one
@@ -136,8 +119,6 @@ public class WideningNumericConversionAnalyser extends UniversalVisitorAdapter i
         //--------------------------------------------------------------------------------------------------------------
         Node lhs = node.getLhsExpression();
         Node rhs = node.getRhsExpression();
-        Class<?> resultingType = standardPromotionMap.get(typeOperationKey(lhs, rhs));
-        if ( resultingType == null ) return node; // Promotion mapping not known. Warn?
 
         if ( lhs instanceof NumericLiteral && rhs instanceof NumericLiteral) {
             if ( !resultingType.equals(lhs.getTypeDescriptor()) ) {
@@ -163,9 +144,4 @@ public class WideningNumericConversionAnalyser extends UniversalVisitorAdapter i
         transformedNode.setTypeDescriptor(resultingType);
         return transformedNode;
     }
-
-    private HashSet<Class<?>> typeOperationKey(Node lhs, Node rhs) {
-        return new HashSet<>(asList(lhs.getTypeDescriptor(), rhs.getTypeDescriptor()));
-    }
-
 }

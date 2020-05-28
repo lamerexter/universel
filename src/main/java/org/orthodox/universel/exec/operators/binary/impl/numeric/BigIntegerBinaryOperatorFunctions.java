@@ -138,7 +138,7 @@ public class BigIntegerBinaryOperatorFunctions {
     }
 
     @BinaryOperator(STAR)
-    public static BigInteger operator_STAR(BigInteger lhs, BigInteger rhs) {
+    public static BigInteger multiply(BigInteger lhs, BigInteger rhs) {
         return lhs.multiply(rhs);
     }
 }

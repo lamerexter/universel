@@ -33,6 +33,7 @@ import org.orthodox.universel.cst.*;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * An map entry expression on the Abstract Syntax Tree, of the form <code>[1, 2, 3, 4]</code>
@@ -58,7 +59,7 @@ public class MapExpr extends Expression implements CompositeNode {
      * @return the key/value expressions of this map entry expression, which may be empty.
      */
     public List<MapEntryExpr> getEntries() {
-        return entries;
+        return entries == null ? Collections.emptyList() : entries;
     }
 
     public Node accept(UniversalCodeVisitor visitor) {
@@ -72,5 +73,19 @@ public class MapExpr extends Expression implements CompositeNode {
     @Override
     public List<Node> getChildNodes() {
         return (List)entries;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (!(o instanceof MapExpr)) return false;
+        if (!super.equals(o)) return false;
+        MapExpr nodes = (MapExpr) o;
+        return Objects.equals(getEntries(), nodes.getEntries());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), getEntries());
     }
 }

@@ -141,7 +141,7 @@ public class ByteBinaryOperatorFunctions {
     }
 
     @BinaryOperator(STAR)
-    public static int operator_STAR(byte lhs, byte rhs) {
+    public static int multiply(byte lhs, byte rhs) {
         return lhs * rhs;
     }
 }

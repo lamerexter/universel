@@ -28,12 +28,13 @@
 
 package org.orthodox.universel.cst;
 
+import org.beanplanet.core.util.PropertyBasedToStringBuilder;
 import org.orthodox.universel.cst.annotation.Annotation;
 
 import java.lang.reflect.Modifier;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * AST representation of standard Java-like modifiers, as defined in
@@ -41,7 +42,7 @@ import java.util.Map;
  *
  * @author Gary Watson
  */
-public final class Modifiers extends AbstractCompositeNode {
+public final class Modifiers extends Node {
     // Bit representations of the Java modifiers
     public static final int ABSTRACT = 0x00000400;
     public static final int ANNOTATION = 0x00002000;
@@ -62,10 +63,6 @@ public final class Modifiers extends AbstractCompositeNode {
      * The bitwise basic modifiers associated with this modifiers set.
      */
     private int modifiers;
-    /**
-     * The annotation modifiers associated with this modifiers set.
-     */
-    private List<Annotation> annotations;
 
 
     private static final Map<Integer, String> ALL_MODIFIERS = new LinkedHashMap<Integer, String>();
@@ -107,12 +104,10 @@ public final class Modifiers extends AbstractCompositeNode {
      *
      * @param tokenImage  the image representing this cst annotation.
      * @param modifiers   the bitwise modifiers used to initialise this instance.
-     * @param annotations the annotations used to initialise this instance.
      */
-    public Modifiers(TokenImage tokenImage, int modifiers, List<Annotation> annotations) {
+    public Modifiers(TokenImage tokenImage, int modifiers) {
         super(tokenImage);
         this.modifiers = modifiers;
-        this.annotations = annotations;
     }
 
     /**
@@ -131,24 +126,6 @@ public final class Modifiers extends AbstractCompositeNode {
      */
     public void setModifiers(int modifiers) {
         this.modifiers = modifiers;
-    }
-
-    /**
-     * Gets the annotation modifiers associated with this modifiers set.
-     *
-     * @return the annotation modifiers associated with this modifiers set.
-     */
-    public List<Annotation> getAnnotations() {
-        return annotations;
-    }
-
-    /**
-     * Sets the annotation modifiers associated with this modifiers set.
-     *
-     * @param annotations the annotation modifiers associated with this modifiers set.
-     */
-    public void setAnnotations(List<Annotation> annotations) {
-        this.annotations = annotations;
     }
 
     public boolean isPublic() {
@@ -248,7 +225,7 @@ public final class Modifiers extends AbstractCompositeNode {
     }
 
     public boolean contains(int modifier) {
-        return (modifiers & modifier) != 0;
+        return (modifiers & modifier) == modifier;
     }
 
     public static int addModifier(int modifiers, int mod) {
@@ -263,23 +240,26 @@ public final class Modifiers extends AbstractCompositeNode {
         return new Modifiers(modifiers);
     }
 
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        }
-
-        if (!(obj instanceof Modifiers)) {
-            return false;
-        }
-
-        return ((Modifiers) obj).getModifiers() == getModifiers();
-    }
-
-    public int hashCode() {
-        return modifiers;
-    }
-
-    public Node accept(UniversalCodeVisitor visitor) {
+    public Modifiers accept(UniversalCodeVisitor visitor) {
         return visitor.visitModifiers(this);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Modifiers)) return false;
+        if (!super.equals(o)) return false;
+        Modifiers nodes = (Modifiers) o;
+        return getModifiers() == nodes.getModifiers();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), getModifiers());
+    }
+
+    @Override
+    public String toString() {
+        return new PropertyBasedToStringBuilder(this).build();
     }
 }

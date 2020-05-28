@@ -39,13 +39,23 @@ public class Name extends Expression implements Named {
     private String name;
 
     /**
-     * Consructs a new name reference from the given parser token image.
+     * Constructs a new name reference from the given parser token image.
      *
      * @param tokenImage the parser token image.
+     * @param name the name element.
      */
     public Name(TokenImage tokenImage, String name) {
         super(tokenImage);
         this.name = name;
+    }
+
+    /**
+     * Constructs a new name reference from the given parser token image.
+     *
+     * @param name the name element.
+     */
+    public Name(String name) {
+        this(null, name);
     }
 
     @Override
@@ -69,7 +79,7 @@ public class Name extends Expression implements Named {
     }
 
     @Override
-    public Node accept(UniversalCodeVisitor visitor) {
+    public Name accept(UniversalCodeVisitor visitor) {
         return visitor.visitName(this);
     }
 }

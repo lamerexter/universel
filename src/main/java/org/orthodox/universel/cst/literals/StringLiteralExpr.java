@@ -59,4 +59,11 @@ public class StringLiteralExpr extends Expression {
     public Class<?> getTypeDescriptor() {
         return String.class;
     }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if ( !(o instanceof StringLiteralExpr) ) return false;
+        return super.equals(o);
+    }
 }

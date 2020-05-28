@@ -28,33 +28,30 @@
 
 package org.orthodox.universel.cst;
 
-import org.orthodox.universel.cst.types.ClassOrInterfaceType;
+import org.orthodox.universel.cst.type.reference.ClassOrInterfaceType;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A parameterised type specification, as defined by the Java 5 SE language level specification
  * for Generics.
- * 
- * @author Gary Watson
  */
 public class TypeParameter extends Node {
-   private String name;
+   private Name name;
    private ParameterisedTypeBinding typeBound;
    private List<ClassOrInterfaceType> boundingTypes;
    
    /**
     * Instantiates a new type declaration
     *
-    * @param tokenImage the image representing this cst type parameter.
     * @param name the name defined by this type declaration.
     * @param typeBound the type binding applied to the source.
     * @param boundingTypes the bounding types applied.
     */
-   public TypeParameter(int startLine, int startColumn, String name, ParameterisedTypeBinding typeBound, List<ClassOrInterfaceType> boundingTypes) {
+   public TypeParameter(Name name, ParameterisedTypeBinding typeBound, List<ClassOrInterfaceType> boundingTypes) {
       super(TokenImage.builder()
-            .startLine(startLine)
-            .startColumn(startColumn)
+            .range(name)
             .range(boundingTypes)
             .build()
       );
@@ -63,27 +60,31 @@ public class TypeParameter extends Node {
       this.boundingTypes = boundingTypes;
    }
 
-   public String getName() {
+   public Name getName() {
       return name;
-   }
-
-   public void setName(String name) {
-      this.name = name;
    }
 
    public ParameterisedTypeBinding getTypeBound() {
       return typeBound;
    }
 
-   public void setTypeBound(ParameterisedTypeBinding typeBound) {
-      this.typeBound = typeBound;
-   }
-
    public List<ClassOrInterfaceType> getBoundingTypes() {
       return boundingTypes;
    }
 
-   public void setBoundingTypes(List<ClassOrInterfaceType> boundingTypes) {
-      this.boundingTypes = boundingTypes;
+   @Override
+   public boolean equals(final Object o) {
+      if (this == o) return true;
+      if (!(o instanceof TypeParameter)) return false;
+      if (!super.equals(o)) return false;
+      TypeParameter that = (TypeParameter) o;
+      return Objects.equals(getName(), that.getName()) &&
+             getTypeBound() == that.getTypeBound() &&
+             Objects.equals(getBoundingTypes(), that.getBoundingTypes());
+   }
+
+   @Override
+   public int hashCode() {
+      return Objects.hash(super.hashCode(), getName(), getTypeBound(), getBoundingTypes());
    }
 }

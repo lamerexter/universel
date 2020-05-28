@@ -28,43 +28,73 @@
 
 package org.orthodox.universel.exec.names;
 
+import org.beanplanet.core.beans.JavaBean;
 import org.junit.jupiter.api.Test;
-import org.orthodox.universel.Universal;
+import org.orthodox.universel.BeanWithProperties;
+import org.orthodox.universel.compiler.CompilationErrorsException;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.orthodox.universel.Universal.execute;
 
 public class ScriptScopeNameTest {
     @Test
     public void nameNotFound() {
-        assertThat(Universal.execute("theVariable"), nullValue());
+        assertThrows(CompilationErrorsException.class, () -> assertThat(execute("nameThatWillNotResolve"), nullValue()));
     }
 
     @Test
     public void nameFound() {
-        Map<String, Object> binding = new HashMap<>();
-        binding.put("booleanValue", true);
-        binding.put("byteValue", (byte)64);
-        binding.put("charValue", 'Z');
-        binding.put("floatValue", 128f);
-        binding.put("doubleValue", (char)512d);
-        binding.put("intValue", 4096);
-        binding.put("longValue", 8192L);
-        binding.put("shortValue", (short)32767);
-        binding.put("stringValue", "HelloWorld");
+        // Given
+        BeanWithProperties referencePropertyValue = new BeanWithProperties();
+        BeanWithProperties binding = new JavaBean<>(new BeanWithProperties())
+            .with("booleanProperty", true)
+            .with("bigDecimalProperty", new BigDecimal("123.456"))
+            .with("bigIntegerProperty", new BigInteger("1234567890"))
+            .with("byteProperty", (byte)64)
+            .with("charProperty", 'Z')
+            .with("doubleProperty", 512d)
+            .with("floatProperty", 128f)
+            .with("intProperty", 123)
+            .with("longProperty", 123456L)
+            .with("shortProperty", (short)32767)
+            .with("stringProperty", "Hello World!")
+            .with("referenceProperty", referencePropertyValue)
+            .with("typeProperty", Number.class)
+            .getBean();
 
-        binding.forEach((key, value) -> assertThat(Universal.execute(key, binding), equalTo(binding.get(key))));
+        // Then
+        assertThat(execute("booleanProperty", binding), equalTo(binding.isBooleanProperty()));
+        assertThat(execute("bigDecimalProperty", binding), equalTo(binding.getBigDecimalProperty()));
+        assertThat(execute("bigIntegerProperty", binding), equalTo(binding.getBigIntegerProperty()));
+        assertThat(execute("byteProperty", binding), equalTo(binding.getByteProperty()));
+        assertThat(execute("charProperty", binding), equalTo(binding.getCharProperty()));
+        assertThat(execute("doubleProperty", binding), equalTo(binding.getDoubleProperty()));
+        assertThat(execute("floatProperty", binding), equalTo(binding.getFloatProperty()));
+        assertThat(execute("intProperty", binding), equalTo(binding.getIntProperty()));
+        assertThat(execute("longProperty", binding), equalTo(binding.getLongProperty()));
+        assertThat(execute("shortProperty", binding), equalTo(binding.getShortProperty()));
+        assertThat(execute("stringProperty", binding), equalTo(binding.getStringProperty()));
+        assertThat(execute("referenceProperty", binding), equalTo(binding.getReferenceProperty()));
+        assertThat(execute("typeProperty", binding), equalTo(binding.getTypeProperty()));
     }
 
     @Test
-    public void interpolationOfVariable() {
-        Map<String, Object> binding = new HashMap<>();
-        binding.put("personName", "Mr An Ming");
-        assertThat(Universal.execute("\"Hello my friend, ${personName}!\"", binding), equalTo("Hello my friend, Mr An Ming!"));
+    public void interpolationOfBindVariableProperty() {
+        // Given
+        BeanWithProperties binding = new JavaBean<>(new BeanWithProperties())
+                                         .with("stringProperty", "Mr An Ming")
+                                         .getBean();
+
+        // Then
+        assertThat(execute("\"Hello my friend, ${stringProperty}!\"", binding), equalTo("Hello my friend, Mr An Ming!"));
     }
 
 }

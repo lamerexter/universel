@@ -29,4 +29,11 @@ public class DecimalFloatingPointLiteralExpr extends FloatingPointLiteral {
     public BigDecimal asBigDecimal() {
         return new BigDecimal(StringUtil.rTrim(getTokenImage().getImage().trim(), "D"));
     }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if ( !(o instanceof DecimalFloatingPointLiteralExpr) ) return false;
+        return super.equals(o);
+    }
 }

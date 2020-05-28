@@ -58,14 +58,16 @@ public class SetExprTest {
                    equalTo(new LinkedHashSet<>(asList(1, "Hello World", 2, true, false, 2.5f, 3.5d))));
     }
 
+    public static class Person {
+        public String getName() {
+            return "Joe Bloggs";
+        }
+    }
+
     @Test
     public void stringInterpolation() throws Exception{
-        // Given
-        Map<String, Object> binding = new HashMap<>();
-        binding.put("person", "Joe Bloggs");
-
         // Then
-        assertThat(Universal.execute("{\"Hello there ${person}!\"}", binding), equalTo(new LinkedHashSet<>(asList("Hello there Joe Bloggs!"))));
+        assertThat(Universal.execute("{\"Hello there ${name}!\"}", new Person()), equalTo(new LinkedHashSet<>(asList("Hello there Joe Bloggs!"))));
     }
 
 }

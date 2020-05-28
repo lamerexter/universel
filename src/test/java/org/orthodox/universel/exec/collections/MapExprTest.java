@@ -41,12 +41,13 @@ import java.util.Map;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasEntry;
+import static org.orthodox.universel.Universal.execute;
 
 public class MapExprTest {
     @Test
     void emptyMap() {
         // When
-        LinkedHashMap result = Universal.execute(LinkedHashMap.class, "{:}");
+        LinkedHashMap result = execute(LinkedHashMap.class, "{:}");
 
         // Then
         assertThat(result, equalTo(Collections.emptyMap()));
@@ -59,18 +60,21 @@ public class MapExprTest {
         expectedResult.put("theKey", true);
 
         // When
-        LinkedHashMap result = Universal.execute(LinkedHashMap.class, "{ 'theKey' : true}");
+        LinkedHashMap result = execute(LinkedHashMap.class, "{ 'theKey' : true}");
 
         // Then
         assertThat(result, equalTo(expectedResult));
     }
 
+    public static class Person {
+        public String getName() {
+            return "Fred";
+        }
+    }
+
     @Test
     void multiElementMap() {
         // Given
-        Map<String, Object> binding = new HashMap<>();
-        binding.put("name", "Fred");
-
         LinkedHashMap<Object, Object> expectedResult = new LinkedHashMap<>();
         expectedResult.put(1, "one");
         expectedResult.put("Hello World", "Hello World, Fred!");
@@ -79,12 +83,12 @@ public class MapExprTest {
         expectedResult.put(false, 5);
         expectedResult.put(2.5f, 6);
         expectedResult.put(7, 7);
-        expectedResult.put(new BigDecimal(3.5), 4.5d);
+        expectedResult.put(new BigDecimal("3.5"), 4.5d);
 
         // When
-        LinkedHashMap result = Universal.execute(LinkedHashMap.class,
-                                                 "{1 : 'one', \"Hello World\" : 2, 3 : 33I, true : 4, false : 5, 2.5f : 6, 7 : 7, 3.5D : 4.5d, 'Hello World' : \"Hello World, ${name}!\"}",
-                                                 binding);
+        LinkedHashMap result = execute(LinkedHashMap.class,
+                                       "{1 : 'one', \"Hello World\" : 2, 3 : 33I, true : 4, false : 5, 2.5f : 6, 7 : 7, 3.5D : 4.5d, 'Hello World' : \"Hello World, ${name}!\"}",
+                                       new Person());
 
         // Then
         assertThat(result, equalTo(expectedResult));
@@ -100,7 +104,7 @@ public class MapExprTest {
 
 
         // When
-        LinkedHashMap result = Universal.execute(LinkedHashMap.class, "{1 : {2 : 'inner'}}");
+        LinkedHashMap result = execute(LinkedHashMap.class, "{1 : {2 : 'inner'}}");
 
         // Then
         assertThat(result, equalTo(expectedResult));

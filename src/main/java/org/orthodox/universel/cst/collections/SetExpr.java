@@ -32,6 +32,7 @@ import org.orthodox.universel.cst.*;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -78,5 +79,19 @@ public class SetExpr extends Expression implements CompositeNode {
     @Override
     public List<Node> getChildNodes() {
         return elements;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (!(o instanceof SetExpr)) return false;
+        if (!super.equals(o)) return false;
+        SetExpr nodes = (SetExpr) o;
+        return Objects.equals(getElements(), nodes.getElements());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), getElements());
     }
 }

@@ -28,7 +28,7 @@
 
 package org.orthodox.universel.cst;
 
-import org.orthodox.universel.cst.types.ReferenceType;
+import org.orthodox.universel.cst.type.reference.ReferenceType;
 
 public class InstanceofExpression extends BinaryExpression {
    public InstanceofExpression(Operator operator, Expression lhsExpr, ReferenceType type) {

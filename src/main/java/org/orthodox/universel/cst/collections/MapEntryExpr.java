@@ -28,13 +28,11 @@
 
 package org.orthodox.universel.cst.collections;
 
-import org.orthodox.universel.cst.CompositeNode;
-import org.orthodox.universel.cst.Expression;
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.TokenImage;
+import org.orthodox.universel.cst.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.beanplanet.core.util.ArrayUtil.asListOfNotNull;
 
@@ -84,5 +82,25 @@ public class MapEntryExpr extends Expression implements CompositeNode {
     @Override
     public List<Node> getChildNodes() {
         return asListOfNotNull(keyExpression, valueExpression);
+    }
+
+    @Override
+    public MapEntryExpr accept(UniversalCodeVisitor visitor) {
+        return visitor.visitMapEntry(this);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (!(o instanceof MapEntryExpr)) return false;
+        if (!super.equals(o)) return false;
+        MapEntryExpr nodes = (MapEntryExpr) o;
+        return Objects.equals(getKeyExpression(), nodes.getKeyExpression()) &&
+               Objects.equals(getValueExpression(), nodes.getValueExpression());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), getKeyExpression(), getValueExpression());
     }
 }

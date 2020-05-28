@@ -141,7 +141,7 @@ public class IntegerBinaryOperatorFunctions {
     }
 
     @BinaryOperator(STAR)
-    public static int operator_STAR(int lhs, int rhs) {
+    public static int multiply(int lhs, int rhs) {
         return lhs * rhs;
     }
 }

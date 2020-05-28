@@ -33,15 +33,21 @@ import org.orthodox.universel.Universal;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.orthodox.universel.Universal.execute;
 
 public class TypeReferenceScopeTest {
     @Test
-    public void typeFromImport() {
-        assertThat(Universal.execute("import "+getClass().getName()+"\n"+getClass().getSimpleName()), equalTo(getClass()));
+    public void typeFromImplicitImport() {
+        assertThat(execute("System"), equalTo(System.class));
+    }
+
+    @Test
+    public void typeFromExplicitImport() {
+        assertThat(execute("import " + getClass().getName() + "\n" + getClass().getSimpleName()), equalTo(getClass()));
     }
 
     @Test
     public void typeFromImportOnDemand() {
-        assertThat(Universal.execute("import "+getClass().getPackage().getName()+".*\n"+getClass().getSimpleName()), equalTo(getClass()));
+        assertThat(execute("import " + getClass().getPackage().getName() + ".*\n" + getClass().getSimpleName()), equalTo(getClass()));
     }
 }

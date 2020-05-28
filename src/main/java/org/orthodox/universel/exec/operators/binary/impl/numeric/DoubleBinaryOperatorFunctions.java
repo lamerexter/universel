@@ -111,7 +111,7 @@ public class DoubleBinaryOperatorFunctions {
     }
 
     @BinaryOperator(STAR)
-    public static double operator_STAR(double lhs, double rhs) {
+    public static double multiply(double lhs, double rhs) {
         return lhs * rhs;
     }
 }

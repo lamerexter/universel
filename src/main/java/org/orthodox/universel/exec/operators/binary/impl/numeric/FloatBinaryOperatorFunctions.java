@@ -111,7 +111,7 @@ public class FloatBinaryOperatorFunctions {
     }
 
     @BinaryOperator(STAR)
-    public static float operator_STAR(float lhs, float rhs) {
+    public static float multiply(float lhs, float rhs) {
         return lhs * rhs;
     }
 }
