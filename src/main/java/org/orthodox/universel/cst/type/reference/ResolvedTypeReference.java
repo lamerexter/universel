@@ -30,7 +30,10 @@ package org.orthodox.universel.cst.type.reference;
 
 import org.beanplanet.core.models.path.DelimitedNamePath;
 import org.beanplanet.core.models.path.NamePath;
+import org.orthodox.universel.cst.Node;
 import org.orthodox.universel.cst.TokenImage;
+
+import java.util.Objects;
 
 import static org.beanplanet.core.lang.TypeUtil.determineArrayDimensions;
 
@@ -42,6 +45,8 @@ import static org.beanplanet.core.lang.TypeUtil.determineArrayDimensions;
  * current compilation unit.</p>
  */
 public class ResolvedTypeReference extends TypeReference {
+    private final Class<?> typeDescriptor;
+
     /**
      * Constructs a new type AST resolved type reference instance.
      *
@@ -51,7 +56,8 @@ public class ResolvedTypeReference extends TypeReference {
      * @param dimensions the number of dimensions, if this is is an array type.
      */
     public ResolvedTypeReference(TokenImage tokenImage, Class<?> typeDescriptor, NamePath name, int dimensions) {
-        super(tokenImage, typeDescriptor, name, dimensions);
+        super(tokenImage, name, dimensions);
+        this.typeDescriptor = typeDescriptor;
     }
 
     /**
@@ -61,6 +67,30 @@ public class ResolvedTypeReference extends TypeReference {
      * @param typeDescriptor the name of the referenced type, which may be fully qualified.
      */
     public ResolvedTypeReference(TokenImage tokenImage, Class<?> typeDescriptor) {
-        super(tokenImage, typeDescriptor, new DelimitedNamePath(typeDescriptor.getName(), "."), determineArrayDimensions(typeDescriptor));
+        super(tokenImage, new DelimitedNamePath(typeDescriptor.getName(), "."), determineArrayDimensions(typeDescriptor));
+        this.typeDescriptor = typeDescriptor;
+    }
+
+    /**
+     * Constructs a new type AST resolved type reference instance from the given node.
+     *
+     * @param node the node whose type will be the referred type.
+     */
+    public ResolvedTypeReference(Node node) {
+        this(node.getTokenImage(), node.getTypeDescriptor());
+    }
+
+    @Override
+    public Class<?> getTypeDescriptor() {
+        return typeDescriptor;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ResolvedTypeReference)) return false;
+        if (!super.equals(o)) return false;
+        ResolvedTypeReference that = (ResolvedTypeReference) o;
+        return this.getTypeDescriptor() == that.getTypeDescriptor();
     }
 }

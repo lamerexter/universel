@@ -39,8 +39,9 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
 /**
- * An AST representation of a reference type. This will consist of an existing, non-array type (either an Object type or
- * a primitive type), plus an optional number of array dimensions.
+ * An AST representation of a reference type. This will consist of an existing component type type (either an Object type or
+ * a primitive type), plus a number of array dimensions. Reference types with primitive component type must have a non-zero
+ * number of dimensions.
  */
 public final class ReferenceType extends TypeReference implements CompositeNode {
     private final TypeReference referredType;
@@ -87,5 +88,14 @@ public final class ReferenceType extends TypeReference implements CompositeNode 
     @Override
     public List<Node> getChildNodes() {
         return referredType == null ? emptyList() : singletonList(referredType);
+    }
+
+    /**
+     * Whether the type referred to is a sequence type (consists of a number of ordered elements).
+     *
+     * @return true if the referred component type is a sequence or this reference type has dimensions (is an array).
+     */
+    public boolean isSequence() {
+        return referredType.isSequence() || getDimensions() > 0;
     }
 }

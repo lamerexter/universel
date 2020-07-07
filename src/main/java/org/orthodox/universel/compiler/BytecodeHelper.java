@@ -13,9 +13,7 @@ import org.orthodox.universel.cst.type.reference.TypeReference;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.Deque;
-import java.util.LinkedList;
+import java.util.*;
 
 import static java.util.Arrays.stream;
 import static org.beanplanet.core.lang.TypeUtil.*;
@@ -30,9 +28,22 @@ public class BytecodeHelper {
     public static final Type OBJECT_TYPE = Type.getType(Object.class);
     public static final Type[] OBJECT_TYPE_ARRAY = new Type[] { OBJECT_TYPE };
 
+    private static final Map<Class<?>, Integer> primitiveTypeToNewArrayAsmOpCode = new HashMap<>();
+
 
     private Deque<ClassWriter> cwStack = new LinkedList<>();
     private Deque<MethodVisitor> mvStack = new LinkedList<>();
+
+    static {
+        primitiveTypeToNewArrayAsmOpCode.put(boolean.class, T_BOOLEAN);
+        primitiveTypeToNewArrayAsmOpCode.put(byte.class, T_BYTE);
+        primitiveTypeToNewArrayAsmOpCode.put(char.class, T_CHAR);
+        primitiveTypeToNewArrayAsmOpCode.put(double.class, T_DOUBLE);
+        primitiveTypeToNewArrayAsmOpCode.put(float.class, T_FLOAT);
+        primitiveTypeToNewArrayAsmOpCode.put(int.class, T_INT);
+        primitiveTypeToNewArrayAsmOpCode.put(long.class, T_LONG);
+        primitiveTypeToNewArrayAsmOpCode.put(short.class, T_SHORT);
+    }
 
     public BytecodeHelper() {}
 
@@ -250,7 +261,7 @@ public class BytecodeHelper {
                                             declaringType.getName().join("/"),
                                             name,
                                             Type.getMethodDescriptor(Type.getType(returnType), typeArrayFor(parameterTypes)),
-                                            false);
+                                            declaringType.isInterface());
     }
 
     private static Type[] toTypes(Class<?>[] paramTypes) {
@@ -426,5 +437,26 @@ public class BytecodeHelper {
         } else {
             peekMethodVisitor().visitInsn(ARETURN);
         }
+    }
+
+    public void emitCreateArray(final TypeReference type, int dimensions) {
+        if ( dimensions == 1) {
+            final TypeReference componentType = type.getComponentType();
+            if ( componentType.isPrimitiveType() ) {
+                peekMethodVisitor().visitIntInsn(NEWARRAY, primitiveTypeToNewArrayAsmOpCode.get(componentType.getTypeDescriptor()));
+            } else {
+                peekMethodVisitor().visitTypeInsn(ANEWARRAY, getInternalName(componentType));
+            }
+        } else {
+            peekMethodVisitor().visitMultiANewArrayInsn(getInternalName(type), dimensions);
+        }
+    }
+
+    private static String getInternalName(final TypeReference type) {
+        return Type.getInternalName(type.getTypeDescriptor());
+    }
+
+    private static String getDescriptor(final TypeReference type) {
+        return Type.getDescriptor(type.getTypeDescriptor());
     }
 }

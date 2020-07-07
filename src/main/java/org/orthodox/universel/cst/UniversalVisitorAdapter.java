@@ -30,9 +30,11 @@ package org.orthodox.universel.cst;
 
 import org.orthodox.universel.ast.*;
 import org.orthodox.universel.ast.NodeSequence.NodeSequenceBuilder;
+import org.orthodox.universel.ast.allocation.ArrayCreationExpression;
 import org.orthodox.universel.ast.allocation.ObjectCreationExpression;
 import org.orthodox.universel.ast.conditionals.IfStatement;
 import org.orthodox.universel.ast.conditionals.IfStatement.ElseIf;
+import org.orthodox.universel.ast.functional.FunctionalInterfaceObject;
 import org.orthodox.universel.ast.navigation.NameTest;
 import org.orthodox.universel.ast.navigation.NavigationStep;
 import org.orthodox.universel.ast.navigation.NavigationStream;
@@ -59,6 +61,7 @@ import org.orthodox.universel.symanticanalysis.name.InternalNodeSequence;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static org.beanplanet.core.util.CollectionUtil.nullSafe;
 
@@ -66,6 +69,22 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
     @Override
     public Node visitAnnotation(final Annotation node) {
         return node;
+    }
+
+    @Override
+    public ArrayCreationExpression visitArrayCreationExpression(final ArrayCreationExpression node) {
+        TypeReference transformedType = node.getComponentType().accept(this);
+        List<Node> transformedDimensionExpressions = node.getDimensionExpressions()
+                                                         .stream()
+                                                         .map(n -> n.accept(this))
+                                                         .collect(Collectors.toList());
+
+        boolean noTransformationChanges = Objects.equals(transformedType, node.getComponentType())
+                                          && Objects.equals(transformedDimensionExpressions, node.getDimensionExpressions());
+        return noTransformationChanges ? node : new ArrayCreationExpression(node.getTokenImage(),
+                                                                            transformedType,
+                                                                            transformedDimensionExpressions,
+                                                                            node.getInitialiserExpression());
     }
 
     @Override
@@ -131,6 +150,18 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
                                                                             transformedExtendsList,
                                                                             transformedImplementsList);
         return Objects.equals(node, transformedClassDeclaration) ? node : transformedClassDeclaration;
+    }
+
+    @Override
+    public Node visitFunctionalInterfaceObject(final FunctionalInterfaceObject node) {
+        MethodDeclaration transformedMethodPrototype = node.getTargetMethodPrototype() == null ? null : node.getTargetMethodPrototype().accept(this);
+
+        return Objects.equals(node.getTargetMethodPrototype(), transformedMethodPrototype) ? node : new FunctionalInterfaceObject(node.getTokenImage(),
+                                                                                                                                  node.getSourceFunctionType(),
+                                                                                                                                  node.getSourceFunctionReturnType(),
+                                                                                                                                  node.getSourceFunctionParameters(),
+                                                                                                                                  node.getSourceFunctionName(),
+                                                                                                                                  transformedMethodPrototype);
     }
 
     @Override
@@ -272,7 +303,7 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
     }
 
     @Override
-    public Node visitMethodDeclaration(final MethodDeclaration node) {
+    public MethodDeclaration visitMethodDeclaration(final MethodDeclaration node) {
         if (node.getModifiers() != null) {
             node.getModifiers().accept(this);
         }
@@ -506,5 +537,14 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
     @Override
     public Node visitJvmInstruction(JvmInstructionNode jvmInstructionNode) {
         return jvmInstructionNode;
+    }
+
+    protected NodeSequence<Node> transformNodeSequence(final NodeSequence<Node> nodeSequence) {
+        if ( nodeSequence == null ) return null;
+
+        final NodeSequenceBuilder<Node> transformedNodes = NodeSequence.builder();
+        nodeSequence.getNodes().forEach(n -> transformedNodes.add(n.accept(this)));
+
+        return transformedNodes.build();
     }
 }

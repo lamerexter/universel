@@ -28,12 +28,14 @@
 package org.orthodox.universel.exec.navigation;
 
 import org.orthodox.universel.ast.navigation.NavigationStep;
+import org.orthodox.universel.ast.navigation.ReductionNodeTest;
 
 import java.util.List;
 
 public interface NavigatorRegistry {
-   void addNavigator(Class<?> fromType, List<String> axes, List<String> names, NavigatorFunction navigator);
-   List<NavigatorFunction> lookup(Class<?> fromType, NavigationStep step);
+   void addMappingNavigator(Class<?> fromType, List<String> axes, List<String> names, NavigatorFunction navigator);
+   void addReductionNavigator(Class<?> fromType, List<String> axes, Class<? extends ReductionNodeTest> reductionType, NavigatorFunction navigator);
+   List<NavigatorFunction> lookup(Class<?> fromType, NavigationStep<?> step);
    
    int size();
    void clear();

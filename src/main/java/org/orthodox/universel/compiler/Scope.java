@@ -31,6 +31,10 @@ package org.orthodox.universel.compiler;
 import org.orthodox.universel.ast.navigation.NavigationStep;
 import org.orthodox.universel.cst.Node;
 
+import java.util.Collections;
+import java.util.List;
+
 public interface Scope {
+    default NavigationStep<?> resolveInitial(NavigationStep<?> initialStep) { return null; }
     Node navigate(NavigationStep<?> step);
 }

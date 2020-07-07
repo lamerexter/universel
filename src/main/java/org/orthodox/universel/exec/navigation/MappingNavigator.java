@@ -25,28 +25,23 @@
  *  DEALINGS IN THE SOFTWARE.
  *
  */
+package org.orthodox.universel.exec.navigation;
 
-package org.orthodox.universel.exec.navigation.impl.bean;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import org.beanplanet.core.beans.TypePropertiesSource;
-import org.orthodox.universel.ast.InstanceMethodCall;
-import org.orthodox.universel.ast.navigation.NameTest;
-import org.orthodox.universel.ast.navigation.NavigationStep;
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.exec.navigation.Navigator;
-
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.Method;
-
-@Navigator
-public class BeanNavigatorFunctions {
-    @Navigator(axis = "default", name="*")
-    public static Node propertyNavigator(final Class<?> fromType, final NavigationStep<NameTest> step) {
-        TypePropertiesSource<?> properties = new TypePropertiesSource<>(fromType);
-        if ( !properties.isReadableProperty(step.getNodeTest().getName()) ) return step;
-
-        PropertyDescriptor propertyDescriptor = properties.assertAndGetReadablePropertyDescriptor(step.getNodeTest().getName());
-        Method readMethod = propertyDescriptor.getReadMethod();
-        return new InstanceMethodCall(readMethod.getReturnType(), step.getTokenImage(), readMethod.getDeclaringClass(), readMethod.getName());
-    }
+/**
+ * A method tagging annotation for marking a method as being an implementations of a name navigator (for example a
+ * field, property or method name).
+ *
+ * <p>Methods annotation may have static methods which perform name-based navigator functions.</p>
+ */
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface MappingNavigator {
+    String[] value() default {};
+    String[] axis() default {};
+    String[] name() default {"*" };
 }

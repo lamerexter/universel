@@ -28,29 +28,32 @@
 
 package org.orthodox.universel.symanticanalysis.name;
 
-import javafx.util.Builder;
 import org.beanplanet.core.collections.ListBuilder;
+import org.beanplanet.core.lang.TypeUtil;
+import org.beanplanet.core.models.Builder;
 import org.orthodox.universel.cst.CompositeNode;
 import org.orthodox.universel.cst.Node;
+import org.orthodox.universel.cst.Type;
 import org.orthodox.universel.cst.UniversalCodeVisitor;
 
 import java.util.List;
 import java.util.Objects;
 
+import static org.beanplanet.core.lang.TypeUtil.loadClassOrNull;
 import static org.orthodox.universel.cst.TokenImage.range;
 
 public class InternalNodeSequence extends Node implements CompositeNode {
     private List<Node> nodes;
-    private boolean atomic;
+    private Type resultType;
 
     public InternalNodeSequence(final List<Node> nodes) {
-        this(nodes, false);
+        this(null, nodes);
     }
 
-    public InternalNodeSequence(final List<Node> nodes, boolean atomic) {
+    public InternalNodeSequence(final Type resultType, final List<Node> nodes) {
         super(range(nodes));
         this.nodes = nodes;
-        this.atomic = atomic;
+        this.resultType = resultType;
     }
 
     public static InternalNodeSequenceBuilder builder() {
@@ -59,10 +62,6 @@ public class InternalNodeSequence extends Node implements CompositeNode {
 
     public boolean isEmpty() {
         return nodes == null || nodes.isEmpty();
-    }
-
-    public boolean isAtomic() {
-        return atomic;
     }
 
     public List<Node> getNodes() {
@@ -76,9 +75,17 @@ public class InternalNodeSequence extends Node implements CompositeNode {
 
     @Override
     public Class<?> getTypeDescriptor() {
-        if ( super.getTypeDescriptor() != null ) return super.typeDescriptor;
+        if ( super.getTypeDescriptor() != null ) return super.getTypeDescriptor();
+
+        if ( resultType != null && loadClassOrNull(resultType.getFullyQualifiedName().join(".")) != null ) {
+            return loadClassOrNull( resultType.getFullyQualifiedName().join(".") );
+        }
 
         return nodes.isEmpty() ? null : nodes.get(nodes.size()-1).getTypeDescriptor();
+    }
+
+    public Type getResultType() {
+        return resultType;
     }
 
     @Override
@@ -88,7 +95,7 @@ public class InternalNodeSequence extends Node implements CompositeNode {
 
     public static class InternalNodeSequenceBuilder implements Builder<InternalNodeSequence> {
         private ListBuilder<Node> nodeListBuilder = ListBuilder.builder();
-        private boolean atomic = false;
+        private Type type;
 
         public final InternalNodeSequenceBuilder add(Node ... elements) {
             nodeListBuilder.add(elements);
@@ -100,14 +107,14 @@ public class InternalNodeSequence extends Node implements CompositeNode {
             return this;
         }
 
-        public final InternalNodeSequenceBuilder atomic(boolean atomic) {
-            this.atomic = atomic;
+        public final InternalNodeSequenceBuilder resultType(Type type) {
+            this.type = type;
             return this;
         }
 
         @Override
         public InternalNodeSequence build() {
-            return new InternalNodeSequence(nodeListBuilder.build(), atomic);
+            return new InternalNodeSequence(type, nodeListBuilder.build());
         }
     }
 
@@ -119,13 +126,13 @@ public class InternalNodeSequence extends Node implements CompositeNode {
             return false;
         if (!super.equals(o))
             return false;
-        InternalNodeSequence nodes1 = (InternalNodeSequence) o;
-        return Objects.equals(getNodes(), nodes1.getNodes())
-                && Objects.equals(isAtomic(), nodes1.isAtomic());
+        InternalNodeSequence that = (InternalNodeSequence) o;
+        return Objects.equals(this.getType(), that.getNodes())
+               && Objects.equals(this.getNodes(), that.getNodes());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), getNodes(), isAtomic());
+        return Objects.hash(super.hashCode(), getType(), getNodes());
     }
 }

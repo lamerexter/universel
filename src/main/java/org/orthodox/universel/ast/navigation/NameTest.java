@@ -39,7 +39,7 @@ import java.util.Objects;
 /**
  * A name reference expression.
  */
-public class NameTest extends Expression implements Named, NodeTest {
+public class NameTest extends Expression implements Named, MappingNodeTest {
     private String name;
 
     /**

@@ -65,6 +65,15 @@ public class ReturnStatement extends Statement implements CompositeNode {
         this.expression = expression;
     }
 
+    /**
+     * Constructs an return statement from the givenexpression.
+     *
+     * @param expression the expression value returned by this statement.
+     */
+    public ReturnStatement(Node expression) {
+        this(expression.getTokenImage(), expression);
+    }
+
     public Node getExpression() {
         return expression;
     }

@@ -44,20 +44,23 @@ import java.util.Objects;
  */
 public final class Modifiers extends Node {
     // Bit representations of the Java modifiers
-    public static final int ABSTRACT = 0x00000400;
-    public static final int ANNOTATION = 0x00002000;
-    public static final int ENUM = 0x00004000;
-    public static final int FINAL = 0x00000010;
-    public static final int INTERFACE = 0x00000200;
-    public static final int NATIVE = 0x00000100;
-    public static final int PRIVATE = 0x00000002;
-    public static final int PROTECTED = 0x00000004;
-    public static final int PUBLIC = 0x00000001;
-    public static final int STATIC = 0x00000008;
-    public static final int STRICTFP = 0x00000800;
+    public static final int ABSTRACT     = 0x00000400;
+    public static final int ANNOTATION   = 0x00002000;
+    public static final int BRIDGE       = 0x00000040;
+    public static final int ENUM         = 0x00004000;
+    public static final int FINAL        = 0x00000010;
+    public static final int INTERFACE    = 0x00000200;
+    public static final int NATIVE       = 0x00000100;
+    public static final int PRIVATE      = 0x00000002;
+    public static final int PROTECTED    = 0x00000004;
+    public static final int PUBLIC       = 0x00000001;
+    public static final int STATIC       = 0x00000008;
+    public static final int STRICTFP     = 0x00000800;
     public static final int SYNCHRONIZED = 0x00000020;
-    public static final int TRANSIENT = 0x00000080;
-    public static final int VOLATILE = 0x00000040;
+    public static final int SYNTHETIC    = 0x00001000;
+    public static final int TRANSIENT    = 0x00000080;
+    public static final int VARARGS      = 0x00000080;
+    public static final int VOLATILE     = 0x00000040;
 
     /**
      * The bitwise basic modifiers associated with this modifiers set.
@@ -68,18 +71,19 @@ public final class Modifiers extends Node {
     private static final Map<Integer, String> ALL_MODIFIERS = new LinkedHashMap<Integer, String>();
 
     static {
-        ALL_MODIFIERS.put(PUBLIC, "public");
-        ALL_MODIFIERS.put(PROTECTED, "protected");
-        ALL_MODIFIERS.put(PRIVATE, "private");
         ALL_MODIFIERS.put(ABSTRACT, "abstract");
-        ALL_MODIFIERS.put(STATIC, "static");
         ALL_MODIFIERS.put(FINAL, "final");
+        ALL_MODIFIERS.put(INTERFACE, "interface");
         ALL_MODIFIERS.put(NATIVE, "native");
-        ALL_MODIFIERS.put(SYNCHRONIZED, "synchronized");
+        ALL_MODIFIERS.put(PRIVATE, "private");
+        ALL_MODIFIERS.put(PROTECTED, "protected");
+        ALL_MODIFIERS.put(PUBLIC, "public");
+        ALL_MODIFIERS.put(STATIC, "static");
         ALL_MODIFIERS.put(STRICTFP, "strictfp");
+        ALL_MODIFIERS.put(SYNCHRONIZED, "synchronized");
+        ALL_MODIFIERS.put(SYNTHETIC, "synthetic");
         ALL_MODIFIERS.put(TRANSIENT, "transient");
         ALL_MODIFIERS.put(VOLATILE, "volatile");
-        ALL_MODIFIERS.put(INTERFACE, "interface");
     }
 
     /**
@@ -128,22 +132,6 @@ public final class Modifiers extends Node {
         this.modifiers = modifiers;
     }
 
-    public boolean isPublic() {
-        return isPublic(modifiers);
-    }
-
-    public boolean isProtected() {
-        return isProtected(modifiers);
-    }
-
-    public boolean isPrivate() {
-        return isPrivate(modifiers);
-    }
-
-    public boolean isStatic() {
-        return isStatic(modifiers);
-    }
-
     public boolean isAbstract() {
         return isAbstract(modifiers);
     }
@@ -156,6 +144,22 @@ public final class Modifiers extends Node {
         return isNative(modifiers);
     }
 
+    public boolean isProtected() {
+        return isProtected(modifiers);
+    }
+
+    public boolean isPrivate() {
+        return isPrivate(modifiers);
+    }
+
+    public boolean isPublic() {
+        return isPublic(modifiers);
+    }
+
+    public boolean isStatic() {
+        return isStatic(modifiers);
+    }
+
     public boolean isStrictfp() {
         return isStrictfp(modifiers);
     }
@@ -164,28 +168,16 @@ public final class Modifiers extends Node {
         return isSynchronized(modifiers);
     }
 
+    public boolean isSynthetic() {
+        return isSynthetic(modifiers);
+    }
+
     public boolean isTransient() {
         return isTransient(modifiers);
     }
 
     public boolean isVolatile() {
         return isVolatile(modifiers);
-    }
-
-    public static boolean isPublic(int modifiers) {
-        return (modifiers & PUBLIC) != 0;
-    }
-
-    public static boolean isProtected(int modifiers) {
-        return (modifiers & PROTECTED) != 0;
-    }
-
-    public static boolean isPrivate(int modifiers) {
-        return (modifiers & PRIVATE) != 0;
-    }
-
-    public static boolean isStatic(int modifiers) {
-        return (modifiers & STATIC) != 0;
     }
 
     public static boolean isAbstract(int modifiers) {
@@ -200,12 +192,32 @@ public final class Modifiers extends Node {
         return (modifiers & NATIVE) != 0;
     }
 
+    public static boolean isProtected(int modifiers) {
+        return (modifiers & PROTECTED) != 0;
+    }
+
+    public static boolean isPrivate(int modifiers) {
+        return (modifiers & PRIVATE) != 0;
+    }
+
+    public static boolean isPublic(int modifiers) {
+        return (modifiers & PUBLIC) != 0;
+    }
+
+    public static boolean isStatic(int modifiers) {
+        return (modifiers & STATIC) != 0;
+    }
+
     public static boolean isStrictfp(int modifiers) {
         return (modifiers & STRICTFP) != 0;
     }
 
     public static boolean isSynchronized(int modifiers) {
         return (modifiers & SYNCHRONIZED) != 0;
+    }
+
+    public static boolean isSynthetic(int modifiers) {
+        return (modifiers & SYNTHETIC) != 0;
     }
 
     public static boolean isTransient(int modifiers) {

@@ -64,9 +64,9 @@ public final class PrimitiveType extends TypeReference {
    private final Primitive primitive;
 
    public PrimitiveType(TokenImage tokenImage, Primitive primitive) {
-       super(tokenImage, primitive.getTypeDescriptor(), new SimpleNamePath(Collections.singletonList(primitive.name())));
+       super(tokenImage, primitive.getTypeDescriptor(), new SimpleNamePath(Collections.singletonList(primitive.getTypeDescriptor().getSimpleName())));
        this.primitive = primitive;
-       this.typeDescriptor = primitive.getTypeDescriptor();
+//       this.typeDescriptor = primitive.getTypeDescriptor();
    }
 
     /**
@@ -83,4 +83,8 @@ public final class PrimitiveType extends TypeReference {
        return primitive;
    }
 
+    @Override
+    public Class<?> getTypeDescriptor() {
+        return getPrimitive().getTypeDescriptor();
+    }
 }

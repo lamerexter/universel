@@ -69,7 +69,7 @@ public class MethodDeclarationDeclaringTypeDecorator extends AbstractSemanticAna
     }
 
     @Override
-    public Node visitMethodDeclaration(MethodDeclaration node) {
+    public MethodDeclaration visitMethodDeclaration(MethodDeclaration node) {
         if (node.getDeclaringType() != null || enclosingTypeDeclarations.isEmpty()) return node;
 
         node.setDeclaringType(new TypeDeclarationReference(enclosingTypeDeclarations.peek()));

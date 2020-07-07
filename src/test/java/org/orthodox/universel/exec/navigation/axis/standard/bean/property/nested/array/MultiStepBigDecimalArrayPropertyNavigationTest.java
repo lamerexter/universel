@@ -28,10 +28,8 @@
 
 package org.orthodox.universel.exec.navigation.axis.standard.bean.property.nested.array;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.orthodox.universel.BeanWithProperties;
-import org.orthodox.universel.exec.navigation.axis.standard.bean.property.nested.LamdaTester;
 
 import java.math.BigDecimal;
 
@@ -40,24 +38,20 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.orthodox.universel.Universal.execute;
 
 public class MultiStepBigDecimalArrayPropertyNavigationTest {
-    public static final BigDecimal L11 = new BigDecimal("1");
-    public static final BigDecimal L12 = new BigDecimal("11");
-    public static final BigDecimal L13 = new BigDecimal("111");
-    public static final BeanWithProperties[] R1 = {
-        new BeanWithProperties().withBigDecimalProperty(L11),
-        new BeanWithProperties().withBigDecimalProperty(L12),
-        new BeanWithProperties().withBigDecimalProperty(L13)
-    };
-    private BeanWithProperties binding;
-
-    @BeforeEach
-    void setUp() {
-        LamdaTester test = new LamdaTester();
-        binding = new BeanWithProperties().withReferenceArrayProperty(R1);
-    }
-
     @Test
-    void read() {
-        assertThat(execute("referenceArrayProperty\\bigDecimalProperty", binding), equalTo(new BigDecimal[] { L11, L12, L13 }));
+    void bigDecimalRead_reduction() {
+        // Given
+        final BigDecimal B1 = new BigDecimal("1");
+        final BigDecimal B2 = new BigDecimal("11");
+        final BigDecimal B3 = new BigDecimal("111");
+        final BeanWithProperties[] R1 = {
+            new BeanWithProperties().withBigDecimalProperty(B1),
+            new BeanWithProperties().withBigDecimalProperty(B2),
+            new BeanWithProperties().withBigDecimalProperty(B3)
+        };
+        final BeanWithProperties binding = new BeanWithProperties().withReferenceArrayProperty(R1);
+
+        // Then
+        assertThat(execute("referenceArrayProperty\\bigDecimalProperty\\[[]]", binding), equalTo(new BigDecimal[] {B1, B2, B3 }));
     }
 }

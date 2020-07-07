@@ -31,6 +31,7 @@ package org.orthodox.universel.symanticanalysis.conversion;
 import org.orthodox.universel.cst.BinaryExpression;
 import org.orthodox.universel.cst.Node;
 import org.orthodox.universel.cst.literals.NumericLiteral;
+import org.orthodox.universel.cst.type.reference.ResolvedTypeReference;
 import org.orthodox.universel.symanticanalysis.AbstractSemanticAnalyser;
 
 import java.math.BigDecimal;
@@ -103,7 +104,7 @@ public class WideningNumericConversionAnalyser extends AbstractSemanticAnalyser 
         if ( isNumericExpressionType(transformedNode.getLhsExpression()) && isNumericExpressionType(transformedNode.getRhsExpression()) ) {
             Optional<Class<?>> wideningType = determineWidestNumericOperandType(node.getLhsExpression().getTypeDescriptor(), node.getRhsExpression().getTypeDescriptor());
             if ( wideningType.isPresent() ) {
-                transformedNode.setTypeDescriptor(wideningType.get());
+                transformedNode.setType(new ResolvedTypeReference(transformedNode.getTokenImage(), wideningType.get()));
                 transformedNode = performWideningConversion(transformedNode, wideningType.get());
             }
         }
@@ -141,7 +142,7 @@ public class WideningNumericConversionAnalyser extends AbstractSemanticAnalyser 
         }
 
         BinaryExpression transformedNode = new BinaryExpression(node.getOperator(), lhs, rhs);
-        transformedNode.setTypeDescriptor(resultingType);
+        transformedNode.setType(new ResolvedTypeReference(transformedNode.getTokenImage(), resultingType));
         return transformedNode;
     }
 }

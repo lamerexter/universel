@@ -28,14 +28,15 @@
 package org.orthodox.universel.ast.allocation;
 
 import org.beanplanet.core.collections.ListBuilder;
-import org.orthodox.universel.cst.CompositeNode;
-import org.orthodox.universel.cst.Expression;
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.TokenImage;
+import org.orthodox.universel.cst.*;
+import org.orthodox.universel.cst.type.reference.ArrayTypeReference;
 import org.orthodox.universel.cst.type.reference.TypeReference;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+
+import static java.util.Collections.emptyList;
 
 /**
  * An array creation expression on the Abstract Syntax Tree (AST).
@@ -76,7 +77,7 @@ public class ArrayCreationExpression extends Expression implements CompositeNode
     * @return the expressions which comprise the dimensions of the array.
     */
    public List<Node> getDimensionExpressions() {
-      return dimensionExpressions;
+      return dimensionExpressions == null ? emptyList() : dimensionExpressions;
    }
 
    /**
@@ -111,5 +112,14 @@ public class ArrayCreationExpression extends Expression implements CompositeNode
    @Override
    public int hashCode() {
       return Objects.hash(super.hashCode(), getComponentType(), getDimensionExpressions(), getInitialiserExpression());
+   }
+
+   @Override
+   public Node accept(UniversalCodeVisitor visitor) {
+      return visitor.visitArrayCreationExpression(this);
+   }
+
+   public TypeReference getType() {
+      return new ArrayTypeReference(getTokenImage(), getComponentType(), getDimensionExpressions().size()) ;
    }
 }

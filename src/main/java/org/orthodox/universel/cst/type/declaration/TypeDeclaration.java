@@ -212,4 +212,8 @@ public class TypeDeclaration extends Node implements CompositeNode {
    public NamePath getFullyQualifiedName() {
       return packageDeclaration != null ? packageDeclaration.getName().joinSingleton(name.getName()) : new SimpleNamePath(name.getName());
    }
+
+   public boolean isSequance() {
+      return false;
+   }
 }

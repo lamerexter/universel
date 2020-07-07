@@ -59,7 +59,7 @@ public class ClassField implements Field {
     * @return the field's directly enclosing type.
     */
    public Type getDeclaringType() {
-      return new ClassType(field.getDeclaringClass());
+      return new JavaType(field.getDeclaringClass());
    }
 
    /**
@@ -77,7 +77,7 @@ public class ClassField implements Field {
     * @return the field's type.
     */
    public Type getType() {
-      return new ClassType(field.getType());
+      return new JavaType(field.getType());
    }
 
    /**

@@ -49,6 +49,15 @@ public class TypeDeclarationReference extends TypeReference {
     }
 
     /**
+     * Gets the type declaration associated with this type referece.
+     *
+     * @return the type declaration associsted with this type reference.
+     */
+    public TypeDeclaration getTypeDeclaration() {
+        return typeDeclaration;
+    }
+
+    /**
      * Whether the type referred to is an interface type.
      *
      * @return true if the type referred to is an interface, false otherwise.
@@ -69,5 +78,14 @@ public class TypeDeclarationReference extends TypeReference {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), typeDeclaration);
+    }
+
+    /**
+     * Whether the type referred to is a sequence type (consists of a number of ordered elements).
+     *
+     * @return true if the referred component type is a sequence or this reference type has dimensions (is an array).
+     */
+    public boolean isSequence() {
+        return getTypeDeclaration().isSequance();
     }
 }

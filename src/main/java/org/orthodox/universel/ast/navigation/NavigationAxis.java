@@ -34,6 +34,7 @@ public enum NavigationAxis {
     ANCESTOR("ancestor"),
     ANCESTOR_OR_SELF("ancestor-or-self"),
     ATTRIBUTE("attribute"),
+    BINDING("binding"),
     CHILD("child"),
     DEFAULT("default"),
     DESCENDANT("descendant"),

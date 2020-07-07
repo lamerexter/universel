@@ -40,6 +40,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 
 /**
  * A static method call expression, consisting of a name and zero or more parameter expressions.
@@ -80,7 +81,7 @@ public class StaticMethodCall extends Expression implements CompositeNode {
      * @param name the method name.
      */
     public StaticMethodCall(Class<?> typeDescriptor, TokenImage tokenImage, Class<?> declaringClass, String name) {
-        this(typeDescriptor, tokenImage, declaringClass, name, Collections.emptyList());
+        this(typeDescriptor, tokenImage, declaringClass, name, emptyList());
     }
 
     /**
@@ -136,6 +137,22 @@ public class StaticMethodCall extends Expression implements CompositeNode {
     }
 
     /**
+     * Constructs a static method call expression, consisting of a name and zero parameters.
+     *
+     * @param tokenImage the parser token image.
+     * @param declaringType reference to the type declaring the static method.
+     * @param returnType the return type of the method call.
+     * @param name the method name.
+     * @see #StaticMethodCall(TokenImage, TypeReference, TypeReference, String, List, List)
+     */
+    public StaticMethodCall(TokenImage tokenImage,
+                            TypeReference declaringType,
+                            TypeReference returnType,
+                            String name) {
+        this(tokenImage, declaringType, returnType, name, Collections.emptyList(), emptyList());
+    }
+
+    /**
      * Constructs a static method call expression, consisting of a name and zero or more parameters.
      *
      * @param tokenImage the parser token image.
@@ -151,7 +168,7 @@ public class StaticMethodCall extends Expression implements CompositeNode {
                             String name,
                             List<TypeReference> parameterTypes,
                             List<Node> parameters) {
-        super(tokenImage);
+        super(tokenImage, returnType);
         this.declaringClass = declaringType.getTypeDescriptor();
         this.parameterClasses = parameterTypes.stream().map(Node::getTypeDescriptor).collect(Collectors.toList());
 
@@ -249,7 +266,7 @@ public class StaticMethodCall extends Expression implements CompositeNode {
      * @return he parameter expressions of this method call.
      */
     public List<Node> getParameters() {
-        return parameters != null ? parameters : Collections.emptyList();
+        return parameters != null ? parameters : emptyList();
     }
 
     @SuppressWarnings("unchecked")

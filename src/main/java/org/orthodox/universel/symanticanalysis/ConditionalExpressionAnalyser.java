@@ -35,7 +35,8 @@ import org.beanplanet.core.util.StringUtil;
 import org.orthodox.universel.ast.NodeSequence;
 import org.orthodox.universel.cst.*;
 import org.orthodox.universel.cst.conditionals.TernaryExpression;
-import org.orthodox.universel.cst.type.*;
+import org.orthodox.universel.cst.type.MethodDeclaration;
+import org.orthodox.universel.cst.type.Parameter;
 import org.orthodox.universel.cst.type.reference.*;
 
 import javax.lang.model.type.NullType;
@@ -220,8 +221,8 @@ public class ConditionalExpressionAnalyser extends UniversalVisitorAdapter imple
     }
 
     @Override
-    public Node visitMethodDeclaration(MethodDeclaration node) {
-        if (node.getReturnType().getTypeDescriptor() != null && node.getParameters().getNodes().stream().map(Node::getTypeDescriptor).allMatch(Objects::nonNull)) return node;
+    public MethodDeclaration visitMethodDeclaration(MethodDeclaration node) {
+//        if (node.getReturnType().getTypeDescriptor() != null && node.getParameters().getNodes().stream().map(Node::getTypeDescriptor).allMatch(Objects::nonNull)) return node;
 
         TypeReference transformedReturnTypeReference;
         if ( node.getReturnType().getTypeDescriptor() != null ) {
@@ -250,20 +251,28 @@ public class ConditionalExpressionAnalyser extends UniversalVisitorAdapter imple
         nodeSequenceBuilder.addAll(transformedParametersList);
         final NodeSequence<Parameter> transformedParameters = nodeSequenceBuilder.build();
 
-        boolean noTransformationChanges = Objects.equals(transformedReturnTypeReference, node.getReturnType()) &&
-                                          Objects.equals(transformedParameters, node.getParameters());
+        final NodeSequence<Node> transformedBody = super.transformNodeSequence(node.getBody());
+
+        boolean noTransformationChanges = Objects.equals(transformedReturnTypeReference, node.getReturnType())
+                                          && Objects.equals(transformedParameters, node.getParameters())
+                                          && Objects.equals(transformedBody, node.getBody());
         return noTransformationChanges ? node : new MethodDeclaration(node.getModifiers(),
                                                                       node.getTypeParameters(),
                                                                       transformedReturnTypeReference,
                                                                       node.getName(),
                                                                       transformedParameters,
-                                                                      node.getBody());
+                                                                      transformedBody);
    }
 
 
     @Override
     public TypeReference visitTypeReference(TypeReference node) {
         if (node instanceof ResolvedTypeReference) return node;
+
+        // TODO: Hack to make ScriptAssemblyTest work. A reference to the current type being compiled (i.e. the main class) cannot
+        // possibly resolve to the class being compiled! This is an example of requiring the Class<?> to be available for
+        // the current class being compiled. Chicken and egg...
+        if (node instanceof TypeNameReference) return node;
 
         Class<?> resolvedType = determineTypeOfReference(node);
         return new ResolvedTypeReference(node.getTokenImage(), resolvedType, node.getName(), node.getDimensions());

@@ -28,6 +28,8 @@
 
 package org.orthodox.universel.exec.script;
 
+import org.beanplanet.core.io.IoUtil;
+import org.beanplanet.core.io.resource.FileResource;
 import org.beanplanet.core.lang.TypeUtil;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.Test;
@@ -36,6 +38,7 @@ import org.orthodox.universel.Universal;
 import org.orthodox.universel.compiler.CompilationDefaults;
 import org.orthodox.universel.compiler.CompiledUnit;
 import org.orthodox.universel.cst.Modifiers;
+import org.orthodox.universel.tools.BytecodeOutput;
 
 import java.lang.reflect.Method;
 import java.util.Optional;
@@ -46,6 +49,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.orthodox.universel.Universal.compile;
 import static org.orthodox.universel.Universal.execute;
 import static org.orthodox.universel.compiler.CompilationDefaults.*;
 

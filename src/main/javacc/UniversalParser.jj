@@ -56,7 +56,8 @@ import org.orthodox.universel.ast.navigation.*;
 import org.orthodox.universel.cst.*;
 import org.orthodox.universel.cst.collections.*;
 import org.orthodox.universel.cst.conditionals.*;
-import org.orthodox.universel.cst.types.*;
+import org.orthodox.universel.cst.type.*;
+import org.orthodox.universel.cst.type.reference.*;
 import org.orthodox.universel.cst.literals.*;
 import org.orthodox.universel.cst.TokenImage.TokenImageBuilder;
 import java.io.StringReader;
@@ -146,6 +147,7 @@ TOKEN :
   < LTGT: "<>" > |
   < LONG: "long" > |
   < LBRACE: "{" > { stateStack.push(curLexState); } |
+  < LSQB: "[" > |
   < NATIVE: "native" > |
   < NE: "!=" > |
   < NEW: "new" > |
@@ -1219,13 +1221,13 @@ public Expression Expression():
     (
         expr = Literal()
         |
-        expr = NavigationStream()
-        |
         expr = ListExpression()
         |
         expr = MapOrSetExpression()
         |
         expr=AllocationExpression()
+        |
+        expr = NavigationStream()
         |
         "(" expr=Expression() ")"
     )
@@ -1433,19 +1435,19 @@ public NavigationStream NavigationStream():
 }
 {
     (
-        step = NavigationStep()               { steps=add(steps, step); }
+        step = NavigationFirstStep()               { steps=add(steps, step); }
 
         (
             ("\\"|".")
 
-            step = NavigationStep()           { steps.add(step); }
+            step = NavigationNextSteps()           { steps.add(step); }
         )*
     )
 
     { return new NavigationStream(steps); }
 }
 
-public Node NavigationStep():
+public Node NavigationFirstStep():
 {
     List<Node> argumentsList = null;
     Name name = null;
@@ -1468,6 +1470,31 @@ public Node NavigationStep():
                                                     .endLine(token.endLine)
                                                     .endColumn(token.endColumn)
                                                     .build(), NavigationAxis.DEFAULT, nodeTest); }
+}
+
+public Node NavigationNextSteps():
+{
+    boolean isArrayReduction = false;
+    Node step = null;
+}
+{
+    (
+        step=NavigationFirstStep()
+        |
+        ( "["       { step = new NavigationStep<NodeTest>(tokenImage(), NavigationAxis.DEFAULT, new ListNodeTest(tokenImage())); }
+          [
+            "[" "]" { isArrayReduction = true; }
+          ]
+
+          "]"       { step = new NavigationStep<NodeTest>(tokenImage(), NavigationAxis.DEFAULT, isArrayReduction ? new ArrayNodeTest(tokenImage()) : new ListNodeTest(tokenImage())); }
+        )
+        |
+        ("{" "}")  { step = new NavigationStep<NodeTest>(tokenImage(), NavigationAxis.DEFAULT, new SetNodeTest(tokenImage())); }
+//        |
+//        (<LSQB> <LSQB> "]]")  { step = new NavigationStep<NodeTest>(tokenImage(), NavigationAxis.DEFAULT, new ArrayNodeTest(tokenImage())); }
+    )
+
+    { return step; }
 }
 
 public Name Identifier():

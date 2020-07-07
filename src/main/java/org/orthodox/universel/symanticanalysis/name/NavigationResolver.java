@@ -28,23 +28,27 @@
 
 package org.orthodox.universel.symanticanalysis.name;
 
-import org.orthodox.universel.ast.InstanceMethodCall;
-import org.orthodox.universel.ast.StaticMethodCall;
+import org.beanplanet.core.collections.ListBuilder;
+import org.orthodox.universel.ast.*;
 import org.orthodox.universel.ast.conditionals.IfStatement;
+import org.orthodox.universel.ast.functional.FunctionalInterfaceObject;
 import org.orthodox.universel.ast.navigation.NavigationStep;
 import org.orthodox.universel.ast.navigation.NavigationStream;
+import org.orthodox.universel.ast.navigation.ReductionNodeTest;
 import org.orthodox.universel.compiler.*;
-import org.orthodox.universel.cst.ImportDecl;
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.NullTestExpression;
-import org.orthodox.universel.cst.Script;
+import org.orthodox.universel.cst.*;
 import org.orthodox.universel.cst.literals.NullLiteralExpr;
 import org.orthodox.universel.cst.type.MethodDeclaration;
+import org.orthodox.universel.cst.type.Parameter;
 import org.orthodox.universel.cst.type.declaration.ClassDeclaration;
+import org.orthodox.universel.cst.type.reference.ResolvedTypeReference;
 import org.orthodox.universel.symanticanalysis.AbstractSemanticAnalyser;
 import org.orthodox.universel.symanticanalysis.JvmInstructionNode;
 import org.orthodox.universel.symanticanalysis.conversion.BoxConversion;
 import org.orthodox.universel.symanticanalysis.conversion.TypeConversion;
+import org.orthodox.universel.symanticanalysis.navigation.MapStage;
+import org.orthodox.universel.symanticanalysis.navigation.NavigationStage;
+import org.orthodox.universel.symanticanalysis.navigation.ReduceStage;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -57,6 +61,7 @@ import java.util.stream.Stream;
 import static java.util.Collections.singletonList;
 import static org.beanplanet.core.lang.TypeUtil.isPrimitiveType;
 import static org.orthodox.universel.compiler.Messages.NavigationExpression.UNRESOLVED_STEP;
+import static org.orthodox.universel.cst.Modifiers.*;
 
 public class NavigationResolver extends AbstractSemanticAnalyser {
 
@@ -78,7 +83,7 @@ public class NavigationResolver extends AbstractSemanticAnalyser {
     }
 
     @Override
-    public Node visitMethodDeclaration(final MethodDeclaration node) {
+    public MethodDeclaration visitMethodDeclaration(final MethodDeclaration node) {
         getContext().pushScope(new MethodScope(node));
 
         try {
@@ -90,85 +95,22 @@ public class NavigationResolver extends AbstractSemanticAnalyser {
 
     @Override
     public Node visitNavigationStream(final NavigationStream node) {
-        final NavigationStream transformedStream = (NavigationStream)super.visitNavigationStream(node);
+        NavigationStream transformedStream = (NavigationStream)super.visitNavigationStream(node);
 
-        if (transformedStream.getChildNodes().isEmpty() || !transformedStream.getChildNodes().stream().allMatch(n -> n instanceof NavigationStep))
+        if (transformedStream.getSteps().isEmpty() || !transformedStream.getSteps().stream().allMatch(n -> n instanceof NavigationStep))
             return transformedStream;
 
-        //--------------------------------------------------------------------------------------------------------------
-        // The Navigation Stream will be totally transformed into a sequence of other statements/nodes. It is therefore
-        // an error if a step cannot be transformed.
-        // Determine stream status. Is the LHS context multiple cardinatlity (i.e. Collection, Iterable, Stream ... ?)
-        //--------------------------------------------------------------------------------------------------------------
-        List<Node> transformedSteps = new ArrayList<>(transformedStream.getSteps().size());
-        boolean first = true;
-        boolean hasErrors = false;
-        boolean isStream = false;
-        for (int n=0; n < transformedStream.getSteps().size(); n++) {
-            Node child = transformedStream.getSteps().get(n);
-            Node transformStep = transformStep((NavigationStep<?>) child);
+        List<NavigationStage> stages = realise(transformedStream);
+        if ( stages == null ) return node;
 
-            if (first) {
-                first = false;
-            } else {
-                getContext().popScope();
-            }
-
-            //--------------------------------------------------------------------------------------------------------------
-            // If we're dealing with multiple cardinality here (i.e. Collection etc), convert navigation stream to
-            // a physical Stream.
-            //--------------------------------------------------------------------------------------------------------------
-            final boolean inStream = isStream;
-            isStream = isStream || determineStreamStatus(transformStep);
-            NameScope nameScope = null;
-            if ( isStream ) {
-                if ( isMultipleCardinality(transformStep) ) {
-                    Class<?> componentTypeDescriptor = transformStep.getTypeDescriptor().getComponentType();
-                    transformStep = new TypeConversion(transformStep, Stream.class);
-                    if ( inStream ) {
-                        transformStep = new InstanceMethodCall(Stream.class, transformStep.getTokenImage(), transformStep.getTypeDescriptor(), "flatMap");
-                    }
-                    nameScope = new BoundScope(componentTypeDescriptor, getContext().getNavigatorRegistry());
-                } else {
-                    nameScope = new BoundScope(transformStep.getTypeDescriptor(), getContext().getNavigatorRegistry());
-                    transformStep = new InstanceMethodCall(Stream.class,
-                                                           transformStep.getTokenImage(),
-                                                           Stream.class,
-                                                           "map",
-                                                           singletonList(Function.class),
-                                                           singletonList(new StaticMethodCall(Function.class,
-                                                                                transformStep.getTokenImage(),
-                                                                                getClass(),
-                                                                                "doIt"
-                                                           )));
-                }
-            } else {
-                nameScope = new BoundScope(transformStep.getTypeDescriptor(), getContext().getNavigatorRegistry());
-            }
-
-            transformedSteps.add(transformStep);
-            getContext().pushScope(nameScope);
-
-            if (Objects.equals(transformStep, child)) {
-                getContext().getMessages().addError(UNRESOLVED_STEP.withRelatedObject(child));
-                hasErrors = true;
-                break; // pointless continuing further along this navigation path now...
-            }
-
-//            if ( n==1 ) break;
-        }
-        if (!first)
-            getContext().popScope();
-
-        if (hasErrors)
-            return transformedStream;
+        List<Node> multipleCardinalityTransformedSteps = sequenceAnalysis(stages);
 
         //--------------------------------------------------------------------------------------------------------------
         // Add null/optional safety checks to stream steps 1..n (not the first)
         //--------------------------------------------------------------------------------------------------------------
         Node lastNullSafeNavigation = null;
-        for (int n = transformedSteps.size() - 1; n > 0; n--) {
-            Node transformStep = transformedSteps.get(n);
+        for (int n = multipleCardinalityTransformedSteps.size() - 1; n > 0; n--) {
+            Node transformStep = multipleCardinalityTransformedSteps.get(n);
 
             // Navigation is via reference types only, so box if necessary
             if ( isPrimitiveType(transformStep.getTypeDescriptor()) ) {
@@ -176,12 +118,12 @@ public class NavigationResolver extends AbstractSemanticAnalyser {
             }
             Node transformedNullSafeStep = InternalNodeSequence
                                                .builder()
-                                               .add(transformedSteps.get(n - 1))
+                                               .add(multipleCardinalityTransformedSteps.get(n - 1))
                                                .add(new IfStatement(transformStep.getTokenImage(),
                                                                     new NullTestExpression(transformStep
                                                                                                .getTokenImage(),
                                                                                            new JvmInstructionNode(transformStep
-                                                                                                   .getTokenImage()) {
+                                                                                                                      .getTokenImage()) {
                                                                                                @Override
                                                                                                public void emit(BytecodeHelper bch) {
                                                                                                    bch.emitDuplicate();
@@ -218,21 +160,137 @@ public class NavigationResolver extends AbstractSemanticAnalyser {
         // since there is no LHS context which is null unsafe (e.g. a local primitive variable value).
         //--------------------------------------------------------------------------------------------------------------
         if (lastNullSafeNavigation == null) {
-            lastNullSafeNavigation = transformedSteps.get(0);
-//            if (isPrimitiveType(lastNullSafeNavigation.getTypeDescriptor())) {
-//                lastNullSafeNavigation = new BoxConversion(lastNullSafeNavigation);
-//            }
+            lastNullSafeNavigation = multipleCardinalityTransformedSteps.get(0);
         }
 
         return lastNullSafeNavigation;
     }
 
-    private boolean isMultipleCardinality(final Node node) {
-        return node.getTypeDescriptor() != null && node.getTypeDescriptor().isArray();
+    private List<NavigationStage> realise(final NavigationStream navigationStream) {
+        //--------------------------------------------------------------------------------------------------------------
+        // Given the scopes in play assume the first step is relative and make absolute.
+        //--------------------------------------------------------------------------------------------------------------
+        NavigationStep<?> initialStepResolved = resolveStep((NavigationStep<?>)navigationStream.getSteps().get(0));
+        final NavigationStream absoluteStream = initialStepResolved == null ?
+                                                navigationStream :
+                                                new NavigationStream(ListBuilder.<Node>builder()
+                                                                         .add(initialStepResolved)
+                                                                         .addAll(navigationStream.getSteps())
+                                                                         .build());
+
+        //--------------------------------------------------------------------------------------------------------------
+        // Transform the logical navigation stream to a physical implementation. The Navigation Stream will be totally
+        // transformed into a sequence of other statements/nodes. It is therefore an error if a step cannot be transformed.
+        //
+        // For single-step navigation the step will be transformed with no intermediate stream.
+        // For multi-step navigation where all steps are single cardinality the steps will be transformed with no
+        // intermediate stream.
+        // For multi-step navigation where one or more steps of multiple cardinalities (i.e. Collection<T>,
+        // Iterable<T>, Array<T>) an intermediate stream will be created.
+        //--------------------------------------------------------------------------------------------------------------
+        List<NavigationStage> navSages = new ArrayList<>(absoluteStream.getSteps().size());
+        boolean inSequence = false;
+        for (int n=0; n < absoluteStream.getSteps().size(); n++) {
+            NavigationStage previousStep = n > 0 ? navSages.get(n-1) : null;
+            Node step = absoluteStream.getSteps().get(n);
+
+            Scope previousStepScope = null;
+            try {
+                if ( previousStep != null ) {
+                    getContext().pushScope(previousStepScope = new BoundScope(previousStep.isSequence() ?
+                                                                              previousStep.getNode().getTypeDescriptor().getComponentType() :
+                                                                              previousStep.getNode().getTypeDescriptor(),
+                                                                              getContext().getNavigatorRegistry()));
+                }
+
+                Node transformStep = transformStep((NavigationStep<?>) step);
+
+                if (Objects.equals(transformStep, step)) {
+                    getContext().addError(UNRESOLVED_STEP.withRelatedObject(step));
+                    return null; // pointless continuing further along this navigation path now...
+                }
+
+                final boolean isSequence = isSequenceType(transformStep);
+                final boolean isReduction = (((NavigationStep<?>) step).getNodeTest() instanceof ReductionNodeTest);
+                navSages.add(isReduction ? new ReduceStage(transformStep, isSequence, inSequence) : new MapStage(transformStep, isSequence, inSequence));
+                inSequence = (inSequence || isSequence) && !isReduction;
+            } finally {
+                if ( previousStepScope != null ) getContext().popScope();
+            }
+        }
+
+        return navSages;
     }
 
-    private boolean determineStreamStatus(final Node node) {
-        return isMultipleCardinality(node);
+    private List<Node> sequenceAnalysis(final List<NavigationStage> stages) {
+        //--------------------------------------------------------------------------------------------------------------
+        // Transform the single-cardinality steps back to multi-cardinalities, where applicable.
+        //--------------------------------------------------------------------------------------------------------------
+        List<Node> multipleCardinalityTransformedSteps = new ArrayList<>(stages.size());
+        boolean inStream = false;
+        for (int n=0; n < stages.size(); n++) {
+            NavigationStage previousStep = n > 0 ? stages.get(n-1) : null;
+            NavigationStage stage = stages.get(n);
+            Node step = stage.getNode();
+
+            if ( n != stages.size()-1 ) {
+
+                if ( stage.isSequence() ) {
+                    if (inStream) {
+
+                    } else {
+                        inStream = true;
+                        // Convert to stream
+                        step = new TypeConversion(step, Stream.class);
+                    }
+                } else if (inStream) {
+                    Stream s;
+                    // Convert singleton to singleton stream and insert into flatmap
+                    Class<?> previousStepType = previousStep.isSequence() ? previousStep.getTypeDescriptor().getComponentType() : previousStep.getTypeDescriptor();
+                    MethodDeclaration generatedMethod = new MethodDeclaration(valueOf(PRIVATE | STATIC | SYNTHETIC), null, null, new ResolvedTypeReference(step), "nav$step" + n + "$fio",
+                                                                              NodeSequence.<Parameter>builder()
+                                                                                  .add(new Parameter(valueOf(FINAL),
+                                                                                                     new ResolvedTypeReference(previousStep.getNode().getTokenImage(), previousStepType),
+                                                                                                     false,
+                                                                                                     new Name(previousStep.getNode().getTokenImage(), "navStep")
+                                                                                  ))
+                                                                                  .build(),
+                                                                              NodeSequence.builder()
+                                                                                          .add(new LoadLocal(previousStep.getNode().getTokenImage(), previousStepType, 0))
+                                                                                          .add(new ReturnStatement(step))
+                                                                                          .build()
+                    );
+                    step = InternalNodeSequence.builder()
+                                               .add(new InstanceMethodCall(Stream.class,
+                                                                           step.getTokenImage(),
+                                                                           Stream.class,
+                                                                           "map",
+                                                                           singletonList(Function.class),
+                                                                           singletonList(new FunctionalInterfaceObject(step.getTokenImage(),
+                                                                                                                       Function.class, Object.class, singletonList(Object.class), "apply",
+                                                                                                                       generatedMethod
+                                                                                         )
+                                                                           )
+                                               ))
+                                               .build();
+                }
+            }
+
+            multipleCardinalityTransformedSteps.add(step);
+        }
+
+        return multipleCardinalityTransformedSteps;
+    }
+
+    private NavigationStep<?> resolveStep(final NavigationStep<?> step) {
+        return getContext().scopes()
+                           .map(s -> s.resolveInitial(step))
+                           .filter(Objects::nonNull)
+                           .findFirst().orElse(null);
+    }
+
+    private boolean isSequenceType(final Node node) {
+        return node.getType() != null && node.getType().isSequence();
     }
 
     private Node transformStep(final NavigationStep step) {
@@ -252,41 +310,6 @@ public class NavigationResolver extends AbstractSemanticAnalyser {
             }
         };
     }
-
-//    @Override
-//    public Name visitName(Name node) {
-//        //--------------------------------------------------------------------------------------------------------------
-//        // Check scopes and resolve name to the innermost.
-//        // TODO: now this is Script scope ONLY!
-//        //--------------------------------------------------------------------------------------------------------------
-//        final Class<?> bindingType = getContext().getBindingType();
-//        if (bindingType == null)
-//            return node;
-//
-//        return accessNameOnBinding(node);
-//    }
-//
-//    private Node accessNameOnBinding(Name name) {
-//        //--------------------------------------------------------------------------------------------------------------
-//        // Readable property.
-//        //--------------------------------------------------------------------------------------------------------------
-//        TypePropertiesSource<?> properties = new TypePropertiesSource<>(getContext().getBindingType());
-//        if (!properties.isReadableProperty(name.getName()))
-//            return name;
-//
-//        Method readMethod = properties.assertAndGetPropertyDescriptor(name.getName()).getReadMethod();
-//        return new BindingMethodCall(name.getTokenImage(), readMethod, singletonList(new StringLiteralExpr(TokenImage
-//                                                                                                               .builder()
-//                                                                                                               .range(
-//                                                                                                                   name)
-//                                                                                                               .image(
-//                                                                                                                   readMethod
-//                                                                                                                       .getName())
-//                                                                                                               .build(),
-//                                                                                                           ""
-//        )));
-//    }
-
 
     @Override
     public Node visitScript(final Script node) {

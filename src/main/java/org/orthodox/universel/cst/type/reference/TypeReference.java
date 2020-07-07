@@ -28,9 +28,11 @@
 
 package org.orthodox.universel.cst.type.reference;
 
+import org.beanplanet.core.lang.TypeUtil;
 import org.beanplanet.core.models.path.NamePath;
 import org.orthodox.universel.cst.Node;
 import org.orthodox.universel.cst.TokenImage;
+import org.orthodox.universel.cst.Type;
 import org.orthodox.universel.cst.UniversalCodeVisitor;
 
 import java.util.Objects;
@@ -41,7 +43,7 @@ import java.util.Objects;
  *
  * @author Gary Watson
  */
-public abstract class TypeReference extends Node {
+public class TypeReference extends Node implements Type {
     /** The name of the type referred to, including any package name prefix which may have been used. */
     private final NamePath name;
 
@@ -84,6 +86,7 @@ public abstract class TypeReference extends Node {
         this.name = name;
         this.dimensions = dimensions;
     }
+
     /**
      * Constructs a new type AST node instance.
      *
@@ -94,6 +97,26 @@ public abstract class TypeReference extends Node {
         this(tokenImage, name, 0);
     }
 
+    @Override
+    public TypeReference getType() {
+        return this;
+    }
+
+    @Override
+    public Class<?> getTypeDescriptor() {
+        return TypeUtil.loadClassOrNull(getName().join("."));
+    }
+
+    /**
+     * If this type is an array type, returns the component type of the array.
+     *
+     * @return the component type of this array type, or null if this type is not an array type.
+     */
+    public TypeReference getComponentType() {
+        Class<?> clazz = getTypeDescriptor();
+        return clazz != null && clazz.isArray() ? new ResolvedTypeReference(getTokenImage(), clazz.getComponentType()) : null;
+    }
+
     /**
      * Gets the name of the type referred to, including any package name prefix which may have been used.
      *
@@ -101,6 +124,16 @@ public abstract class TypeReference extends Node {
      */
     public NamePath getName() {
         return name;
+    }
+
+    @Override
+    public Type getSuperclass() {
+        return null;
+    }
+
+    @Override
+    public NamePath getFullyQualifiedName() {
+        return getName();
     }
 
     /**
@@ -118,7 +151,7 @@ public abstract class TypeReference extends Node {
      * @return true if the type referred to is a primitive type, false otherwise.
      */
     public boolean isPrimitiveType() {
-        return false;
+        return getTypeDescriptor() != null && getTypeDescriptor().isPrimitive();
     }
 
     /**
@@ -127,7 +160,7 @@ public abstract class TypeReference extends Node {
      * @return true if the type referred to is the void type, false otherwise.
      */
     public boolean isVoidType() {
-        return false;
+        return getTypeDescriptor() == void.class;
     }
 
     /**
@@ -145,7 +178,7 @@ public abstract class TypeReference extends Node {
      * @return true if the type referred to is a reference type, false otherwise.
      */
     public boolean isReferenceType() {
-        return false;
+        return getTypeDescriptor() != null && Object.class.isAssignableFrom(getTypeDescriptor());
     }
 
     public TypeReference accept(UniversalCodeVisitor visitor) {
@@ -158,12 +191,24 @@ public abstract class TypeReference extends Node {
         if (!(o instanceof TypeReference)) return false;
         if (!super.equals(o)) return false;
         TypeReference that = (TypeReference) o;
-        return getDimensions() == that.getDimensions() &&
-               Objects.equals(getName(), that.getName());
+        return getDimensions() == that.getDimensions()
+               && Objects.equals(getName(), that.getName())
+               && Objects.equals(getTypeDescriptor(), that.getTypeDescriptor());
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), getName(), getDimensions());
+    }
+
+    /**
+     * Whether the type referred to is a sequence type (consists of a number of ordered elements). This includes arrays,
+     * list, sets and the class of all other iterable and streamable types.
+     *
+     * @return true if the type referred to is an array or {@link Iterable}.
+     */
+    public boolean isSequence() {
+        final Class<?> clazz = getTypeDescriptor();
+        return isArray() || (clazz != null && Iterable.class.isAssignableFrom(clazz));
     }
 }

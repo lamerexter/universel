@@ -27,7 +27,6 @@
  */
 package org.orthodox.universel.cst;
 
-import org.beanplanet.core.models.path.DelimitedNamePath;
 import org.orthodox.universel.ast.AstVisitor;
 import org.orthodox.universel.cst.type.reference.ResolvedTypeReference;
 import org.orthodox.universel.cst.type.reference.TypeReference;
@@ -50,7 +49,7 @@ public abstract class Node implements UniversalCodeVisitable {
      */
     private TokenImage tokenImage;
 
-    protected Class<?> typeDescriptor;
+//    protected Class<?> typeDescriptor;
 
     private TypeReference type;
 
@@ -100,8 +99,8 @@ public abstract class Node implements UniversalCodeVisitable {
     public Node(Node parent, TokenImage tokenImage, Class<?> typeDescriptor) {
         this.parent = parent;
         this.tokenImage = tokenImage;
-        this.typeDescriptor = typeDescriptor;
-        this.type = null;
+//        this.typeDescriptor = typeDescriptor;
+        this.type = typeDescriptor == null ? null : new ResolvedTypeReference(tokenImage, typeDescriptor);
     }
 
     /**
@@ -114,7 +113,7 @@ public abstract class Node implements UniversalCodeVisitable {
     public Node(Node parent, TokenImage tokenImage, TypeReference type) {
         this.parent = parent;
         this.tokenImage = tokenImage;
-        this.typeDescriptor = null;
+//        this.typeDescriptor = null;
         this.type = type;
     }
 
@@ -185,16 +184,26 @@ public abstract class Node implements UniversalCodeVisitable {
     }
 
     public Class<?> getTypeDescriptor() {
-        return typeDescriptor;
+//        return typeDescriptor;
+        return getType() == null ? null : getType().getTypeDescriptor();
     }
 
+    /**
+     * Returns the type associated with this node.
+     *
+     * @return the static type of the node.
+     */
     public TypeReference getType() {
         return type;
     }
 
-    public void setTypeDescriptor(Class<?> typeDescriptor) {
-        this.typeDescriptor = typeDescriptor;
+    public void setType(final TypeReference type) {
+        this.type = type;
     }
+
+//    public void setTypeDescriptor(Class<?> typeDescriptor) {
+//        this.typeDescriptor = typeDescriptor;
+//    }
 
     @Override
     public boolean equals(Object o) {
@@ -205,11 +214,11 @@ public abstract class Node implements UniversalCodeVisitable {
         Node node = (Node) o;
         return Objects.equals(parent, node.parent)
                && Objects.equals(tokenImage, node.tokenImage)
-               && Objects.equals(typeDescriptor, node.typeDescriptor);
+               && Objects.equals(type, node.type);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(parent, tokenImage, typeDescriptor);
+        return Objects.hash(parent, tokenImage, type);
     }
 }

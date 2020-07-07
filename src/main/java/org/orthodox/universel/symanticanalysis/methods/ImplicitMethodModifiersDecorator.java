@@ -40,7 +40,7 @@ public class ImplicitMethodModifiersDecorator extends AbstractSemanticAnalyser {
     public static final Modifiers DEFAULT_METHOD_MODIFIERS = new Modifiers(Modifiers.PUBLIC);
 
     @Override
-    public Node visitMethodDeclaration(MethodDeclaration node) {
+    public MethodDeclaration visitMethodDeclaration(MethodDeclaration node) {
         if (node.getModifiers() != null) return node;
 
         return new MethodDeclaration(DEFAULT_METHOD_MODIFIERS,

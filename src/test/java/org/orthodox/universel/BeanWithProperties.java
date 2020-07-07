@@ -115,14 +115,6 @@ public class BeanWithProperties {
         this.floatProperty = floatProperty;
     }
 
-    public boolean isBooleanProperty() {
-        return booleanProperty;
-    }
-
-    public void setBooleanProperty(boolean booleanProperty) {
-        this.booleanProperty = booleanProperty;
-    }
-
     public BigDecimal getBigDecimalProperty() {
         return bigDecimalProperty;
     }
@@ -144,12 +136,35 @@ public class BeanWithProperties {
         this.bigIntegerProperty = bigIntegerProperty;
     }
 
+    public BeanWithProperties withBigIntegerProperty(BigInteger bigIntegerProperty) {
+        setBigIntegerProperty(bigIntegerProperty);
+        return this;
+    }
+
+    public boolean isBooleanProperty() {
+        return booleanProperty;
+    }
+
+    public void setBooleanProperty(boolean booleanProperty) {
+        this.booleanProperty = booleanProperty;
+    }
+
+    public BeanWithProperties withBooleanProperty(boolean booleanProperty) {
+        setBooleanProperty(booleanProperty);
+        return this;
+    }
+
     public byte getByteProperty() {
         return byteProperty;
     }
 
     public void setByteProperty(byte byteProperty) {
         this.byteProperty = byteProperty;
+    }
+
+    public BeanWithProperties withByteProperty(byte byteProperty) {
+        setByteProperty(byteProperty);
+        return this;
     }
 
     public char getCharProperty() {
@@ -160,12 +175,22 @@ public class BeanWithProperties {
         this.charProperty = charProperty;
     }
 
+    public BeanWithProperties withCharProperty(char charProperty) {
+        setCharProperty(charProperty);
+        return this;
+    }
+
     public Class<?> getTypeProperty() {
         return typeProperty;
     }
 
     public void setTypeProperty(Class<?> typeProperty) {
         this.typeProperty = typeProperty;
+    }
+
+    public BeanWithProperties withTypeProperty(Class<?> typeProperty) {
+        setTypeProperty(typeProperty);
+        return this;
     }
 
     public double getDoubleProperty() {
@@ -176,12 +201,22 @@ public class BeanWithProperties {
         this.doubleProperty = doubleProperty;
     }
 
+    public BeanWithProperties withDoubleProperty(double doubleProperty) {
+        setDoubleProperty(doubleProperty);
+        return this;
+    }
+
     public float getFloatProperty() {
         return floatProperty;
     }
 
     public void setFloatProperty(float floatProperty) {
         this.floatProperty = floatProperty;
+    }
+
+    public BeanWithProperties withFloatProperty(float floatProperty) {
+        setFloatProperty(floatProperty);
+        return this;
     }
 
     public int getIntProperty() {
@@ -192,12 +227,22 @@ public class BeanWithProperties {
         this.intProperty = intProperty;
     }
 
+    public BeanWithProperties withIntProperty(int intProperty) {
+        setIntProperty(intProperty);
+        return this;
+    }
+
     public long getLongProperty() {
         return longProperty;
     }
 
     public void setLongProperty(long longProperty) {
         this.longProperty = longProperty;
+    }
+
+    public BeanWithProperties withLongProperty(long longProperty) {
+        setLongProperty(longProperty);
+        return this;
     }
 
     public short getShortProperty() {
@@ -208,12 +253,22 @@ public class BeanWithProperties {
         this.shortProperty = shortProperty;
     }
 
+    public BeanWithProperties withShortProperty(short shortProperty) {
+        setShortProperty(shortProperty);
+        return this;
+    }
+
     public String getStringProperty() {
         return stringProperty;
     }
 
     public void setStringProperty(String stringProperty) {
         this.stringProperty = stringProperty;
+    }
+
+    public BeanWithProperties withStringProperty(String stringProperty) {
+        setStringProperty(stringProperty);
+        return this;
     }
 
     public BeanWithProperties getReferenceProperty() {
@@ -237,12 +292,22 @@ public class BeanWithProperties {
         this.booleanWrapperProperty = booleanWrapperProperty;
     }
 
+    public BeanWithProperties withBooleanWrapperProperty(Boolean booleanWrapperProperty) {
+        setBooleanWrapperProperty(booleanWrapperProperty);
+        return this;
+    }
+
     public Byte getByteWrapperProperty() {
         return byteWrapperProperty;
     }
 
     public void setByteWrapperProperty(Byte byteWrapperProperty) {
         this.byteWrapperProperty = byteWrapperProperty;
+    }
+
+    public BeanWithProperties withByteWrapperProperty(Byte byteWrapperProperty) {
+        setByteWrapperProperty(byteWrapperProperty);
+        return this;
     }
 
     public Character getCharWrapperProperty() {
@@ -253,12 +318,22 @@ public class BeanWithProperties {
         this.charWrapperProperty = charWrapperProperty;
     }
 
+    public BeanWithProperties withCharWrapperProperty(Character charWrapperProperty) {
+        setCharWrapperProperty(charWrapperProperty);
+        return this;
+    }
+
     public Double getDoubleWrapperProperty() {
         return doubleWrapperProperty;
     }
 
     public void setDoubleWrapperProperty(Double doubleWrapperProperty) {
         this.doubleWrapperProperty = doubleWrapperProperty;
+    }
+
+    public BeanWithProperties withDoubleWrapperProperty(Double doubleWrapperProperty) {
+        setDoubleWrapperProperty(doubleWrapperProperty);
+        return this;
     }
 
     public Float getFloatWrapperProperty() {
@@ -269,12 +344,22 @@ public class BeanWithProperties {
         this.floatWrapperProperty = floatWrapperProperty;
     }
 
+    public BeanWithProperties withFloatWrapperProperty(Float floatWrapperProperty) {
+        setFloatWrapperProperty(floatWrapperProperty);
+        return this;
+    }
+
     public Integer getIntWrapperProperty() {
         return intWrapperProperty;
     }
 
     public void setIntWrapperProperty(Integer intWrapperProperty) {
         this.intWrapperProperty = intWrapperProperty;
+    }
+
+    public BeanWithProperties withIntWrapperProperty(Integer intWrapperProperty) {
+        setIntWrapperProperty(intWrapperProperty);
+        return this;
     }
 
     public Long getLongWrapperProperty() {
@@ -285,12 +370,22 @@ public class BeanWithProperties {
         this.longWrapperProperty = longWrapperProperty;
     }
 
+    public BeanWithProperties withLongWrapperProperty(Long longWrapperProperty) {
+        setLongWrapperProperty(longWrapperProperty);
+        return this;
+    }
+
     public Short getShortWrapperProperty() {
         return shortWrapperProperty;
     }
 
     public void setShortWrapperProperty(Short shortWrapperProperty) {
         this.shortWrapperProperty = shortWrapperProperty;
+    }
+
+    public BeanWithProperties withShortWrapperProperty(Short shortWrapperProperty) {
+        setShortWrapperProperty(shortWrapperProperty);
+        return this;
     }
 
     public String getStringWrapperProperty() {

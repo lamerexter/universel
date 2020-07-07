@@ -32,13 +32,13 @@ import org.orthodox.universel.cst.*;
 import org.orthodox.universel.cst.type.reference.ResolvedTypeReference;
 import org.orthodox.universel.cst.type.reference.TypeReference;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 
 /**
  * An intance method call expression, consisting of a name and zero or more parameter expressions.
@@ -82,7 +82,7 @@ public class InstanceMethodCall extends Expression implements CompositeNode {
      * @param name the method name.
      */
     public InstanceMethodCall(Class<?> typeDescriptor, TokenImage tokenImage, Class<?> declaringClass, String name) {
-        this(typeDescriptor, tokenImage, declaringClass, name, Collections.emptyList());
+        this(typeDescriptor, tokenImage, declaringClass, name, emptyList());
     }
 
     /**
@@ -95,7 +95,7 @@ public class InstanceMethodCall extends Expression implements CompositeNode {
      * @param parameters the parameter expressions of this method call.
      */
     public InstanceMethodCall(Class<?> typeDescriptor, TokenImage tokenImage, Class<?> declaringClass, String name, Node ... parameters) {
-        this(typeDescriptor, tokenImage, typeDescriptor, name, asList(parameters));
+        this(typeDescriptor, tokenImage, declaringClass, name, asList(parameters));
     }
 
     /**
@@ -131,6 +131,21 @@ public class InstanceMethodCall extends Expression implements CompositeNode {
         this.parameterTypes = IntStream.range(0, parameterClasses.size()).mapToObj(i -> new ResolvedTypeReference(parameters.get(i).getTokenImage(), parameterClasses.get(0))).collect(Collectors.toList());
         this.name = name;
         this.parameters = parameters;
+    }
+
+    /**
+     * Constructs an instance method call expression, consisting of a name and zero parameters.
+     *
+     * @param tokenImage the parser token image.
+     * @param declaringType reference to the type declaring the static method.
+     * @param returnType the return type of the method call.
+     * @param name the method name.
+     */
+    public InstanceMethodCall(TokenImage tokenImage,
+                              TypeReference declaringType,
+                              TypeReference returnType,
+                              String name) {
+        this(tokenImage, declaringType, returnType, name, emptyList(), emptyList());
     }
 
     /**
@@ -206,7 +221,7 @@ public class InstanceMethodCall extends Expression implements CompositeNode {
      * @return he parameter expressions of this method call.
      */
     public List<Node> getParameters() {
-        return parameters != null ? parameters : Collections.emptyList();
+        return parameters != null ? parameters : emptyList();
     }
 
     /**
@@ -230,7 +245,7 @@ public class InstanceMethodCall extends Expression implements CompositeNode {
     @SuppressWarnings("unchecked")
     @Override
     public List<Node> getChildNodes() {
-        return parameters == null ? Collections.emptyList() : (List) parameters;
+        return parameters == null ? emptyList() : (List) parameters;
     }
 
     public Node accept(UniversalCodeVisitor visitor) {

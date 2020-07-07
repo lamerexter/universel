@@ -31,8 +31,10 @@ package org.orthodox.universel.cst;
 
 
 import org.orthodox.universel.ast.*;
+import org.orthodox.universel.ast.allocation.ArrayCreationExpression;
 import org.orthodox.universel.ast.allocation.ObjectCreationExpression;
 import org.orthodox.universel.ast.conditionals.IfStatement;
+import org.orthodox.universel.ast.functional.FunctionalInterfaceObject;
 import org.orthodox.universel.ast.navigation.NameTest;
 import org.orthodox.universel.ast.navigation.NavigationStep;
 import org.orthodox.universel.ast.navigation.NavigationStream;
@@ -65,8 +67,9 @@ public interface UniversalCodeVisitor {
     Node visitAnnotation(Annotation node);
 
     //   Node visitAnnotationDeclaration(AnnotationDeclaration node);
-//   Node visitArrayCreationExpression(ArrayCreationExpression node);
-//   Node visitAssertStatement(AssertStatement node);
+    Node visitArrayCreationExpression(ArrayCreationExpression node);
+
+    //   Node visitAssertStatement(AssertStatement node);
 //   Node visitAssignmentExpression(AssignmentExpression node);
     Node visitBetweenExpression(BetweenExpression node);
 
@@ -100,6 +103,8 @@ public interface UniversalCodeVisitor {
 //   Node visitForStatement(ForStatement node);
 //   Node visitFunction(Function node);
 
+    Node visitFunctionalInterfaceObject(FunctionalInterfaceObject node);
+
     Node visitInExpression(InExpression node);
 
     Node visitIfStatement(IfStatement node);
@@ -126,7 +131,7 @@ public interface UniversalCodeVisitor {
 
     Node visitMap(MapExpr node);
 
-    Node visitMethodDeclaration(MethodDeclaration node);
+    MethodDeclaration visitMethodDeclaration(MethodDeclaration node);
 
     Node visitMethodCall(MethodCall node);
 

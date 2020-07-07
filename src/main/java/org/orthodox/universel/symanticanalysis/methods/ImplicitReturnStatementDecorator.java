@@ -47,14 +47,14 @@ import static org.orthodox.universel.compiler.TransformationUtil.autoBoxOrPromot
  * Looks at script and method bodies, adding return statements where necessary.
  */
 public class ImplicitReturnStatementDecorator extends AbstractSemanticAnalyser {
-    public Node visitMethodDeclaration(final MethodDeclaration node) {
+    public MethodDeclaration visitMethodDeclaration(final MethodDeclaration node) {
         NodeSequence<Node> transformedBody = node.getBody();
 
         //--------------------------------------------------------------------------------------------------------------
         // Empty body method
         //--------------------------------------------------------------------------------------------------------------
-        if ( node.getBody() == null || node.getBody().isEmpty() ) {
-            if ( node.getReturnType().isPrimitiveType() ) {
+        if ( node.getBody().isEmpty() ) {
+            if ( node.getReturnType().isPrimitiveType() && !node.getReturnType().isVoidType() ) {
                 // It is an error to not have a return value when the method returns a primitive, non-nullable, type.
                 getContext().getMessages().addError(MISSING_RETURN.withRelatedObject(node));
                 return node;

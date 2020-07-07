@@ -32,9 +32,9 @@ import org.beanplanet.core.lang.FilteringPackageClassScanner;
 import org.beanplanet.core.lang.PackageResourceScanner;
 import org.beanplanet.core.lang.conversion.TypeConversionException;
 import org.beanplanet.core.logging.Logger;
+import org.orthodox.universel.ast.navigation.ListNodeTest;
 import org.orthodox.universel.ast.navigation.NavigationStep;
-import org.orthodox.universel.cst.Operator;
-import org.orthodox.universel.exec.operators.binary.BinaryOperator;
+import org.orthodox.universel.ast.navigation.ReductionNodeTest;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -53,8 +53,14 @@ import static org.beanplanet.core.util.StringUtil.asDelimitedString;
 import static org.orthodox.universel.cst.Modifiers.isStatic;
 
 public class PackageScanNavigatorLoader implements NavigatorLoader, Logger {
+    /**
+     * The default top-level resource from which navigators will be loaded.
+     */
     public static final String NAVIGATOR_PACKAGES_RESOURCE = "META-INF/services/org/orthodox/universal/navigator-packages.txt";
 
+    /**
+     * The top-level resource from which navigators will be loaded.
+     */
     protected String navigatorPackagesResource = NAVIGATOR_PACKAGES_RESOURCE;
 
     public PackageScanNavigatorLoader() {
@@ -73,28 +79,41 @@ public class PackageScanNavigatorLoader implements NavigatorLoader, Logger {
 
     protected PackageResourceScanner<Class<?>> packageScanner = new FilteringPackageClassScanner(PACKAGE_SCAN_CLASS_FILTER);
 
-    private static final Predicate<Method> ANNOTATED_METHOD_FILTER = new Predicate<Method>() {
-        public boolean test(Method method) {
-            Class<?>[] paramTypes = method.getParameterTypes();
-            return isPublic(method.getModifiers())
-                   && isStatic(method.getModifiers())
-                   && !Modifier.isAbstract(method.getModifiers())
-                   && method.isAnnotationPresent(Navigator.class)
-                   && (paramTypes.length == 2)
-                   && paramTypes[0] == Class.class
-                   && paramTypes[1] == NavigationStep.class;
-        }
+    private static final Predicate<Method> ANNOTATED_MAPPING_FILTER = method -> {
+        Class<?>[] paramTypes = method.getParameterTypes();
+        return isPublic(method.getModifiers())
+               && isStatic(method.getModifiers())
+               && !Modifier.isAbstract(method.getModifiers())
+               && method.isAnnotationPresent(MappingNavigator.class)
+               && (paramTypes.length == 2)
+               && paramTypes[0] == Class.class
+               && paramTypes[1] == NavigationStep.class;
+    };
+
+    private static final Predicate<Method> ANNOTATED_REDUCTION_FILTER = method -> {
+        Class<?>[] paramTypes = method.getParameterTypes();
+        return isPublic(method.getModifiers())
+               && isStatic(method.getModifiers())
+               && !Modifier.isAbstract(method.getModifiers())
+               && method.isAnnotationPresent(ReductionNavigator.class)
+               && (paramTypes.length == 2)
+               && paramTypes[0] == Class.class
+               && paramTypes[1] == NavigationStep.class;
     };
 
     /**
-     * @return the binaryOPeratorPackagesResource
+     * Gets the top-level resource from which navigators will be loaded.
+     *
+     * @return the top-level resource from which navigators will be loaded.
      */
-    public String getBinaryOpetratorrPackagesResource() {
+    public String getNavigatorPackagesResource() {
         return navigatorPackagesResource;
     }
 
     /**
-     * @param navigatorPackagesResource the binaryOPeratorPackagesResource to set
+     * Sets the top-level resource from which navigators will be loaded.
+     *
+     * @param navigatorPackagesResource the top-level resource from which navigators will be loaded.
      */
     public void setNavigatorPackagesResource(String navigatorPackagesResource) {
         this.navigatorPackagesResource = navigatorPackagesResource;
@@ -111,7 +130,7 @@ public class PackageScanNavigatorLoader implements NavigatorLoader, Logger {
             }
 
             Set<Class<?>> classes = packageScanner.findResourcesInPackages(packageNames);
-            loadBinaryOperators(registry, classes);
+            loadNavigators(registry, classes);
 
             if (isDebugEnabled()) {
                 debug("Loaded " + registry.size() + " navigators from " + classes.size() + (classes.size() == 1 ? " class in " : " classes in ") + packageNames.length + (packageNames.length == 1 ? " package " : " packages ") + "into registry");
@@ -134,12 +153,12 @@ public class PackageScanNavigatorLoader implements NavigatorLoader, Logger {
 
     protected void findAndAddPackages(Set<String> packageNames, ClassLoader cl) {
         if (isDebugEnabled()) {
-            debug("Searching for annotation-configured navigators [classLoader=" + cl.getClass().getName() + ", resource(s)=" + getBinaryOpetratorrPackagesResource() + "] ...");
+            debug("Searching for annotation-configured navigators [classLoader=" + cl.getClass().getName() + ", resource(s)=" + getNavigatorPackagesResource() + "] ...");
         }
 
         BufferedReader reader = null;
         try {
-            for (String resourcePath : nullSafe(asCsvList(getBinaryOpetratorrPackagesResource()))) {
+            for (String resourcePath : nullSafe(asCsvList(getNavigatorPackagesResource()))) {
                 for (Enumeration<URL> resources = cl.getResources(resourcePath); resources.hasMoreElements(); ) {
                     URL resourceURL = resources.nextElement();
                     if (isDebugEnabled()) {
@@ -159,43 +178,77 @@ public class PackageScanNavigatorLoader implements NavigatorLoader, Logger {
                 }
             }
         } catch (IOException ioEx) {
-            throw new TypeConversionException("Unable to load navigator package names [" + getBinaryOpetratorrPackagesResource() + "] through classloader [" + cl + "]: ", ioEx);
+            throw new TypeConversionException("Unable to load navigator package names [" + getNavigatorPackagesResource() + "] through classloader [" + cl + "]: ", ioEx);
         } finally {
             IoUtil.closeIgnoringErrors(reader);
         }
     }
 
-    protected void loadBinaryOperators(NavigatorRegistry registry, Set<Class<?>> classes) {
+    protected void loadNavigators(NavigatorRegistry registry, Set<Class<?>> classes) {
         Set<Class<?>> visitedClasses = new HashSet<>();
         for (Class<?> clazz : classes) {
-            loadBinaryOperators(visitedClasses, registry, clazz);
+            loadMappingFilters(visitedClasses, registry, clazz);
+        }
+
+        visitedClasses = new HashSet<>();
+        for (Class<?> clazz : classes) {
+            loadReductionFilters(visitedClasses, registry, clazz);
         }
     }
 
-    protected void loadBinaryOperators(Set<Class<?>> visitedClasses, NavigatorRegistry registry, Class<?> clazz) {
-        if (ANNOTATED_CLASS_FILTER.test(clazz)) {
-            loadAnnotatedBinaryOPerators(visitedClasses, registry, clazz);
-        }
-    }
-
-    protected void loadAnnotatedBinaryOPerators(Set<Class<?>> visitedClasses, NavigatorRegistry registry, Class<?> clazz) {
+    protected void loadMappingFilters(Set<Class<?>> visitedClasses, NavigatorRegistry registry, Class<?> clazz) {
         if (visitedClasses.contains(clazz)) {
             return;
         }
 
         getMethodsInClassHierarchy(clazz)
-                .filter(ANNOTATED_METHOD_FILTER)
-                .forEach(m -> addStaticMethodNavigatorToRegistry(registry, m));
+                .filter(ANNOTATED_MAPPING_FILTER)
+                .forEach(m -> addStaticMethodMappingNavigatorToRegistry(registry, m));
 
         visitedClasses.add(clazz);
     }
 
-    private void addStaticMethodNavigatorToRegistry(NavigatorRegistry registry, Method method) {
-        Navigator navigatorAnnotation = method.getAnnotation(Navigator.class);
-        registry.addNavigator(determineNavigationSourceType(method.getGenericParameterTypes()[0]),
-                              asList(navigatorAnnotation.axis().length == 0 ? navigatorAnnotation.value() : navigatorAnnotation.axis()),
-                              asList(navigatorAnnotation.name()),
-                              new StaticMethodNavigatorFunction(method)
+    protected void loadReductionFilters(Set<Class<?>> visitedClasses, NavigatorRegistry registry, Class<?> clazz) {
+        if (visitedClasses.contains(clazz)) {
+            return;
+        }
+
+        getMethodsInClassHierarchy(clazz)
+            .filter(ANNOTATED_REDUCTION_FILTER)
+            .forEach(m -> addStaticMethodReductionNavigatorToRegistry(registry, m));
+
+        visitedClasses.add(clazz);
+    }
+
+    private void addStaticMethodReductionNavigatorToRegistry(final NavigatorRegistry registry, final Method method) {
+        ReductionNavigator navigatorAnnotation = method.getAnnotation(ReductionNavigator.class);
+        registry.addReductionNavigator(determineNavigationSourceType(method.getGenericParameterTypes()[0]),
+                                       asList(navigatorAnnotation.axis().length == 0 ? navigatorAnnotation.value() : navigatorAnnotation.axis()),
+                                       determineReductionNodeTestType(method.getGenericParameterTypes()[1]),
+                                       new StaticMethodNavigatorFunction(method)
+        );
+    }
+
+    @SuppressWarnings("unchecked")
+    private Class<? extends ReductionNodeTest> determineReductionNodeTestType(final Type genericParameterType) {
+        if ( genericParameterType instanceof ParameterizedType ) {
+            ParameterizedType parameterizedType = (ParameterizedType) genericParameterType;
+            if ( parameterizedType.getActualTypeArguments().length == 1
+                 && parameterizedType.getActualTypeArguments()[0] instanceof Class) {
+//                 && ((Class)parameterizedType.getActualTypeArguments()[0]).isAssignableFrom(ReductionNodeTest.class) ) {
+                return (Class)parameterizedType.getActualTypeArguments()[0];
+            }
+        }
+
+        throw new UnsupportedOperationException();
+    }
+
+    private void addStaticMethodMappingNavigatorToRegistry(NavigatorRegistry registry, Method method) {
+        MappingNavigator navigatorAnnotation = method.getAnnotation(MappingNavigator.class);
+        registry.addMappingNavigator(determineNavigationSourceType(method.getGenericParameterTypes()[0]),
+                                     asList(navigatorAnnotation.axis().length == 0 ? navigatorAnnotation.value() : navigatorAnnotation.axis()),
+                                     asList(navigatorAnnotation.name()),
+                                     new StaticMethodNavigatorFunction(method)
         );
     }
 

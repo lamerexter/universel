@@ -155,7 +155,7 @@ public class MethodDeclaration extends Node implements CompositeNode {
     }
 
     @Override
-    public Node accept(UniversalCodeVisitor visitor) {
+    public MethodDeclaration accept(UniversalCodeVisitor visitor) {
         return visitor.visitMethodDeclaration(this);
     }
 }

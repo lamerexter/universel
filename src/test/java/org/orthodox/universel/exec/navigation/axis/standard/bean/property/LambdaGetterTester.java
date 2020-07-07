@@ -54,6 +54,12 @@ public class LambdaGetterTester {
     };
 
     public static final void main(String ... args) throws Throwable {
+        System.out.println(Arrays.stream(R1)
+                                 .map(b -> b.getBigDecimalProperty())
+                                 .collect(Collectors.toList()));
+    }
+
+    public static final void main1(String ... args) throws Throwable {
         final MethodHandles.Lookup lookup = MethodHandles.lookup();
 
         final CallSite site = LambdaMetafactory.metafactory(lookup,

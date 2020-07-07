@@ -28,15 +28,13 @@
 
 package org.orthodox.universel.ast;
 
-import javafx.util.Builder;
 import org.beanplanet.core.collections.ListBuilder;
+import org.beanplanet.core.models.Builder;
 import org.orthodox.universel.cst.CompositeNode;
 import org.orthodox.universel.cst.Node;
 import org.orthodox.universel.cst.TokenImage;
 import org.orthodox.universel.cst.UniversalCodeVisitor;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -89,7 +87,7 @@ public class NodeSequence<T extends Node> extends Node implements CompositeNode 
 
     @Override
     public Class<?> getTypeDescriptor() {
-        if ( super.getTypeDescriptor() != null ) return super.typeDescriptor;
+        if ( super.getTypeDescriptor() != null ) return super.getTypeDescriptor();
 
         return isEmpty() ? null : nodes.get(nodes.size()-1).getTypeDescriptor();
     }

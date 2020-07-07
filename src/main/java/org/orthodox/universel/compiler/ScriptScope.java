@@ -28,14 +28,12 @@
 
 package org.orthodox.universel.compiler;
 
-import org.beanplanet.core.collections.ListBuilder;
 import org.orthodox.universel.ast.LoadLocal;
 import org.orthodox.universel.ast.navigation.NavigationAxis;
 import org.orthodox.universel.ast.navigation.NavigationStep;
 import org.orthodox.universel.ast.navigation.NodeType;
 import org.orthodox.universel.cst.Node;
 import org.orthodox.universel.exec.navigation.NavigatorRegistry;
-import org.orthodox.universel.symanticanalysis.name.InternalNodeSequence;
 
 import java.util.Objects;
 
@@ -48,16 +46,17 @@ public class ScriptScope extends BoundScope {
     }
 
     @Override
+    public NavigationStep<?> resolveInitial(final NavigationStep<?> initialStep) {
+        Node transformedNode = super.navigate(initialStep);
+        if ( Objects.equals(transformedNode, initialStep) ) return null;
+
+        return new NavigationStep<>(initialStep.getTokenImage(), NavigationAxis.BINDING, new NodeType(initialStep.getTokenImage()));
+    }
+
+    @Override
     public Node navigate(final NavigationStep<?> step) {
-        if ( step.getAxis().equals(NavigationAxis.SELF.getCanonicalName()) && step.getNodeTest() instanceof NodeType ) {
-            return new LoadLocal(step.getTokenImage(), getBindingType(), SCRIPT_BINDING_LOCAL_OFFSET);
-        }
+        if ( !(step.getAxis().equals(NavigationAxis.BINDING.getCanonicalName()) && step.getNodeTest() instanceof NodeType) ) return null;
 
-        Node transformedNode = super.navigate(step);
-
-        return Objects.equals(transformedNode, step) ? step : new InternalNodeSequence(ListBuilder.<Node>builder()
-                                                                                           .add(new LoadLocal(step.getTokenImage(), getBindingType(), SCRIPT_BINDING_LOCAL_OFFSET))
-                                                                                           .add(transformedNode)
-                                                                                           .build());
+        return new LoadLocal(step.getTokenImage(), getBindingType(), SCRIPT_BINDING_LOCAL_OFFSET);
     }
 }

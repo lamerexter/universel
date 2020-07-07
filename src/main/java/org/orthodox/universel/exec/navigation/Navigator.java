@@ -27,23 +27,18 @@
  */
 package org.orthodox.universel.exec.navigation;
 
-import org.orthodox.universel.cst.Operator;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * A class and method tagging annotation for marking classes and methods as hbeing implementations of
- * {@link org.orthodox.universel.cst.BinaryExpression}s for binary {@link Operator}s.
+ * A class tagging annotation for marking classes as implementing one or more navigator implementations.
  *
- * <p>Classes tagged by this annotation may have static methods which perform designated binary operators.</p>
+ * <p>Classes tagged by this annotation may have static methods which perform filter, map or reduce navigation
+ * functions annotated with {@link FilterNavigator}, {@link MappingNavigator} and {@link ReductionNavigator}, respectively.</p>
  */
-@Target({ElementType.TYPE, ElementType.METHOD})
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Navigator {
-    String[] value() default {};
-    String[] axis() default {};
-    String[] name() default { "*" };
 }

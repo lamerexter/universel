@@ -1,17 +1,18 @@
 package org.orthodox.universel.compiler;
 
 import org.beanplanet.core.io.resource.ByteArrayResource;
+import org.beanplanet.core.lang.Assert;
 import org.beanplanet.core.models.path.NamePath;
 import org.beanplanet.core.util.IterableUtil;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.*;
 import org.objectweb.asm.Type;
 import org.orthodox.universel.UniversalException;
 import org.orthodox.universel.ast.*;
+import org.orthodox.universel.ast.allocation.ArrayCreationExpression;
 import org.orthodox.universel.ast.allocation.ObjectCreationExpression;
 import org.orthodox.universel.ast.conditionals.IfStatement;
 import org.orthodox.universel.ast.conditionals.IfStatement.ElseIf;
+import org.orthodox.universel.ast.functional.FunctionalInterfaceObject;
 import org.orthodox.universel.cst.*;
 import org.orthodox.universel.cst.annotation.Annotation;
 import org.orthodox.universel.cst.collections.ListExpr;
@@ -36,7 +37,9 @@ import org.orthodox.universel.symanticanalysis.conversion.TypeConversion;
 import org.orthodox.universel.symanticanalysis.name.InternalNodeSequence;
 
 import javax.lang.model.type.NullType;
+import java.lang.invoke.*;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Function;
 
@@ -45,6 +48,7 @@ import static java.lang.reflect.Modifier.STATIC;
 import static org.beanplanet.core.lang.TypeUtil.findMethod;
 import static org.beanplanet.core.util.CollectionUtil.isNullOrEmpty;
 import static org.objectweb.asm.Opcodes.*;
+import static org.objectweb.asm.Type.getInternalName;
 import static org.orthodox.universel.StringEscapeUtil.unescapeUniversalCharacterEscapeSequences;
 import static org.orthodox.universel.compiler.BytecodeHelper.CTOR_METHOD_NAME;
 import static org.orthodox.universel.compiler.codegen.CodeGenUtil.internalName;
@@ -69,6 +73,16 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
 
     @Override
     public Node visitAnnotation(final Annotation node) {
+        return node;
+    }
+
+    @Override
+    public ArrayCreationExpression visitArrayCreationExpression(final ArrayCreationExpression node) {
+        node.getDimensionExpressions().forEach(n -> n.accept(this));
+
+        compilationContext.getBytecodeHelper().emitCreateArray(node.getType(), node.getDimensionExpressions().size());
+        compilationContext.getVirtualMachine().loadOperandOfType(node.getTypeDescriptor());
+
         return node;
     }
 
@@ -180,7 +194,46 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
         return node;
     }
 
-        @Override
+    @Override
+    public Node visitFunctionalInterfaceObject(final FunctionalInterfaceObject node) {
+        MethodDeclaration transformedMethodPrototype = node.getTargetMethodPrototype().accept(this);
+
+        Type funcType = Type.getMethodType(Type.getType(node.getSourceFunctionReturnType()),
+                                           node.getSourceFunctionParameters().stream().map(Type::getType).toArray(Type[]::new));
+        Type targType = Type.getMethodType(Type.getType(node.getTargetMethodPrototype().getReturnType().getTypeDescriptor()),
+                                           node.getTargetMethodPrototype().getParameters().getNodes().stream().map(Node::getTypeDescriptor).map(Type::getType).toArray(Type[]::new));
+        MethodType methodType = MethodType.methodType(transformedMethodPrototype.getReturnType().getTypeDescriptor(),
+                                                      transformedMethodPrototype.getParameters().getNodes().stream().map(Node::getTypeDescriptor).toArray(Class[]::new));
+        Handle bsm = new Handle(H_INVOKESTATIC,
+                                getInternalName(LambdaMetafactory.class),
+                                "metafactory",
+                                MethodType.methodType(CallSite.class,
+                                                      MethodHandles.Lookup.class,
+                                                      String.class,
+                                                      MethodType.class,
+                                                      MethodType.class,
+                                                      MethodHandle.class,
+                                                      MethodType.class).toMethodDescriptorString(),
+                                false);
+        String generatedClassName = "UScript1";
+        compilationContext.getBytecodeHelper()
+                          .peekMethodVisitor()
+                          .visitInvokeDynamicInsn("apply",
+                                                  MethodType.methodType(node.getSourceFunctionType()).toMethodDescriptorString(),
+                                                  bsm,
+                                                  funcType,
+                                                  new Handle(H_INVOKESTATIC,
+                                                             generatedClassName,
+                                                             transformedMethodPrototype.getName(),
+                                                             methodType.toMethodDescriptorString(),
+                                                             false),
+                                                  targType
+                                                  );
+
+        return node;
+    }
+
+    @Override
     public IfStatement visitIfStatement(final IfStatement node) {
         MethodVisitor mv = compilationContext.getBytecodeHelper().peekMethodVisitor();
         boolean hasElseIf = node.getElseIfExpressions() != null && !node.getElseIfExpressions().isEmpty();
@@ -283,7 +336,7 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
     @Override
     public Node visitList(final ListExpr node) {
         MethodVisitor mv = compilationContext.getBytecodeHelper().peekMethodVisitor();
-        String className = Type.getInternalName(ArrayList.class);
+        String className = getInternalName(ArrayList.class);
         mv.visitTypeInsn(NEW, className);
         mv.visitInsn(DUP);
 
@@ -298,7 +351,7 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
             mv.visitInsn(DUP);
             itemNode.accept(this);
             compilationContext.getBytecodeHelper().boxIfNeeded(compilationContext.getVirtualMachine().peekOperandStack());
-            mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(List.class), "add", Type.getMethodDescriptor(Type.BOOLEAN_TYPE, BytecodeHelper.OBJECT_TYPE_ARRAY));
+            mv.visitMethodInsn(INVOKEINTERFACE, getInternalName(List.class), "add", Type.getMethodDescriptor(Type.BOOLEAN_TYPE, BytecodeHelper.OBJECT_TYPE_ARRAY));
             mv.visitInsn(POP);
         }
         compilationContext.getVirtualMachine().loadOperandOfType(ArrayList.class);
@@ -321,7 +374,7 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
     @Override
     public Node visitMap(final MapExpr node) {
         MethodVisitor mv = compilationContext.getBytecodeHelper().peekMethodVisitor();
-        String className = Type.getInternalName(LinkedHashMap.class);
+        String className = getInternalName(LinkedHashMap.class);
         mv.visitTypeInsn(NEW, className);
         mv.visitInsn(DUP);
         mv.visitMethodInsn(INVOKESPECIAL, className, BytecodeHelper.CTOR_METHOD_NAME, Type.getMethodDescriptor(Type.VOID_TYPE, BytecodeHelper.EMPTY_TYPES));
@@ -332,7 +385,7 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
             compilationContext.getBytecodeHelper().boxIfNeeded(compilationContext.getVirtualMachine().peekOperandStack());
             mapEntryExpr.getValueExpression().accept(this);
             compilationContext.getBytecodeHelper().boxIfNeeded(compilationContext.getVirtualMachine().peekOperandStack());
-            mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Map.class), "put", Type.getMethodDescriptor(BytecodeHelper.OBJECT_TYPE, BytecodeHelper.OBJECT_TYPE, BytecodeHelper.OBJECT_TYPE));
+            mv.visitMethodInsn(INVOKEINTERFACE, getInternalName(Map.class), "put", Type.getMethodDescriptor(BytecodeHelper.OBJECT_TYPE, BytecodeHelper.OBJECT_TYPE, BytecodeHelper.OBJECT_TYPE));
             mv.visitInsn(POP);
         }
 
@@ -342,7 +395,7 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
     }
 
     @Override
-    public Node visitMethodDeclaration(final MethodDeclaration node) {
+    public MethodDeclaration visitMethodDeclaration(final MethodDeclaration node) {
         return withinStack(node, n -> {
             MethodVisitor mv = compilationContext
                                    .getBytecodeHelper()
@@ -373,10 +426,10 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
         return node;
     }
 
-    private <T  extends Node> Node withinStack(T node, Function<T, Node> visitFunction) {
+    private <T  extends Node> T withinStack(T node, Function<T, Node> visitFunction) {
         int initialStackSize = compilationContext.getVirtualMachine().stackSize();
         try {
-            return visitFunction.apply(node);
+            return (T)visitFunction.apply(node);
         } finally {
             compilationContext.getVirtualMachine().popToStackSize(initialStackSize);
         }
@@ -603,7 +656,7 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
     @Override
     public Node visitSet(final SetExpr node) {
         MethodVisitor mv = compilationContext.getBytecodeHelper().peekMethodVisitor();
-        String className = Type.getInternalName(LinkedHashSet.class);
+        String className = getInternalName(LinkedHashSet.class);
         mv.visitTypeInsn(NEW, className);
         mv.visitInsn(DUP);
 
@@ -618,7 +671,7 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
             mv.visitInsn(DUP);
             itemNode.accept(this);
             compilationContext.getBytecodeHelper().boxIfNeeded(compilationContext.getVirtualMachine().peekOperandStack());
-            mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Set.class), "add", Type.getMethodDescriptor(Type.BOOLEAN_TYPE, BytecodeHelper.OBJECT_TYPE_ARRAY));
+            mv.visitMethodInsn(INVOKEINTERFACE, getInternalName(Set.class), "add", Type.getMethodDescriptor(Type.BOOLEAN_TYPE, BytecodeHelper.OBJECT_TYPE_ARRAY));
             mv.visitInsn(POP);
         }
         compilationContext.getVirtualMachine().loadOperandOfType(LinkedHashSet.class);
