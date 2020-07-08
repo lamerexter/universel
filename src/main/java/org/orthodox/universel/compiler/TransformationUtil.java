@@ -31,7 +31,7 @@ package org.orthodox.universel.compiler;
 import org.beanplanet.core.lang.TypeUtil;
 import org.orthodox.universel.cst.MethodCall;
 import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.type.MethodDeclaration;
+import org.orthodox.universel.cst.methods.MethodDeclaration;
 import org.orthodox.universel.symanticanalysis.conversion.TypeConversion;
 
 import javax.lang.model.type.NullType;

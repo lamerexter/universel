@@ -32,7 +32,8 @@ import org.orthodox.universel.cst.CompositeNode;
 import org.orthodox.universel.cst.Node;
 import org.orthodox.universel.cst.TokenImage;
 import org.orthodox.universel.cst.UniversalCodeVisitor;
-import org.orthodox.universel.cst.type.MethodDeclaration;
+import org.orthodox.universel.cst.methods.LambdaFunction;
+import org.orthodox.universel.cst.methods.MethodDeclaration;
 
 import java.util.List;
 import java.util.Objects;
@@ -51,14 +52,14 @@ public class FunctionalInterfaceObject extends Node implements CompositeNode {
     private final List<Class<?>> sourceFunctionParameters;
     private final String sourceFunctionName;
 
-    private final MethodDeclaration targetMethodPrototype;
+    private final LambdaFunction targetMethodPrototype;
 
     public FunctionalInterfaceObject(final TokenImage tokenImage,
                                      final Class<?> sourceFunctionType,
                                      final Class<?> sourceFunctionReturnType,
                                      final List<Class<?>> sourceFunctionParameters,
                                      final String sourceFunctionName,
-                                     final MethodDeclaration targetMethodPrototype) {
+                                     final LambdaFunction targetMethodPrototype) {
         super(tokenImage, sourceFunctionType);
         this.sourceFunctionType = sourceFunctionType;
         this.sourceFunctionReturnType = sourceFunctionReturnType;
@@ -83,7 +84,7 @@ public class FunctionalInterfaceObject extends Node implements CompositeNode {
         return sourceFunctionName;
     }
 
-    public MethodDeclaration getTargetMethodPrototype() {
+    public LambdaFunction getTargetMethodPrototype() {
         return targetMethodPrototype;
     }
 

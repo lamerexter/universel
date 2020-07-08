@@ -33,7 +33,7 @@ import org.orthodox.universel.ast.navigation.NameTest;
 import org.orthodox.universel.ast.navigation.NavigationAxis;
 import org.orthodox.universel.ast.navigation.NavigationStep;
 import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.type.MethodDeclaration;
+import org.orthodox.universel.cst.methods.MethodDeclaration;
 
 import static java.util.stream.IntStream.range;
 

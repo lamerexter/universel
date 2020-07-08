@@ -26,11 +26,12 @@
  *
  */
 
-package org.orthodox.universel.cst.type;
+package org.orthodox.universel.cst.methods;
 
 import org.beanplanet.core.collections.ListBuilder;
 import org.orthodox.universel.ast.NodeSequence;
 import org.orthodox.universel.cst.*;
+import org.orthodox.universel.cst.type.Parameter;
 import org.orthodox.universel.cst.type.reference.TypeReference;
 
 import java.util.List;
@@ -41,31 +42,20 @@ import static org.orthodox.universel.ast.NodeSequence.emptyNodeSequence;
 /**
  * A Universel method declaration on the Abstract Syntax Tree (AST).
  */
-public class MethodDeclaration extends Node implements CompositeNode {
+public abstract class AbstractMethodDeclaration extends Node implements CompositeNode {
     private final Modifiers modifiers;
     private final NodeSequence<TypeParameter> typeParameters;
     private TypeReference declaringType;
     private final TypeReference returnType;
-    private final String name;
     private final NodeSequence<Parameter> parameters;
     private final NodeSequence<Node> body;
 
-    public MethodDeclaration(final Modifiers modifiers,
-                             final NodeSequence<TypeParameter> typeParameters,
-                             final TypeReference returnType,
-                             final String name,
-                             final NodeSequence<Parameter> parameters,
-                             final NodeSequence<Node> body) {
-        this(modifiers, typeParameters, null, returnType, name, parameters, body);
-    }
-
-    public MethodDeclaration(final Modifiers modifiers,
-                             final NodeSequence<TypeParameter> typeParameters,
-                             final TypeReference declaringType,
-                             final TypeReference returnType,
-                             final String name,
-                             final NodeSequence<Parameter> parameters,
-                             final NodeSequence<Node> body) {
+    public AbstractMethodDeclaration(final Modifiers modifiers,
+                                     final NodeSequence<TypeParameter> typeParameters,
+                                     final TypeReference declaringType,
+                                     final TypeReference returnType,
+                                     final NodeSequence<Parameter> parameters,
+                                     final NodeSequence<Node> body) {
         super(TokenImage.builder()
                         .add(modifiers)
                         .add(typeParameters)
@@ -77,7 +67,6 @@ public class MethodDeclaration extends Node implements CompositeNode {
         this.typeParameters = typeParameters;
         this.declaringType = declaringType;
         this.returnType = returnType;
-        this.name = name;
         this.parameters = parameters;
         this.body = body;
     }
@@ -102,10 +91,6 @@ public class MethodDeclaration extends Node implements CompositeNode {
         return returnType;
     }
 
-    public String getName() {
-        return name;
-    }
-
     public NodeSequence<Parameter> getParameters() {
         return parameters == null ? NodeSequence.emptyNodeSequence() : parameters;
     }
@@ -117,14 +102,13 @@ public class MethodDeclaration extends Node implements CompositeNode {
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
-        if (!(o instanceof MethodDeclaration)) return false;
+        if (!(o instanceof AbstractMethodDeclaration)) return false;
         if (!super.equals(o)) return false;
-        MethodDeclaration nodes = (MethodDeclaration) o;
+        AbstractMethodDeclaration nodes = (AbstractMethodDeclaration) o;
         return Objects.equals(getModifiers(), nodes.getModifiers()) &&
                Objects.equals(getTypeParameters(), nodes.getTypeParameters()) &&
                Objects.equals(getDeclaringType(), nodes.getDeclaringType()) &&
                Objects.equals(getReturnType(), nodes.getReturnType()) &&
-               Objects.equals(getName(), nodes.getName()) &&
                Objects.equals(getParameters(), nodes.getParameters()) &&
                Objects.equals(getBody(), nodes.getBody());
     }
@@ -136,7 +120,6 @@ public class MethodDeclaration extends Node implements CompositeNode {
                             getTypeParameters(),
                             getDeclaringType(),
                             getReturnType(),
-                            getName(),
                             getParameters(),
                             getBody()
         );
@@ -152,10 +135,5 @@ public class MethodDeclaration extends Node implements CompositeNode {
                    .addAllNotNull(parameters.getNodes())
                    .addAllNotNull(body.getNodes())
             .build();
-    }
-
-    @Override
-    public MethodDeclaration accept(UniversalCodeVisitor visitor) {
-        return visitor.visitMethodDeclaration(this);
     }
 }

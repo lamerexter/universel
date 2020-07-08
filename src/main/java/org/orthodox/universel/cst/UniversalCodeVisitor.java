@@ -46,7 +46,8 @@ import org.orthodox.universel.cst.collections.MapExpr;
 import org.orthodox.universel.cst.collections.SetExpr;
 import org.orthodox.universel.cst.conditionals.TernaryExpression;
 import org.orthodox.universel.cst.literals.*;
-import org.orthodox.universel.cst.type.MethodDeclaration;
+import org.orthodox.universel.cst.methods.LambdaFunction;
+import org.orthodox.universel.cst.methods.MethodDeclaration;
 import org.orthodox.universel.cst.type.declaration.ClassDeclaration;
 import org.orthodox.universel.cst.type.declaration.InterfaceDeclaration;
 import org.orthodox.universel.cst.type.reference.TypeReference;
@@ -122,6 +123,8 @@ public interface UniversalCodeVisitor {
     Node visitInterfaceDeclaration(InterfaceDeclaration node);
 
     Node visitInterpolatedStringLiteral(InterpolatedStringLiteralExpr node);
+
+    Node visitLambdaFunction(LambdaFunction node);
 
     Node visitList(ListExpr node);
 

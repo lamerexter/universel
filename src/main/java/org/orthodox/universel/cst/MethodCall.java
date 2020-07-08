@@ -29,10 +29,8 @@
 package org.orthodox.universel.cst;
 
 import org.orthodox.universel.ast.navigation.NodeTest;
-import org.orthodox.universel.cst.type.MethodDeclaration;
+import org.orthodox.universel.cst.methods.MethodDeclaration;
 
-import java.lang.reflect.Executable;
-import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;

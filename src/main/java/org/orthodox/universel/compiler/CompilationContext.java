@@ -3,13 +3,16 @@ package org.orthodox.universel.compiler;
 import org.beanplanet.core.io.resource.Resource;
 import org.beanplanet.core.models.NameValue;
 import org.beanplanet.core.models.SimpleNameValue;
+import org.beanplanet.core.models.path.NamePath;
 import org.beanplanet.messages.domain.Messages;
 import org.orthodox.universel.ast.navigation.NavigationStep;
 import org.orthodox.universel.cst.ImportStmt;
 import org.orthodox.universel.cst.Node;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.lang.String.valueOf;
 import static java.util.Arrays.asList;
 import static org.beanplanet.core.util.IteratorUtil.asStream;
 
@@ -18,6 +21,7 @@ public class CompilationContext implements NameScope {
     private final VirtualMachine virtualMachine;
     private final Deque<NameValue<Resource>> compiledClassResources = new ArrayDeque<>();
     private final Deque<NameScope> scopes = new ArrayDeque<>();
+    private final Deque<CompilingTypeInfo> compilingTypeInfos = new ArrayDeque<>();
 
     private final Messages messages;
 
@@ -88,5 +92,35 @@ public class CompilationContext implements NameScope {
 
     public List<NameValue<Resource>> getCompiledClassResources() {
         return new ArrayList<>(compiledClassResources);
+    }
+
+    public void pushTypeInfo(CompilingTypeInfo typeInfo) {
+       this.compilingTypeInfos.push(typeInfo);
+    }
+
+    public CompilingTypeInfo popTypeInfo() {
+        return this.compilingTypeInfos.pop();
+    }
+
+    public CompilingTypeInfo peekTypeInfo() {
+        return compilingTypeInfos.peek();
+    }
+
+    public static class CompilingTypeInfo {
+        private Map<Object, AtomicInteger> generatedMethodNameSequences = new HashMap<>();
+        private NamePath fqTypeName;
+
+        public CompilingTypeInfo(NamePath fqTypeName) {
+            this.fqTypeName = fqTypeName;
+        }
+
+        public NamePath getFullyQualifiedTypeName() {
+            return fqTypeName;
+        }
+
+        public String generateSyntheticMethodName(NamePath nameHints) {
+            AtomicInteger sequenceGenerator = generatedMethodNameSequences.computeIfAbsent(nameHints, k -> new AtomicInteger());
+            return nameHints.joinSingleton(valueOf(sequenceGenerator.incrementAndGet())).join("$");
+        }
     }
 }

@@ -46,7 +46,8 @@ import org.orthodox.universel.cst.collections.MapExpr;
 import org.orthodox.universel.cst.collections.SetExpr;
 import org.orthodox.universel.cst.conditionals.TernaryExpression;
 import org.orthodox.universel.cst.literals.*;
-import org.orthodox.universel.cst.type.MethodDeclaration;
+import org.orthodox.universel.cst.methods.LambdaFunction;
+import org.orthodox.universel.cst.methods.MethodDeclaration;
 import org.orthodox.universel.cst.type.Parameter;
 import org.orthodox.universel.cst.type.declaration.ClassDeclaration;
 import org.orthodox.universel.cst.type.declaration.InterfaceDeclaration;
@@ -154,14 +155,14 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
 
     @Override
     public Node visitFunctionalInterfaceObject(final FunctionalInterfaceObject node) {
-        MethodDeclaration transformedMethodPrototype = node.getTargetMethodPrototype() == null ? null : node.getTargetMethodPrototype().accept(this);
+        Node transformedMethodPrototype = node.getTargetMethodPrototype() == null ? null : node.getTargetMethodPrototype().accept(this);
 
         return Objects.equals(node.getTargetMethodPrototype(), transformedMethodPrototype) ? node : new FunctionalInterfaceObject(node.getTokenImage(),
                                                                                                                                   node.getSourceFunctionType(),
                                                                                                                                   node.getSourceFunctionReturnType(),
                                                                                                                                   node.getSourceFunctionParameters(),
                                                                                                                                   node.getSourceFunctionName(),
-                                                                                                                                  transformedMethodPrototype);
+                                                                                                                                  (LambdaFunction)transformedMethodPrototype);
     }
 
     @Override
@@ -265,6 +266,32 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
 
         boolean noTransformationChanges = Objects.equals(node.getParts(), transformedParts);
         return noTransformationChanges ? node : new InterpolatedStringLiteralExpr(node.getTokenImage(), transformedParts, node.getDelimeter());
+    }
+
+    @Override
+    public Node visitLambdaFunction(final LambdaFunction node) {
+        if (node.getModifiers() != null) {
+            node.getModifiers().accept(this);
+        }
+
+        TypeReference transformedReturnType = node.getReturnType().accept(this);
+
+        List<Parameter> transformedParameterList = new ArrayList<>(node.getParameters().size());
+        for (Node parameter : nullSafe(node.getParameters().getNodes())) {
+            transformedParameterList.add((Parameter)parameter.accept(this));
+        }
+        NodeSequence<Parameter> transformedParameters = new NodeSequence<>(node.getParameters().getTokenImage(), transformedParameterList);
+
+        List<Node> transformedBodyNodes = new ArrayList<>(node.getBody().size());
+        for (Node bodyNode : nullSafe(node.getBody().getNodes())) {
+            transformedBodyNodes.add(bodyNode.accept(this));
+        }
+        NodeSequence<Node> transformedBody = new NodeSequence<>(node.getBody().getTokenImage(), transformedBodyNodes);
+
+        boolean noTransformationChanges = Objects.equals(node.getReturnType(), transformedReturnType) &&
+                                          Objects.equals(node.getParameters(), transformedParameters) &&
+                                          Objects.equals(node.getBody(), transformedBody);
+        return noTransformationChanges ? node : new LambdaFunction(node.getModifiers(), node.getTypeParameters(), transformedReturnType, node.getNameHints(), transformedParameters, transformedBody);
     }
 
     @Override

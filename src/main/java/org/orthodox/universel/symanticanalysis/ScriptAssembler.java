@@ -36,7 +36,7 @@ import org.orthodox.universel.ast.LoadLocal;
 import org.orthodox.universel.ast.NodeSequence;
 import org.orthodox.universel.ast.allocation.ObjectCreationExpression;
 import org.orthodox.universel.cst.*;
-import org.orthodox.universel.cst.type.MethodDeclaration;
+import org.orthodox.universel.cst.methods.MethodDeclaration;
 import org.orthodox.universel.cst.type.Parameter;
 import org.orthodox.universel.cst.type.declaration.ClassDeclaration;
 import org.orthodox.universel.cst.type.declaration.TypeDeclaration;
@@ -45,16 +45,13 @@ import org.orthodox.universel.cst.type.reference.ResolvedTypeReference;
 import org.orthodox.universel.cst.type.reference.TypeNameReference;
 import org.orthodox.universel.cst.type.reference.TypeReference;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static org.beanplanet.core.util.CollectionUtil.isEmptyOrNull;
 import static org.orthodox.universel.ast.NodeSequence.emptyNodeSequence;
 import static org.orthodox.universel.compiler.CompilationDefaults.SCRIPT_CLASS_NAME;
 import static org.orthodox.universel.cst.Modifiers.*;

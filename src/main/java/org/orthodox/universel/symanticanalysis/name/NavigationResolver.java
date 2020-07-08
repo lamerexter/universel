@@ -29,6 +29,7 @@
 package org.orthodox.universel.symanticanalysis.name;
 
 import org.beanplanet.core.collections.ListBuilder;
+import org.beanplanet.core.models.path.SimpleNamePath;
 import org.orthodox.universel.ast.*;
 import org.orthodox.universel.ast.conditionals.IfStatement;
 import org.orthodox.universel.ast.functional.FunctionalInterfaceObject;
@@ -38,7 +39,9 @@ import org.orthodox.universel.ast.navigation.ReductionNodeTest;
 import org.orthodox.universel.compiler.*;
 import org.orthodox.universel.cst.*;
 import org.orthodox.universel.cst.literals.NullLiteralExpr;
-import org.orthodox.universel.cst.type.MethodDeclaration;
+import org.orthodox.universel.cst.methods.GeneratedStaticLambdaFunction;
+import org.orthodox.universel.cst.methods.LambdaFunction;
+import org.orthodox.universel.cst.methods.MethodDeclaration;
 import org.orthodox.universel.cst.type.Parameter;
 import org.orthodox.universel.cst.type.declaration.ClassDeclaration;
 import org.orthodox.universel.cst.type.reference.ResolvedTypeReference;
@@ -95,13 +98,13 @@ public class NavigationResolver extends AbstractSemanticAnalyser {
 
     @Override
     public Node visitNavigationStream(final NavigationStream node) {
-        NavigationStream transformedStream = (NavigationStream)super.visitNavigationStream(node);
+        NavigationStream transformedStream = (NavigationStream) super.visitNavigationStream(node);
 
         if (transformedStream.getSteps().isEmpty() || !transformedStream.getSteps().stream().allMatch(n -> n instanceof NavigationStep))
             return transformedStream;
 
         List<NavigationStage> stages = realise(transformedStream);
-        if ( stages == null ) return node;
+        if (stages == null) return node;
 
         List<Node> multipleCardinalityTransformedSteps = sequenceAnalysis(stages);
 
@@ -113,7 +116,7 @@ public class NavigationResolver extends AbstractSemanticAnalyser {
             Node transformStep = multipleCardinalityTransformedSteps.get(n);
 
             // Navigation is via reference types only, so box if necessary
-            if ( isPrimitiveType(transformStep.getTypeDescriptor()) ) {
+            if (isPrimitiveType(transformStep.getTypeDescriptor())) {
                 transformStep = new BoxConversion(transformStep);
             }
             Node transformedNullSafeStep = InternalNodeSequence
@@ -170,7 +173,7 @@ public class NavigationResolver extends AbstractSemanticAnalyser {
         //--------------------------------------------------------------------------------------------------------------
         // Given the scopes in play assume the first step is relative and make absolute.
         //--------------------------------------------------------------------------------------------------------------
-        NavigationStep<?> initialStepResolved = resolveStep((NavigationStep<?>)navigationStream.getSteps().get(0));
+        NavigationStep<?> initialStepResolved = resolveStep((NavigationStep<?>) navigationStream.getSteps().get(0));
         final NavigationStream absoluteStream = initialStepResolved == null ?
                                                 navigationStream :
                                                 new NavigationStream(ListBuilder.<Node>builder()
@@ -190,17 +193,18 @@ public class NavigationResolver extends AbstractSemanticAnalyser {
         //--------------------------------------------------------------------------------------------------------------
         List<NavigationStage> navSages = new ArrayList<>(absoluteStream.getSteps().size());
         boolean inSequence = false;
-        for (int n=0; n < absoluteStream.getSteps().size(); n++) {
-            NavigationStage previousStep = n > 0 ? navSages.get(n-1) : null;
+        for (int n = 0; n < absoluteStream.getSteps().size(); n++) {
+            NavigationStage previousStep = n > 0 ? navSages.get(n - 1) : null;
             Node step = absoluteStream.getSteps().get(n);
 
             Scope previousStepScope = null;
             try {
-                if ( previousStep != null ) {
+                if (previousStep != null) {
                     getContext().pushScope(previousStepScope = new BoundScope(previousStep.isSequence() ?
                                                                               previousStep.getNode().getTypeDescriptor().getComponentType() :
                                                                               previousStep.getNode().getTypeDescriptor(),
-                                                                              getContext().getNavigatorRegistry()));
+                                                                              getContext().getNavigatorRegistry()
+                    ));
                 }
 
                 Node transformStep = transformStep((NavigationStep<?>) step);
@@ -215,7 +219,7 @@ public class NavigationResolver extends AbstractSemanticAnalyser {
                 navSages.add(isReduction ? new ReduceStage(transformStep, isSequence, inSequence) : new MapStage(transformStep, isSequence, inSequence));
                 inSequence = (inSequence || isSequence) && !isReduction;
             } finally {
-                if ( previousStepScope != null ) getContext().popScope();
+                if (previousStepScope != null) getContext().popScope();
             }
         }
 
@@ -228,14 +232,14 @@ public class NavigationResolver extends AbstractSemanticAnalyser {
         //--------------------------------------------------------------------------------------------------------------
         List<Node> multipleCardinalityTransformedSteps = new ArrayList<>(stages.size());
         boolean inStream = false;
-        for (int n=0; n < stages.size(); n++) {
-            NavigationStage previousStep = n > 0 ? stages.get(n-1) : null;
+        for (int n = 0; n < stages.size(); n++) {
+            NavigationStage previousStep = n > 0 ? stages.get(n - 1) : null;
             NavigationStage stage = stages.get(n);
             Node step = stage.getNode();
 
-            if ( n != stages.size()-1 ) {
+            if (n != stages.size() - 1) {
 
-                if ( stage.isSequence() ) {
+                if (stage.isSequence()) {
                     if (inStream) {
 
                     } else {
@@ -247,18 +251,19 @@ public class NavigationResolver extends AbstractSemanticAnalyser {
                     Stream s;
                     // Convert singleton to singleton stream and insert into flatmap
                     Class<?> previousStepType = previousStep.isSequence() ? previousStep.getTypeDescriptor().getComponentType() : previousStep.getTypeDescriptor();
-                    MethodDeclaration generatedMethod = new MethodDeclaration(valueOf(PRIVATE | STATIC | SYNTHETIC), null, null, new ResolvedTypeReference(step), "nav$step" + n + "$fio",
-                                                                              NodeSequence.<Parameter>builder()
-                                                                                  .add(new Parameter(valueOf(FINAL),
-                                                                                                     new ResolvedTypeReference(previousStep.getNode().getTokenImage(), previousStepType),
-                                                                                                     false,
-                                                                                                     new Name(previousStep.getNode().getTokenImage(), "navStep")
-                                                                                  ))
-                                                                                  .build(),
-                                                                              NodeSequence.builder()
-                                                                                          .add(new LoadLocal(previousStep.getNode().getTokenImage(), previousStepType, 0))
-                                                                                          .add(new ReturnStatement(step))
-                                                                                          .build()
+                    LambdaFunction generatedMethod = new GeneratedStaticLambdaFunction(new ResolvedTypeReference(step),
+                                                                                       new SimpleNamePath("nav", "step", String.valueOf(n), "fio"),
+                                                                                       NodeSequence.<Parameter>builder()
+                                                                                           .add(new Parameter(valueOf(FINAL),
+                                                                                                              new ResolvedTypeReference(previousStep.getNode().getTokenImage(), previousStepType),
+                                                                                                              false,
+                                                                                                              new Name(previousStep.getNode().getTokenImage(), "step")
+                                                                                           ))
+                                                                                           .build(),
+                                                                                       NodeSequence.builder()
+                                                                                                   .add(new LoadLocal(previousStep.getNode().getTokenImage(), previousStepType, 0))
+                                                                                                   .add(new ReturnStatement(step))
+                                                                                                   .build()
                     );
                     step = InternalNodeSequence.builder()
                                                .add(new InstanceMethodCall(Stream.class,

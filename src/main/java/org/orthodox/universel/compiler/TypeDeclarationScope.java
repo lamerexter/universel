@@ -35,7 +35,7 @@ import org.orthodox.universel.ast.navigation.NavigationAxis;
 import org.orthodox.universel.ast.navigation.NavigationStep;
 import org.orthodox.universel.cst.MethodCall;
 import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.type.MethodDeclaration;
+import org.orthodox.universel.cst.methods.MethodDeclaration;
 import org.orthodox.universel.cst.type.Parameter;
 import org.orthodox.universel.cst.type.declaration.TypeDeclaration;
 import org.orthodox.universel.cst.type.declaration.TypeDeclarationReference;

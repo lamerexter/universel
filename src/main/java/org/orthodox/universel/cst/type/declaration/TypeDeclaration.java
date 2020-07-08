@@ -34,7 +34,7 @@ import org.beanplanet.core.models.path.SimpleNamePath;
 import org.orthodox.universel.ast.NodeSequence;
 import org.orthodox.universel.ast.PackageDeclaration;
 import org.orthodox.universel.cst.*;
-import org.orthodox.universel.cst.type.MethodDeclaration;
+import org.orthodox.universel.cst.methods.MethodDeclaration;
 import org.orthodox.universel.cst.type.reference.TypeReference;
 
 import java.util.List;

@@ -1,7 +1,6 @@
 package org.orthodox.universel.compiler;
 
 import org.beanplanet.core.io.resource.ByteArrayResource;
-import org.beanplanet.core.lang.Assert;
 import org.beanplanet.core.models.path.NamePath;
 import org.beanplanet.core.util.IterableUtil;
 import org.objectweb.asm.*;
@@ -13,6 +12,7 @@ import org.orthodox.universel.ast.allocation.ObjectCreationExpression;
 import org.orthodox.universel.ast.conditionals.IfStatement;
 import org.orthodox.universel.ast.conditionals.IfStatement.ElseIf;
 import org.orthodox.universel.ast.functional.FunctionalInterfaceObject;
+import org.orthodox.universel.compiler.CompilationContext.CompilingTypeInfo;
 import org.orthodox.universel.cst.*;
 import org.orthodox.universel.cst.annotation.Annotation;
 import org.orthodox.universel.cst.collections.ListExpr;
@@ -21,9 +21,9 @@ import org.orthodox.universel.cst.collections.MapExpr;
 import org.orthodox.universel.cst.collections.SetExpr;
 import org.orthodox.universel.cst.conditionals.TernaryExpression;
 import org.orthodox.universel.cst.literals.*;
-import org.orthodox.universel.cst.type.MethodDeclaration;
+import org.orthodox.universel.cst.methods.LambdaFunction;
+import org.orthodox.universel.cst.methods.MethodDeclaration;
 import org.orthodox.universel.cst.type.declaration.ClassDeclaration;
-import org.orthodox.universel.cst.type.reference.ReferenceType;
 import org.orthodox.universel.cst.type.reference.TypeReference;
 import org.orthodox.universel.exec.operators.binary.BinaryOperatorRegistry;
 import org.orthodox.universel.exec.operators.binary.ConcurrentBinaryOperatorRegistry;
@@ -39,10 +39,11 @@ import org.orthodox.universel.symanticanalysis.name.InternalNodeSequence;
 import javax.lang.model.type.NullType;
 import java.lang.invoke.*;
 import java.lang.reflect.Method;
-import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
+import static java.lang.String.valueOf;
 import static java.lang.reflect.Modifier.PUBLIC;
 import static java.lang.reflect.Modifier.STATIC;
 import static org.beanplanet.core.lang.TypeUtil.findMethod;
@@ -164,6 +165,7 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
         final NamePath pkgName = node.getPackageDeclaration() != null ? node.getPackageDeclaration().getName() : NamePath.EMPTY_NAME_PATH;
         final String classBasename = node.getName().getName();
         final NamePath fqClassName = pkgName.joinSingleton(classBasename);
+        compilationContext.pushTypeInfo(new CompilingTypeInfo(fqClassName));
 
         // Generate the class
         ClassWriter cw = compilationContext.getBytecodeHelper().generateClass(V1_8, node.getModifiers().getModifiers(),
@@ -190,20 +192,21 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
         compilationContext.getBytecodeHelper().popClassWriter();
 
         compilationContext.addCompiledType(fqClassName.join("."), new ByteArrayResource(cw.toByteArray()));
+        compilationContext.popTypeInfo();
 
         return node;
     }
 
     @Override
     public Node visitFunctionalInterfaceObject(final FunctionalInterfaceObject node) {
-        MethodDeclaration transformedMethodPrototype = node.getTargetMethodPrototype().accept(this);
+        MethodDeclaration syntheticMethod = visitLambdaFunction(node.getTargetMethodPrototype());
 
         Type funcType = Type.getMethodType(Type.getType(node.getSourceFunctionReturnType()),
                                            node.getSourceFunctionParameters().stream().map(Type::getType).toArray(Type[]::new));
         Type targType = Type.getMethodType(Type.getType(node.getTargetMethodPrototype().getReturnType().getTypeDescriptor()),
                                            node.getTargetMethodPrototype().getParameters().getNodes().stream().map(Node::getTypeDescriptor).map(Type::getType).toArray(Type[]::new));
-        MethodType methodType = MethodType.methodType(transformedMethodPrototype.getReturnType().getTypeDescriptor(),
-                                                      transformedMethodPrototype.getParameters().getNodes().stream().map(Node::getTypeDescriptor).toArray(Class[]::new));
+        MethodType methodType = MethodType.methodType(syntheticMethod.getReturnType().getTypeDescriptor(),
+                                                      syntheticMethod.getParameters().getNodes().stream().map(Node::getTypeDescriptor).toArray(Class[]::new));
         Handle bsm = new Handle(H_INVOKESTATIC,
                                 getInternalName(LambdaMetafactory.class),
                                 "metafactory",
@@ -215,7 +218,7 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
                                                       MethodHandle.class,
                                                       MethodType.class).toMethodDescriptorString(),
                                 false);
-        String generatedClassName = "UScript1";
+        String generatedClassName = compilationContext.peekTypeInfo().getFullyQualifiedTypeName().join("/");
         compilationContext.getBytecodeHelper()
                           .peekMethodVisitor()
                           .visitInvokeDynamicInsn("apply",
@@ -224,7 +227,7 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
                                                   funcType,
                                                   new Handle(H_INVOKESTATIC,
                                                              generatedClassName,
-                                                             transformedMethodPrototype.getName(),
+                                                             syntheticMethod.getName(),
                                                              methodType.toMethodDescriptorString(),
                                                              false),
                                                   targType
@@ -331,6 +334,22 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
         }
 
         return jvmInstructionNode;
+    }
+
+    @Override
+    public MethodDeclaration visitLambdaFunction(final LambdaFunction node) {
+        final String syntheticMethodName = compilationContext.peekTypeInfo().generateSyntheticMethodName(node.getNameHints());
+        MethodDeclaration syntheticMethod = new MethodDeclaration(node.getModifiers(),
+                                                                  node.getTypeParameters(),
+                                                                  node.getDeclaringType(),
+                                                                  node.getReturnType(),
+                                                                  syntheticMethodName,
+                                                                  node.getParameters(),
+                                                                  node.getBody()
+        );
+        visitMethodDeclaration(syntheticMethod);
+
+        return syntheticMethod;
     }
 
     @Override

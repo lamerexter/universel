@@ -28,27 +28,14 @@
 
 package org.orthodox.universel.symanticanalysis;
 
-import org.beanplanet.core.collections.ListBuilder;
-import org.orthodox.universel.ast.NodeSequence;
-import org.orthodox.universel.cst.Name;
 import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.Script;
-import org.orthodox.universel.cst.type.MethodDeclaration;
-import org.orthodox.universel.cst.type.Parameter;
+import org.orthodox.universel.cst.methods.MethodDeclaration;
 import org.orthodox.universel.cst.type.declaration.ClassDeclaration;
 import org.orthodox.universel.cst.type.declaration.TypeDeclaration;
 import org.orthodox.universel.cst.type.declaration.TypeDeclarationReference;
-import org.orthodox.universel.cst.type.reference.ResolvedTypeReference;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import static org.beanplanet.core.util.CollectionUtil.isEmptyOrNull;
-import static org.orthodox.universel.ast.NodeSequence.emptyNodeSequence;
-import static org.orthodox.universel.cst.Modifiers.*;
 
 /**
  * Locates {@link TypeDeclaration}s and updates them, where not already set, with their declaring type information.

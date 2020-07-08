@@ -35,7 +35,7 @@ import org.orthodox.universel.cst.Modifiers;
 import org.orthodox.universel.cst.TokenImage;
 import org.orthodox.universel.cst.literals.DecimalIntegerLiteralExpr;
 import org.orthodox.universel.cst.literals.NullLiteralExpr;
-import org.orthodox.universel.cst.type.MethodDeclaration;
+import org.orthodox.universel.cst.methods.MethodDeclaration;
 import org.orthodox.universel.cst.type.reference.PrimitiveType;
 import org.orthodox.universel.cst.type.reference.VoidType;
 import org.orthodox.universel.BeanWithProperties;
