@@ -500,6 +500,11 @@ public class BeanWithProperties {
         this.referenceListProperty = referenceListProperty;
     }
 
+    public BeanWithProperties withReferenceListProperty(List<BeanWithProperties> referenceListProperty) {
+        setReferenceListProperty(referenceListProperty);
+        return this;
+    }
+
     public boolean[] getBooleanArrayProperty() {
         return booleanArrayProperty;
     }

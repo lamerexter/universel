@@ -8,6 +8,7 @@ import org.orthodox.universal.parser.ParseException;
 import org.orthodox.universal.parser.UniversalParser;
 import org.orthodox.universel.cst.Node;
 import org.orthodox.universel.cst.Script;
+import org.orthodox.universel.cst.Type;
 import org.orthodox.universel.exec.navigation.ConcurrentNavigatorRegistry;
 import org.orthodox.universel.exec.navigation.NavigatorLoader;
 import org.orthodox.universel.exec.navigation.NavigatorRegistry;
@@ -108,7 +109,7 @@ public class UniversalCompiler {
     }
 
     public CompiledUnit<?> compile(Resource compilationUnitResource) {
-        return compile(compilationUnitResource, null);
+        return compile(compilationUnitResource, (Class<?>)null);
     }
 
     public <B> CompiledUnit<B> compile(Resource compilationUnitResource, Class<B> bindingType) {
@@ -169,6 +170,11 @@ public class UniversalCompiler {
                                   compilationContext.getCompiledClassResources(),
                                   endTime - startTime
         );
+    }
+
+    @SuppressWarnings("inchecked")
+    public <B> CompiledUnit<B> compile(Resource compilationUnitResource, Type bindingType) {
+        return (CompiledUnit<B>)compile(compilationUnitResource, Object.class);
     }
 
     private static class MyClassLoader extends ClassLoader {

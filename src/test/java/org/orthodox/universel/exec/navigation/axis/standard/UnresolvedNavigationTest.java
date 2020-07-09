@@ -63,7 +63,7 @@ public class UnresolvedNavigationTest {
 
     @Test
     void nullBinding_singleStepNameAreUnresolved() {
-        CompiledUnit compiledUnit = compile("a", null);
+        CompiledUnit compiledUnit = compile("a", (Class<?>)null);
         assertThat(compiledUnit.hasErrors(), is(true));
 
         Script script = (Script) compiledUnit.getAstNode();
@@ -76,7 +76,7 @@ public class UnresolvedNavigationTest {
 
     @Test
     void nullBinding_nestedStepsNameAreUnresolved() {
-        CompiledUnit compiledUnit = compile("a\\b\\c", null);
+        CompiledUnit compiledUnit = compile("a\\b\\c", (Class<?>)null);
         assertThat(compiledUnit.hasErrors(), is(true));
 
         Script script = (Script) compiledUnit.getAstNode();

@@ -26,17 +26,30 @@
  *
  */
 
-package org.orthodox.universel.exec.navigation.axis.standard.bean.property.nested;
+package org.orthodox.universel.exec.navigation.axis.standard.bean.property.nested.collections;
 
+import org.junit.jupiter.api.Test;
 import org.orthodox.universel.BeanWithProperties;
 
 import java.util.List;
-import java.util.Optional;
 
-public class LamdaTester {
-    public Optional<?> doit(List<BeanWithProperties> theList) {
-        return theList.stream()
-            .map(b -> b.getBigDecimalProperty())
-            .findFirst();
+import static java.util.Arrays.asList;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.orthodox.universel.Universal.execute;
+
+public class MultiStepListPropertyNavigationTest {
+    @Test
+    void typeRead_reduction() {
+        // Given
+        final List<BeanWithProperties> collection = asList(
+            new BeanWithProperties().withTypeProperty(String.class),
+            new BeanWithProperties().withTypeProperty(Integer.class),
+            new BeanWithProperties().withTypeProperty(void.class)
+        );
+        final BeanWithProperties binding = new BeanWithProperties().withReferenceListProperty(collection);
+
+        // Then
+        assertThat(execute("referenceListProperty\\typeProperty\\[]", binding), equalTo(asList(String.class, Integer.class, void.class)));
     }
 }

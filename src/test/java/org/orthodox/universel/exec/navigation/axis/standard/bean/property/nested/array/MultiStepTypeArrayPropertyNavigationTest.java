@@ -35,7 +35,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.orthodox.universel.Universal.execute;
 
-public class MultiSteptypeArrayPropertyNavigationTest {
+public class MultiStepTypeArrayPropertyNavigationTest {
     @Test
     void typeRead_reduction() {
         // Given
