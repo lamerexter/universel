@@ -37,11 +37,11 @@ public class TokenImage {
     }
 
     public static TokenImage range(final Node ... nodeList) {
-        return builder().range(nodeList).build();
+        return nodeList != null && nodeList.length == 1 ? nodeList[0].getTokenImage() : builder().range(nodeList).build();
     }
 
     public static TokenImage range(final List<? extends Node> nodeList) {
-        return builder().range(nodeList).build();
+        return nodeList != null && nodeList.size() == 1 ? nodeList.get(0).getTokenImage() : builder().range(nodeList).build();
     }
 
     /**

@@ -17,11 +17,10 @@ package org.orthodox.universel.ast.conditionals;
 
 import org.beanplanet.core.collections.ListBuilder;
 import org.orthodox.universel.ast.Statement;
-import org.orthodox.universel.cst.CompositeNode;
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.TokenImage;
-import org.orthodox.universel.cst.UniversalCodeVisitor;
+import org.orthodox.universel.cst.*;
+import org.orthodox.universel.cst.type.reference.ResolvedTypeReferenceOld;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -181,6 +180,19 @@ public class IfStatement extends Statement implements CompositeNode {
      */
     public Node getElseExpression() {
         return elseExpression;
+    }
+
+    @Override
+    public Type getType() {
+        return nvl(TypeInferenceUtil.determineCommonSuperclass(new LinkedHashSet<>(ListBuilder.<Type>builder()
+                                                 .addNotNull(thenExpression == null ? null : thenExpression.getType())
+                                                 .addNotNull(elseIfExpressions == null ? null : elseIfExpressions.stream()
+                                                                                                                 .map(eif -> eif.getBody() == null ? null : eif.getBody().getType())
+                                                                                                                 .toArray(Type[]::new))
+                                                 .addNotNull(elseExpression == null ? null : elseExpression.getType())
+                                                 .build())
+
+        ), new ResolvedTypeReferenceOld(Object.class));
     }
 
     @Override

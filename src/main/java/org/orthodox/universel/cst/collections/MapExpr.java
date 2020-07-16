@@ -29,6 +29,7 @@
 package org.orthodox.universel.cst.collections;
 
 import org.orthodox.universel.cst.*;
+import org.orthodox.universel.cst.type.reference.ResolvedTypeReferenceOld;
 
 import java.util.Collections;
 import java.util.List;
@@ -66,6 +67,12 @@ public class MapExpr extends Expression implements CompositeNode {
         return visitor.visitMap(this);
     }
 
+    @Override
+    public Type getType() {
+        return new ResolvedTypeReferenceOld(getTokenImage(), Map.class); // This could be a Parameterised type now, of the common supertype of elements?
+    }
+
+    @Override
     public Class<?> getTypeDescriptor() {
         return Map.class;
     }

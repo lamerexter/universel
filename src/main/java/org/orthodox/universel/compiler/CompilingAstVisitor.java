@@ -23,6 +23,7 @@ import org.orthodox.universel.cst.conditionals.TernaryExpression;
 import org.orthodox.universel.cst.literals.*;
 import org.orthodox.universel.cst.methods.LambdaFunction;
 import org.orthodox.universel.cst.methods.MethodDeclaration;
+import org.orthodox.universel.cst.type.LoadTypeExpression;
 import org.orthodox.universel.cst.type.declaration.ClassDeclaration;
 import org.orthodox.universel.cst.type.reference.TypeReference;
 import org.orthodox.universel.exec.operators.binary.BinaryOperatorRegistry;
@@ -391,6 +392,15 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
     }
 
     @Override
+    public Node visitLoadType(LoadTypeExpression node) {
+        compilationContext.getVirtualMachine().loadOperandOfType(node.getLoadType().getTypeClass());
+        compilationContext.getBytecodeHelper().emitLoadType(node.getLoadType().getTypeClass());
+
+        return node;
+    }
+
+
+    @Override
     public Node visitMap(final MapExpr node) {
         MethodVisitor mv = compilationContext.getBytecodeHelper().peekMethodVisitor();
         String className = getInternalName(LinkedHashMap.class);
@@ -666,7 +676,7 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
         }
 
         // Visit script body elements
-        for (Node child : IterableUtil.nullSafe(node.getBodyElements())) {
+        for (Node child : node.getBody()) {
             child.accept(this);
         }
         return node;

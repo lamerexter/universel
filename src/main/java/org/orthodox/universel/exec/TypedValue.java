@@ -26,25 +26,11 @@
  *
  */
 
-package org.orthodox.universel.ast.conversion;
+package org.orthodox.universel.exec;
 
-import org.orthodox.universel.ast.AstVisitorAdapter;
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.Operator;
-import org.orthodox.universel.cst.TokenImage;
-import org.orthodox.universel.cst.UnaryExpression;
-import org.orthodox.universel.cst.literals.DecimalFloatingPointLiteralExpr;
+import org.beanplanet.core.models.Value;
+import org.orthodox.universel.cst.Type;
 
-public class UnaryMinusLiteralTransformer extends AstVisitorAdapter {
-    @Override
-    public Node visitUnaryExpression(UnaryExpression node) {
-        // TODO GAW: Not used, as yet. See CstTransformer
-        if (node.getOperator() != Operator.MINUS || !(node.getExpression() instanceof DecimalFloatingPointLiteralExpr)) return node;
-
-        return new DecimalFloatingPointLiteralExpr(TokenImage.builder()
-                                                             .range(node)
-                                                             .image(node.getExpression().getTokenImage().getImage())
-                                                             .build());
-    }
-
+public interface TypedValue extends Value {
+    Type getValueType();
 }

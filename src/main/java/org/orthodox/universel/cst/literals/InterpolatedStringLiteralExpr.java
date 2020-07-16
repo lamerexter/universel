@@ -1,6 +1,7 @@
 package org.orthodox.universel.cst.literals;
 
 import org.orthodox.universel.cst.*;
+import org.orthodox.universel.cst.type.reference.ResolvedTypeReferenceOld;
 
 import java.util.Collections;
 import java.util.List;
@@ -60,6 +61,12 @@ public class InterpolatedStringLiteralExpr extends Expression implements Composi
         return getTokenImage() == null ? null : getTokenImage().getImage().substring(getDelimeter().length(), getTokenImage().getImage().length()-getDelimeter().length());
     }
 
+    @Override
+    public Type getType() {
+        return new ResolvedTypeReferenceOld(getTokenImage(), String.class);
+    }
+
+    @Override
     public Class<?> getTypeDescriptor() {
         return String.class;
     }

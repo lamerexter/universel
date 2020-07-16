@@ -108,7 +108,7 @@ public class ScriptAssemblyTest {
         Optional<Method> staticExecutionMethod = TypeUtil.findMethod(SCRIPT_EXECUTE_METHOD_MODIFIERS,
                                                                      SCRIPT_STATIC_METHOD_NAME,
                                                                      compiled.getCompiledClasses().get(0),
-                                                                     Object.class,
+                                                                     null,
                                                                      BeanWithProperties.class
                                                                     );
         assertThat(staticExecutionMethod.isPresent(), is(true));

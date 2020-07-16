@@ -58,6 +58,7 @@ import org.orthodox.universel.cst.collections.*;
 import org.orthodox.universel.cst.conditionals.*;
 import org.orthodox.universel.cst.type.*;
 import org.orthodox.universel.cst.type.reference.*;
+import org.orthodox.universel.cst.type.reference.WildcardType;
 import org.orthodox.universel.cst.methods.*;
 import org.orthodox.universel.cst.literals.*;
 import org.orthodox.universel.cst.TokenImage.TokenImageBuilder;

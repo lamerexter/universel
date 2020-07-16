@@ -28,10 +28,7 @@
 
 package org.orthodox.universel.ast;
 
-import org.orthodox.universel.cst.CompositeNode;
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.TokenImage;
-import org.orthodox.universel.cst.UniversalCodeVisitor;
+import org.orthodox.universel.cst.*;
 
 import java.util.List;
 import java.util.Objects;
@@ -100,6 +97,16 @@ public class ReturnStatement extends Statement implements CompositeNode {
     @Override
     public Node accept(UniversalCodeVisitor visitor) {
         return visitor.visitReturnStatement(this);
+    }
+
+    /**
+     * Returns the static type of the node. A return expression type is simply the type of its operand.
+     *
+     * @return the node's type, or null if the type cannot be determined at this time.
+     */
+    @Override
+    public Type getType() {
+        return expression == null ? null : expression.getType();
     }
 
     public Class<?> getTypeDescriptor() {

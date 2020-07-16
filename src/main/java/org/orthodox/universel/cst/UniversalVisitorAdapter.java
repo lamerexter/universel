@@ -48,9 +48,11 @@ import org.orthodox.universel.cst.conditionals.TernaryExpression;
 import org.orthodox.universel.cst.literals.*;
 import org.orthodox.universel.cst.methods.LambdaFunction;
 import org.orthodox.universel.cst.methods.MethodDeclaration;
+import org.orthodox.universel.cst.type.LoadTypeExpression;
 import org.orthodox.universel.cst.type.Parameter;
 import org.orthodox.universel.cst.type.declaration.ClassDeclaration;
 import org.orthodox.universel.cst.type.declaration.InterfaceDeclaration;
+import org.orthodox.universel.cst.type.reference.ReferenceType;
 import org.orthodox.universel.cst.type.reference.TypeReference;
 import org.orthodox.universel.symanticanalysis.JvmInstructionNode;
 import org.orthodox.universel.symanticanalysis.ValueConsumingNode;
@@ -173,7 +175,7 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
         }
 
         boolean noTransformationChanges = Objects.equals(node.getNodes(), transformedNodes);
-        return noTransformationChanges ? node : new InternalNodeSequence(transformedNodes);
+        return noTransformationChanges ? node : new InternalNodeSequence(node.getResultType(), transformedNodes);
     }
 
     @Override
@@ -220,9 +222,12 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
 
     @Override
     public Node visitInstanceofExpression(final InstanceofExpression node) {
-        node.getLhsExpression().accept(this);
-        node.getRhsExpression().accept(this);
-        return node;
+        Node transformedLhs = node.getLhsExpression().accept(this);
+        TypeReference transformedRhs = (TypeReference)node.getRhsExpression().accept(this);
+
+        boolean noTransformationChanges = Objects.equals(node.getLhsExpression(), transformedLhs)
+            && Objects.equals(node.getRhsExpression(), transformedRhs);
+        return noTransformationChanges ? node : new InstanceofExpression(node.getOperator(), transformedLhs, transformedRhs);
     }
 
     @Override
@@ -309,6 +314,12 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
         return node;
     }
 
+    @Override
+    public Node visitLoadType(LoadTypeExpression node) {
+        return node;
+    }
+
+
     public MapEntryExpr visitMapEntry(MapEntryExpr node) {
         Node transformedKey = node.getKeyExpression() == null ? null : node.getKeyExpression().accept(this);
         Node transformedVal = node.getValueExpression() == null ? null : node.getValueExpression().accept(this);
@@ -335,7 +346,7 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
             node.getModifiers().accept(this);
         }
 
-        TypeReference transformedReturnType = node.getReturnType().accept(this);
+        TypeReference transformedReturnType = node.getReturnType() == null ? null : node.getReturnType().accept(this);
 
         List<Parameter> transformedParameterList = new ArrayList<>(node.getParameters().size());
         for (Node parameter : nullSafe(node.getParameters().getNodes())) {
@@ -475,6 +486,14 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
     }
 
     @Override
+    public Parameter visitParameter(final Parameter node) {
+        TypeReference transformedType = node.getType() == null ? null : node.getType().accept(this);
+
+        boolean noTransformationChanges = Objects.equals(node.getType(), transformedType);
+        return noTransformationChanges ? node : new Parameter(node.getModifiers(), transformedType, node.isVarArgs(), node.getName());
+    }
+
+    @Override
     public Node visitReturnStatement(final ReturnStatement node) {
         if ( node.getExpression() == null) return node;
 
@@ -490,14 +509,15 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
             transformedImport = (ImportDecl)node.getImportDeclaration().accept(this);
         }
 
-        List<Node> transformedBodyElements = new ArrayList<>(node.getBodyElements().size());
-        for (Node child : node.getBodyElements()) {
-            transformedBodyElements.add(child.accept(this));
+        NodeSequenceBuilder<Node> transformedBodyBuilder = NodeSequence.builder();
+        for (Node bodyElement : node.getBody()) {
+            transformedBodyBuilder.add(bodyElement.accept(this));
         }
+        transformedBodyBuilder.resultType(node.getBody().getResultType());
 
         boolean noTransformationChanges = Objects.equals(node.getImportDeclaration(), transformedImport)
-                                          && Objects.equals(node.getBodyElements(), transformedBodyElements);
-        return noTransformationChanges ? node : new Script(transformedImport, transformedBodyElements);
+                                          && Objects.equals(node.getBody(), transformedBodyBuilder);
+        return noTransformationChanges ? node : new Script(node.getType(), node.getPackageDeclaration(), transformedImport, transformedBodyBuilder.build());
     }
 
     @Override

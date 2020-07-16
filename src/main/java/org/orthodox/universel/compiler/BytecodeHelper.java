@@ -316,20 +316,20 @@ public class BytecodeHelper {
         }
     }
 
-    public void emitLoadLocal(boolean staticMethod, int paramPosition, TypeReference type) {
+    public void emitLoadLocal(boolean staticMethod, int paramPosition, org.orthodox.universel.cst.Type type) {
         int varPosition = staticMethod ? paramPosition : paramPosition+1;
         if (type.isPrimitiveType()) {
-            if (type.getTypeDescriptor() == boolean.class
-                || type.getTypeDescriptor() == int.class
-                || type.getTypeDescriptor() == char.class
-                || type.getTypeDescriptor() == short.class
-                || type.getTypeDescriptor() == byte.class ) {
+            if (type.getTypeClass() == boolean.class
+                || type.getTypeClass() == int.class
+                || type.getTypeClass() == char.class
+                || type.getTypeClass() == short.class
+                || type.getTypeClass() == byte.class ) {
                 peekMethodVisitor().visitVarInsn(ILOAD, varPosition);
-            } else if (type.getTypeDescriptor() == double.class) {
+            } else if (type.getTypeClass() == double.class) {
                 peekMethodVisitor().visitVarInsn(DLOAD, varPosition);
-            } else if (type.getTypeDescriptor() == float.class) {
+            } else if (type.getTypeClass() == float.class) {
                 peekMethodVisitor().visitVarInsn(FLOAD, varPosition);
-            } else if (type.getTypeDescriptor() == long.class) {
+            } else if (type.getTypeClass() == long.class) {
                 peekMethodVisitor().visitVarInsn(LLOAD, varPosition);
             }
         } else {
@@ -384,7 +384,7 @@ public class BytecodeHelper {
         } else if (isPrimitiveTypeWrapperClass(sourceType) && isPrimitiveType(targetType)) {
             unbox(targetType);
         } else if (isPrimitiveType(sourceType) && (isPrimitiveTypeWrapperClass(targetType) || targetType == Object.class)) {
-            box(targetType);
+            box(sourceType);
         } else {
             convert(sourceType, targetType);
         }

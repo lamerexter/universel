@@ -28,6 +28,7 @@
 
 package org.orthodox.universel.compiler;
 
+import org.orthodox.universel.ast.NodeSequence;
 import org.orthodox.universel.cst.*;
 import org.orthodox.universel.symanticanalysis.SemanticAnalyser;
 import org.orthodox.universel.symanticanalysis.SemanticAnalysisContext;
@@ -60,10 +61,20 @@ public class CopyOnChangeAstVisitor extends UniversalVisitorAdapter implements S
 
     @Override
     public Node visitScript(Script node) {
+        ImportDecl transformedImport = null;
+        if ( node.getImportDeclaration() != null ) {
+            transformedImport = (ImportDecl)node.getImportDeclaration().accept(this);
+        }
 
-        List<Node> newBodyElements = node.getBodyElements().stream().map(this::callDelegateForChange).collect(Collectors.toList());
-        return Objects.equals(node.getBodyElements(), newBodyElements) ?
-               node : new Script(node.getImportDeclaration(), newBodyElements);
+        NodeSequence.NodeSequenceBuilder<Node> transformedBodyBuilder = NodeSequence.builder();
+        for (Node bodyElement : node.getBody()) {
+            transformedBodyBuilder.add(callDelegateForChange(bodyElement));
+        }
+        transformedBodyBuilder.resultType(node.getBody().getResultType());
+
+        boolean noTransformationChanges = Objects.equals(node.getImportDeclaration(), transformedImport)
+                                          && Objects.equals(node.getBody(), transformedBodyBuilder);
+        return noTransformationChanges ? node : new Script(node.getType(), node.getPackageDeclaration(), transformedImport, transformedBodyBuilder.build());
     }
 
     @Override

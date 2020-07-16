@@ -52,7 +52,7 @@ public class UnresolvedMethodCallReporter extends AbstractSemanticAnalyser {
             .filter(s -> Objects.equals(s.getAxis(), NavigationAxis.DEFAULT.getCanonicalName()))
             .forEach(s -> getContext().addError(METHOD_NOT_FOUND
                                                     .relatedObject(s)
-                                                    .withParameters(((MethodCall)s.getNodeTest()).getName())
+                                                    .withParameters(((MethodCall)s.getNodeTest()).getName().getName())
 
             ));
 

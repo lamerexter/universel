@@ -44,7 +44,7 @@ import org.orthodox.universel.cst.methods.LambdaFunction;
 import org.orthodox.universel.cst.methods.MethodDeclaration;
 import org.orthodox.universel.cst.type.Parameter;
 import org.orthodox.universel.cst.type.declaration.ClassDeclaration;
-import org.orthodox.universel.cst.type.reference.ResolvedTypeReference;
+import org.orthodox.universel.cst.type.reference.ResolvedTypeReferenceOld;
 import org.orthodox.universel.symanticanalysis.AbstractSemanticAnalyser;
 import org.orthodox.universel.symanticanalysis.JvmInstructionNode;
 import org.orthodox.universel.symanticanalysis.conversion.BoxConversion;
@@ -63,38 +63,37 @@ import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
 import static org.beanplanet.core.lang.TypeUtil.isPrimitiveType;
-import static org.orthodox.universel.compiler.Messages.NavigationExpression.UNRESOLVED_STEP;
 import static org.orthodox.universel.cst.Modifiers.*;
 
 public class NavigationResolver extends AbstractSemanticAnalyser {
 
-    @Override
-    public Node visitClassDeclaration(ClassDeclaration node) {
-        getContext().pushScope(new TypeDeclarationScope(node));
+//    @Override
+//    public Node visitClassDeclaration(ClassDeclaration node) {
+//        getContext().pushScope(new TypeDeclarationScope(node));
+//
+//        try {
+//            return super.visitClassDeclaration(node);
+//        } finally {
+//            getContext().popScope();
+//        }
+//    }
 
-        try {
-            return super.visitClassDeclaration(node);
-        } finally {
-            getContext().popScope();
-        }
-    }
+//    @Override
+//    public Node visitImportDeclaration(final ImportDecl node) {
+//        getContext().pushScope(new ImportScope(node, getContext().getMessages()));
+//        return super.visitImportDeclaration(node);
+//    }
 
-    @Override
-    public Node visitImportDeclaration(final ImportDecl node) {
-        getContext().pushScope(new ImportScope(node, getContext().getMessages()));
-        return super.visitImportDeclaration(node);
-    }
-
-    @Override
-    public MethodDeclaration visitMethodDeclaration(final MethodDeclaration node) {
-        getContext().pushScope(new MethodScope(node));
-
-        try {
-            return super.visitMethodDeclaration(node);
-        } finally {
-            getContext().popScope();
-        }
-    }
+//    @Override
+//    public MethodDeclaration visitMethodDeclaration(final MethodDeclaration node) {
+//        getContext().pushScope(new MethodScope(node));
+//
+//        try {
+//            return super.visitMethodDeclaration(node);
+//        } finally {
+//            getContext().popScope();
+//        }
+//    }
 
     @Override
     public Node visitNavigationStream(final NavigationStream node) {
@@ -201,7 +200,7 @@ public class NavigationResolver extends AbstractSemanticAnalyser {
             try {
                 if (previousStep != null) {
                     getContext().pushScope(previousStepScope = new BoundScope(previousStep.isSequence() ?
-                                                                              previousStep.getNode().getTypeDescriptor().getComponentType() :
+                                                                              previousStep.getNode().getType().getComponentType().getTypeClass() :
                                                                               previousStep.getNode().getTypeDescriptor(),
                                                                               getContext().getNavigatorRegistry()
                     ));
@@ -210,8 +209,9 @@ public class NavigationResolver extends AbstractSemanticAnalyser {
                 Node transformStep = transformStep((NavigationStep<?>) step);
 
                 if (Objects.equals(transformStep, step)) {
-                    getContext().addError(UNRESOLVED_STEP.withRelatedObject(step));
-                    return null; // pointless continuing further along this navigation path now...
+                    return null; // Can't proceed yet
+//                    getContext().addError(UNRESOLVED_STEP.withRelatedObject(step));
+//                    return null; // pointless continuing further along this navigation path now...
                 }
 
                 final boolean isSequence = isSequenceType(transformStep);
@@ -250,12 +250,12 @@ public class NavigationResolver extends AbstractSemanticAnalyser {
                 } else if (inStream) {
                     Stream s;
                     // Convert singleton to singleton stream and insert into flatmap
-                    Class<?> previousStepType = previousStep.isSequence() ? previousStep.getTypeDescriptor().getComponentType() : previousStep.getTypeDescriptor();
-                    LambdaFunction generatedMethod = new GeneratedStaticLambdaFunction(new ResolvedTypeReference(step),
+                    Class<?> previousStepType = previousStep.isSequence() ? previousStep.getType().getComponentType().getTypeClass() : previousStep.getTypeDescriptor();
+                    LambdaFunction generatedMethod = new GeneratedStaticLambdaFunction(new ResolvedTypeReferenceOld(step),
                                                                                        new SimpleNamePath("nav", "step", String.valueOf(n), "fio"),
                                                                                        NodeSequence.<Parameter>builder()
                                                                                            .add(new Parameter(valueOf(FINAL),
-                                                                                                              new ResolvedTypeReference(previousStep.getNode().getTokenImage(), previousStepType),
+                                                                                                              new ResolvedTypeReferenceOld(previousStep.getNode().getTokenImage(), previousStepType),
                                                                                                               false,
                                                                                                               new Name(previousStep.getNode().getTokenImage(), "step")
                                                                                            ))
@@ -316,14 +316,14 @@ public class NavigationResolver extends AbstractSemanticAnalyser {
         };
     }
 
-    @Override
-    public Node visitScript(final Script node) {
-        getContext().pushScope(new ImportScope(getContext().getDefaultImports(), getContext().getMessages()));
-
-        try {
-            return super.visitScript(node);
-        } finally {
-            getContext().popScope();
-        }
-    }
+//    @Override
+//    public Node visitScript(final Script node) {
+//        getContext().pushScope(new ImportScope(getContext().getDefaultImports(), getContext().getMessages()));
+//
+//        try {
+//            return super.visitScript(node);
+//        } finally {
+//            getContext().popScope();
+//        }
+//    }
 }

@@ -28,10 +28,7 @@
 
 package org.orthodox.universel.symanticanalysis.conversion;
 
-import org.orthodox.universel.cst.BinaryExpression;
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.Operator;
-import org.orthodox.universel.cst.UniversalVisitorAdapter;
+import org.orthodox.universel.cst.*;
 import org.orthodox.universel.exec.operators.binary.BinaryOperatorRegistry;
 import org.orthodox.universel.exec.operators.binary.ConcurrentBinaryOperatorRegistry;
 import org.orthodox.universel.exec.operators.binary.PackageScanBinaryOperatorLoader;
@@ -69,36 +66,53 @@ public class BinaryExpressionOperatorMethodConverter extends UniversalVisitorAda
     @Override
     public Node performAnalysis(SemanticAnalysisContext context, Node from) {
         this.context = context;
+        checkLoaded();
         return from.accept(this);
     }
 
     @Override
     public Node visitBinaryExpression(final BinaryExpression node) {
-        checkLoaded();
-
         Node lhs = node.getLhsExpression().accept(this);
         Node rhs = node.getRhsExpression().accept(this);
 
         Class<?> lhsType = lhs.getTypeDescriptor();
         Class<?> rhsType = rhs.getTypeDescriptor();
 
-        if ( lhsType == null || rhsType == null ) return node;
+        if (lhsType == null || rhsType == null) return node;
 
         // Separately implemented, for now...
-        if ( Operator.ELVIS == node.getOperator() || Operator.INSTANCE_OF == node.getOperator()) {
-            if (isPrimitiveType(lhsType) ) {
+        if (Operator.ELVIS == node.getOperator() || Operator.INSTANCE_OF == node.getOperator()) {
+            if (isPrimitiveType(lhsType)) {
                 lhs = new BoxConversion(lhs);
                 lhsType = lhs.getTypeDescriptor();
             }
-            if (isPrimitiveType(rhsType) ) {
+            if (isPrimitiveType(rhsType)) {
                 rhs = new BoxConversion(rhs);
                 rhsType = rhs.getTypeDescriptor();
             }
-        } else if ( Operator.INSTANCE_OF == node.getOperator() ) {
+        } else if (Operator.INSTANCE_OF == node.getOperator()) {
             rhsType = Class.class;
         }
 
         Optional<Method> binaryOperatorMethod = binaryOperatorRegistry.lookup(node.getOperator(), lhsType, rhsType);
+        return binaryOperatorMethod.isPresent() ? new BinaryExpressionOperatorMethodCall(node.getTokenImage(), node.getOperator(), binaryOperatorMethod.get(), asList(lhs, rhs)) : node;
+    }
+
+    @Override
+    public Node visitInstanceofExpression(final InstanceofExpression node) {
+        Node lhs = node.getLhsExpression().accept(this);
+        Node rhs = node.getRhsExpression().accept(this);
+
+        Class<?> lhsType = lhs.getTypeDescriptor();
+        Class<?> rhsType = rhs.getTypeDescriptor();
+
+        if (lhsType == null || rhsType == null) return node;
+
+        if (isPrimitiveType(lhsType)) {
+            lhs = new BoxConversion(lhs);
+        }
+
+        Optional<Method> binaryOperatorMethod = binaryOperatorRegistry.lookup(node.getOperator(), Object.class, Class.class);
         return binaryOperatorMethod.isPresent() ? new BinaryExpressionOperatorMethodCall(node.getTokenImage(), node.getOperator(), binaryOperatorMethod.get(), asList(lhs, rhs)) : node;
     }
 }

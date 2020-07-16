@@ -28,13 +28,13 @@
 
 package org.orthodox.universel.cst.type.reference;
 
+import org.beanplanet.core.lang.TypeUtil;
 import org.beanplanet.core.models.path.DelimitedNamePath;
 import org.beanplanet.core.models.path.NamePath;
 import org.orthodox.universel.cst.Node;
 import org.orthodox.universel.cst.TokenImage;
 
-import java.util.Objects;
-
+import static org.beanplanet.core.lang.TypeUtil.determineArrayBaseComponentType;
 import static org.beanplanet.core.lang.TypeUtil.determineArrayDimensions;
 
 /**
@@ -44,31 +44,27 @@ import static org.beanplanet.core.lang.TypeUtil.determineArrayDimensions;
  * <p>The resolved type has come from an unresolved type name, resolved against existing types or types being compiled in the
  * current compilation unit.</p>
  */
-public class ResolvedTypeReference extends TypeReference {
+public class ResolvedTypeReferenceOld extends TypeReference {
     private final Class<?> typeDescriptor;
 
     /**
      * Constructs a new type AST resolved type reference instance.
      *
-     * @param tokenImage the image representing the tresolved type.
+     * @param tokenImage the image representing the resolved type.
      * @param typeDescriptor the name of the referenced type, which may be fully qualified.
-     * @param name the name of the referenced type, which may be fully qualified.
-     * @param dimensions the number of dimensions, if this is is an array type.
      */
-    public ResolvedTypeReference(TokenImage tokenImage, Class<?> typeDescriptor, NamePath name, int dimensions) {
-        super(tokenImage, name, dimensions);
+    public ResolvedTypeReferenceOld(TokenImage tokenImage, Class<?> typeDescriptor) {
+        super(tokenImage);
         this.typeDescriptor = typeDescriptor;
     }
 
     /**
      * Constructs a new type AST resolved type reference instance.
      *
-     * @param tokenImage the image representing the tresolved type.
      * @param typeDescriptor the name of the referenced type, which may be fully qualified.
      */
-    public ResolvedTypeReference(TokenImage tokenImage, Class<?> typeDescriptor) {
-        super(tokenImage, new DelimitedNamePath(typeDescriptor.getName(), "."), determineArrayDimensions(typeDescriptor));
-        this.typeDescriptor = typeDescriptor;
+    public ResolvedTypeReferenceOld(Class<?> typeDescriptor) {
+        this(null, typeDescriptor);
     }
 
     /**
@@ -76,8 +72,28 @@ public class ResolvedTypeReference extends TypeReference {
      *
      * @param node the node whose type will be the referred type.
      */
-    public ResolvedTypeReference(Node node) {
+    public ResolvedTypeReferenceOld(Node node) {
         this(node.getTokenImage(), node.getTypeDescriptor());
+    }
+
+    /**
+     * Gets the fully qualified name of the type including any package name prefix, such as <code>java.lang.String</code>
+     *
+     * @return the fully qualified name of the type.
+     */
+    @Override
+    public NamePath getName() {
+        return new DelimitedNamePath(determineArrayBaseComponentType(getTypeDescriptor()).getName(), ".");
+    }
+
+    /**
+     * Gets the arity of dimensions for an array type reference.
+     *
+     * @return the arity of dimensions for an array type reference. which may be zero if the type referred to is not an array.
+     */
+    @Override
+    public int getDimensions() {
+        return determineArrayDimensions(getTypeDescriptor());
     }
 
     @Override
@@ -88,9 +104,9 @@ public class ResolvedTypeReference extends TypeReference {
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
-        if (!(o instanceof ResolvedTypeReference)) return false;
+        if (!(o instanceof ResolvedTypeReferenceOld)) return false;
         if (!super.equals(o)) return false;
-        ResolvedTypeReference that = (ResolvedTypeReference) o;
+        ResolvedTypeReferenceOld that = (ResolvedTypeReferenceOld) o;
         return this.getTypeDescriptor() == that.getTypeDescriptor();
     }
 }

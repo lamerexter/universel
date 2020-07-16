@@ -82,4 +82,8 @@ public class Parameter extends Node implements CompositeNode {
                  .addNotNull(name)
           .build();
    }
+
+   public Node accept(UniversalCodeVisitor visitor) {
+      return visitor.visitParameter(this);
+   }
 }

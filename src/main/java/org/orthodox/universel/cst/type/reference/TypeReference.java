@@ -35,6 +35,8 @@ import org.orthodox.universel.cst.TokenImage;
 import org.orthodox.universel.cst.Type;
 import org.orthodox.universel.cst.UniversalCodeVisitor;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -43,68 +45,85 @@ import java.util.Objects;
  *
  * @author Gary Watson
  */
-public class TypeReference extends Node implements Type {
-    /** The name of the type referred to, including any package name prefix which may have been used. */
-    private final NamePath name;
-
-    /** The arity of dimensions for an array type reference. */
-    private final int dimensions;
+public abstract class TypeReference extends Node implements Type {
 
     /**
      * Constructs a new type AST type reference instance.
      *
      * @param tokenImage the image representing this cst type.
-     * @param typeDescriptor the name of the referenced type, which may be fully qualified.
-     * @param name the name of the referenced type, which may be fully qualified.
      */
-    public TypeReference(TokenImage tokenImage, Class<?> typeDescriptor, NamePath name) {
-        this(tokenImage, typeDescriptor, name, 0);
+    public TypeReference(TokenImage tokenImage) {
+        super(tokenImage);
     }
 
-    /**
-     * Constructs a new type AST type reference instance.
-     *
-     * @param tokenImage the image representing this cst type.
-     * @param name the name of the referenced type, which may be fully qualified.
-     * @param dimensions the number of dimensions, if this is is an array type.
-     */
-    public TypeReference(TokenImage tokenImage, NamePath name, int dimensions) {
-        this(tokenImage, null, name, dimensions);
-    }
-
-    /**
-     * Constructs a new type AST type reference instance. TODO: The type hierachy for this type is not quite right. This
-     * constructor is only used by {@link ResolvedTypeReference} which passes in the resolved type...
-     *
-     * @param tokenImage the image representing this cst type.
-     * @param typeDescriptor the name of the referenced type, which may be fully qualified.
-     * @param name the name of the referenced type, which may be fully qualified.
-     * @param dimensions the number of dimensions, if this is is an array type.
-     */
-    public TypeReference(TokenImage tokenImage, Class<?> typeDescriptor, NamePath name, int dimensions) {
-        super(tokenImage, typeDescriptor);
-        this.name = name;
-        this.dimensions = dimensions;
-    }
-
-    /**
-     * Constructs a new type AST node instance.
-     *
-     * @param tokenImage the image representing this cst type.
-     * @param name the name of the referenced type, which may be fully qualified.
-     */
-    public TypeReference(TokenImage tokenImage, NamePath name) {
-        this(tokenImage, name, 0);
-    }
+//    /**
+//     * Constructs a new type AST type reference instance.
+//     *
+//     * @param tokenImage the image representing this cst type.
+//     * @param typeDescriptor the name of the referenced type, which may be fully qualified.
+//     */
+//    public TypeReference(TokenImage tokenImage, Class<?> typeDescriptor) {
+//        this(tokenImage, typeDescriptor, new DelimitedNamePath(typeDescriptor.getName(), "."), 0);
+//    }
+//
+//    /**
+//     * Constructs a new type AST type reference instance.
+//     *
+//     * @param tokenImage the image representing this cst type.
+//     * @param typeDescriptor the name of the referenced type, which may be fully qualified.
+//     * @param name the name of the referenced type, which may be fully qualified.
+//     */
+//    public TypeReference(TokenImage tokenImage, Class<?> typeDescriptor, NamePath name) {
+//        this(tokenImage, typeDescriptor, name, 0);
+//    }
+//
+//    /**
+//     * Constructs a new type AST type reference instance.
+//     *
+//     * @param tokenImage the image representing this cst type.
+//     * @param name the name of the referenced type, which may be fully qualified.
+//     * @param dimensions the number of dimensions, if this is is an array type.
+//     */
+//    public TypeReference(TokenImage tokenImage, NamePath name, int dimensions) {
+//        this(tokenImage, null, name, dimensions);
+//    }
+//
+//    /**
+//     * Constructs a new type AST type reference instance. TODO: The type hierachy for this type is not quite right. This
+//     * constructor is only used by {@link ResolvedTypeReferenceOld} which passes in the resolved type...
+//     *
+//     * @param tokenImage the image representing this cst type.
+//     * @param typeDescriptor the name of the referenced type, which may be fully qualified.
+//     * @param name the name of the referenced type, which may be fully qualified.
+//     * @param dimensions the number of dimensions, if this is is an array type.
+//     */
+//    public TypeReference(TokenImage tokenImage, Class<?> typeDescriptor, NamePath name, int dimensions) {
+//        super(tokenImage, typeDescriptor);
+//        this.name = name;
+//        this.dimensions = dimensions;
+//    }
+//
+//    /**
+//     * Constructs a new type AST node instance.
+//     *
+//     * @param tokenImage the image representing this cst type.
+//     * @param name the name of the referenced type, which may be fully qualified.
+//     */
+//    public TypeReference(TokenImage tokenImage, NamePath name) {
+//        this(tokenImage, name, 0);
+//    }
 
     @Override
-    public TypeReference getType() {
+    public Type getType() {
         return this;
     }
 
+
     @Override
     public Class<?> getTypeDescriptor() {
-        return TypeUtil.loadClassOrNull(getName().join("."));
+        Class<?> clazz = TypeUtil.loadClassOrNull(getName().join("."));
+        if ( clazz == null) return null;
+        return isArray() ? TypeUtil.forName(clazz, getDimensions()) : clazz;
     }
 
     /**
@@ -113,17 +132,15 @@ public class TypeReference extends Node implements Type {
      * @return the component type of this array type, or null if this type is not an array type.
      */
     public TypeReference getComponentType() {
-        Class<?> clazz = getTypeDescriptor();
-        return clazz != null && clazz.isArray() ? new ResolvedTypeReference(getTokenImage(), clazz.getComponentType()) : null;
-    }
+        TypeReference componentType = null;
+        if ( isArray() ) {
+            Class<?> clazz = getTypeDescriptor();
+            if ( clazz != null ) componentType = new ResolvedTypeReferenceOld(getTokenImage(), clazz.getComponentType());
+        } else if ( isSequence() && getTypeParameters().size() == 1 ) {
+            componentType = (TypeReference)getTypeParameters().get(0);
+        }
 
-    /**
-     * Gets the name of the type referred to, including any package name prefix which may have been used.
-     *
-     * @return the name of the type reference.
-     */
-    public NamePath getName() {
-        return name;
+        return componentType;
     }
 
     @Override
@@ -132,9 +149,7 @@ public class TypeReference extends Node implements Type {
     }
 
     @Override
-    public NamePath getFullyQualifiedName() {
-        return getName();
-    }
+    public abstract NamePath getName();
 
     /**
      * Gets the arity of dimensions for an array type reference.
@@ -142,7 +157,7 @@ public class TypeReference extends Node implements Type {
      * @return the arity of dimensions for an array type reference. which may be zero if the type referred to is not an array.
      */
     public int getDimensions() {
-        return dimensions;
+        return 0;
     }
 
     /**
@@ -179,6 +194,26 @@ public class TypeReference extends Node implements Type {
      */
     public boolean isReferenceType() {
         return getTypeDescriptor() != null && Object.class.isAssignableFrom(getTypeDescriptor());
+    }
+
+    /**
+     * Gets any type parameters associated with this type.
+     *
+     * @return a list of the type parameters of this type, which may be empty but never null.
+     */
+    @Override
+    public List<Type> getTypeParameters() {
+        return Collections.emptyList();
+    }
+
+    /**
+     * Gets the class associated with this type.
+     *
+     * @return the class associated with this type, which may be null if this type is not an existing type.
+     */
+    @Override
+    public Class<?> getTypeClass() {
+        return getTypeDescriptor();
     }
 
     public TypeReference accept(UniversalCodeVisitor visitor) {

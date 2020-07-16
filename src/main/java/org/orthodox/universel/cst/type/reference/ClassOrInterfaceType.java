@@ -28,6 +28,7 @@
 
 package org.orthodox.universel.cst.type.reference;
 
+import org.beanplanet.core.models.path.NamePath;
 import org.beanplanet.core.models.path.SimpleNamePath;
 import org.orthodox.universel.cst.TokenImage;
 import org.orthodox.universel.cst.type.declaration.TypeDeclaration;
@@ -54,7 +55,7 @@ public final class ClassOrInterfaceType extends TypeReference {
     private TypeDeclaration typeDeclaration;
 
     public ClassOrInterfaceType(TokenImage tokenImage, ClassOrInterfaceType scope, String name, List<TypeReference> typeArgs) {
-        super(tokenImage, new SimpleNamePath(Collections.singletonList(name)));
+        super(tokenImage);
         this.scope = scope;
         this.name = name;
         this.typeArgs = typeArgs;
@@ -74,6 +75,16 @@ public final class ClassOrInterfaceType extends TypeReference {
         }
 
         return scope.getRawTypeName() + "." + name;
+    }
+
+    /**
+     * Gets the fully qualified name of the type including any package name prefix, such as <code>java.lang.String</code>
+     *
+     * @return the fully qualified name of the type.
+     */
+    @Override
+    public NamePath getName() {
+        return new SimpleNamePath(name);
     }
 
     public TypeDeclaration getTypeDeclaration() {

@@ -28,9 +28,15 @@
 
 package org.orthodox.universel.symanticanalysis;
 
+import org.orthodox.universel.compiler.ImportScope;
+import org.orthodox.universel.compiler.MethodScope;
+import org.orthodox.universel.compiler.TypeDeclarationScope;
 import org.orthodox.universel.cst.ImportDecl;
 import org.orthodox.universel.cst.Node;
+import org.orthodox.universel.cst.Script;
 import org.orthodox.universel.cst.UniversalVisitorAdapter;
+import org.orthodox.universel.cst.methods.MethodDeclaration;
+import org.orthodox.universel.cst.type.declaration.ClassDeclaration;
 
 public class AbstractSemanticAnalyser extends UniversalVisitorAdapter implements SemanticAnalyser {
     private SemanticAnalysisContext context;
@@ -47,8 +53,46 @@ public class AbstractSemanticAnalyser extends UniversalVisitorAdapter implements
     }
 
     @Override
-    public Node visitImportDeclaration(ImportDecl node) {
-        this.importDecl = node;
-        return node;
+    public Node visitClassDeclaration(ClassDeclaration node) {
+        getContext().pushScope(new TypeDeclarationScope(node));
+
+        try {
+            return super.visitClassDeclaration(node);
+        } finally {
+            getContext().popScope();
+        }
     }
+
+    @Override
+    public Node visitImportDeclaration(final ImportDecl node) {
+        this.importDecl = node;
+
+        // Imports are scope to end-of-file so remain on the scopes stack
+        getContext().pushScope(new ImportScope(node, getContext().getMessages()));
+
+        return super.visitImportDeclaration(node);
+    }
+
+    @Override
+    public MethodDeclaration visitMethodDeclaration(final MethodDeclaration node) {
+        getContext().pushScope(new MethodScope(node));
+
+        try {
+            return super.visitMethodDeclaration(node);
+        } finally {
+            getContext().popScope();
+        }
+    }
+
+    @Override
+    public Node visitScript(final Script node) {
+        getContext().pushScope(new ImportScope(getContext().getDefaultImports(), getContext().getMessages()));
+
+        try {
+            return super.visitScript(node);
+        } finally {
+            getContext().popScope();
+        }
+    }
+
 }

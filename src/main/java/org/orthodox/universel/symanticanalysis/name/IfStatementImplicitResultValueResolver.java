@@ -31,6 +31,7 @@ package org.orthodox.universel.symanticanalysis.name;
 import org.orthodox.universel.ast.NodeSequence;
 import org.orthodox.universel.ast.conditionals.IfStatement;
 import org.orthodox.universel.cst.Node;
+import org.orthodox.universel.cst.Type;
 import org.orthodox.universel.cst.literals.NullLiteralExpr;
 import org.orthodox.universel.symanticanalysis.AbstractSemanticAnalyser;
 
@@ -62,11 +63,11 @@ public class IfStatementImplicitResultValueResolver extends AbstractSemanticAnal
                                transformedThen, transformedElseIfs, transformedElse);
     }
 
-    private Node transformEmptyOrNullStatementOrBlock(final Node enclosingStatement, final Node statementOrBlock) {
+    private Node transformEmptyOrNullStatementOrBlock(final IfStatement enclosingStatement, final Node statementOrBlock) {
         Node transformedNode = statementOrBlock;
         if ((transformedNode instanceof NodeSequence && ((NodeSequence)transformedNode).isEmpty())
             || transformedNode == null) {
-            transformedNode = new NullLiteralExpr(enclosingStatement.getTokenImage());
+            transformedNode = new NullLiteralExpr(enclosingStatement.getTokenImage(), enclosingStatement.getType());
         }
 
         return transformedNode;

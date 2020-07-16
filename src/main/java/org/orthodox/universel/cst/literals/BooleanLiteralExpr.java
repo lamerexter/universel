@@ -1,9 +1,7 @@
 package org.orthodox.universel.cst.literals;
 
-import org.orthodox.universel.cst.Expression;
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.TokenImage;
-import org.orthodox.universel.cst.UniversalCodeVisitor;
+import org.orthodox.universel.cst.*;
+import org.orthodox.universel.cst.type.reference.ResolvedTypeReferenceOld;
 
 /**
  * A boolean literal (<i>true</i> or <i>false</i>) on the Abstract Syntax Tree.
@@ -32,6 +30,12 @@ public class BooleanLiteralExpr extends Expression {
         return visitor.visitBooleanLiteral(this);
     }
 
+    @Override
+    public Type getType() {
+        return new ResolvedTypeReferenceOld(getTokenImage(), boolean.class);
+    }
+
+    @Override
     public Class<?> getTypeDescriptor() {
         return boolean.class;
     }

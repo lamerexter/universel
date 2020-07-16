@@ -28,18 +28,30 @@
 
 package org.orthodox.universel.cst.type.reference;
 
+import org.beanplanet.core.models.path.NamePath;
 import org.beanplanet.core.models.path.SimpleNamePath;
 import org.orthodox.universel.cst.TokenImage;
-
-import static java.util.Collections.singletonList;
 
 /**
  * Abstract Syntax Tree representation of the void type. Generally, void can only be used to represent the
  * return type of a method (none).
  */
 public class VoidType extends TypeReference {
+
+    public static final SimpleNamePath VOID_NAME = new SimpleNamePath(void.class.getSimpleName());
+
     public VoidType(final TokenImage tokenImage) {
-        super(tokenImage, void.class, new SimpleNamePath(singletonList("void")));
+        super(tokenImage);
+    }
+
+    /**
+     * Gets the fully qualified name of the type including any package name prefix, such as <code>java.lang.String</code>
+     *
+     * @return the fully qualified name of the type.
+     */
+    @Override
+    public NamePath getName() {
+        return VOID_NAME;
     }
 
     /**

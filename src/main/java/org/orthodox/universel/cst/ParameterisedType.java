@@ -1,7 +1,7 @@
 /*
  *  MIT Licence:
  *
- *  Copyright (c) 2019 Orthodox Engineering Ltd
+ *  Copyright (c) 2020 Orthodox Engineering Ltd
  *
  *  Permission is hereby granted, free of charge, to any person
  *  obtaining a copy of this software and associated documentation
@@ -28,14 +28,27 @@
 
 package org.orthodox.universel.cst;
 
-import org.orthodox.universel.cst.type.reference.TypeReference;
+import java.util.List;
 
-public class InstanceofExpression extends BinaryExpression {
-    public InstanceofExpression(Operator operator, Node lhsExpr, TypeReference type) {
-        super(operator, lhsExpr, type);
-    }
+/**
+ * ParameterisedType represents a type parameterised with actual types or type variables such as
+ * <code>Collection&lt;String&gt;</code> or <code>Collection&lt;T&gt;</code>.
+ */
+public interface ParameterisedType extends Type {
+    /**
+     * Returns a list of {@code Type} objects representing the actual type
+     * parameters to this type.
+     *
+     * @return a list of {@code Type} objects representing the actual type parameters to this type.
+     */
+    List<Type> getTypeParameters();
 
-    public Node accept(UniversalCodeVisitor visitor) {
-        return visitor.visitInstanceofExpression(this);
-    }
+    /**
+     * Returns the {@code Type} object representing this type without regard to type arguments. For example, if this
+     * type were <code>Collection&lt;T&gt;</code>, then <code>Collection</code> would be returned.
+     *
+     * @return the {@code Type} object representing the un-paramaterised class or interface of this type.
+     */
+    Type getRawType();
 }
+

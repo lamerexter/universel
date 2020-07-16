@@ -30,6 +30,8 @@ package org.orthodox.universel.cst;
 
 import org.beanplanet.core.models.path.NamePath;
 
+import java.util.List;
+
 /**
  * Represents a type: such as a class, interface, enum type, primitive type or array type. The type may be an existing type (such as a compiled class) or
  * a type currently under compilation.
@@ -48,7 +50,7 @@ public interface Type {
      *
      * @return the fully qualified name of the type.
      */
-    NamePath getFullyQualifiedName();
+    NamePath getName();
 
     /**
      * Gets the simple name of the type, consisting of a single name element which does not include the package name prefix. The simple name
@@ -56,7 +58,7 @@ public interface Type {
      *
      * @return the simple type name.
      */
-    default String getSimpleName() { return getFullyQualifiedName().getLastElement(); }
+    default String getSimpleName() { return getName().getLastElement(); }
 
     /**
      * Gets the arity of dimensions for an array type reference.
@@ -109,4 +111,30 @@ public interface Type {
      * @return true if the type referred to is a reference type, false otherwise.
      */
     boolean isReferenceType();
+
+    /**
+     * Gets any type parameters associated with this type.
+     *
+     * @return a list of the type parameters of this type, which may be empty but never null.
+     *
+     */
+    List<Type> getTypeParameters();
+
+    /**
+     * Gets the class associated with this type.
+     *
+     * @return the class associated with this type, which may be null if this type is not an existing type.
+     */
+    Class<?> getTypeClass();
+
+    /**
+     * Whether the type referred to is a sequence type (consists of a number of ordered elements). This includes arrays,
+     * list, sets and the class of all other iterable and streamable types.
+     *
+     * @return true if the type referred to is an array or {@link Iterable}.
+     */
+    default boolean isSequence() {
+        final Class<?> clazz = getTypeClass();
+        return isArray() || (clazz != null && Iterable.class.isAssignableFrom(clazz));
+    }
 }

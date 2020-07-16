@@ -1,7 +1,7 @@
 /*
  *  MIT Licence:
  *
- *  Copyright (c) 2019 Orthodox Engineering Ltd
+ *  Copyright (c) 2020 Orthodox Engineering Ltd
  *
  *  Permission is hereby granted, free of charge, to any person
  *  obtaining a copy of this software and associated documentation
@@ -28,14 +28,31 @@
 
 package org.orthodox.universel.cst;
 
-import org.orthodox.universel.cst.type.reference.TypeReference;
+import java.util.List;
 
-public class InstanceofExpression extends BinaryExpression {
-    public InstanceofExpression(Operator operator, Node lhsExpr, TypeReference type) {
-        super(operator, lhsExpr, type);
-    }
+/**
+ * WildcardType represents a Java wildcard type expression, such as
+ * {@code ?}, {@code ? extends Number}, or {@code ? super Integer}.
+ *
+ * @see java.lang.reflect.WildcardType
+ */
+public interface WildcardType {
+    /**
+     * Returns a list of {@code Type} objects representing the  upper
+     * bound(s) of this type variable.  If no upper bound is
+     * explicitly declared, the upper bound is {@code Object}.
+     *
+     * @return a list of Types representing the upper bound(s) of this type variable, which may be empty.
+     */
+    List<Type> getUpperBounds();
 
-    public Node accept(UniversalCodeVisitor visitor) {
-        return visitor.visitInstanceofExpression(this);
-    }
+    /**
+     * Returns a list of {@code Type} objects representing the
+     * lower bound(s) of this type variable.  If no lower bound is
+     * explicitly declared, the lower bound is the type of {@code null}.
+     * In this case, a zero length list is returned.
+     *
+     * @return list of Types representing the lower bound(s) of this type variable, which may be empty.
+     */
+    List<Type> getLowerBounds();
 }

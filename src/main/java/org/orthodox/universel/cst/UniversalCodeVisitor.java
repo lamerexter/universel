@@ -48,6 +48,8 @@ import org.orthodox.universel.cst.conditionals.TernaryExpression;
 import org.orthodox.universel.cst.literals.*;
 import org.orthodox.universel.cst.methods.LambdaFunction;
 import org.orthodox.universel.cst.methods.MethodDeclaration;
+import org.orthodox.universel.cst.type.LoadTypeExpression;
+import org.orthodox.universel.cst.type.Parameter;
 import org.orthodox.universel.cst.type.declaration.ClassDeclaration;
 import org.orthodox.universel.cst.type.declaration.InterfaceDeclaration;
 import org.orthodox.universel.cst.type.reference.TypeReference;
@@ -130,6 +132,8 @@ public interface UniversalCodeVisitor {
 
     Node visitLoadLocal(LoadLocal node);
 
+    Node visitLoadType(LoadTypeExpression node);
+
     MapEntryExpr visitMapEntry(MapEntryExpr node);
 
     Node visitMap(MapExpr node);
@@ -168,6 +172,8 @@ public interface UniversalCodeVisitor {
     PackageDeclaration visitPackageDeclaration(PackageDeclaration node);
 //   Node visitPathExpression(PathExpression node);
 //    Node visitRangeExpression(RangeExpression node);
+
+    Parameter visitParameter(Parameter node);
 
     Node visitReturnStatement(ReturnStatement node);
 

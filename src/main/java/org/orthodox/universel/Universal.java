@@ -3,11 +3,14 @@ package org.orthodox.universel;
 import org.beanplanet.core.io.resource.Resource;
 import org.beanplanet.core.io.resource.StringResource;
 import org.beanplanet.core.lang.TypeUtil;
+import org.beanplanet.core.lang.conversion.SystemTypeConverter;
 import org.beanplanet.core.logging.Logger;
 import org.orthodox.universel.compiler.CompilationErrorsException;
 import org.orthodox.universel.compiler.CompiledUnit;
 import org.orthodox.universel.compiler.UniversalCompiler;
 import org.orthodox.universel.cst.*;
+import org.orthodox.universel.exec.Result;
+import org.orthodox.universel.exec.TypedValue;
 
 import java.util.Collections;
 import java.util.List;
@@ -37,7 +40,7 @@ public class Universal implements Logger {
                                         .orElseThrow(() -> new UniversalException(format("Unable to parse expression [%s] to single given AST node of tyoe [%s]: found %d nodes when expecting 1",
                                                                                          script,
                                                                                          astType,
-                                                                                         scriptNode.getBodyElements().size()
+                                                                                         scriptNode.getBody().size()
                                         )));
     }
 
@@ -102,6 +105,18 @@ public class Universal implements Logger {
     }
 
     /**
+     * Evaluates a script and executes it immediately using the supplied binding, returning the result. The script will be parsed,
+     * compiled to bytecode and then executed by this invocation.
+     *
+     * @param script  the script to be executed.
+     * @param binding the binding associated with script compilation and execution.
+     * @return the typed result returned by the script, which may contain null if the script returned null or did not return any result.
+     */
+    public static <B> TypedValue executeWithResult(String script, B binding) {
+        return executeWithResult(new StringResource(script), binding);
+    }
+
+    /**
      * Evaluates a script and executes it immediately using the supplied binding type and binding. The script will be parsed, compiled to bytecode and then executed
      * by this invocation.
      *
@@ -163,6 +178,18 @@ public class Universal implements Logger {
     @SuppressWarnings("unchecked")
     public static <B, T> T execute(Resource script, B binding) {
         return (T) execute(Object.class, script, binding);
+    }
+
+    /**
+     * Evaluates a script and executes it immediately using the supplied binding, returning the result. The script will be parsed,
+     * compiled to bytecode and then executed by this invocation.
+     *
+     * @param script  the script resource to be executed.
+     * @param binding the binding associated with script compilation and execution.
+     * @return the typed result returned by the script, which may contain null if the script returned null or did not return any result.
+     */
+    public static <B> TypedValue executeWithResult(Resource script, B binding) {
+        return executeWithResult(Object.class, script, binding);
     }
 
     /**
@@ -267,6 +294,20 @@ public class Universal implements Logger {
     }
 
     /**
+     * Evaluates a script and executes it immediately using the supplied binding, returning the result. The script will be parsed,
+     * compiled to bytecode and then executed by this invocation.
+     *
+     * @param resultType the raw type of the result expected from execution of the script: either directly or through type
+     *                   conversion applied to the result.
+     * @param script     the script resource to be executed.
+     * @param binding    the binding associated with script compilation and execution, which may be null.
+     * @return the result returned by the script, guaranteed to be checked or converted to match the requested type, which may contain null if the script returned null or did not return any result.
+     */
+    public static <B> TypedValue executeWithResult(Class<?> resultType, Resource script, B binding) {
+        return executeWithResult(resultType, script, binding == null ? null : (Class<B>) binding.getClass(), binding);
+    }
+
+    /**
      * Evaluates a script and executes it immediately using the supplied binding. The script will be parsed, compiled to bytecode and then executed
      * by this invocation.
      *
@@ -294,6 +335,31 @@ public class Universal implements Logger {
      */
     public static <B, T> T execute(Class<T> resultType, Resource script, Class<B> bindingType, B binding) {
         return execute(resultType, compile(script, bindingType), binding);
+    }
+
+    /**
+     * Evaluates a script and executes it immediately using the supplied binding, returning the result. The script will be parsed,
+     * compiled to bytecode and then executed by this invocation.
+     *
+     * @param resultType the raw type of the result expected from execution of the script: either directly or through type
+     *                   conversion applied to the result.
+     * @param script     the script resource to be executed.
+     * @param binding    the binding associated with script compilation and execution, which may be null.
+     * @return the result returned by the script, guaranteed to be checked or converted to match the requested type, which may contain null if the script returned null or did not return any result.
+     */
+    /**
+     * Evaluates a script and executes it immediately using the supplied binding, returning the result. The script will be parsed,
+     * ompiled to bytecode and then executed by this invocation.
+     *
+     * @param resultType  the type of the result expected from execution of the script: either directly or through type
+     *                    conversion applied to the result.
+     * @param script      the script resource to be executed.
+     * @param bindingType the type of binding on which the compiled unit will be based, which may not be null.
+     * @param binding     the binding associated with script compilation and execution, which may be null.
+     * @return the result returned by the script, guaranteed to be checked or converted to match the requested type, which may contain null if the script returned null or did not return any result.
+     */
+    public static <B> TypedValue executeWithResult(Class<?> resultType, Resource script, Class<B> bindingType, B binding) {
+        return executeWithResult(resultType, compile(script, bindingType), binding);
     }
 
     /**
@@ -342,6 +408,30 @@ public class Universal implements Logger {
 
         Object result = TypeUtil.invokeStaticMethod(compiledClasses.get(0), "main", script.getBindingType() != null ? new Object[] { binding } : null);
         return (T) result;
+    }
+
+    /**
+     * Executes a compiled script using the compatible binding specified.
+     *
+     * @param resultType the type of the result expected from execution of the script: either directly or through type
+     *                   conversion applied to the result.
+     * @param script     the compiled script, previously obtained via a call to <code>execute</code>.
+     * @param binding    the binding to be associated with execution, which may be null.
+     * @return the result returned by the script, converted to the requested result type if necessary.
+     */
+    @SuppressWarnings("unchecked")
+    public static <B> TypedValue executeWithResult(Class<?> resultType, CompiledUnit<B> script, B binding) {
+        if (script.getMessages().hasErrors()) {
+            throw new CompilationErrorsException(script.getMessages());
+        }
+
+        List<Class<?>> compiledClasses = script.getCompiledClasses();
+        if (compiledClasses.size() != 1) {
+            throw new IllegalStateException("It looks like the script compiled is not executable? Were there executable statements specified?");
+        }
+
+        Object result = TypeUtil.invokeStaticMethod(compiledClasses.get(0), "main", script.getBindingType() != null ? new Object[] { binding } : null);
+        return new Result(SystemTypeConverter.getInstance(), script.getResultType(), result);
     }
 
     /**

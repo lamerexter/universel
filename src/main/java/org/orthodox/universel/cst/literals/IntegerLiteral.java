@@ -1,9 +1,7 @@
 package org.orthodox.universel.cst.literals;
 
-import org.orthodox.universel.cst.Expression;
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.TokenImage;
-import org.orthodox.universel.cst.UniversalCodeVisitor;
+import org.orthodox.universel.cst.*;
+import org.orthodox.universel.cst.type.reference.ResolvedTypeReferenceOld;
 
 import java.math.BigInteger;
 
@@ -39,6 +37,12 @@ public abstract class IntegerLiteral extends Expression implements NumericLitera
         }
     }
 
+    @Override
+    public Type getType() {
+        return new ResolvedTypeReferenceOld(getTokenImage(), getLiteralValueClass());
+    }
+
+    @Override
     public Class<?> getTypeDescriptor() {
         return getLiteralValueClass();
     }

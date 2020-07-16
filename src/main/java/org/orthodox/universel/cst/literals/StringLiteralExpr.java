@@ -1,9 +1,7 @@
 package org.orthodox.universel.cst.literals;
 
-import org.orthodox.universel.cst.Expression;
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.TokenImage;
-import org.orthodox.universel.cst.UniversalCodeVisitor;
+import org.orthodox.universel.cst.*;
+import org.orthodox.universel.cst.type.reference.ResolvedTypeReferenceOld;
 
 /**
  * A string literal on the Abstract Syntax Tree.
@@ -56,6 +54,12 @@ public class StringLiteralExpr extends Expression {
         return getTokenImage() == null ? null : getTokenImage().getImage().substring(getDelimeter().length(), getTokenImage().getImage().length()-getDelimeter().length());
     }
 
+    @Override
+    public Type getType() {
+        return new ResolvedTypeReferenceOld(getTokenImage(), String.class);
+    }
+
+    @Override
     public Class<?> getTypeDescriptor() {
         return String.class;
     }

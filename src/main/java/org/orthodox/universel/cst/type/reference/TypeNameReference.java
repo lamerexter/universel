@@ -35,6 +35,8 @@ import org.orthodox.universel.cst.TokenImage;
  * Represents a type reference by name only. This is usually used for types being compiled at the time.
  */
 public class TypeNameReference extends TypeReference {
+    private final NamePath name;
+
     /**
      * Constructs a new named type reference on the Abstract Syntax Tree (AST).
      *
@@ -42,6 +44,17 @@ public class TypeNameReference extends TypeReference {
      * @param name the name of the referenced type, which must be fully qualified.
      */
     public TypeNameReference(TokenImage tokenImage, NamePath name) {
-        super(tokenImage, name);
+        super(tokenImage);
+        this.name = name;
+    }
+
+    /**
+     * Gets the fully qualified name of the type including any package name prefix, such as <code>java.lang.String</code>
+     *
+     * @return the fully qualified name of the type.
+     */
+    @Override
+    public NamePath getName() {
+        return name;
     }
 }

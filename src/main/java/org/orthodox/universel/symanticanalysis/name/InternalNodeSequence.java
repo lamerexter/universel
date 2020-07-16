@@ -29,7 +29,6 @@
 package org.orthodox.universel.symanticanalysis.name;
 
 import org.beanplanet.core.collections.ListBuilder;
-import org.beanplanet.core.lang.TypeUtil;
 import org.beanplanet.core.models.Builder;
 import org.orthodox.universel.cst.CompositeNode;
 import org.orthodox.universel.cst.Node;
@@ -74,14 +73,23 @@ public class InternalNodeSequence extends Node implements CompositeNode {
     }
 
     @Override
+    public Type getType() {
+        if ( super.getType() != null ) return super.getType();
+
+        if ( resultType != null ) return resultType;
+
+        return isEmpty() ? null : nodes.get(nodes.size()-1).getType();
+    }
+
+    @Override
     public Class<?> getTypeDescriptor() {
         if ( super.getTypeDescriptor() != null ) return super.getTypeDescriptor();
 
-        if ( resultType != null && loadClassOrNull(resultType.getFullyQualifiedName().join(".")) != null ) {
-            return loadClassOrNull( resultType.getFullyQualifiedName().join(".") );
+        if ( resultType != null && loadClassOrNull(resultType.getName().join(".")) != null ) {
+            return loadClassOrNull( resultType.getName().join(".") );
         }
 
-        return nodes.isEmpty() ? null : nodes.get(nodes.size()-1).getTypeDescriptor();
+        return isEmpty() ? null : nodes.get(nodes.size()-1).getTypeDescriptor();
     }
 
     public Type getResultType() {

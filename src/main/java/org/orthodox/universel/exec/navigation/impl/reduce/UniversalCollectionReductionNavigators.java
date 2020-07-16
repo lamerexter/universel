@@ -39,13 +39,13 @@ import org.orthodox.universel.ast.navigation.ArrayNodeTest;
 import org.orthodox.universel.ast.navigation.ListNodeTest;
 import org.orthodox.universel.ast.navigation.NavigationStep;
 import org.orthodox.universel.ast.navigation.SetNodeTest;
-import org.orthodox.universel.cst.JavaType;
 import org.orthodox.universel.cst.Name;
 import org.orthodox.universel.cst.Node;
+import org.orthodox.universel.cst.ParameterisedTypeImpl;
 import org.orthodox.universel.cst.methods.GeneratedStaticLambdaFunction;
 import org.orthodox.universel.cst.methods.LambdaFunction;
 import org.orthodox.universel.cst.type.Parameter;
-import org.orthodox.universel.cst.type.reference.ResolvedTypeReference;
+import org.orthodox.universel.cst.type.reference.ResolvedTypeReferenceOld;
 import org.orthodox.universel.cst.type.reference.TypeReference;
 import org.orthodox.universel.exec.navigation.Navigator;
 import org.orthodox.universel.exec.navigation.ReductionNavigator;
@@ -70,17 +70,18 @@ public class UniversalCollectionReductionNavigators {
     public static Node toListReduction(final Class<?> fromType, final NavigationStep<ListNodeTest> step) {
         return InternalNodeSequence.builder()
                                    .add(new InstanceMethodCall(step.getTokenImage(),
-                                                               new ResolvedTypeReference(step.getTokenImage(), Stream.class),
-                                                               new ResolvedTypeReference(step.getTokenImage(), Object.class),
+                                                               new ResolvedTypeReferenceOld(step.getTokenImage(), Stream.class),
+                                                               new ResolvedTypeReferenceOld(step.getTokenImage(), Object.class),
                                                                "collect",
-                                                               singletonList(new ResolvedTypeReference(step.getTokenImage(), Collector.class)),
+                                                               singletonList(new ResolvedTypeReferenceOld(step.getTokenImage(), Collector.class)),
                                                                singletonList(new StaticMethodCall(step.getTokenImage(),
-                                                                                                  new ResolvedTypeReference(step.getTokenImage(), Collectors.class),
-                                                                                                  new ResolvedTypeReference(step.getTokenImage(), Collector.class),
+                                                                                                  new ResolvedTypeReferenceOld(step.getTokenImage(), Collectors.class),
+                                                                                                  new ResolvedTypeReferenceOld(step.getTokenImage(), Collector.class),
                                                                                                   "toList"
                                                                ))
                                    ))
-                                   .resultType(new JavaType(List.class))
+                                   .resultType(new ParameterisedTypeImpl(new ResolvedTypeReferenceOld(step.getTokenImage(), List.class),
+                                                                         asList(new ResolvedTypeReferenceOld(step.getTokenImage(), fromType))))
                                    .build();
     }
 
@@ -88,35 +89,35 @@ public class UniversalCollectionReductionNavigators {
     public static Node toSetReduction(final Class<?> fromType, final NavigationStep<SetNodeTest> step) {
         return InternalNodeSequence.builder()
                                    .add(new InstanceMethodCall(step.getTokenImage(),
-                                                               new ResolvedTypeReference(step.getTokenImage(), Stream.class),
-                                                               new ResolvedTypeReference(step.getTokenImage(), Object.class),
+                                                               new ResolvedTypeReferenceOld(step.getTokenImage(), Stream.class),
+                                                               new ResolvedTypeReferenceOld(step.getTokenImage(), Object.class),
                                                                "collect",
-                                                               singletonList(new ResolvedTypeReference(step.getTokenImage(), Collector.class)),
+                                                               singletonList(new ResolvedTypeReferenceOld(step.getTokenImage(), Collector.class)),
                                                                singletonList(new StaticMethodCall(step.getTokenImage(),
-                                                                                                  new ResolvedTypeReference(step.getTokenImage(), Collectors.class),
-                                                                                                  new ResolvedTypeReference(step.getTokenImage(), Collector.class),
+                                                                                                  new ResolvedTypeReferenceOld(step.getTokenImage(), Collectors.class),
+                                                                                                  new ResolvedTypeReferenceOld(step.getTokenImage(), Collector.class),
                                                                                                   "toSet"
                                                                ))
                                    ))
-                                   .resultType(new JavaType(Set.class))
+                                   .resultType(new ResolvedTypeReferenceOld(Set.class))
                                    .build();
     }
 
     @ReductionNavigator(axis = "default", collectionType = Object[].class)
     public static Node toArrayReduction(final Class<?> fromType, final NavigationStep<ArrayNodeTest> step) {
-        TypeReference arrayType = new ResolvedTypeReference(step.getTokenImage(), forName(fromType, 1));
+        TypeReference arrayType = new ResolvedTypeReferenceOld(step.getTokenImage(), forName(fromType, 1));
 
         if (TypeUtil.isPrimitiveType(fromType)) {
             return InternalNodeSequence.builder()
                                        .add(new InstanceMethodCall(step.getTokenImage(),
-                                                                   new ResolvedTypeReference(step.getTokenImage(), Stream.class),
-                                                                   new ResolvedTypeReference(step.getTokenImage(), Object.class),
+                                                                   new ResolvedTypeReferenceOld(step.getTokenImage(), Stream.class),
+                                                                   new ResolvedTypeReferenceOld(step.getTokenImage(), Object.class),
                                                                    "collect",
-                                                                   singletonList(new ResolvedTypeReference(step.getTokenImage(), Collector.class)),
+                                                                   singletonList(new ResolvedTypeReferenceOld(step.getTokenImage(), Collector.class)),
                                                                    singletonList(
                                                                        new StaticMethodCall(step.getTokenImage(),
-                                                                                            new ResolvedTypeReference(step.getTokenImage(), StreamUtil.class),
-                                                                                            new ResolvedTypeReference(step.getTokenImage(), Collector.class),
+                                                                                            new ResolvedTypeReferenceOld(step.getTokenImage(), StreamUtil.class),
+                                                                                            new ResolvedTypeReferenceOld(step.getTokenImage(), Collector.class),
                                                                                             "to" + StringUtil.initCap(fromType.getSimpleName()) + "Array"
                                                                        )
 
@@ -130,14 +131,14 @@ public class UniversalCollectionReductionNavigators {
                                                                                new SimpleNamePath("nav$step", "999", "fio"),
                                                                                NodeSequence.<Parameter>builder()
                                                                                    .add(new Parameter(valueOf(FINAL),
-                                                                                                      new ResolvedTypeReference(step.getTokenImage(), int.class),
+                                                                                                      new ResolvedTypeReferenceOld(step.getTokenImage(), int.class),
                                                                                                       false,
                                                                                                       new Name(step.getTokenImage(), "arraySize")
                                                                                    ))
                                                                                    .build(),
                                                                                NodeSequence.builder()
                                                                                            .add(new ReturnStatement(new ArrayCreationExpression(step.getTokenImage(),
-                                                                                                                                                new ResolvedTypeReference(step.getTokenImage(), fromType),
+                                                                                                                                                new ResolvedTypeReferenceOld(step.getTokenImage(), fromType),
                                                                                                                                                 asList(new LoadLocal(step.getTokenImage(), int.class, 0)),
                                                                                                                                                 null
                                                                                            )
@@ -147,10 +148,10 @@ public class UniversalCollectionReductionNavigators {
 
             return InternalNodeSequence.builder()
                                        .add(new InstanceMethodCall(step.getTokenImage(),
-                                                                   new ResolvedTypeReference(step.getTokenImage(), Stream.class),
-                                                                   new ResolvedTypeReference(step.getTokenImage(), Object[].class),
+                                                                   new ResolvedTypeReferenceOld(step.getTokenImage(), Stream.class),
+                                                                   new ResolvedTypeReferenceOld(step.getTokenImage(), Object[].class),
                                                                    "toArray",
-                                                                   singletonList(new ResolvedTypeReference(step.getTokenImage(), IntFunction.class)),
+                                                                   singletonList(new ResolvedTypeReferenceOld(step.getTokenImage(), IntFunction.class)),
                                                                    singletonList(new FunctionalInterfaceObject(step.getTokenImage(),
                                                                                                                IntFunction.class,
                                                                                                                Object.class, //forName(fromType, 1),

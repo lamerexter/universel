@@ -6,6 +6,7 @@ import org.beanplanet.messages.domain.Messages;
 import org.orthodox.universel.UniversalException;
 import org.orthodox.universel.cst.Node;
 import org.orthodox.universel.cst.ParseTree;
+import org.orthodox.universel.cst.Type;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -91,4 +92,7 @@ public class CompiledUnit<B> {
         }
     }
 
+    public Type getResultType() {
+        return getAstNode().getType();
+    }
 }

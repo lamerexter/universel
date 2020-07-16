@@ -30,13 +30,16 @@ package org.orthodox.universel.exec.navigation.axis.standard.bean.property.neste
 
 import org.junit.jupiter.api.Test;
 import org.orthodox.universel.BeanWithProperties;
+import org.orthodox.universel.cst.ParameterisedType;
+import org.orthodox.universel.exec.TypedValue;
 
 import java.util.List;
 
 import static java.util.Arrays.asList;
-import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.orthodox.universel.Universal.execute;
+import static org.orthodox.universel.Universal.executeWithResult;
 
 public class MultiStepListPropertyNavigationTest {
     @Test
@@ -49,7 +52,17 @@ public class MultiStepListPropertyNavigationTest {
         );
         final BeanWithProperties binding = new BeanWithProperties().withReferenceListProperty(collection);
 
+        // When
+
         // Then
-        assertThat(execute("referenceListProperty\\typeProperty\\[]", binding), equalTo(asList(String.class, Integer.class, void.class)));
+        TypedValue result = executeWithResult("referenceListProperty\\typeProperty\\[]", binding);
+
+        assertThat(result.getValue(), equalTo(asList(String.class, Integer.class, void.class)));
+        assertThat(result.getValueType(), instanceOf(ParameterisedType.class));
+
+        ParameterisedType resultPt = (ParameterisedType)result.getValueType();
+        assertThat(resultPt.getRawType().getTypeClass(), equalTo(List.class));
+        assertThat(resultPt.getTypeParameters().size(), equalTo(1));
+        assertThat(resultPt.getTypeParameters().get(0).getTypeClass(), equalTo(Class.class));
     }
 }

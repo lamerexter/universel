@@ -67,7 +67,7 @@ public class UnresolvedNavigationTest {
         assertThat(compiledUnit.hasErrors(), is(true));
 
         Script script = (Script) compiledUnit.getAstNode();
-        NavigationStream ns = (NavigationStream)script.getBodyElements().get(0);
+        NavigationStream ns = (NavigationStream)script.getBody().getNodes().get(0);
 
         assertThat(compiledUnit.getMessages().hasErrorWithCode(UNRESOLVED_STEP.getCode()), is(true));
         assertThat(compiledUnit.getMessages().findErrorWithCode(UNRESOLVED_STEP.getCode()).get().getRelatedObject() instanceof Node, is(true));
@@ -80,7 +80,7 @@ public class UnresolvedNavigationTest {
         assertThat(compiledUnit.hasErrors(), is(true));
 
         Script script = (Script) compiledUnit.getAstNode();
-        NavigationStream ns = (NavigationStream)script.getBodyElements().get(0);
+        NavigationStream ns = (NavigationStream)script.getBody().getChildNodes().get(0);
 
         assertThat(compiledUnit.getMessages().hasErrorWithCode(UNRESOLVED_STEP.getCode()), is(true));
         assertThat(compiledUnit.getMessages().findErrorWithCode(UNRESOLVED_STEP.getCode()).get().getRelatedObject() instanceof Node, is(true));
@@ -93,7 +93,7 @@ public class UnresolvedNavigationTest {
         assertThat(compiledUnit.hasErrors(), is(true));
 
         Script script = (Script) compiledUnit.getAstNode();
-        NavigationStream ns = (NavigationStream)script.getBodyElements().get(0);
+        NavigationStream ns = (NavigationStream)script.getBody().getChildNodes().get(0);
 
         assertThat(compiledUnit.getMessages().hasErrorWithCode(UNRESOLVED_STEP.getCode()), is(true));
         assertThat(compiledUnit.getMessages().findErrorWithCode(UNRESOLVED_STEP.getCode()).get().getRelatedObject() instanceof Node, is(true));
@@ -106,7 +106,7 @@ public class UnresolvedNavigationTest {
         assertThat(compiledUnit.hasErrors(), is(true));
 
         Script script = (Script) compiledUnit.getAstNode();
-        NavigationStream ns = (NavigationStream)script.getBodyElements().get(0);
+        NavigationStream ns = (NavigationStream)script.getBody().getChildNodes().get(0);
 
         assertThat(compiledUnit.getMessages().hasErrorWithCode(UNRESOLVED_STEP.getCode()), is(true));
         assertThat(compiledUnit.getMessages().findErrorWithCode(UNRESOLVED_STEP.getCode()).get().getRelatedObject() instanceof Node, is(true));
@@ -119,7 +119,7 @@ public class UnresolvedNavigationTest {
         assertThat(compiledUnit.hasErrors(), is(true));
 
         Script script = (Script) compiledUnit.getAstNode();
-        NavigationStream ns = (NavigationStream)script.getBodyElements().get(0);
+        NavigationStream ns = (NavigationStream)script.getBody().getChildNodes().get(0);
 
         assertThat(compiledUnit.getMessages().hasErrorWithCode(UNRESOLVED_STEP.getCode()), is(true));
         assertThat(compiledUnit.getMessages().findErrorWithCode(UNRESOLVED_STEP.getCode()).get().getRelatedObject() instanceof Node, is(true));

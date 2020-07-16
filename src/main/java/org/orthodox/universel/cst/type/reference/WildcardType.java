@@ -28,7 +28,10 @@
 
 package org.orthodox.universel.cst.type.reference;
 
+import org.beanplanet.core.models.path.NamePath;
 import org.orthodox.universel.cst.TokenImage;
+
+import java.util.Objects;
 
 /**
  * AST representation of a wildcard type.
@@ -43,7 +46,7 @@ public final class WildcardType extends TypeReference {
    private final TypeReference sup;
 
    public WildcardType(TokenImage tokenImage, TypeReference ext, TypeReference sup) {
-       super(tokenImage, null);
+       super(tokenImage);
        assert ext == null || sup == null;
        this.ext = ext;
        this.sup = sup;
@@ -66,4 +69,39 @@ public final class WildcardType extends TypeReference {
    public TypeReference getSuper() {
        return sup;
    }
+
+    /**
+     * Gets the fully qualified name of the type including any package name prefix, such as <code>java.lang.String</code>
+     *
+     * @return the fully qualified name of the type.
+     */
+    @Override
+    public NamePath getName() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Gets the arity of dimensions for an array type reference.
+     *
+     * @return the arity of dimensions for an array type reference. which may be zero if the type referred to is not an array.
+     */
+    @Override
+    public int getDimensions() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (!(o instanceof WildcardType)) return false;
+        if (!super.equals(o)) return false;
+        WildcardType that = (WildcardType) o;
+        return Objects.equals(ext, that.ext) &&
+               Objects.equals(sup, that.sup);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), ext, sup);
+    }
 }

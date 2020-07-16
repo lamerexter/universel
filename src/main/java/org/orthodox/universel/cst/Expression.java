@@ -1,6 +1,6 @@
 package org.orthodox.universel.cst;
 
-import org.orthodox.universel.cst.type.reference.ResolvedTypeReference;
+import org.orthodox.universel.cst.type.reference.ResolvedTypeReferenceOld;
 import org.orthodox.universel.cst.type.reference.TypeReference;
 
 /**
@@ -23,7 +23,7 @@ public class Expression extends Node {
      * @param typeDescriptor the type of the node, or null if unknown at this time.
      */
     public Expression(TokenImage tokenImage, Class<?> typeDescriptor) {
-        this(tokenImage, new ResolvedTypeReference(tokenImage, typeDescriptor));
+        this(tokenImage, new ResolvedTypeReferenceOld(tokenImage, typeDescriptor));
     }
 
     /**
@@ -32,7 +32,7 @@ public class Expression extends Node {
      * @param tokenImage the parser token image backing this node.
      * @param type  the type of the node, or null if unknown at this time.
      */
-    public Expression(TokenImage tokenImage, TypeReference type) {
+    public Expression(TokenImage tokenImage, Type type) {
         super(tokenImage, type);
     }
 }

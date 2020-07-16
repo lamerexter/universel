@@ -33,11 +33,15 @@ import org.orthodox.universel.ast.InstanceMethodCall;
 import org.orthodox.universel.ast.navigation.NameTest;
 import org.orthodox.universel.ast.navigation.NavigationStep;
 import org.orthodox.universel.cst.Node;
+import org.orthodox.universel.cst.type.reference.ResolvedTypeReferenceOld;
+import org.orthodox.universel.cst.type.reference.TypeReference;
 import org.orthodox.universel.exec.navigation.MappingNavigator;
 import org.orthodox.universel.exec.navigation.Navigator;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
+
+import static org.orthodox.universel.cst.TypeInferenceUtil.*;
 
 @Navigator
 public class UniversalBeanNavigators {
@@ -48,6 +52,9 @@ public class UniversalBeanNavigators {
 
         PropertyDescriptor propertyDescriptor = properties.assertAndGetReadablePropertyDescriptor(step.getNodeTest().getName());
         Method readMethod = propertyDescriptor.getReadMethod();
-        return new InstanceMethodCall(readMethod.getReturnType(), step.getTokenImage(), readMethod.getDeclaringClass(), readMethod.getName());
+        return new InstanceMethodCall(step.getTokenImage(),
+                                      new ResolvedTypeReferenceOld(step.getTokenImage(), readMethod.getDeclaringClass()),
+                                      (TypeReference) resolveType(readMethod.getGenericReturnType()),
+                                      readMethod.getName());
     }
 }

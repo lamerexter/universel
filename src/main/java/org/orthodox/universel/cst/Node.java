@@ -28,7 +28,7 @@
 package org.orthodox.universel.cst;
 
 import org.orthodox.universel.ast.AstVisitor;
-import org.orthodox.universel.cst.type.reference.ResolvedTypeReference;
+import org.orthodox.universel.cst.type.reference.ResolvedTypeReferenceOld;
 import org.orthodox.universel.cst.type.reference.TypeReference;
 
 import java.util.Objects;
@@ -51,7 +51,7 @@ public abstract class Node implements UniversalCodeVisitable {
 
 //    protected Class<?> typeDescriptor;
 
-    private TypeReference type;
+    private Type type;
 
 
     /**
@@ -85,7 +85,7 @@ public abstract class Node implements UniversalCodeVisitable {
      * @param tokenImage the parser token image backing this node.
      * @param type  the type of the node, or null if unknown at this time.
      */
-    public Node(TokenImage tokenImage, TypeReference type) {
+    public Node(TokenImage tokenImage, Type type) {
         this(null, tokenImage, type);
     }
 
@@ -100,7 +100,7 @@ public abstract class Node implements UniversalCodeVisitable {
         this.parent = parent;
         this.tokenImage = tokenImage;
 //        this.typeDescriptor = typeDescriptor;
-        this.type = typeDescriptor == null ? null : new ResolvedTypeReference(tokenImage, typeDescriptor);
+        this.type = typeDescriptor == null ? null : new ResolvedTypeReferenceOld(tokenImage, typeDescriptor);
     }
 
     /**
@@ -110,7 +110,7 @@ public abstract class Node implements UniversalCodeVisitable {
      * @param tokenImage the parser token image backing this node.
      * @param type the type of the node, or null if unknown at this time.
      */
-    public Node(Node parent, TokenImage tokenImage, TypeReference type) {
+    public Node(Node parent, TokenImage tokenImage, Type type) {
         this.parent = parent;
         this.tokenImage = tokenImage;
 //        this.typeDescriptor = null;
@@ -185,15 +185,15 @@ public abstract class Node implements UniversalCodeVisitable {
 
     public Class<?> getTypeDescriptor() {
 //        return typeDescriptor;
-        return getType() == null ? null : getType().getTypeDescriptor();
+        return getType() == null ? null : getType().getTypeClass();
     }
 
     /**
-     * Returns the type associated with this node.
+     * Returns the established static type of the node.
      *
-     * @return the static type of the node.
+     * @return the node's type, or null if the type cannot be determined at this time.
      */
-    public TypeReference getType() {
+    public Type getType() {
         return type;
     }
 

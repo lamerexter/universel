@@ -30,7 +30,7 @@ package org.orthodox.universel.ast;
 
 import org.beanplanet.core.collections.ListBuilder;
 import org.orthodox.universel.cst.*;
-import org.orthodox.universel.cst.type.reference.ResolvedTypeReference;
+import org.orthodox.universel.cst.type.reference.ResolvedTypeReferenceOld;
 import org.orthodox.universel.cst.type.reference.TypeReference;
 
 import java.util.Collections;
@@ -108,10 +108,10 @@ public class StaticMethodCall extends Expression implements CompositeNode {
      */
     public StaticMethodCall(Class<?> typeDescriptor, TokenImage tokenImage, Class<?> declaringClass, String name, List<Node> parameters) {
         this(tokenImage,
-             new ResolvedTypeReference(tokenImage, declaringClass),
-             new ResolvedTypeReference(tokenImage, typeDescriptor),
+             new ResolvedTypeReferenceOld(tokenImage, declaringClass),
+             new ResolvedTypeReferenceOld(tokenImage, typeDescriptor),
              name,
-             parameters.stream().map(p -> new ResolvedTypeReference(p.getTokenImage(), p.getTypeDescriptor())).collect(Collectors.toList()),
+             parameters.stream().map(p -> new ResolvedTypeReferenceOld(p.getTokenImage(), p.getTypeDescriptor())).collect(Collectors.toList()),
              parameters
         );
     }
@@ -128,10 +128,10 @@ public class StaticMethodCall extends Expression implements CompositeNode {
      */
     public StaticMethodCall(Class<?> typeDescriptor, TokenImage tokenImage, Class<?> declaringClass, String name, List<Class<?>> parameterClasses, List<Node> parameters) {
         this(tokenImage,
-             new ResolvedTypeReference(tokenImage, declaringClass),
-             new ResolvedTypeReference(tokenImage, typeDescriptor),
+             new ResolvedTypeReferenceOld(tokenImage, declaringClass),
+             new ResolvedTypeReferenceOld(tokenImage, typeDescriptor),
              name,
-             IntStream.range(0, parameterClasses.size()).mapToObj(i -> new ResolvedTypeReference(parameters.get(i).getTokenImage(), parameterClasses.get(0))).collect(Collectors.toList()),
+             IntStream.range(0, parameterClasses.size()).mapToObj(i -> new ResolvedTypeReferenceOld(parameters.get(i).getTokenImage(), parameterClasses.get(0))).collect(Collectors.toList()),
              parameters
         );
     }
@@ -175,7 +175,7 @@ public class StaticMethodCall extends Expression implements CompositeNode {
         this.declaringType = declaringType;
         this.returnType = returnType;
         this.name = name;
-        this.parameterTypes = IntStream.range(0, parameterClasses.size()).mapToObj(i -> new ResolvedTypeReference(parameters.get(i).getTokenImage(), parameterClasses.get(0))).collect(Collectors.toList());
+        this.parameterTypes = IntStream.range(0, parameterClasses.size()).mapToObj(i -> new ResolvedTypeReferenceOld(parameters.get(i).getTokenImage(), parameterClasses.get(0))).collect(Collectors.toList());
         this.parameters = parameters;
     }
 

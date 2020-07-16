@@ -29,7 +29,7 @@
 package org.orthodox.universel.ast;
 
 import org.orthodox.universel.cst.*;
-import org.orthodox.universel.cst.type.reference.ResolvedTypeReference;
+import org.orthodox.universel.cst.type.reference.ResolvedTypeReferenceOld;
 import org.orthodox.universel.cst.type.reference.TypeReference;
 
 import java.util.List;
@@ -66,12 +66,12 @@ public class InstanceMethodCall extends Expression implements CompositeNode {
 
 
     /** The enclosing type within which the instance method is declared. */
-    private final Class<?> declaringClass;
+//    private final Class<?> declaringClass;
 
     /**
      * The types of parameters of this method call.
      */
-    private final List<Class<?>> parameterClasses;
+//    private final List<Class<?>> parameterClasses;
 
     /**
      * Constructs an instance method call expression, consisting of a name zero parameters.
@@ -123,12 +123,12 @@ public class InstanceMethodCall extends Expression implements CompositeNode {
      */
     public InstanceMethodCall(Class<?> typeDescriptor, TokenImage tokenImage, Class<?> declaringClass, String name, List<Class<?>> parameterClasses, List<Node> parameters) {
         super(tokenImage, typeDescriptor);
-        this.declaringClass = declaringClass;
-        this.parameterClasses = parameterClasses;
+//        this.declaringClass = declaringClass;
+//        this.parameterClasses = parameterClasses;
 
-        this.declaringType = new ResolvedTypeReference(tokenImage, declaringClass);
-        this.returnType = new ResolvedTypeReference(tokenImage, typeDescriptor);
-        this.parameterTypes = IntStream.range(0, parameterClasses.size()).mapToObj(i -> new ResolvedTypeReference(parameters.get(i).getTokenImage(), parameterClasses.get(0))).collect(Collectors.toList());
+        this.declaringType = new ResolvedTypeReferenceOld(tokenImage, declaringClass);
+        this.returnType = new ResolvedTypeReferenceOld(tokenImage, typeDescriptor);
+        this.parameterTypes = IntStream.range(0, parameterClasses.size()).mapToObj(i -> new ResolvedTypeReferenceOld(parameters.get(i).getTokenImage(), parameterClasses.get(0))).collect(Collectors.toList());
         this.name = name;
         this.parameters = parameters;
     }
@@ -164,14 +164,15 @@ public class InstanceMethodCall extends Expression implements CompositeNode {
                               String name,
                               List<TypeReference> parameterTypes,
                               List<Node> parameters) {
-        super(tokenImage);
-        this.declaringClass = declaringType.getTypeDescriptor();
-        this.parameterClasses = parameterTypes.stream().map(Node::getTypeDescriptor).collect(Collectors.toList());
+        super(tokenImage, returnType);
+//        this.declaringClass = declaringType.getTypeDescriptor();
+//        this.parameterClasses = parameterTypes.stream().map(Node::getTypeDescriptor).collect(Collectors.toList());
 
         this.declaringType = declaringType;
         this.returnType = returnType;
         this.name = name;
-        this.parameterTypes = IntStream.range(0, parameterClasses.size()).mapToObj(i -> new ResolvedTypeReference(parameters.get(i).getTokenImage(), parameterClasses.get(0))).collect(Collectors.toList());
+//        this.parameterTypes = IntStream.range(0, parameterClasses.size()).mapToObj(i -> new ResolvedTypeReference(parameters.get(i).getTokenImage(), parameterClasses.get(0))).collect(Collectors.toList());
+        this.parameterTypes = parameterTypes;
         this.parameters = parameters;
     }
 
@@ -230,7 +231,7 @@ public class InstanceMethodCall extends Expression implements CompositeNode {
      * @return the enclosing type within which the instance method is declared.
      */
     public Class<?> getDeclaringClass() {
-        return declaringClass;
+        return declaringType == null ? null : declaringType.getTypeDescriptor();
     }
 
     /**
@@ -239,7 +240,7 @@ public class InstanceMethodCall extends Expression implements CompositeNode {
      * @return the types of parameters of this method call.
      */
     public List<Class<?>> getParameterClasses() {
-        return parameterClasses;
+        return parameterTypes.stream().map(Node::getTypeDescriptor).collect(Collectors.toList());
     }
 
     @SuppressWarnings("unchecked")
@@ -261,8 +262,7 @@ public class InstanceMethodCall extends Expression implements CompositeNode {
         if (!super.equals(o))
             return false;
         InstanceMethodCall nodes = (InstanceMethodCall) o;
-        return Objects.equals(declaringClass, nodes.declaringClass)
-               && Objects.equals(declaringType, nodes.declaringType)
+        return Objects.equals(declaringType, nodes.declaringType)
                && Objects.equals(returnType, nodes.returnType)
                && Objects.equals(name, nodes.name)
                && Objects.equals(parameterTypes, nodes.parameterTypes)
@@ -271,7 +271,7 @@ public class InstanceMethodCall extends Expression implements CompositeNode {
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), declaringClass, declaringType, returnType, name, parameterTypes, parameters);
+        return Objects.hash(super.hashCode(), declaringType, returnType, name, parameterTypes, parameters);
     }
 
 }

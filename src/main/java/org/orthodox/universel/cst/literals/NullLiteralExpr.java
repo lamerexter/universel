@@ -1,9 +1,6 @@
 package org.orthodox.universel.cst.literals;
 
-import org.orthodox.universel.cst.Expression;
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.TokenImage;
-import org.orthodox.universel.cst.UniversalCodeVisitor;
+import org.orthodox.universel.cst.*;
 
 import javax.lang.model.type.NullType;
 
@@ -11,6 +8,13 @@ import javax.lang.model.type.NullType;
  * A null literal (<i>null</i>) on the Abstract Syntax Tree.
  */
 public class NullLiteralExpr extends Expression {
+    /**
+     * Constructs a new null literal node with no associated token image.
+     */
+    public NullLiteralExpr() {
+        this(null, NullType.class);
+    }
+
     /**
      * Constructs a new null literal node from the given parser token image.
      *
@@ -28,6 +32,16 @@ public class NullLiteralExpr extends Expression {
      */
     public NullLiteralExpr(TokenImage tokenImage, Class<?> typeDescriptor) {
         super(tokenImage, typeDescriptor);
+    }
+
+    /**
+     * Constructs a new null literal node from the given parser token image and known type information.
+     *
+     * @param tokenImage the parser token image.
+     * @param type the type of the null expression, or null if unknown at this time.
+     */
+    public NullLiteralExpr(TokenImage tokenImage, Type type) {
+        super(tokenImage, type);
     }
 
     public Node accept(UniversalCodeVisitor visitor) {

@@ -38,10 +38,8 @@ import org.orthodox.universel.symanticanalysis.AbstractSemanticAnalyser;
 
 import java.util.Objects;
 
-import static org.beanplanet.core.lang.TypeUtil.isPrimitiveType;
 import static org.orthodox.universel.compiler.Messages.MethodDeclaration.IMPLICIT_RETURN_TYPE_MISMATCH;
 import static org.orthodox.universel.compiler.Messages.MethodDeclaration.MISSING_RETURN;
-import static org.orthodox.universel.compiler.TransformationUtil.autoBoxOrPromoteIfNecessary;
 
 /**
  * Looks at script and method bodies, adding return statements where necessary.
@@ -69,7 +67,7 @@ public class ImplicitReturnStatementDecorator extends AbstractSemanticAnalyser {
         //--------------------------------------------------------------------------------------------------------------
         // Method with one or more body statements, without a last return statement.
         //--------------------------------------------------------------------------------------------------------------
-        else if ( !(node.getBody().lastNode() instanceof ReturnStatement) && node.getBody().getTypeDescriptor() != null ) {
+        else if ( !(node.getBody().lastNode() instanceof ReturnStatement) && node.getReturnType() != null && node.getBody().getTypeDescriptor() != null ) {
             transformedBody = NodeSequence.builder()
                                           .tokenImage(node.getTokenImage())
                                           .addAll(node.getBody().getNodes().subList(0, node.getBody().size()-1))

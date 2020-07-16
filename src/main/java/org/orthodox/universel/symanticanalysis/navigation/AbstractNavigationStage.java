@@ -29,6 +29,7 @@
 package org.orthodox.universel.symanticanalysis.navigation;
 
 import org.orthodox.universel.cst.Node;
+import org.orthodox.universel.cst.Type;
 import org.orthodox.universel.cst.type.reference.TypeReference;
 
 import java.util.Objects;
@@ -73,7 +74,7 @@ public abstract class AbstractNavigationStage extends Node implements Navigation
         return node == null ? null : node.getTypeDescriptor();
     }
 
-    public TypeReference getType() {
+    public Type getType() {
         return node == null ? null : node.getType();
     }
 

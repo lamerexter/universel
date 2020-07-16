@@ -8,6 +8,8 @@ import org.beanplanet.messages.domain.Messages;
 import org.orthodox.universel.ast.navigation.NavigationStep;
 import org.orthodox.universel.cst.ImportStmt;
 import org.orthodox.universel.cst.Node;
+import org.orthodox.universel.cst.Type;
+import org.orthodox.universel.cst.type.reference.ResolvedTypeReferenceOld;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -17,7 +19,8 @@ import static java.util.Arrays.asList;
 import static org.beanplanet.core.util.IteratorUtil.asStream;
 
 public class CompilationContext implements NameScope {
-    private final Class<?> bindingType;
+    private final Type bindingType;
+//    private final Class<?> bindingClass;
     private final VirtualMachine virtualMachine;
     private final Deque<NameValue<Resource>> compiledClassResources = new ArrayDeque<>();
     private final Deque<NameScope> scopes = new ArrayDeque<>();
@@ -28,21 +31,27 @@ public class CompilationContext implements NameScope {
     private static final List<ImportStmt> DEFAULT_IMPORTS = asList(
         new ImportStmt(true, "java", "lang"),
         new ImportStmt(true, "java", "util"),
-        new ImportStmt(true, "java", "lang", "Math")
+        new ImportStmt(false, "java", "lang", "Math"),
+        new ImportStmt(false, "java", "math", "BigDecimal"),
+        new ImportStmt(false, "java", "math", "BigInteger")
     );
 
     private final List<ImportStmt> getDefaultImports = DEFAULT_IMPORTS;
 
-    public CompilationContext(final Class<?> bindingType,
+    public CompilationContext(final Class<?> bindingClass,
                               final VirtualMachine virtualMachine,
                               final Messages messages) {
-        this.bindingType = bindingType;
+        this.bindingType = bindingClass == null ? null : new ResolvedTypeReferenceOld(bindingClass);
         this.virtualMachine = virtualMachine;
         this.messages = messages;
     }
 
-    public Class<?> getBindingType() {
+    public Type getBindingType() {
         return bindingType;
+    }
+
+    public Class<?> getBindingClass() {
+        return bindingType == null ? null : bindingType.getTypeClass();
     }
 
     public Messages getMessages() {

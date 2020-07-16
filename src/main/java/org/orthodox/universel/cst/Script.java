@@ -29,14 +29,13 @@ package org.orthodox.universel.cst;
 
 import org.beanplanet.core.collections.ListBuilder;
 import org.orthodox.universel.ast.AstVisitor;
+import org.orthodox.universel.ast.NodeSequence;
 import org.orthodox.universel.ast.PackageDeclaration;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 import static java.util.Arrays.asList;
-import static org.beanplanet.core.util.ArrayUtil.asListOfNotNull;
 import static org.orthodox.universel.cst.TokenImage.range;
 
 /**
@@ -48,7 +47,7 @@ import static org.orthodox.universel.cst.TokenImage.range;
 public class Script extends Node implements CompositeNode {
     private final PackageDeclaration packageDeclaration;
     private final ImportDecl importDeclaration;
-    private final List<Node> bodyElements;
+    private final NodeSequence<Node> body;
 
     public Script(Node ... bodyElements) {
         this(null, null, asList(bodyElements));
@@ -59,10 +58,18 @@ public class Script extends Node implements CompositeNode {
     }
 
     public Script(PackageDeclaration packageDeclaration, ImportDecl importDecl, List<Node> bodyElements) {
-        super(range(packageDeclaration, importDecl, bodyElements));
+        this(packageDeclaration, importDecl, new NodeSequence<>(bodyElements));
+    }
+
+    public Script(PackageDeclaration packageDeclaration, ImportDecl importDecl, NodeSequence<Node> body) {
+        this(null, packageDeclaration, importDecl, body);
+    }
+
+    public Script(Type type, PackageDeclaration packageDeclaration, ImportDecl importDecl, NodeSequence<Node> body) {
+        super(range(packageDeclaration, importDecl, body), type);
         this.packageDeclaration = packageDeclaration;
         this.importDeclaration = importDecl;
-        this.bodyElements = bodyElements;
+        this.body = body;
     }
 
     public PackageDeclaration getPackageDeclaration() {
@@ -73,8 +80,8 @@ public class Script extends Node implements CompositeNode {
         return importDeclaration;
     }
 
-    public List<Node> getBodyElements() {
-        return bodyElements == null ? Collections.emptyList() : bodyElements;
+    public NodeSequence<Node> getBody() {
+        return body;
     }
 
     public Node accept(UniversalCodeVisitor visitor) {
@@ -85,9 +92,17 @@ public class Script extends Node implements CompositeNode {
         return visitor.visitScript(this);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<Node> getChildNodes() {
-        return ListBuilder.<Node>builder().addNotNull(packageDeclaration).addNotNull(importDeclaration).addAllNotNull(getBodyElements()).build();
+        return ListBuilder.<Node>builder().addNotNull(packageDeclaration).addNotNull(importDeclaration).addNotNull(getBody()).build();
+    }
+
+    @Override
+    public Type getType() {
+        if ( super.getType() != null ) return super.getType();
+
+        return body.getType();
     }
 
     @Override
@@ -101,11 +116,11 @@ public class Script extends Node implements CompositeNode {
         Script that = (Script) o;
         return Objects.equals(packageDeclaration, that.packageDeclaration)
                && Objects.equals(importDeclaration, that.importDeclaration)
-               && Objects.equals(bodyElements, that.bodyElements);
+               && Objects.equals(body, that.body);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), packageDeclaration, importDeclaration, bodyElements);
+        return Objects.hash(super.hashCode(), packageDeclaration, importDeclaration, body);
     }
 }

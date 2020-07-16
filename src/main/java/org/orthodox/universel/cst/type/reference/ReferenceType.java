@@ -28,6 +28,7 @@
 
 package org.orthodox.universel.cst.type.reference;
 
+import org.beanplanet.core.models.path.NamePath;
 import org.orthodox.universel.cst.CompositeNode;
 import org.orthodox.universel.cst.Node;
 import org.orthodox.universel.cst.TokenImage;
@@ -45,6 +46,7 @@ import static java.util.Collections.singletonList;
  */
 public final class ReferenceType extends TypeReference implements CompositeNode {
     private final TypeReference referredType;
+    private final int dimensions;
 
     /**
      * Constructs a new type AST type reference instance.
@@ -54,12 +56,33 @@ public final class ReferenceType extends TypeReference implements CompositeNode 
      * @param dimensions   the number of dimensions, if this is is an array type.
      */
     public ReferenceType(TokenImage tokenImage, TypeReference referredType, int dimensions) {
-        super(tokenImage, referredType.getName(), dimensions);
+        super(tokenImage);
         this.referredType = referredType;
+        this.dimensions = dimensions;
     }
 
     public TypeReference getReferredType() {
         return referredType;
+    }
+
+    /**
+     * Gets the fully qualified name of the type including any package name prefix, such as <code>java.lang.String</code>
+     *
+     * @return the fully qualified name of the type.
+     */
+    @Override
+    public NamePath getName() {
+        return getReferredType().getName();
+    }
+
+    /**
+     * Gets the arity of dimensions for an array type reference.
+     *
+     * @return the arity of dimensions for an array type reference. which may be zero if the type referred to is not an array.
+     */
+    @Override
+    public int getDimensions() {
+        return getReferredType().getDimensions()+dimensions;
     }
 
     /**
@@ -68,7 +91,7 @@ public final class ReferenceType extends TypeReference implements CompositeNode 
      * @return true if the type referred to is a reference type, false otherwise.
      */
     public boolean isReferenceType() {
-        return false;
+        return getReferredType().isReferenceType();
     }
 
     @Override
@@ -76,13 +99,14 @@ public final class ReferenceType extends TypeReference implements CompositeNode 
         if (this == o) return true;
         if (!(o instanceof ReferenceType)) return false;
         if (!super.equals(o)) return false;
-        ReferenceType that = (ReferenceType) o;
-        return Objects.equals(getReferredType(), that.getReferredType());
+        ReferenceType nodes = (ReferenceType) o;
+        return getDimensions() == nodes.getDimensions() &&
+               Objects.equals(getReferredType(), nodes.getReferredType());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), getReferredType());
+        return Objects.hash(super.hashCode(), getReferredType(), getDimensions());
     }
 
     @Override

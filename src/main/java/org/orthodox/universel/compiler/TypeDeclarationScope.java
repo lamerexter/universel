@@ -28,6 +28,7 @@
 
 package org.orthodox.universel.compiler;
 
+import org.beanplanet.core.models.path.NamePath;
 import org.orthodox.universel.ast.InstanceMethodCall;
 import org.orthodox.universel.ast.LoadLocal;
 import org.orthodox.universel.ast.StaticMethodCall;
@@ -35,6 +36,7 @@ import org.orthodox.universel.ast.navigation.NavigationAxis;
 import org.orthodox.universel.ast.navigation.NavigationStep;
 import org.orthodox.universel.cst.MethodCall;
 import org.orthodox.universel.cst.Node;
+import org.orthodox.universel.cst.Type;
 import org.orthodox.universel.cst.methods.MethodDeclaration;
 import org.orthodox.universel.cst.type.Parameter;
 import org.orthodox.universel.cst.type.declaration.TypeDeclaration;

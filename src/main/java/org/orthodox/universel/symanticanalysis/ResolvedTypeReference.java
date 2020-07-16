@@ -26,36 +26,36 @@
  *
  */
 
-package org.orthodox.universel.cst.type.declaration;
+package org.orthodox.universel.symanticanalysis;
 
 import org.beanplanet.core.models.path.NamePath;
+import org.orthodox.universel.cst.TokenImage;
+import org.orthodox.universel.cst.Type;
 import org.orthodox.universel.cst.type.reference.TypeReference;
 
 import java.util.Objects;
 
-/**
- * Represents a type reference to a {@link TypeDeclaration}.
- */
-public class TypeDeclarationReference extends TypeReference {
-    private final TypeDeclaration typeDeclaration;
+public class ResolvedTypeReference extends TypeReference {
+    private Type wrappedType;
 
     /**
-     * Constructs a new type AST resolved type reference instance.
+     * Constructs a new type AST type reference instance.
      *
-     * @param typeDeclaration the type referred to by the type reference.
+     * @param typeReference the referenced type.
      */
-    public TypeDeclarationReference(TypeDeclaration typeDeclaration) {
-        super(typeDeclaration.getTokenImage());
-        this.typeDeclaration = typeDeclaration;
+    public ResolvedTypeReference(final TypeReference typeReference) {
+        this(typeReference.getTokenImage(), typeReference);
     }
 
     /**
-     * Gets the type declaration associated with this type referece.
+     * Constructs a new type AST type reference instance.
      *
-     * @return the type declaration associsted with this type reference.
+     * @param tokenImage the image representing this cst type.
+     * @param type the referenced type.
      */
-    public TypeDeclaration getTypeDeclaration() {
-        return typeDeclaration;
+    public ResolvedTypeReference(final TokenImage tokenImage, final Type type) {
+        super(tokenImage);
+        this.wrappedType = type;
     }
 
     /**
@@ -65,38 +65,30 @@ public class TypeDeclarationReference extends TypeReference {
      */
     @Override
     public NamePath getName() {
-        return getTypeDeclaration().getFullyQualifiedName();
+        return wrappedType.getName();
     }
 
     /**
-     * Whether the type referred to is an interface type.
+     * Gets the arity of dimensions for an array type reference.
      *
-     * @return true if the type referred to is an interface, false otherwise.
+     * @return the arity of dimensions for an array type reference. which may be zero if the type referred to is not an array.
      */
-    public boolean isInterface() {
-        return typeDeclaration instanceof InterfaceDeclaration;
+    @Override
+    public int getDimensions() {
+        return wrappedType.getDimensions();
     }
 
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
-        if (!(o instanceof TypeDeclarationReference)) return false;
+        if (!(o instanceof ResolvedTypeReference)) return false;
         if (!super.equals(o)) return false;
-        TypeDeclarationReference that = (TypeDeclarationReference) o;
-        return Objects.equals(typeDeclaration, that.typeDeclaration);
+        ResolvedTypeReference that = (ResolvedTypeReference) o;
+        return Objects.equals(wrappedType, that.wrappedType);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), typeDeclaration);
-    }
-
-    /**
-     * Whether the type referred to is a sequence type (consists of a number of ordered elements).
-     *
-     * @return true if the referred component type is a sequence or this reference type has dimensions (is an array).
-     */
-    public boolean isSequence() {
-        return getTypeDeclaration().isSequance();
+        return Objects.hash(super.hashCode(), wrappedType);
     }
 }

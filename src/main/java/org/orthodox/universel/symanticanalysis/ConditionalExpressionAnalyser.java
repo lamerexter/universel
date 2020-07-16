@@ -112,6 +112,10 @@ public class ConditionalExpressionAnalyser extends UniversalVisitorAdapter imple
     }
 
     private Class<?> determineTypeOfReference(TypeReference node) {
+        if (node instanceof ArrayTypeReference) {
+            return null;
+        }
+
         //--------------------------------------------------------------------------------------------------------------
         // Find matching primitive types
         //--------------------------------------------------------------------------------------------------------------
@@ -220,19 +224,20 @@ public class ConditionalExpressionAnalyser extends UniversalVisitorAdapter imple
         return matchingTypes;
     }
 
-    @Override
-    public MethodDeclaration visitMethodDeclaration(MethodDeclaration node) {
+//    @Override
+    public MethodDeclaration visitMethodDeclaration_old(MethodDeclaration node) {
 //        if (node.getReturnType().getTypeDescriptor() != null && node.getParameters().getNodes().stream().map(Node::getTypeDescriptor).allMatch(Objects::nonNull)) return node;
 
         TypeReference transformedReturnTypeReference;
-        if ( node.getReturnType().getTypeDescriptor() != null ) {
+        if ( node.getReturnType() == null ) {
+            transformedReturnTypeReference = null;
+        }
+        else if ( node.getReturnType().getTypeDescriptor() != null ) {
             transformedReturnTypeReference = node.getReturnType();
         } else {
             Class<?> resolvedType = determineTypeOfReference(node.getReturnType());
-            transformedReturnTypeReference = resolvedType == null ? node.getReturnType() : new ResolvedTypeReference(node.getTokenImage(),
-                                                                                                                     resolvedType,
-                                                                                                                     node.getReturnType().getName(),
-                                                                                                                     node.getReturnType().getDimensions());
+            transformedReturnTypeReference = resolvedType == null ? node.getReturnType() : new ResolvedTypeReferenceOld(node.getTokenImage(),
+                                                                                                                        resolvedType);
 
         }
 
@@ -244,7 +249,7 @@ public class ConditionalExpressionAnalyser extends UniversalVisitorAdapter imple
                 resolvedTypeReference = parameter.getType();
             } else {
                 Class<?> resolvedType = determineTypeOfReference(parameter.getType());
-                resolvedTypeReference = resolvedType == null ? parameter.getType() : new ResolvedTypeReference(node.getTokenImage(), resolvedType, parameter.getType().getName(), parameter.getType().getDimensions());
+                resolvedTypeReference = resolvedType == null ? parameter.getType() : new ResolvedTypeReferenceOld(node.getTokenImage(), resolvedType);
             }
             transformedParametersList.add(new Parameter(parameter.getModifiers(), resolvedTypeReference, parameter.isVarArgs(), parameter.getName()));
         }
@@ -267,7 +272,8 @@ public class ConditionalExpressionAnalyser extends UniversalVisitorAdapter imple
 
     @Override
     public TypeReference visitTypeReference(TypeReference node) {
-        if (node instanceof ResolvedTypeReference) return node;
+        if (node instanceof ResolvedTypeReferenceOld) return node;
+        if (node instanceof ArrayTypeReference) return node;
 
         // TODO: Hack to make ScriptAssemblyTest work. A reference to the current type being compiled (i.e. the main class) cannot
         // possibly resolve to the class being compiled! This is an example of requiring the Class<?> to be available for
@@ -275,6 +281,6 @@ public class ConditionalExpressionAnalyser extends UniversalVisitorAdapter imple
         if (node instanceof TypeNameReference) return node;
 
         Class<?> resolvedType = determineTypeOfReference(node);
-        return new ResolvedTypeReference(node.getTokenImage(), resolvedType, node.getName(), node.getDimensions());
+        return new ResolvedTypeReferenceOld(node.getTokenImage(), resolvedType);
     }
 }

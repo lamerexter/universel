@@ -30,13 +30,12 @@ package org.orthodox.universel.ast;
 
 import org.beanplanet.core.collections.ListBuilder;
 import org.beanplanet.core.models.Builder;
-import org.orthodox.universel.cst.CompositeNode;
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.TokenImage;
-import org.orthodox.universel.cst.UniversalCodeVisitor;
+import org.orthodox.universel.cst.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
@@ -53,6 +52,11 @@ public class NodeSequence<T extends Node> extends Node implements CompositeNode 
 
     public NodeSequence(final TokenImage tokenImage, final List<T> nodes) {
         super(tokenImage);
+        this.nodes = nodes;
+    }
+
+    public NodeSequence(final TokenImage tokenImage, final Type resultType, final List<T> nodes) {
+        super(tokenImage, resultType);
         this.nodes = nodes;
     }
 
@@ -85,6 +89,21 @@ public class NodeSequence<T extends Node> extends Node implements CompositeNode 
         return (List<Node>)getNodes();
     }
 
+    public Type getResultType() {
+        return super.getType();
+    }
+
+    public Stream<T> stream() {
+        return nodes == null ? Collections.<T>emptyList().stream() : getNodes().stream();
+    }
+
+    @Override
+    public Type getType() {
+        if ( super.getType() != null ) return super.getType();
+
+        return isEmpty() ? null : nodes.get(nodes.size()-1).getType();
+    }
+
     @Override
     public Class<?> getTypeDescriptor() {
         if ( super.getTypeDescriptor() != null ) return super.getTypeDescriptor();
@@ -100,6 +119,7 @@ public class NodeSequence<T extends Node> extends Node implements CompositeNode 
     public static class NodeSequenceBuilder<T extends Node> implements Builder<NodeSequence<T>> {
         private TokenImage tokenImage;
         private ListBuilder<T> nodeListBuilder = ListBuilder.builder();
+        private Type resultType;
 
         public final NodeSequenceBuilder<T> add(T ... elements) {
             nodeListBuilder.add(elements);
@@ -128,9 +148,14 @@ public class NodeSequence<T extends Node> extends Node implements CompositeNode 
             return this;
         }
 
+        public final NodeSequenceBuilder<T> resultType(Type resultType) {
+            this.resultType = resultType;
+            return this;
+        }
+
         @Override
         public NodeSequence<T> build() {
-            return new NodeSequence<T>(tokenImage, nodeListBuilder.build());
+            return new NodeSequence<T>(tokenImage, resultType, nodeListBuilder.build());
         }
 
         public final NodeSequenceBuilder<T> tokenImage(final TokenImage tokenImage) {

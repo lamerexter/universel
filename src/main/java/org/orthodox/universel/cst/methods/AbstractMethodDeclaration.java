@@ -62,7 +62,7 @@ public abstract class AbstractMethodDeclaration extends Node implements Composit
                         .add(returnType)
                         .add(parameters)
                         .add(body)
-                        .build());
+                        .build(), returnType);
         this.modifiers = modifiers;
         this.typeParameters = typeParameters;
         this.declaringType = declaringType;
@@ -135,5 +135,10 @@ public abstract class AbstractMethodDeclaration extends Node implements Composit
                    .addAllNotNull(parameters.getNodes())
                    .addAllNotNull(body.getNodes())
             .build();
+    }
+
+    @Override
+    public Type getType() {
+        return returnType;
     }
 }

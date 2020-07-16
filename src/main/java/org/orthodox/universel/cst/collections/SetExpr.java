@@ -29,6 +29,7 @@
 package org.orthodox.universel.cst.collections;
 
 import org.orthodox.universel.cst.*;
+import org.orthodox.universel.cst.type.reference.ResolvedTypeReferenceOld;
 
 import java.util.Collections;
 import java.util.List;
@@ -53,6 +54,12 @@ public class SetExpr extends Expression implements CompositeNode {
         this.elements = elements;
     }
 
+    @Override
+    public Type getType() {
+        return new ResolvedTypeReferenceOld(getTokenImage(), Set.class); // This could be a ParameterisedType now, of the common supertype of elements?
+    }
+
+    @Override
     public Class<?> getTypeDescriptor() {
         return Set.class;
     }

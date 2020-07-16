@@ -28,10 +28,10 @@
 
 package org.orthodox.universel.cst.type.reference;
 
+import org.beanplanet.core.models.path.NamePath;
 import org.beanplanet.core.models.path.SimpleNamePath;
 import org.orthodox.universel.cst.TokenImage;
-
-import java.util.Collections;
+import org.orthodox.universel.cst.Type;
 
 import static org.beanplanet.core.util.StringUtil.initCap;
 
@@ -64,10 +64,20 @@ public final class PrimitiveType extends TypeReference {
    private final Primitive primitive;
 
    public PrimitiveType(TokenImage tokenImage, Primitive primitive) {
-       super(tokenImage, primitive.getTypeDescriptor(), new SimpleNamePath(Collections.singletonList(primitive.getTypeDescriptor().getSimpleName())));
+       super(tokenImage);
        this.primitive = primitive;
 //       this.typeDescriptor = primitive.getTypeDescriptor();
    }
+
+    /**
+     * Gets the fully qualified name of the type including any package name prefix, such as <code>java.lang.String</code>
+     *
+     * @return the fully qualified name of the type.
+     */
+    @Override
+    public NamePath getName() {
+        return new SimpleNamePath(getPrimitive().getTypeDescriptor().getSimpleName());
+    }
 
     /**
      * Whether this type reference is to a primitive type.
@@ -82,6 +92,11 @@ public final class PrimitiveType extends TypeReference {
     public Primitive getPrimitive() {
        return primitive;
    }
+
+    @Override
+    public Type getType() {
+        return new ResolvedTypeReferenceOld(getTokenImage(), getPrimitive().getTypeDescriptor()); // This could be a Parameterised type now, of the common supertype of elements?
+    }
 
     @Override
     public Class<?> getTypeDescriptor() {

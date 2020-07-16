@@ -39,7 +39,8 @@ import org.orthodox.universel.ast.navigation.NameTest;
 import org.orthodox.universel.ast.navigation.NavigationAxis;
 import org.orthodox.universel.ast.navigation.NavigationStep;
 import org.orthodox.universel.cst.*;
-import org.orthodox.universel.cst.type.reference.ResolvedTypeReference;
+import org.orthodox.universel.cst.type.LoadTypeExpression;
+import org.orthodox.universel.cst.type.reference.ResolvedTypeReferenceOld;
 
 import javax.lang.model.type.NullType;
 import java.lang.reflect.Constructor;
@@ -101,10 +102,12 @@ public class ImportScope implements Scope {
 
     private Node resolveNameReference(final NavigationStep<NameTest> step) {
         final List<Class<?>> typesFromNotOnDemandImports = resolveTypeNameFromImports(step, importStatements.stream().filter(ImportStmt::isNotOnDemand).collect(Collectors.toList()));
-        if (typesFromNotOnDemandImports.size() == 1) return new ResolvedTypeReference(step.getTokenImage(), typesFromNotOnDemandImports.get(0));
+        if (typesFromNotOnDemandImports.size() == 1) return new LoadTypeExpression(step.getTokenImage(), new ResolvedTypeReferenceOld(step.getTokenImage(), typesFromNotOnDemandImports.get(0)));
+//        if (typesFromNotOnDemandImports.size() == 1) return new ResolvedTypeReferenceOld(step.getTokenImage(), typesFromNotOnDemandImports.get(0));
 
         final List<Class<?>> typesFromOnDemandImports = resolveTypeNameFromImports(step, importStatements.stream().filter(ImportStmt::isOnDemand).collect(Collectors.toList()));
-        if (typesFromOnDemandImports.size() == 1) return new ResolvedTypeReference(step.getTokenImage(), typesFromOnDemandImports.get(0));
+        if (typesFromOnDemandImports.size() == 1)  return new LoadTypeExpression(step.getTokenImage(), new ResolvedTypeReferenceOld(step.getTokenImage(), typesFromOnDemandImports.get(0)));;
+//        if (typesFromOnDemandImports.size() == 1) return new ResolvedTypeReferenceOld(step.getTokenImage(), typesFromOnDemandImports.get(0));
 
         //--------------------------------------------------------------------------------------------------------------
         // Determine if name can be ambiguously resolved to two or more types from the imports.
@@ -201,16 +204,16 @@ public class ImportScope implements Scope {
         List<Constructor<?>> matchingImplicitlyImportedConsructors = findMatchingConstructorsFromImplicitImports(methodCall);
         if (matchingImplicitlyImportedConsructors.size() == 1) {
             return new ObjectCreationExpression(step.getTokenImage(),
-                                                new ResolvedTypeReference(step.getTokenImage(),
-                                                                          matchingImplicitlyImportedConsructors.get(0).getDeclaringClass()),
+                                                new ResolvedTypeReferenceOld(step.getTokenImage(),
+                                                                             matchingImplicitlyImportedConsructors.get(0).getDeclaringClass()),
                                                 autoBoxParametersIfNecessary(matchingImplicitlyImportedConsructors.get(0).getParameterTypes(), methodCall.getParameters()));
         }
 
         List<Constructor<?>> matchingExplicitlyImportedConsructors = findMatchingConstructorsFromExplicitImports(methodCall);
         if (matchingExplicitlyImportedConsructors.size() == 1) {
             return new ObjectCreationExpression(step.getTokenImage(),
-                                                new ResolvedTypeReference(step.getTokenImage(),
-                                                                          matchingExplicitlyImportedConsructors.get(0).getDeclaringClass()),
+                                                new ResolvedTypeReferenceOld(step.getTokenImage(),
+                                                                             matchingExplicitlyImportedConsructors.get(0).getDeclaringClass()),
                                                 autoBoxParametersIfNecessary(matchingExplicitlyImportedConsructors.get(0).getParameterTypes(), methodCall.getParameters()));
         }
 
@@ -320,8 +323,8 @@ public class ImportScope implements Scope {
         List<Constructor<?>> callableConstructorsFromImports = findMatchingConstructorsFromImports(step.getNodeTest());
         if (callableConstructorsFromImports.size() == 1) {
             return new ObjectCreationExpression(step.getTokenImage(),
-                                                new ResolvedTypeReference(step.getTokenImage(),
-                                                                          callableConstructorsFromImports.get(0).getDeclaringClass()),
+                                                new ResolvedTypeReferenceOld(step.getTokenImage(),
+                                                                             callableConstructorsFromImports.get(0).getDeclaringClass()),
                                                 autoBoxParametersIfNecessary(callableConstructorsFromImports.get(0).getParameterTypes(), step.getNodeTest().getParameters()));
         }
 
@@ -501,6 +504,40 @@ public class ImportScope implements Scope {
 
     private boolean boxTypeCompatible(Class<?> type1, Class<?> type2) {
         return ensureNonPrimitiveType(type1).equals(ensureNonPrimitiveType(type2));
+    }
+
+    @Override
+    public Type resolveType(final NamePath name) {
+        final List<Type> typesFromNotOnDemandImports = resolveType(name, importStatements.stream().filter(ImportStmt::isNotOnDemand).collect(Collectors.toList()));
+        if (typesFromNotOnDemandImports.size() == 1) return typesFromNotOnDemandImports.get(0);
+
+        final List<Type> typesFromOnDemandImports = resolveType(name, importStatements.stream().filter(ImportStmt::isOnDemand).collect(Collectors.toList()));
+        if (typesFromOnDemandImports.size() == 1) return typesFromOnDemandImports.get(0);
+
+        return null;
+    }
+
+    private List<Type> resolveType(final NamePath names, final List<ImportStmt> importStatements) {
+        final String name = names.getLastElement();  // TODO: What about fqtn? Possibly handled by navigation path...
+
+        List<Type> matchingTypes = new ArrayList<>();
+        for (int n=importStatements.size()-1; n >= 0; n--) {
+            ImportStmt importStmt = importStatements.get(n);
+
+            NamePath typeName = new SimpleNamePath(importStmt.getElements().stream().map(Name::getName).collect(Collectors.toList()));
+            if ( importStmt.isOnDemand() ) {
+                typeName = typeName.joinSingleton(name);
+            } else if ( !Objects.equals(name, typeName.getLastElement()) ) {
+                continue;
+            }
+
+            Class<?> referredType = TypeUtil.loadClassOrNull(typeName.join("."));
+            if (referredType == null) continue;
+
+            matchingTypes.add(new ResolvedTypeReferenceOld(referredType));
+        }
+
+        return matchingTypes;
     }
 
 }

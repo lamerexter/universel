@@ -44,8 +44,6 @@ import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
 import static org.beanplanet.core.lang.TypeUtil.ensureNonPrimitiveType;
 import static org.beanplanet.core.util.StringUtil.asDelimitedString;
-import static org.orthodox.universel.compiler.Messages.MethodCall.METHOD_AMBIGUOUS;
-import static org.orthodox.universel.compiler.Messages.MethodCall.METHOD_NOT_FOUND;
 
 public class MethodCallAnalyser extends UniversalVisitorAdapter implements SemanticAnalyser {
     private SemanticAnalysisContext context;

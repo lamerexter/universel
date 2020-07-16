@@ -28,7 +28,10 @@
 
 package org.orthodox.universel.cst.type.reference;
 
+import org.beanplanet.core.models.path.NamePath;
 import org.orthodox.universel.cst.TokenImage;
+
+import java.util.Objects;
 
 import static org.beanplanet.core.lang.TypeUtil.forName;
 
@@ -37,6 +40,7 @@ import static org.beanplanet.core.lang.TypeUtil.forName;
  */
 public class ArrayTypeReference extends TypeReference {
     private final TypeReference componentType;
+    private final int dimensions;
 
     /**
      * Constructs a new type AST resolved type reference instance.
@@ -49,22 +53,38 @@ public class ArrayTypeReference extends TypeReference {
      *                   <code>con.acme.MyClass[][]</code> or <code>1</code> for array type <code>boolean[]</code>.
      */
     public ArrayTypeReference(TokenImage tokenImage, TypeReference componentType, int dimensions) {
-        super(tokenImage, componentType.getName(), dimensions);
+        super(tokenImage);
         this.componentType = componentType;
+        this.dimensions = dimensions;
     }
 
     public TypeReference getComponentType() {
         return componentType;
     }
 
+    /**
+     * Gets the fully qualified name of the type including any package name prefix, such as <code>java.lang.String</code>
+     *
+     * @return the fully qualified name of the type.
+     */
     @Override
-    public TypeReference getType() {
-        return this;
+    public NamePath getName() {
+        return getComponentType().getName();
+    }
+
+    /**
+     * Gets the arity of dimensions for an array type reference.
+     *
+     * @return the arity of dimensions for an array type reference. which may be zero if the type referred to is not an array.
+     */
+    @Override
+    public int getDimensions() {
+        return getComponentType().getDimensions()+dimensions;
     }
 
     public Class<?> getTypeDescriptor() {
         Class<?> componentClass = getComponentType().getTypeDescriptor();
-        return forName(componentClass, getDimensions());
+        return componentClass == null ? null : forName(componentClass, dimensions);
     }
 
     /**
@@ -74,5 +94,20 @@ public class ArrayTypeReference extends TypeReference {
      */
     public boolean isReferenceType() {
         return true;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ArrayTypeReference)) return false;
+        if (!super.equals(o)) return false;
+        ArrayTypeReference that = (ArrayTypeReference) o;
+        return getDimensions() == that.getDimensions() &&
+               Objects.equals(getComponentType(), that.getComponentType());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), getComponentType(), getDimensions());
     }
 }

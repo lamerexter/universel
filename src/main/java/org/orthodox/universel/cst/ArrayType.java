@@ -1,7 +1,7 @@
 /*
  *  MIT Licence:
  *
- *  Copyright (c) 2019 Orthodox Engineering Ltd
+ *  Copyright (c) 2020 Orthodox Engineering Ltd
  *
  *  Permission is hereby granted, free of charge, to any person
  *  obtaining a copy of this software and associated documentation
@@ -28,14 +28,8 @@
 
 package org.orthodox.universel.cst;
 
-import org.orthodox.universel.cst.type.reference.TypeReference;
-
-public class InstanceofExpression extends BinaryExpression {
-    public InstanceofExpression(Operator operator, Node lhsExpr, TypeReference type) {
-        super(operator, lhsExpr, type);
-    }
-
-    public Node accept(UniversalCodeVisitor visitor) {
-        return visitor.visitInstanceofExpression(this);
-    }
+/**
+ * Represents an array type with a explicit component type.
+ */
+public interface ArrayType extends Type {
 }

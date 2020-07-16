@@ -26,36 +26,27 @@
  *
  */
 
-package org.orthodox.universel.cst.type.declaration;
+package org.orthodox.universel.cst;
 
 import org.beanplanet.core.models.path.NamePath;
 import org.orthodox.universel.cst.type.reference.TypeReference;
 
 import java.util.Objects;
 
-/**
- * Represents a type reference to a {@link TypeDeclaration}.
- */
-public class TypeDeclarationReference extends TypeReference {
-    private final TypeDeclaration typeDeclaration;
+import static org.beanplanet.core.lang.TypeUtil.forName;
 
-    /**
-     * Constructs a new type AST resolved type reference instance.
-     *
-     * @param typeDeclaration the type referred to by the type reference.
-     */
-    public TypeDeclarationReference(TypeDeclaration typeDeclaration) {
-        super(typeDeclaration.getTokenImage());
-        this.typeDeclaration = typeDeclaration;
+public class ArrayTypeImpl extends TypeReference implements ArrayType {
+    private final Type componentType;
+    private final int dimensions;
+
+    public ArrayTypeImpl(final Type componentType) {
+        this(componentType, 1);
     }
 
-    /**
-     * Gets the type declaration associated with this type referece.
-     *
-     * @return the type declaration associsted with this type reference.
-     */
-    public TypeDeclaration getTypeDeclaration() {
-        return typeDeclaration;
+    public ArrayTypeImpl(final Type componentType, int dimensions) {
+        super(null);
+        this.componentType = componentType;
+        this.dimensions = dimensions;
     }
 
     /**
@@ -65,38 +56,47 @@ public class TypeDeclarationReference extends TypeReference {
      */
     @Override
     public NamePath getName() {
-        return getTypeDeclaration().getFullyQualifiedName();
+        return getComponentType().getName();
     }
 
     /**
-     * Whether the type referred to is an interface type.
+     * Gets the arity of dimensions for an array type reference.
      *
-     * @return true if the type referred to is an interface, false otherwise.
+     * @return the arity of dimensions for an array type reference. which may be zero if the type referred to is not an array.
      */
-    public boolean isInterface() {
-        return typeDeclaration instanceof InterfaceDeclaration;
+    @Override
+    public int getDimensions() {
+        return getComponentType().getDimensions()+dimensions;
+    }
+
+    /**
+     * If this type is an array type, returns the component type of the array.
+     *
+     * @return the component type of this array type, or null if this type is not an array type.
+     */
+    @Override
+    public TypeReference getComponentType() {
+        return (TypeReference)componentType;
+    }
+
+    @Override
+    public Class<?> getTypeDescriptor() {
+        Class<?> componentClass = getComponentType().getTypeDescriptor();
+        return componentClass == null ? null : forName(componentClass, dimensions);
     }
 
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
-        if (!(o instanceof TypeDeclarationReference)) return false;
+        if (!(o instanceof ArrayTypeImpl)) return false;
         if (!super.equals(o)) return false;
-        TypeDeclarationReference that = (TypeDeclarationReference) o;
-        return Objects.equals(typeDeclaration, that.typeDeclaration);
+        ArrayTypeImpl arrayType = (ArrayTypeImpl) o;
+        return getDimensions() == arrayType.getDimensions() &&
+               Objects.equals(getComponentType(), arrayType.getComponentType());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), typeDeclaration);
-    }
-
-    /**
-     * Whether the type referred to is a sequence type (consists of a number of ordered elements).
-     *
-     * @return true if the referred component type is a sequence or this reference type has dimensions (is an array).
-     */
-    public boolean isSequence() {
-        return getTypeDeclaration().isSequance();
+        return Objects.hash(super.hashCode(), getComponentType(), getDimensions());
     }
 }

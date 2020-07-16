@@ -57,8 +57,6 @@ public class MethodDeclarationTest {
 
     @Test
     void primitiveReturnCompatible_PrimitiveArg() {
-//        assertThat(execute("public static int doubleIt(int x) { x * 2 }   doubleIt(12)"), equalTo(24));
-
         CompiledUnit<?> compiled = compile("public static int doubleIt(int x) { x * 2 }");
 
         Class<?> compiledClass = compiled.getCompiledClasses().get(0);

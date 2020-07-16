@@ -28,6 +28,8 @@
 
 package org.orthodox.universel.cst;
 
+import org.orthodox.universel.cst.type.reference.ResolvedTypeReferenceOld;
+
 /**
  * Represents a field of an existing class.
  *
@@ -59,7 +61,7 @@ public class ClassField implements Field {
     * @return the field's directly enclosing type.
     */
    public Type getDeclaringType() {
-      return new JavaType(field.getDeclaringClass());
+      return new ResolvedTypeReferenceOld(field.getDeclaringClass());
    }
 
    /**
@@ -77,7 +79,7 @@ public class ClassField implements Field {
     * @return the field's type.
     */
    public Type getType() {
-      return new JavaType(field.getType());
+      return new ResolvedTypeReferenceOld(field.getType());
    }
 
    /**

@@ -29,12 +29,13 @@
 package org.orthodox.universel.symanticanalysis.navigation;
 
 import org.orthodox.universel.cst.Node;
+import org.orthodox.universel.cst.Type;
 import org.orthodox.universel.cst.type.reference.TypeReference;
 
 public interface NavigationStage {
     Class<?> getTypeDescriptor();
 
-    TypeReference getType();
+    Type getType();
 
     Node getNode();
     boolean isSequence();
