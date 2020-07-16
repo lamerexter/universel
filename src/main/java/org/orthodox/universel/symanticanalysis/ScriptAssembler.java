@@ -161,9 +161,6 @@ public class ScriptAssembler extends AbstractSemanticAnalyser {
 
         final String generatedTypename = generateUniqueExecutionClassname();
         Type scriptResult = InternalNodeSequence.builder().add(methodBodyElements.toArray(new Node[methodBodyElements.size()])).build().getType();
-        if ( scriptResult == null ) {
-            System.out.println("HERE");
-        }
 
         MethodDeclaration scriptBodyMethod = new MethodDeclaration(MAIN_MODIFIERS,
                                                                    null,

@@ -58,8 +58,8 @@ public class InstanceOfTest {
         assertThat(execute("\"\"\"Hello World!\"\"\" instanceof String"), equalTo(true));
 
         assertThat(execute("{} instanceof List"), equalTo(false));
-        assertThat(execute("{} instanceof List"), equalTo(false));
-        assertThat(execute("{} instanceof List"), equalTo(false));
+        assertThat(execute("{:} instanceof List"), equalTo(false));
+        assertThat(execute("'Hello World!' instanceof List"), equalTo(false));
     }
 
     @Test
