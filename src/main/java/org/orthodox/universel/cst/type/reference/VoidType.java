@@ -63,4 +63,10 @@ public class VoidType extends TypeReference {
         return true;
     }
 
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (!super.equals(o)) return false;
+        return o instanceof VoidType;
+    }
 }

@@ -31,6 +31,8 @@ package org.orthodox.universel.cst.type.reference;
 import org.beanplanet.core.models.path.NamePath;
 import org.orthodox.universel.cst.TokenImage;
 
+import java.util.Objects;
+
 /**
  * Represents a type reference by name only. This is usually used for types being compiled at the time.
  */
@@ -56,5 +58,19 @@ public class TypeNameReference extends TypeReference {
     @Override
     public NamePath getName() {
         return name;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TypeNameReference)) return false;
+        if (!super.equals(o)) return false;
+        TypeNameReference that = (TypeNameReference) o;
+        return Objects.equals(getName(), that.getName());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), getName());
     }
 }

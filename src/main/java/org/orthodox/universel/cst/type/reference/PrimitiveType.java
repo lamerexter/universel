@@ -33,6 +33,8 @@ import org.beanplanet.core.models.path.SimpleNamePath;
 import org.orthodox.universel.cst.TokenImage;
 import org.orthodox.universel.cst.Type;
 
+import java.util.Objects;
+
 import static org.beanplanet.core.util.StringUtil.initCap;
 
 
@@ -101,5 +103,19 @@ public final class PrimitiveType extends TypeReference {
     @Override
     public Class<?> getTypeDescriptor() {
         return getPrimitive().getTypeDescriptor();
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PrimitiveType)) return false;
+        if (!super.equals(o)) return false;
+        PrimitiveType that = (PrimitiveType) o;
+        return getPrimitive() == that.getPrimitive();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), getPrimitive());
     }
 }

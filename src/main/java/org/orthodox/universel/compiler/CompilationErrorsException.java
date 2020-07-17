@@ -72,4 +72,13 @@ public class CompilationErrorsException extends UniversalException {
                "-"+(tokenImage.getEndLine() < 0 ? "_" : tokenImage.getEndLine())+
                ":"+(tokenImage.getEndColumn() < 0 ? "_" : tokenImage.getEndColumn());
     }
+
+    /**
+     * Gets the messages associated with this compilation exception.
+     *
+     * @return any messages produced by the compilation process, which may be empty but never null.
+     */
+    public Messages getMessages() {
+        return messages;
+    }
 }

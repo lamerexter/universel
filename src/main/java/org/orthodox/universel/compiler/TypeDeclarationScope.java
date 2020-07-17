@@ -48,6 +48,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.orthodox.universel.compiler.TransformationUtil.autoBoxOrPromoteIfNecessary;
 
 public class TypeDeclarationScope implements Scope {
@@ -104,4 +106,13 @@ public class TypeDeclarationScope implements Scope {
                                                                                                                                           .collect(Collectors.toList()))))
                                    .build();
     }
+
+    public List<Type> resolveType(NamePath name) {
+        if ( typeDeclaration.getName().getName().equals(name.join(".")) ) {
+            return singletonList(new TypeDeclarationReference(typeDeclaration));
+        }
+
+        return emptyList();
+    }
+
 }

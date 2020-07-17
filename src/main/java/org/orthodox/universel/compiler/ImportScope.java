@@ -46,15 +46,13 @@ import javax.lang.model.type.NullType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
+import static java.util.Collections.emptyList;
 import static org.beanplanet.core.lang.TypeUtil.ensureNonPrimitiveType;
 import static org.beanplanet.core.util.CollectionUtil.isEmptyOrNull;
 import static org.beanplanet.core.util.StringUtil.asDelimitedString;
@@ -507,14 +505,14 @@ public class ImportScope implements Scope {
     }
 
     @Override
-    public Type resolveType(final NamePath name) {
-        final List<Type> typesFromNotOnDemandImports = resolveType(name, importStatements.stream().filter(ImportStmt::isNotOnDemand).collect(Collectors.toList()));
-        if (typesFromNotOnDemandImports.size() == 1) return typesFromNotOnDemandImports.get(0);
+    public List<Type> resolveType(final NamePath name) {
+        final List<Type> typesFromExplicitImports = resolveType(name, importStatements.stream().filter(ImportStmt::isNotOnDemand).collect(Collectors.toList()));
+        if ( !typesFromExplicitImports.isEmpty() ) return typesFromExplicitImports;
 
         final List<Type> typesFromOnDemandImports = resolveType(name, importStatements.stream().filter(ImportStmt::isOnDemand).collect(Collectors.toList()));
-        if (typesFromOnDemandImports.size() == 1) return typesFromOnDemandImports.get(0);
+        if ( !typesFromOnDemandImports.isEmpty() ) return typesFromOnDemandImports;
 
-        return null;
+        return emptyList();
     }
 
     private List<Type> resolveType(final NamePath names, final List<ImportStmt> importStatements) {

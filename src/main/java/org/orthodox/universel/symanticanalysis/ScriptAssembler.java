@@ -50,12 +50,13 @@ import org.orthodox.universel.symanticanalysis.name.InternalNodeSequence;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.orthodox.universel.ast.NodeSequence.emptyNodeSequence;
-import static org.orthodox.universel.compiler.CompilationDefaults.SCRIPT_CLASS_NAME;
+import static org.orthodox.universel.compiler.CompilationDefaults.*;
 import static org.orthodox.universel.cst.Modifiers.*;
 
 /**
@@ -63,24 +64,42 @@ import static org.orthodox.universel.cst.Modifiers.*;
  * canonical form consisting of the types declared or a surrogate type to house the members and executable body lines.
  */
 public class ScriptAssembler extends AbstractSemanticAnalyser {
-    public static final Modifiers MAIN_MODIFIERS = valueOf(PUBLIC | STATIC);
-    public static final String MAIN_NAME = "main";
-    public static final String MAIN_BINDING_PARAM_NAME = "binding";
     private static AtomicLong generatedScriptIndex = new AtomicLong();
     private static final List<Node> EMPTY_SCRIPT_SYNTHETIC_ELEMENTS = singletonList(new NullLiteralExpr());
 
+    private boolean withinMainMethod;
+    private TypeReference executionMethodReturnType;
+
     @Override
     public Node visitScript(final Script script) {
+        //--------------------------------------------------------------------------------------------------------------
+        // Stop if the script is fully assembled: ClassDeclaration { main()  [execute()] }
+        //--------------------------------------------------------------------------------------------------------------
         if ( scriptAlreadyAssembled(script) ) return script;
+
+        //--------------------------------------------------------------------------------------------------------------
+        // If we're midway through assembly, decorate additional sections when they become available.
+        //--------------------------------------------------------------------------------------------------------------
+        if ( scriptExecutionMethodMissingReturnType(script) ) return addExecutionMethodReturnType(script);
         if ( scriptMainMethodMissingReturnType(script) ) return addMainMethodReturnType(script);
         if ( scriptMissingResultType(script) ) return addScriptResultType(script);
 
         //--------------------------------------------------------------------------------------------------------------
-        // There is one or more body elements that are not type declarations or type members (e.g. fields, methods etc.).
-        // Assemble those body elements into a new class declaration.
+        // Create a new assembly with members and executable method(s) housed in a new class declaration.
         // First determine whether we need to generate instance methods or a purely static implementation.
         //--------------------------------------------------------------------------------------------------------------
         return shouldGenerateStaticImplementation(script) ? generateStaticImplementation(script) : generateNonStaticImplementation(script);
+    }
+
+    private Node addExecutionMethodReturnType(final Script script) {
+        Script transformedScript = (Script)super.visitScript(script);
+        if ( !scriptExecutionMethodMissingReturnType(transformedScript) ) {
+            MethodDeclaration executionMethod = findScriptExecuteMethod(transformedScript);
+            executionMethodReturnType = executionMethod.getReturnType();
+            transformedScript = (Script)super.visitScript(transformedScript);
+        }
+
+        return transformedScript;
     }
 
     private Node addMainMethodReturnType(final Script script) {
@@ -89,22 +108,49 @@ public class ScriptAssembler extends AbstractSemanticAnalyser {
 
     private boolean scriptMainMethodMissingReturnType(final Script script) {
         final MethodDeclaration scriptMainMethod = findScriptMainMethod(script);
-        return scriptMainMethod != null && scriptMainMethod.getReturnType() == null;
+        return scriptMainMethod != null
+               && scriptMainMethod.getReturnType() == null;
+
+    }
+
+    private boolean scriptExecutionMethodMissingReturnType(final Script script) {
+        final MethodDeclaration scriptExecuteMethod = findScriptExecuteMethod(script);
+        return scriptExecuteMethod != null
+               && scriptExecuteMethod.getReturnType() == null;
     }
 
     @Override
     public MethodDeclaration visitMethodDeclaration(final MethodDeclaration node) {
-        if ( !isScriptMain(node) ) return node;
-        if ( node.getReturnType() != null || node.getBody().getType() == null) return node;
+        withinMainMethod = isScriptMain(node);
+        try {
+            if ( !(withinMainMethod || isScriptExecute(node)) ) return super.visitMethodDeclaration(node);
 
-        return new MethodDeclaration(node.getModifiers(),
-                                     node.getTypeParameters(),
-                                     node.getDeclaringType(),
-                                     (TypeReference)node.getBody().getType(),
-                                     node.getName(),
-                                     node.getParameters(),
-                                     node.getBody());
+            if ( node.getReturnType() != null || node.getBody().getType() == null) return super.visitMethodDeclaration(node);
+
+            return new MethodDeclaration(node.getModifiers(),
+                                         node.getTypeParameters(),
+                                         node.getDeclaringType(),
+                                         (TypeReference)node.getBody().getType(),
+                                         node.getName(),
+                                         node.getParameters(),
+                                         node.getBody());
+        } finally {
+            withinMainMethod = false;
+        }
     }
+
+    @Override
+    public Node visitMethodCall(final InstanceMethodCall node) {
+        if (!withinMainMethod || !SCRIPT_EXECUTE_METHOD_NAME.equals(node.getName()) || executionMethodReturnType == null || node.getReturnType() != null) return node;
+
+        return new InstanceMethodCall(node.getTokenImage(),
+                                      node.getDeclaringType(),
+                                      executionMethodReturnType,
+                                      node.getName(),
+                                      node.getParameterTypes(),
+                                      node.getParameters());
+    }
+
 
     private Node addScriptResultType(final Script script) {
         MethodDeclaration scriptMainMethod = findScriptMainMethod(script);
@@ -115,6 +161,14 @@ public class ScriptAssembler extends AbstractSemanticAnalyser {
     }
 
     private MethodDeclaration findScriptMainMethod(final Script script) {
+        return findScriptMethod(script, this::isScriptMain);
+    }
+
+    private MethodDeclaration findScriptExecuteMethod(final Script script) {
+        return findScriptMethod(script, this::isScriptExecute);
+    }
+
+    private MethodDeclaration findScriptMethod(final Script script, Predicate<MethodDeclaration> methodFilter) {
         return script.getBody()
                      .stream()
                      .filter(TypeDeclaration.class::isInstance)
@@ -122,7 +176,7 @@ public class ScriptAssembler extends AbstractSemanticAnalyser {
                      .flatMap(td -> td.getMembers().stream()
                                       .filter(MethodDeclaration.class::isInstance)
                                       .map(MethodDeclaration.class::cast)
-                                      .filter(this::isScriptMain))
+                                      .filter(methodFilter))
                      .map(MethodDeclaration.class::cast)
                      .findFirst().orElse(null);
     }
@@ -132,13 +186,25 @@ public class ScriptAssembler extends AbstractSemanticAnalyser {
     }
 
     private boolean scriptAlreadyAssembled(final Script script) {
+        MethodDeclaration scriptMainMethod = findScriptMainMethod(script);
+        MethodDeclaration scriptExecuteMethod = findScriptExecuteMethod(script);
         return !scriptMissingResultType(script)
-               && findScriptMainMethod(script) != null;
+               && scriptMainMethod != null
+               && !scriptMainMethodMissingReturnType(script)
+               && (scriptExecuteMethod == null || !scriptExecutionMethodMissingReturnType(script));
     }
 
     private boolean isScriptMain(final MethodDeclaration md) {
-        return "main".equals(md.getName())
-               && Objects.equals(md.getModifiers(), MAIN_MODIFIERS)
+        return SCRIPT_MAIN_METHOD_NAME.equals(md.getName())
+               && Objects.equals(md.getModifiers(), SCRIPT_MAIN_METHOD_MODIFIERS)
+               && (md.getParameters().isEmpty()
+                   || (md.getParameters().size() == 1 && MAIN_BINDING_PARAM_NAME.equals(md.getParameters().getNodes().get(0).getName().getName()))
+               );
+    }
+
+    private boolean isScriptExecute(final MethodDeclaration md) {
+        return SCRIPT_EXECUTE_METHOD_NAME.equals(md.getName())
+               && Objects.equals(md.getModifiers(), SCRIPT_EXECUTE_METHOD_MODIFIERS)
                && (md.getParameters().isEmpty()
                    || (md.getParameters().size() == 1 && MAIN_BINDING_PARAM_NAME.equals(md.getParameters().getNodes().get(0).getName().getName()))
                );
@@ -162,10 +228,10 @@ public class ScriptAssembler extends AbstractSemanticAnalyser {
         final String generatedTypename = generateUniqueExecutionClassname();
         Type scriptResult = InternalNodeSequence.builder().add(methodBodyElements.toArray(new Node[methodBodyElements.size()])).build().getType();
 
-        MethodDeclaration scriptBodyMethod = new MethodDeclaration(MAIN_MODIFIERS,
+        MethodDeclaration scriptMainMethod = new MethodDeclaration(SCRIPT_MAIN_METHOD_MODIFIERS,
                                                                    null,
                                                                    (TypeReference) scriptResult,
-                                                                   MAIN_NAME,
+                                                                   SCRIPT_MAIN_METHOD_NAME,
                                                                    getContext().getBindingType() == null
                                                                    ? emptyNodeSequence() : NodeSequence.<Parameter>builder()
                                                                                                .add(new Parameter(valueOf(FINAL),
@@ -186,13 +252,13 @@ public class ScriptAssembler extends AbstractSemanticAnalyser {
                                                             NodeSequence.<Node>builder()
                                                                 .addAll(findTypeDeclarations(script))
                                                                 .addAll(findTypeMembers(script))
-                                                                .addNotNull(scriptBodyMethod)
+                                                                .addNotNull(scriptMainMethod)
                                                                 .build(),
                                                             null,
                                                             null
         );
 
-        scriptBodyMethod.setDeclaringType(new TypeDeclarationReference(scriptClass));
+        scriptMainMethod.setDeclaringType(new TypeDeclarationReference(scriptClass));
 
         return new Script(scriptResult,
                           script.getPackageDeclaration(),
@@ -207,11 +273,70 @@ public class ScriptAssembler extends AbstractSemanticAnalyser {
 
     private Node generateNonStaticImplementation(final Script script) {
         List<Node> methodBodyElements = findMethodBodyElements(script);
-        final String generatedTypename = generateUniqueExecutionClassname();
-        final NamePath fqGeneratedTypeName = script.getPackageDeclaration() == null ? new SimpleNamePath(generatedTypename) : script.getPackageDeclaration().getName().joinSingleton(generatedTypename);
-        final Type returnType = script.getType() != null ? script.getType() : new ResolvedTypeReferenceOld(script.getTokenImage(), Object.class);
+        if (methodBodyElements.isEmpty()) {
+            methodBodyElements = EMPTY_SCRIPT_SYNTHETIC_ELEMENTS;
+        }
 
-        return new Script(returnType,
+        final String generatedTypename = generateUniqueExecutionClassname();
+        Type scriptResult = InternalNodeSequence.builder().add(methodBodyElements.toArray(new Node[methodBodyElements.size()])).build().getType();
+
+        final NamePath fqGeneratedTypeName = script.getPackageDeclaration() == null ? new SimpleNamePath(generatedTypename) : script.getPackageDeclaration().getName().joinSingleton(generatedTypename);
+
+        MethodDeclaration scriptExecuteMethod = new MethodDeclaration(valueOf(PUBLIC),
+                                                                      null,
+                                                                      (TypeReference) scriptResult,
+                                                                      SCRIPT_EXECUTE_METHOD_NAME,
+                                                                      getContext().getBindingType() == null
+                                                                      ? emptyNodeSequence() : NodeSequence.<Parameter>builder()
+                                                                                                  .add(new Parameter(valueOf(FINAL),
+                                                                                                                     new ResolvedTypeReferenceOld(script.getTokenImage(),
+                                                                                                                                                  getContext().getBindingType()
+                                                                                                                     ),
+                                                                                                                     false,
+                                                                                                                     new Name(script.getTokenImage(), MAIN_BINDING_PARAM_NAME)
+                                                                                                       )
+                                                                                                  )
+                                                                                                  .build(),
+                                                                      NodeSequence.<Node>builder().addAll(methodBodyElements).build()
+        );
+        MethodDeclaration scriptMainMethod = new MethodDeclaration(SCRIPT_MAIN_METHOD_MODIFIERS,
+                                                                   null,
+                                                                   (TypeReference) scriptResult,
+                                                                   SCRIPT_MAIN_METHOD_NAME,
+                                                                   getContext().getBindingType() == null
+                                                                   ? emptyNodeSequence() : NodeSequence.<Parameter>builder()
+                                                                                               .add(new Parameter(valueOf(FINAL),
+                                                                                                                  new ResolvedTypeReferenceOld(script.getTokenImage(),
+                                                                                                                                               getContext().getBindingType()
+                                                                                                                  ),
+                                                                                                                  false,
+                                                                                                                  new Name(script.getTokenImage(), MAIN_BINDING_PARAM_NAME)
+                                                                                                    )
+                                                                                               )
+                                                                                               .build(),
+                                                                   NodeSequence.<Node>builder()
+                                                                       .add(new ObjectCreationExpression(script.getTokenImage(), new TypeNameReference(script.getTokenImage(), fqGeneratedTypeName)))
+                                                                       .add(new InstanceMethodCall(script.getTokenImage(),
+                                                                                                   new TypeNameReference(script.getTokenImage(), fqGeneratedTypeName),
+                                                                                                   (TypeReference)scriptResult,
+                                                                                                   "execute",
+                                                                                                   getContext().getBindingType() == null
+                                                                                                   ? emptyList() : ListBuilder.<TypeReference>builder()
+                                                                                                                       .add(new ResolvedTypeReferenceOld(script.getTokenImage(),
+                                                                                                                                                         getContext().getBindingType()
+                                                                                                                       ))
+                                                                                                                       .build(),
+                                                                                                   getContext().getBindingType() == null
+                                                                                                   ? emptyList() : singletonList(new LoadLocal(script.getTokenImage(),
+                                                                                                                                               getContext().getBindingType(), 0)
+                                                                                                   )
+                                                                            )
+                                                                       )
+                                                                       .build()
+        );
+
+
+        return new Script(scriptResult,
                           script.getPackageDeclaration(),
                           script.getImportDeclaration(),
                           NodeSequence.builder()
@@ -222,58 +347,9 @@ public class ScriptAssembler extends AbstractSemanticAnalyser {
                                                         NodeSequence.<Node>builder()
                                                             .addAll(findTypeDeclarations(script))
                                                             .addAll(findTypeMembers(script))
-                                                            .add(new MethodDeclaration(valueOf(PUBLIC),
-                                                                                       null,
-                                                                                       (TypeReference)returnType,
-                                                                                       "execute",
-                                                                                       getContext().getBindingType() == null
-                                                                                       ? emptyNodeSequence() : NodeSequence.<Parameter>builder()
-                                                                                                                   .add(new Parameter(valueOf(FINAL),
-                                                                                                                                      new ResolvedTypeReferenceOld(script.getTokenImage(),
-                                                                                                                                                                   getContext().getBindingType()
-                                                                                                                                      ),
-                                                                                                                                      false,
-                                                                                                                                      new Name(script.getTokenImage(), MAIN_BINDING_PARAM_NAME))
-                                                                                                                       )
-                                                                                                                   .build(),
-                                                                                       NodeSequence.<Node>builder().addAll(methodBodyElements).build()
-                                                                 )
-                                                                )
-                                                            .add(new MethodDeclaration(MAIN_MODIFIERS,
-                                                                                       null,
-                                                                                       new ResolvedTypeReferenceOld(script.getTokenImage(), Object.class),
-                                                                                       "main",
-                                                                                       getContext().getBindingType() == null
-                                                                                       ? emptyNodeSequence() : NodeSequence.<Parameter>builder()
-                                                                                                                   .add(new Parameter(valueOf(FINAL),
-                                                                                                                                      new ResolvedTypeReferenceOld(script.getTokenImage(),
-                                                                                                                                                                   getContext().getBindingType()
-                                                                                                                                      ),
-                                                                                                                                      false,
-                                                                                                                                      new Name(script.getTokenImage(), MAIN_BINDING_PARAM_NAME))
-                                                                                                                       )
-                                                                                                                   .build(),
-                                                                                       NodeSequence.<Node>builder()
-                                                                                           .add(new ObjectCreationExpression(script.getTokenImage(), new TypeNameReference(script.getTokenImage(), fqGeneratedTypeName)))
-                                                                                           .add(new InstanceMethodCall(script.getTokenImage(),
-                                                                                                                       new TypeNameReference(script.getTokenImage(), fqGeneratedTypeName),
-                                                                                                                       new ResolvedTypeReferenceOld(script.getTokenImage(), Object.class),
-                                                                                                                       "execute",
-                                                                                                                       getContext().getBindingType() == null
-                                                                                                                       ? emptyList() : ListBuilder.<TypeReference>builder()
-                                                                                                                                           .add(new ResolvedTypeReferenceOld(script.getTokenImage(),
-                                                                                                                                                                             getContext().getBindingType()
-                                                                                                                                           ))
-                                                                                                                                           .build(),
-                                                                                                                       getContext().getBindingType() == null
-                                                                                                                       ? emptyList() : singletonList(new LoadLocal(script.getTokenImage(),
-                                                                                                                                                                   getContext().getBindingType(), 0)
-                                                                                                                                                    )
-                                                                                                )
-                                                                                               )
-                                                                                           .build()
-                                                                 )
-                                                                ).build(),
+                                                            .add(scriptExecuteMethod)
+                                                            .add(scriptMainMethod)
+                                                            .build(),
                                                         null, null
                                    )
                                   ).build()
@@ -299,19 +375,6 @@ public class ScriptAssembler extends AbstractSemanticAnalyser {
                      .stream()
                      .filter(n -> !isTypeDeclaration(n) && !isTypeMember(n))
                      .collect(Collectors.toList());
-    }
-
-    private boolean allBodyElementsAreTypeDeclarations(final Script node) {
-        return !node.getBody().isEmpty() &&
-               node.getBody()
-                   .stream()
-                   .allMatch(this::isTypeDeclaration);
-    }
-
-    private boolean allBodyElementsAreTypeMembers(final Script node) {
-        return node.getBody()
-                   .stream()
-                   .allMatch(this::isTypeMember);
     }
 
     private boolean isTypeDeclaration(final Node node) {

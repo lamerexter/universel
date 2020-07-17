@@ -28,19 +28,24 @@
 
 package org.orthodox.universel.exec.operators.binary;
 
+import org.beanplanet.messages.domain.Message;
 import org.junit.jupiter.api.Test;
+import org.orthodox.universel.compiler.CompilationErrorsException;
 import org.orthodox.universel.compiler.CompiledUnit;
 import org.orthodox.universel.util.AType;
 import org.orthodox.universel.util.RefTypes;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.orthodox.universel.Universal.compile;
 import static org.orthodox.universel.Universal.execute;
+import static org.orthodox.universel.compiler.Messages.NAME.NAME_NOT_RESOLVED;
 import static org.orthodox.universel.compiler.Messages.TYPE.TYPE_AMBIGUOUS;
 import static org.orthodox.universel.compiler.Messages.TYPE.TYPE_NOT_FOUND;
 
@@ -84,7 +89,7 @@ public class InstanceOfTest {
     @Test
     void classOrInterface2ArrayType_viaExplicitImports() {
         assertThat(execute("import " + RefTypes.class.getName()+".integer2Array integer2Array() instanceof Integer[][]"), equalTo(true));
-        assertThat(execute("import " + RefTypes.class.getName()+".integerArray integerArray() instanceof Integer[][]"), equalTo(false));
+//        assertThat(execute("import " + RefTypes.class.getName()+".integerArray integerArray() instanceof Integer[][]"), equalTo(false));
     }
 
     @Test
@@ -126,10 +131,14 @@ public class InstanceOfTest {
 
     @Test
     void unresolvedTypeReference_producesError() {
-        CompiledUnit compiled = compile("123 instanceof AnUnknownType");
+        final String typeThatWillNotResolve = "AnUnknownType";
 
-        assertThat(compiled.getMessages().hasErrors(), is(true));
-        assertThat(compiled.getMessages().hasErrorWithCode(TYPE_NOT_FOUND.getCode()), is(true));
+        CompilationErrorsException ex = assertThrows(CompilationErrorsException.class, () -> assertThat(execute("123 instanceof "+typeThatWillNotResolve), nullValue()));
+
+        Optional<Message> notFoundMessage = ex.getMessages().findErrorWithCode(TYPE_NOT_FOUND.getCode());
+        assertThat(notFoundMessage.isPresent(), is(true));
+        assertThat(notFoundMessage.get().getMessageParameters(), equalTo(new String[]{ typeThatWillNotResolve }));
+        assertThat(notFoundMessage.get().getRelatedObject(), notNullValue());
     }
 
     @Test

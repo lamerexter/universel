@@ -28,23 +28,15 @@
 
 package org.orthodox.universel.exec.script;
 
-import org.beanplanet.core.io.IoUtil;
-import org.beanplanet.core.io.resource.FileResource;
 import org.beanplanet.core.lang.TypeUtil;
-import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.Test;
 import org.orthodox.universel.BeanWithProperties;
 import org.orthodox.universel.Universal;
-import org.orthodox.universel.compiler.CompilationDefaults;
 import org.orthodox.universel.compiler.CompiledUnit;
-import org.orthodox.universel.cst.Modifiers;
-import org.orthodox.universel.tools.BytecodeOutput;
 
 import java.lang.reflect.Method;
 import java.util.Optional;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -105,8 +97,8 @@ public class ScriptAssemblyTest {
     }
 
     private void assertStaticExecutionMethodPresent(final CompiledUnit<?> compiled) {
-        Optional<Method> staticExecutionMethod = TypeUtil.findMethod(SCRIPT_EXECUTE_METHOD_MODIFIERS,
-                                                                     SCRIPT_STATIC_METHOD_NAME,
+        Optional<Method> staticExecutionMethod = TypeUtil.findMethod(SCRIPT_EXECUTE_METHOD_MODIFIERS.getModifiers(),
+                                                                     SCRIPT_MAIN_METHOD_NAME,
                                                                      compiled.getCompiledClasses().get(0),
                                                                      null,
                                                                      BeanWithProperties.class
@@ -115,16 +107,16 @@ public class ScriptAssemblyTest {
     }
 
     private void assertNonStaticExecutionMethodPresent(final CompiledUnit<?> compiled) {
-        Optional<Method> staticExecutionMethod = TypeUtil.findMethod(SCRIPT_EXECUTE_METHOD_MODIFIERS,
-                                                                     SCRIPT_STATIC_METHOD_NAME,
+        Optional<Method> staticExecutionMethod = TypeUtil.findMethod(SCRIPT_MAIN_METHOD_MODIFIERS.getModifiers(),
+                                                                     SCRIPT_MAIN_METHOD_NAME,
                                                                      compiled.getCompiledClasses().get(0),
-                                                                     Object.class,
+                                                                     null,
                                                                      BeanWithProperties.class
                                                                     );
-        Optional<Method> nonStaticExecutionMethod = TypeUtil.findMethod(SCRIPT_EXECUTE_METHOD_MODIFIERS,
+        Optional<Method> nonStaticExecutionMethod = TypeUtil.findMethod(SCRIPT_EXECUTE_METHOD_MODIFIERS.getModifiers(),
                                                                         SCRIPT_EXECUTE_METHOD_NAME,
                                                                         compiled.getCompiledClasses().get(0),
-                                                                        Object.class,
+                                                                        null,
                                                                         BeanWithProperties.class
                                                                        );
         assertThat(staticExecutionMethod.isPresent(), is(true));

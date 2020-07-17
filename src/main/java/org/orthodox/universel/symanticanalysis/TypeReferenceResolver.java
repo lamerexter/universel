@@ -28,11 +28,19 @@
 
 package org.orthodox.universel.symanticanalysis;
 
+import org.beanplanet.core.util.CollectionUtil;
 import org.orthodox.universel.cst.ArrayTypeImpl;
+import org.orthodox.universel.cst.Type;
 import org.orthodox.universel.cst.type.reference.ReferenceType;
 import org.orthodox.universel.cst.type.reference.TypeReference;
 
-import java.util.Objects;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.orthodox.universel.compiler.Messages.MethodCall.METHOD_AMBIGUOUS;
+import static org.orthodox.universel.compiler.Messages.TYPE.TYPE_AMBIGUOUS;
 
 /**
  * Iterates over the AST, performing a depth-first post-order traversal to establish the types on the AST. Essentially,
@@ -46,7 +54,15 @@ import java.util.Objects;
  * </ul>
  */
 public class TypeReferenceResolver extends AbstractSemanticAnalyser implements SemanticAnalyser {
+    private final boolean reportErrors;
 
+    public TypeReferenceResolver() {
+        this(false);
+    }
+
+    public TypeReferenceResolver(boolean reportErrors) {
+        this.reportErrors = reportErrors;
+    }
     @Override
     public TypeReference visitTypeReference(TypeReference typeReference) {
         //--------------------------------------------------------------------------------------------------------------
@@ -64,19 +80,31 @@ public class TypeReferenceResolver extends AbstractSemanticAnalyser implements S
         //--------------------------------------------------------------------------------------------------------------
         // Assume it is a relative type and attempt to resolve it from imports.
         //--------------------------------------------------------------------------------------------------------------
-        ResolvedTypeReference resolved = resolveTypeNameInScope(typeReference);
-        if ( resolved != null ) return resolved;
+        List<ResolvedTypeReference> resolved = resolveTypeNameInScope(typeReference);
+        if ( resolved.size() == 1 ) {
+            return resolved.get(0);
+        } else if ( resolved.size() > 1 && reportErrors) {
+            getContext().getMessages().addError(TYPE_AMBIGUOUS
+                                             .relatedObject(typeReference)
+                                             .withParameters(
+                                                 typeReference.getName().join("."),
+                                                 resolved.size(),
+                                                 resolved.stream().map(t -> t.getName().join(".")).collect(Collectors.toList())));
+        }
 
         return typeReference;
     }
 
-    private ResolvedTypeReference resolveTypeNameInScope(final TypeReference typeReference) {
-        return getContext().scopes()
-                           .map(s -> s.resolveType(typeReference.getName()))
-                           .filter(Objects::nonNull)
-                           .map(t -> typeReference.isArray() ? new ArrayTypeImpl(t, typeReference.getDimensions()) : t)
-                           .map(t -> new ResolvedTypeReference(typeReference.getTokenImage(), t))
-                           .findFirst().orElse(null);
+    private List<ResolvedTypeReference> resolveTypeNameInScope(final TypeReference typeReference) {
+        List<Type> resolvedTypes = getContext().scopes()
+                               .map(s -> s.resolveType(typeReference.getName()))
+                               .filter(CollectionUtil::isNotNullOrEmpty)
+                               .findFirst().orElse(Collections.emptyList());
+
+        return resolvedTypes.stream()
+                            .map(t -> typeReference.isArray() ? new ArrayTypeImpl(t, typeReference.getDimensions()) : t)
+                            .map(t -> new ResolvedTypeReference(typeReference.getTokenImage(), t))
+                            .collect(Collectors.toList());
     }
 
     private boolean alreadyResolvable(final TypeReference type) {

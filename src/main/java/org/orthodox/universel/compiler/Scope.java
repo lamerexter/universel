@@ -36,10 +36,12 @@ import org.orthodox.universel.cst.Type;
 import java.util.Collections;
 import java.util.List;
 
+import static java.util.Collections.emptyList;
+
 public interface Scope {
     default NavigationStep<?> resolveInitial(NavigationStep<?> initialStep) { return null; }
     Node navigate(NavigationStep<?> step);
-    default Type resolveType(NamePath name) {
-        return null;
+    default List<Type> resolveType(NamePath name) {
+        return emptyList();
     }
 }

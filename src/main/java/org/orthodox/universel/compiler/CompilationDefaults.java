@@ -28,14 +28,18 @@
 
 package org.orthodox.universel.compiler;
 
+import org.orthodox.universel.cst.Modifiers;
+
 import static org.orthodox.universel.cst.Modifiers.*;
 
 /**
  * Contains default values affecting compilation.
  */
 public interface CompilationDefaults {
-    public static final String SCRIPT_CLASS_NAME = "UScript";
-    public static final String SCRIPT_STATIC_METHOD_NAME = "main";
-    public static final String SCRIPT_EXECUTE_METHOD_NAME = "execute";
-    public static final int SCRIPT_EXECUTE_METHOD_MODIFIERS = valueOf(PUBLIC | STATIC).getModifiers();
+    String SCRIPT_CLASS_NAME = "UScript";
+    String SCRIPT_MAIN_METHOD_NAME = "main";
+    String SCRIPT_EXECUTE_METHOD_NAME = "execute";
+    String MAIN_BINDING_PARAM_NAME = "binding";
+    Modifiers SCRIPT_MAIN_METHOD_MODIFIERS = valueOf(PUBLIC | STATIC);
+    Modifiers SCRIPT_EXECUTE_METHOD_MODIFIERS = valueOf(PUBLIC);
 }

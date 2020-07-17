@@ -19,6 +19,7 @@ import org.orthodox.universel.symanticanalysis.conversion.WideningNumericConvers
 import org.orthodox.universel.symanticanalysis.methods.ImplicitMethodModifiersDecorator;
 import org.orthodox.universel.symanticanalysis.methods.ImplicitReturnStatementDecorator;
 import org.orthodox.universel.symanticanalysis.methods.UnresolvedMethodCallReporter;
+import org.orthodox.universel.symanticanalysis.methods.UnresolvedNameReporter;
 import org.orthodox.universel.symanticanalysis.name.IfStatementImplicitResultValueResolver;
 import org.orthodox.universel.symanticanalysis.name.NavigationResolver;
 
@@ -49,8 +50,13 @@ public class UniversalCompiler {
 //            new NavigationContextResolver(),
             new NavigationResolver(),
             new IfStatementImplicitResultValueResolver(),
+            new ImplicitReturnStatementDecorator(),
+
+            // Lastly, when all opportunities for resolution has preceded, report any errors
+            new TypeReferenceResolver(true),
             new UnresolvedMethodCallReporter(),
-            new ImplicitReturnStatementDecorator()
+            new UnresolvedNameReporter(),
+            new UnresolvedTypeReferenceReporter()
         );
     }
 

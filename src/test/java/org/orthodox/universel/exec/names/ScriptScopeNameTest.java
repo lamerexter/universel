@@ -29,25 +29,36 @@
 package org.orthodox.universel.exec.names;
 
 import org.beanplanet.core.beans.JavaBean;
+import org.beanplanet.messages.domain.Message;
+import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.Test;
 import org.orthodox.universel.BeanWithProperties;
 import org.orthodox.universel.compiler.CompilationErrorsException;
+import org.orthodox.universel.compiler.Messages;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.orthodox.universel.Universal.execute;
+import static org.orthodox.universel.compiler.Messages.NAME.NAME_NOT_RESOLVED;
 
 public class ScriptScopeNameTest {
     @Test
     public void nameNotFound() {
-        assertThrows(CompilationErrorsException.class, () -> assertThat(execute("nameThatWillNotResolve"), nullValue()));
+        final String nameThatWillNotResolve = "nameThatWillNotResolve";
+
+        CompilationErrorsException ex = assertThrows(CompilationErrorsException.class, () -> assertThat(execute(nameThatWillNotResolve), nullValue()));
+
+        Optional<Message> notFoundMessage = ex.getMessages().findErrorWithCode(NAME_NOT_RESOLVED.getCode());
+        assertThat(notFoundMessage.isPresent(), is(true));
+        assertThat(notFoundMessage.get().getMessageParameters(), equalTo(new String[]{ nameThatWillNotResolve }));
+        assertThat(notFoundMessage.get().getRelatedObject(), notNullValue());
     }
 
     @Test

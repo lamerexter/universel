@@ -28,20 +28,27 @@
 
 package org.orthodox.universel.exec.navigation.axis.standard;
 
+import org.beanplanet.messages.domain.Message;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.orthodox.universel.compiler.CompiledUnit;
 import org.orthodox.universel.ast.navigation.NavigationStream;
+import org.orthodox.universel.compiler.Messages;
 import org.orthodox.universel.cst.Node;
+import org.orthodox.universel.cst.ParseTree;
 import org.orthodox.universel.cst.Script;
 import org.orthodox.universel.BeanWithProperties;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
+import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.orthodox.universel.Universal.compile;
 import static org.orthodox.universel.Universal.execute;
+import static org.orthodox.universel.compiler.Messages.NAME.NAME_NOT_RESOLVED;
 import static org.orthodox.universel.compiler.Messages.NavigationExpression.UNRESOLVED_STEP;
 
 public class UnresolvedNavigationTest {
@@ -63,66 +70,43 @@ public class UnresolvedNavigationTest {
 
     @Test
     void nullBinding_singleStepNameAreUnresolved() {
-        CompiledUnit compiledUnit = compile("a", (Class<?>)null);
-        assertThat(compiledUnit.hasErrors(), is(true));
-
-        Script script = (Script) compiledUnit.getAstNode();
-        NavigationStream ns = (NavigationStream)script.getBody().getNodes().get(0);
-
-        assertThat(compiledUnit.getMessages().hasErrorWithCode(UNRESOLVED_STEP.getCode()), is(true));
-        assertThat(compiledUnit.getMessages().findErrorWithCode(UNRESOLVED_STEP.getCode()).get().getRelatedObject() instanceof Node, is(true));
-        assertThat(((Node)compiledUnit.getMessages().findErrorWithCode(UNRESOLVED_STEP.getCode()).get().getRelatedObject()).getTokenImage(), equalTo(ns.getSteps().get(0).getTokenImage()));
+        assertNavigationStreamContainsUnresolvedName("a", null, "a", 0);
     }
 
     @Test
     void nullBinding_nestedStepsNameAreUnresolved() {
-        CompiledUnit compiledUnit = compile("a\\b\\c", (Class<?>)null);
-        assertThat(compiledUnit.hasErrors(), is(true));
-
-        Script script = (Script) compiledUnit.getAstNode();
-        NavigationStream ns = (NavigationStream)script.getBody().getChildNodes().get(0);
-
-        assertThat(compiledUnit.getMessages().hasErrorWithCode(UNRESOLVED_STEP.getCode()), is(true));
-        assertThat(compiledUnit.getMessages().findErrorWithCode(UNRESOLVED_STEP.getCode()).get().getRelatedObject() instanceof Node, is(true));
-        assertThat(((Node)compiledUnit.getMessages().findErrorWithCode(UNRESOLVED_STEP.getCode()).get().getRelatedObject()).getTokenImage(), equalTo(ns.getSteps().get(0).getTokenImage()));
+        assertNavigationStreamContainsUnresolvedName("a\\b\\c", null, "a", 0);
+        assertNavigationStreamContainsUnresolvedName("a\\b\\c", null, "b", 1);
+        assertNavigationStreamContainsUnresolvedName("a\\b\\c", null, "c", 2);
     }
 
     @Test
     void invalidInnermostStepName_unresolved() {
-        CompiledUnit compiledUnit = compile("referenceProperty\\referenceProperty\\invalidName", binding.getClass());
-        assertThat(compiledUnit.hasErrors(), is(true));
-
-        Script script = (Script) compiledUnit.getAstNode();
-        NavigationStream ns = (NavigationStream)script.getBody().getChildNodes().get(0);
-
-        assertThat(compiledUnit.getMessages().hasErrorWithCode(UNRESOLVED_STEP.getCode()), is(true));
-        assertThat(compiledUnit.getMessages().findErrorWithCode(UNRESOLVED_STEP.getCode()).get().getRelatedObject() instanceof Node, is(true));
-        assertThat(((Node)compiledUnit.getMessages().findErrorWithCode(UNRESOLVED_STEP.getCode()).get().getRelatedObject()).getTokenImage(), equalTo(ns.getSteps().get(ns.getSteps().size()-1).getTokenImage()));
+        assertNavigationStreamContainsUnresolvedName("referenceProperty\\referenceProperty\\invalidName", binding.getClass(), "invalidName", 2);
     }
 
     @Test
     void invalidIntermediateStepName_unresolved() {
-        CompiledUnit<?> compiledUnit = compile("referenceProperty\\invalidName\\bigDecimalProperty", binding.getClass());
-        assertThat(compiledUnit.hasErrors(), is(true));
-
-        Script script = (Script) compiledUnit.getAstNode();
-        NavigationStream ns = (NavigationStream)script.getBody().getChildNodes().get(0);
-
-        assertThat(compiledUnit.getMessages().hasErrorWithCode(UNRESOLVED_STEP.getCode()), is(true));
-        assertThat(compiledUnit.getMessages().findErrorWithCode(UNRESOLVED_STEP.getCode()).get().getRelatedObject() instanceof Node, is(true));
-        assertThat(((Node)compiledUnit.getMessages().findErrorWithCode(UNRESOLVED_STEP.getCode()).get().getRelatedObject()).getTokenImage(), equalTo(ns.getSteps().get(ns.getSteps().size()-2).getTokenImage()));
+        assertNavigationStreamContainsUnresolvedName("referenceProperty\\invalidName\\bigDecimalProperty", binding.getClass(), "invalidName", 1);
     }
 
     @Test
     void invalidOutermostStepName_unresolved() {
-        CompiledUnit compiledUnit = compile("invalidName\\referenceProperty\\bigDecimalProperty", binding.getClass());
+        assertNavigationStreamContainsUnresolvedName("invalidName\\referenceProperty\\bigDecimalProperty", binding.getClass(), "invalidName", 0);
+    }
+
+    private void assertNavigationStreamContainsUnresolvedName(String script, Class<?> bindingType, String name, int stepIndex) {
+        CompiledUnit compiledUnit = compile(script, bindingType);
         assertThat(compiledUnit.hasErrors(), is(true));
 
-        Script script = (Script) compiledUnit.getAstNode();
-        NavigationStream ns = (NavigationStream)script.getBody().getChildNodes().get(0);
+        Script scriptNode = (Script) compiledUnit.getAstNode();
+        NavigationStream ns = new ParseTree(scriptNode).preorderParentUnawareStream()
+                                                   .filter(NavigationStream.class::isInstance)
+                                                   .map(NavigationStream.class::cast).findFirst().orElseGet(() -> fail("Unresolved navigation stream not found"));
 
-        assertThat(compiledUnit.getMessages().hasErrorWithCode(UNRESOLVED_STEP.getCode()), is(true));
-        assertThat(compiledUnit.getMessages().findErrorWithCode(UNRESOLVED_STEP.getCode()).get().getRelatedObject() instanceof Node, is(true));
-        assertThat(((Node)compiledUnit.getMessages().findErrorWithCode(UNRESOLVED_STEP.getCode()).get().getRelatedObject()).getTokenImage(), equalTo(ns.getSteps().get(ns.getSteps().size()-3).getTokenImage()));
+        Optional<Message> notFoundMessage = compiledUnit.getMessages().findError(e -> e.getCode().equals(NAME_NOT_RESOLVED.getCode()) && asList(e.getMessageParameters()).contains(name));
+        assertThat(notFoundMessage.isPresent(), is(true));
+        assertThat(notFoundMessage.get().getRelatedObject() instanceof Node, is(true));
+        assertThat(((Node)notFoundMessage.get().getRelatedObject()).getTokenImage(), equalTo(ns.getSteps().get(stepIndex).getTokenImage()));
     }
 }
