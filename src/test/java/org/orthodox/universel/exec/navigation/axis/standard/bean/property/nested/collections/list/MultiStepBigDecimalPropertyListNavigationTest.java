@@ -26,33 +26,37 @@
  *
  */
 
-package org.orthodox.universel.exec.navigation.axis.standard.bean.property.nested.array;
+package org.orthodox.universel.exec.navigation.axis.standard.bean.property.nested.collections.list;
 
 import org.junit.jupiter.api.Test;
 import org.orthodox.universel.BeanWithProperties;
+import org.orthodox.universel.exec.TypedValue;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
+import java.util.List;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.orthodox.universel.Universal.execute;
+import static java.util.Arrays.asList;
+import static org.orthodox.universel.ResultTestUtil.assertResultIsParameterisedType;
+import static org.orthodox.universel.Universal.executeWithResult;
 
-public class MultiStepBigIntegerArrayPropertyNavigationTest {
+public class MultiStepBigDecimalPropertyListNavigationTest {
     @Test
-    void bigInteger_reduction() {
+    void read_reduction() {
         // Given
-        final BigInteger B1 = new BigInteger("1");
-        final BigInteger B2 = new BigInteger("11");
-        final BigInteger B3 = new BigInteger("111");
-        final BeanWithProperties[] R1 = {
-            new BeanWithProperties().withBigIntegerProperty(B1),
-            new BeanWithProperties().withBigIntegerProperty(B2),
-            new BeanWithProperties().withBigIntegerProperty(B3)
-        };
-        final BeanWithProperties binding = new BeanWithProperties().withReferenceArrayProperty(R1);
+        final BigDecimal V1 = new BigDecimal("1");
+        final BigDecimal V2 = new BigDecimal("11");
+        final BigDecimal V3 = new BigDecimal("111");
+        final List<BeanWithProperties> collection = asList(
+            new BeanWithProperties().withBigDecimalProperty(V1),
+            new BeanWithProperties().withBigDecimalProperty(V2),
+            new BeanWithProperties().withBigDecimalProperty(V3)
+        );
+        final BeanWithProperties binding = new BeanWithProperties().withReferenceListProperty(collection);
+
+        // When
+        TypedValue result = executeWithResult("referenceListProperty\\bigDecimalProperty\\[]", binding);
 
         // Then
-        assertThat(execute("referenceArrayProperty\\bigIntegerProperty\\[[]]", binding), equalTo(new BigInteger[] {B1, B2, B3 }));
+        assertResultIsParameterisedType(result, asList(V1, V2, V3), List.class, BigDecimal.class);
     }
 }

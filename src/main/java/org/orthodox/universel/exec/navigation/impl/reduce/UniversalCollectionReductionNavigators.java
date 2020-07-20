@@ -34,6 +34,7 @@ import org.beanplanet.core.streams.StreamUtil;
 import org.beanplanet.core.util.StringUtil;
 import org.orthodox.universel.ast.*;
 import org.orthodox.universel.ast.allocation.ArrayCreationExpression;
+import org.orthodox.universel.ast.allocation.ObjectCreationExpression;
 import org.orthodox.universel.ast.functional.FunctionalInterfaceObject;
 import org.orthodox.universel.ast.navigation.ArrayNodeTest;
 import org.orthodox.universel.ast.navigation.ListNodeTest;
@@ -51,15 +52,20 @@ import org.orthodox.universel.exec.navigation.Navigator;
 import org.orthodox.universel.exec.navigation.ReductionNavigator;
 import org.orthodox.universel.symanticanalysis.name.InternalNodeSequence;
 
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.IntFunction;
+import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.beanplanet.core.lang.TypeUtil.ensureNonPrimitiveType;
 import static org.beanplanet.core.lang.TypeUtil.forName;
 import static org.orthodox.universel.cst.Modifiers.FINAL;
 import static org.orthodox.universel.cst.Modifiers.valueOf;
@@ -81,7 +87,7 @@ public class UniversalCollectionReductionNavigators {
                                                                ))
                                    ))
                                    .resultType(new ParameterisedTypeImpl(new ResolvedTypeReferenceOld(step.getTokenImage(), List.class),
-                                                                         asList(new ResolvedTypeReferenceOld(step.getTokenImage(), fromType))))
+                                                                         asList(new ResolvedTypeReferenceOld(step.getTokenImage(), ensureNonPrimitiveType(fromType)))))
                                    .build();
     }
 
@@ -96,10 +102,30 @@ public class UniversalCollectionReductionNavigators {
                                                                singletonList(new StaticMethodCall(step.getTokenImage(),
                                                                                                   new ResolvedTypeReferenceOld(step.getTokenImage(), Collectors.class),
                                                                                                   new ResolvedTypeReferenceOld(step.getTokenImage(), Collector.class),
-                                                                                                  "toSet"
+                                                                                                  "toCollection",
+                                                                                                  singletonList(new ResolvedTypeReferenceOld(step.getTokenImage(), Supplier.class)),
+                                                                                                  singletonList(new FunctionalInterfaceObject(step.getTokenImage(),
+                                                                                                                                              Supplier.class,
+                                                                                                                                              Object.class,
+                                                                                                                                              emptyList(),
+                                                                                                                                              "get",
+                                                                                                                                              new GeneratedStaticLambdaFunction(new ResolvedTypeReferenceOld(step.getTokenImage(), Collection.class),
+                                                                                                                                                                                new SimpleNamePath("reduction", "fio"),
+                                                                                                                                                                                NodeSequence.emptyNodeSequence(),
+                                                                                                                                                                                NodeSequence.builder()
+                                                                                                                                                                                            .add(new ReturnStatement(new ObjectCreationExpression(step.getTokenImage(),
+                                                                                                                                                                                                                                                  new ResolvedTypeReferenceOld(step.getTokenImage(), LinkedHashSet.class)
+                                                                                                                                                                                                 ))
+                                                                                                                                                                                            )
+                                                                                                                                                                                            .build()
+                                                                                                                                              )
+                                                                                                                )
+
+                                                                                                  )
                                                                ))
                                    ))
-                                   .resultType(new ResolvedTypeReferenceOld(Set.class))
+                                   .resultType(new ParameterisedTypeImpl(new ResolvedTypeReferenceOld(step.getTokenImage(), LinkedHashSet.class),
+                                                                         asList(new ResolvedTypeReferenceOld(step.getTokenImage(), ensureNonPrimitiveType(fromType)))))
                                    .build();
     }
 
@@ -128,7 +154,7 @@ public class UniversalCollectionReductionNavigators {
                                        .build();
         } else {
             LambdaFunction generatedMethod = new GeneratedStaticLambdaFunction(arrayType,
-                                                                               new SimpleNamePath("nav$step", "999", "fio"),
+                                                                               new SimpleNamePath("nav", "step", "fio"),
                                                                                NodeSequence.<Parameter>builder()
                                                                                    .add(new Parameter(valueOf(FINAL),
                                                                                                       new ResolvedTypeReferenceOld(step.getTokenImage(), int.class),
@@ -154,7 +180,7 @@ public class UniversalCollectionReductionNavigators {
                                                                    singletonList(new ResolvedTypeReferenceOld(step.getTokenImage(), IntFunction.class)),
                                                                    singletonList(new FunctionalInterfaceObject(step.getTokenImage(),
                                                                                                                IntFunction.class,
-                                                                                                               Object.class, //forName(fromType, 1),
+                                                                                                               Object.class,
                                                                                                                singletonList(int.class),
                                                                                                                "apply",
                                                                                                                generatedMethod

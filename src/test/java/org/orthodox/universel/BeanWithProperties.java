@@ -33,6 +33,7 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * A standard JavaBean with readable amd writable properties (accessors) for all of the runtime standard
@@ -77,6 +78,8 @@ public class BeanWithProperties {
     private List<Short> shortWrapperListProperty;
     private List<String> stringListProperty;
     private List<BeanWithProperties> referenceListProperty;
+
+    private Set<BeanWithProperties> referenceSetProperty;
 
     private BigDecimal[] bigDecimalArrayProperty;
     private BigInteger[] bigIntegerArrayProperty;
@@ -502,6 +505,19 @@ public class BeanWithProperties {
 
     public BeanWithProperties withReferenceListProperty(List<BeanWithProperties> referenceListProperty) {
         setReferenceListProperty(referenceListProperty);
+        return this;
+    }
+
+    public Set<BeanWithProperties> getReferenceSetProperty() {
+        return referenceSetProperty;
+    }
+
+    public void setReferenceSetProperty(final Set<BeanWithProperties> referenceSetProperty) {
+        this.referenceSetProperty = referenceSetProperty;
+    }
+
+    public BeanWithProperties withReferenceSetProperty(final Set<BeanWithProperties> referenceSetProperty) {
+        setReferenceSetProperty(referenceSetProperty);
         return this;
     }
 

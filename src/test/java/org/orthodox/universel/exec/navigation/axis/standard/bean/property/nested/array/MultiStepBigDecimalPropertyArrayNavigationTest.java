@@ -37,7 +37,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.orthodox.universel.Universal.execute;
 
-public class MultiStepBigDecimalArrayPropertyNavigationTest {
+public class MultiStepBigDecimalPropertyArrayNavigationTest {
     @Test
     void bigDecimalRead_reduction() {
         // Given

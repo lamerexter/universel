@@ -26,25 +26,35 @@
  *
  */
 
-package org.orthodox.universel.exec.navigation.axis.standard.bean.property.nested.array;
+package org.orthodox.universel.exec.navigation.axis.standard.bean.property.nested.collections.set;
 
 import org.junit.jupiter.api.Test;
 import org.orthodox.universel.BeanWithProperties;
+import org.orthodox.universel.exec.TypedValue;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.orthodox.universel.Universal.execute;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
-public class MultiStepReferenceTypeArrayPropertyNavigationTest {
+import static java.util.Arrays.asList;
+import static org.orthodox.universel.ResultTestUtil.assertResultIsParameterisedType;
+import static org.orthodox.universel.Universal.executeWithResult;
+
+public class MultiStepReferenceTypePropertyListNavigationTest {
     @Test
-    void referenceTypeRead_reduction() {
+    void read_reduction() {
         // Given
-        final BeanWithProperties B1 = new BeanWithProperties().withStringProperty("Bean1");
-        final BeanWithProperties B2 = new BeanWithProperties().withStringProperty("Bean2");
-        final BeanWithProperties[] array = { B1, B2 };
-        final BeanWithProperties binding = new BeanWithProperties().withReferenceArrayProperty(array);
+        final BeanWithProperties V1 = new BeanWithProperties().withStringProperty("Bean1");
+        final BeanWithProperties V2 = new BeanWithProperties().withStringProperty("Bean2");
+        final Set<BeanWithProperties> collection = new LinkedHashSet<>(asList(
+            new BeanWithProperties().withReferenceProperty(V1),
+            new BeanWithProperties().withReferenceProperty(V2)
+        ));
+        final BeanWithProperties binding = new BeanWithProperties().withReferenceSetProperty(collection);
+
+        // When
+        TypedValue result = executeWithResult("referenceSetProperty\\referenceProperty\\{}", binding);
 
         // Then
-        assertThat(execute("referenceArrayProperty\\[[]]", binding), equalTo(new BeanWithProperties[] { B1, B2 }));
+        assertResultIsParameterisedType(result, new LinkedHashSet<>(asList(V1, V2)), LinkedHashSet.class, BeanWithProperties.class);
     }
 }
