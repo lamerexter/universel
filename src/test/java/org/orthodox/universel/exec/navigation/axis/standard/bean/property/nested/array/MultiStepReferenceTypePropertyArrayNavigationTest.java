@@ -35,18 +35,19 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.orthodox.universel.Universal.execute;
 
-public class MultiStepTypeArrayPropertyNavigationTest {
+public class MultiStepReferenceTypePropertyArrayNavigationTest {
     @Test
-    void typeRead_reduction() {
+    void referenceTypeRead_reduction() {
         // Given
+        final BeanWithProperties V1 = new BeanWithProperties().withStringProperty("Bean1");
+        final BeanWithProperties V2 = new BeanWithProperties().withStringProperty("Bean2");
         final BeanWithProperties[] array = {
-            new BeanWithProperties().withTypeProperty(String.class),
-            new BeanWithProperties().withTypeProperty(Integer.class),
-            new BeanWithProperties().withTypeProperty(void.class)
+            new BeanWithProperties().withReferenceProperty(V1),
+            new BeanWithProperties().withReferenceProperty(V2)
         };
         final BeanWithProperties binding = new BeanWithProperties().withReferenceArrayProperty(array);
 
         // Then
-        assertThat(execute("referenceArrayProperty\\typeProperty\\[[]]", binding), equalTo(new Class[] {String.class, Integer.class, void.class}));
+        assertThat(execute("referenceArrayProperty\\referenceProperty\\[[]]", binding), equalTo(new BeanWithProperties[] { V1, V2 }));
     }
 }

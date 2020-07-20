@@ -222,7 +222,7 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
         String generatedClassName = compilationContext.peekTypeInfo().getFullyQualifiedTypeName().join("/");
         compilationContext.getBytecodeHelper()
                           .peekMethodVisitor()
-                          .visitInvokeDynamicInsn("apply",
+                          .visitInvokeDynamicInsn(node.getSourceFunctionName(),
                                                   MethodType.methodType(node.getSourceFunctionType()).toMethodDescriptorString(),
                                                   bsm,
                                                   funcType,

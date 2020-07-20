@@ -26,26 +26,34 @@
  *
  */
 
-package org.orthodox.universel.exec.navigation.axis.standard.bean.property.nested.array;
+package org.orthodox.universel.exec.navigation.axis.standard.bean.property.nested.collections.list;
 
 import org.junit.jupiter.api.Test;
 import org.orthodox.universel.BeanWithProperties;
+import org.orthodox.universel.exec.TypedValue;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.orthodox.universel.Universal.execute;
+import java.util.List;
 
-public class MultiStepStringArrayPropertyNavigationTest {
+import static java.util.Arrays.asList;
+import static org.orthodox.universel.ResultTestUtil.assertResultIsParameterisedType;
+import static org.orthodox.universel.Universal.executeWithResult;
+
+public class MultiStepStringPropertyListNavigationTest {
     @Test
-    void stringRead_reduction() {
+    void read_reduction() {
         // Given
-        final BeanWithProperties[] array = {
-            new BeanWithProperties().withStringProperty("Hello"),
-            new BeanWithProperties().withStringProperty("World")
-        };
-        final BeanWithProperties binding = new BeanWithProperties().withReferenceArrayProperty(array);
+        final String V1 = "Hello";
+        final String V2 = "World";
+        final List<BeanWithProperties> list = asList(
+            new BeanWithProperties().withStringProperty(V1),
+            new BeanWithProperties().withStringProperty(V2)
+        );
+        final BeanWithProperties binding = new BeanWithProperties().withReferenceListProperty(list);
+
+        // When
+        TypedValue result = executeWithResult("referenceListProperty\\stringProperty\\[]", binding);
 
         // Then
-        assertThat(execute("referenceArrayProperty\\stringProperty\\[[]]", binding), equalTo(new String[] {"Hello", "World"}));
+        assertResultIsParameterisedType(result, asList(V1, V2), List.class, String.class);
     }
 }

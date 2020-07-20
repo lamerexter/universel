@@ -39,11 +39,6 @@ import static org.orthodox.universel.Universal.execute;
 public class PrimitiveSingleDimensionArrayCreationTest {
     @Test
     void boolean_arrayCreation() {
-//        CompiledUnit<?> compiled = compile("new boolean[99]");
-//        compiled.getCompiledClassResources().stream().forEach(nv -> IoUtil.transferAndClose(nv.getValue(), new FileResource("d:\\scratch\\generated.class")));
-//
-//        BytecodeOutput.printClass(compiled.getCompiledClassResources().get(0).getValue().readFullyAsBytes());
-
         assertThat(execute("new boolean[1]"), instanceOf(boolean[].class));
         assertThat(getLength(execute("new boolean[1]")), equalTo(1));
     }
