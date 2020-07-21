@@ -30,7 +30,6 @@ package org.orthodox.universel.exec.navigation.axis.standard.bean.property.neste
 
 import org.junit.jupiter.api.Test;
 import org.orthodox.universel.BeanWithProperties;
-import org.orthodox.universel.exec.TypedValue;
 
 import java.util.List;
 
@@ -52,29 +51,26 @@ public class MultiMapFilterReduceTest {
 
     @Test
     void read_multiMapReduce() {
-        // When
-        TypedValue result = executeWithResult("referenceProperty.referenceListProperty.referenceProperty.[[]].stringProperty.[]", createBinding());
-
-        // Then
-        assertResultIsParameterisedType(result, asList(V1, V2, V3, V4), List.class, String.class);
+        assertResultIsParameterisedType(executeWithResult("referenceProperty.referenceListProperty.referenceProperty.[[]].stringProperty.[]", createBinding()),
+                                        asList(V1, V2, V3, V4), List.class, String.class);
     }
 
     @Test
     void read_multiMapStream() {
-        // When
-        TypedValue result = executeWithResult("referenceProperty.referenceListProperty.referenceProperty.[[]].stringProperty", createBinding());
-
-        // Then
-        assertResultIsParameterisedStream(result, asList(V1, V2, V3, V4), String.class);
+        assertResultIsParameterisedStream(executeWithResult("referenceProperty.referenceListProperty.referenceProperty.[[]].stringProperty", createBinding()),
+                                          asList(V1, V2, V3, V4), String.class);
     }
 
     @Test
     void read_multiContiguousReduce() {
-        // When
-        TypedValue result = executeWithResult("referenceProperty.referenceListProperty.referenceProperty.[[]].[].{}.[]", createBinding());
+        assertResultIsParameterisedType(executeWithResult("referenceProperty.referenceListProperty.referenceProperty.[[]].[].{}.[]", createBinding()),
+                                        asList(B1, B2, B3, B4), List.class, BeanWithProperties.class);
+    }
 
-        // Then
-        assertResultIsParameterisedType(result, asList(B1, B2, B3, B4), List.class, BeanWithProperties.class);
+    @Test
+    void read_multiContiguousReduceThenMapStream() {
+        assertResultIsParameterisedStream(executeWithResult("referenceProperty.referenceListProperty.referenceProperty.[[]].[].{}.[].stringProperty", createBinding()),
+                                          asList(V1, V2, V3, V4), String.class);
     }
 
     private BeanWithProperties createBinding() {
