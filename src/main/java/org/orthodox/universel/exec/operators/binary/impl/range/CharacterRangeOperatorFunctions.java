@@ -28,13 +28,13 @@
 
 package org.orthodox.universel.exec.operators.binary.impl.range;
 
-import org.orthodox.universel.cst.Operator;
+import org.orthodox.universel.ast.Operator;
 import org.orthodox.universel.exec.operators.binary.BinaryOperator;
 import org.orthodox.universel.exec.operators.range.CharacterRange;
 
 import java.util.Collection;
 
-import static org.orthodox.universel.cst.Operator.*;
+import static org.orthodox.universel.ast.Operator.*;
 
 /**
  * Specific operator functions for {@link org.orthodox.universel.exec.operators.range.CharacterRange} whoch deal

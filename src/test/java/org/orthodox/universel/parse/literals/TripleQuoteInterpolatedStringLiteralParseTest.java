@@ -3,12 +3,12 @@ package org.orthodox.universel.parse.literals;
 import org.beanplanet.core.util.StringUtil;
 import org.junit.jupiter.api.Test;
 import org.orthodox.universal.parser.UniversalParser;
-import org.orthodox.universel.cst.Expression;
-import org.orthodox.universel.cst.TokenImage;
-import org.orthodox.universel.cst.literals.BooleanLiteralExpr;
-import org.orthodox.universel.cst.literals.IntegerLiteral;
-import org.orthodox.universel.cst.literals.InterpolatedStringLiteralExpr;
-import org.orthodox.universel.cst.literals.StringLiteralExpr;
+import org.orthodox.universel.ast.Expression;
+import org.orthodox.universel.ast.TokenImage;
+import org.orthodox.universel.ast.literals.BooleanLiteralExpr;
+import org.orthodox.universel.ast.literals.IntegerLiteral;
+import org.orthodox.universel.ast.literals.InterpolatedStringLiteralExpr;
+import org.orthodox.universel.ast.literals.StringLiteralExpr;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;

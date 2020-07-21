@@ -32,7 +32,7 @@ import org.beanplanet.core.lang.FilteringPackageClassScanner;
 import org.beanplanet.core.lang.PackageResourceScanner;
 import org.beanplanet.core.lang.conversion.TypeConversionException;
 import org.beanplanet.core.logging.Logger;
-import org.orthodox.universel.cst.Operator;
+import org.orthodox.universel.ast.Operator;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -48,7 +48,7 @@ import static org.beanplanet.core.lang.TypeUtil.getMethodsInClassHierarchy;
 import static org.beanplanet.core.util.CollectionUtil.nullSafe;
 import static org.beanplanet.core.util.StringUtil.asCsvList;
 import static org.beanplanet.core.util.StringUtil.asDelimitedString;
-import static org.orthodox.universel.cst.Modifiers.isStatic;
+import static org.orthodox.universel.ast.Modifiers.isStatic;
 
 public class PackageScanBinaryOperatorLoader implements BinaryOperatorLoader, Logger {
     public static final String TYPE_CONVERTER_PACKAGES_RESOURCE = "META-INF/services/org/orthodox/universal/binary-operator-packages.txt";

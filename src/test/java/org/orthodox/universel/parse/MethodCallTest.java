@@ -30,10 +30,10 @@ package org.orthodox.universel.parse;
 
 import org.junit.jupiter.api.Test;
 import org.orthodox.universel.Universal;
-import org.orthodox.universel.cst.MethodCall;
-import org.orthodox.universel.cst.literals.BooleanLiteralExpr;
-import org.orthodox.universel.cst.literals.DecimalIntegerLiteralExpr;
-import org.orthodox.universel.cst.literals.StringLiteralExpr;
+import org.orthodox.universel.ast.MethodCall;
+import org.orthodox.universel.ast.literals.BooleanLiteralExpr;
+import org.orthodox.universel.ast.literals.DecimalIntegerLiteralExpr;
+import org.orthodox.universel.ast.literals.StringLiteralExpr;
 
 import java.util.Collections;
 

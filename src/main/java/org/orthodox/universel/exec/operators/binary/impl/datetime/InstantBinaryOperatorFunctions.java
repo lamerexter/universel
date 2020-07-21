@@ -34,7 +34,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.Period;
 
-import static org.orthodox.universel.cst.Operator.*;
+import static org.orthodox.universel.ast.Operator.*;
 
 @BinaryOperator
 public class InstantBinaryOperatorFunctions {

@@ -37,14 +37,11 @@ import org.orthodox.universel.ast.navigation.NavigationStep;
 import org.orthodox.universel.ast.navigation.NavigationStream;
 import org.orthodox.universel.ast.navigation.ReductionNodeTest;
 import org.orthodox.universel.compiler.*;
-import org.orthodox.universel.cst.*;
-import org.orthodox.universel.cst.literals.NullLiteralExpr;
-import org.orthodox.universel.cst.methods.GeneratedStaticLambdaFunction;
-import org.orthodox.universel.cst.methods.LambdaFunction;
-import org.orthodox.universel.cst.methods.MethodDeclaration;
-import org.orthodox.universel.cst.type.Parameter;
-import org.orthodox.universel.cst.type.declaration.ClassDeclaration;
-import org.orthodox.universel.cst.type.reference.ResolvedTypeReferenceOld;
+import org.orthodox.universel.ast.literals.NullLiteralExpr;
+import org.orthodox.universel.ast.methods.GeneratedStaticLambdaFunction;
+import org.orthodox.universel.ast.methods.LambdaFunction;
+import org.orthodox.universel.ast.type.Parameter;
+import org.orthodox.universel.ast.type.reference.ResolvedTypeReferenceOld;
 import org.orthodox.universel.symanticanalysis.AbstractSemanticAnalyser;
 import org.orthodox.universel.symanticanalysis.JvmInstructionNode;
 import org.orthodox.universel.symanticanalysis.conversion.BoxConversion;
@@ -63,7 +60,8 @@ import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
 import static org.beanplanet.core.lang.TypeUtil.isPrimitiveType;
-import static org.orthodox.universel.cst.Modifiers.*;
+import static org.orthodox.universel.ast.Modifiers.*;
+import static org.orthodox.universel.ast.Type.forClass;
 
 public class NavigationResolver extends AbstractSemanticAnalyser {
 
@@ -217,7 +215,8 @@ public class NavigationResolver extends AbstractSemanticAnalyser {
                 final boolean isSequence = isSequenceType(transformStep);
                 final boolean isReduction = (((NavigationStep<?>) step).getNodeTest() instanceof ReductionNodeTest);
                 navSages.add(isReduction ? new ReduceStage(transformStep, isSequence, inSequence) : new MapStage(transformStep, isSequence, inSequence));
-                inSequence = (inSequence || isSequence) && !isReduction;
+                inSequence = (inSequence || isSequence);
+//                inSequence = (inSequence || isSequence) && !isReduction;
             } finally {
                 if (previousStepScope != null) getContext().popScope();
             }
@@ -233,44 +232,51 @@ public class NavigationResolver extends AbstractSemanticAnalyser {
         List<Node> multipleCardinalityTransformedSteps = new ArrayList<>(stages.size());
         boolean inStream = false;
         for (int n = 0; n < stages.size(); n++) {
-            NavigationStage previousStep = n > 0 ? stages.get(n - 1) : null;
+            NavigationStage previousStage = n > 0 ? stages.get(n - 1) : null;
             NavigationStage stage = stages.get(n);
             Node step = stage.getNode();
 
-            if (n != stages.size() - 1) {
-
+//            if (n != stages.size() - 1) {
+            boolean isLastStage = n == stages.size() - 1;
+            if ( stage.isReduce() ) {
+                if ( !isLastStage ) {
+                    inStream = true;
+                    // Convert to stream
+                    step = new TypeConversion(step, new ParameterisedTypeImpl(step.getTokenImage(), forClass(Stream.class), step.getType().getComponentType()));
+                }
+            } else {
                 if (stage.isSequence()) {
                     if (inStream) {
 
-                    } else {
+                    } else if ( !isLastStage ) {
                         inStream = true;
                         // Convert to stream
-                        step = new TypeConversion(step, Stream.class);
+                        step = new TypeConversion(step, new ParameterisedTypeImpl(step.getTokenImage(), forClass(Stream.class), step.getType().getComponentType()));
                     }
                 } else if (inStream) {
-                    Stream s;
+
                     // Convert singleton to singleton stream and insert into flatmap
-                    Class<?> previousStepType = previousStep.isSequence() ? previousStep.getType().getComponentType().getTypeClass() : previousStep.getTypeDescriptor();
+                    Class<?> previousStepType = previousStage.isSequence() ? previousStage.getType().getComponentType().getTypeClass() : previousStage.getTypeDescriptor();
                     LambdaFunction generatedMethod = new GeneratedStaticLambdaFunction(new ResolvedTypeReferenceOld(step),
                                                                                        new SimpleNamePath("nav", "step", String.valueOf(n), "fio"),
                                                                                        NodeSequence.<Parameter>builder()
                                                                                            .add(new Parameter(valueOf(FINAL),
-                                                                                                              new ResolvedTypeReferenceOld(previousStep.getNode().getTokenImage(), previousStepType),
+                                                                                                              new ResolvedTypeReferenceOld(previousStage.getNode().getTokenImage(), previousStepType),
                                                                                                               false,
-                                                                                                              new Name(previousStep.getNode().getTokenImage(), "step")
+                                                                                                              new Name(previousStage.getNode().getTokenImage(), "step")
                                                                                            ))
                                                                                            .build(),
                                                                                        NodeSequence.builder()
-                                                                                                   .add(new LoadLocal(previousStep.getNode().getTokenImage(), previousStepType, 0))
+                                                                                                   .add(new LoadLocal(previousStage.getNode().getTokenImage(), previousStepType, 0))
                                                                                                    .add(new ReturnStatement(step))
                                                                                                    .build()
                     );
                     step = InternalNodeSequence.builder()
-                                               .add(new InstanceMethodCall(Stream.class,
-                                                                           step.getTokenImage(),
-                                                                           Stream.class,
+                                               .add(new InstanceMethodCall(step.getTokenImage(),
+                                                                           new ResolvedTypeReferenceOld(step.getTokenImage(), Stream.class),
+                                                                           new ParameterisedTypeImpl(step.getTokenImage(), forClass(Stream.class), step.getType()),
                                                                            "map",
-                                                                           singletonList(Function.class),
+                                                                           singletonList(new ResolvedTypeReferenceOld(Function.class)),
                                                                            singletonList(new FunctionalInterfaceObject(step.getTokenImage(),
                                                                                                                        Function.class, Object.class, singletonList(Object.class), "apply",
                                                                                                                        generatedMethod
@@ -280,6 +286,7 @@ public class NavigationResolver extends AbstractSemanticAnalyser {
                                                .build();
                 }
             }
+//            }
 
             multipleCardinalityTransformedSteps.add(step);
         }
@@ -315,15 +322,4 @@ public class NavigationResolver extends AbstractSemanticAnalyser {
             }
         };
     }
-
-//    @Override
-//    public Node visitScript(final Script node) {
-//        getContext().pushScope(new ImportScope(getContext().getDefaultImports(), getContext().getMessages()));
-//
-//        try {
-//            return super.visitScript(node);
-//        } finally {
-//            getContext().popScope();
-//        }
-//    }
 }

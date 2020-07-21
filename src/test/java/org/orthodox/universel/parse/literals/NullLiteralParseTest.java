@@ -2,8 +2,8 @@ package org.orthodox.universel.parse.literals;
 
 import org.junit.jupiter.api.Test;
 import org.orthodox.universal.parser.UniversalParser;
-import org.orthodox.universel.cst.Expression;
-import org.orthodox.universel.cst.literals.NullLiteralExpr;
+import org.orthodox.universel.ast.Expression;
+import org.orthodox.universel.ast.literals.NullLiteralExpr;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;

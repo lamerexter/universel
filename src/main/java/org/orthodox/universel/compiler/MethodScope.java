@@ -32,8 +32,8 @@ import org.orthodox.universel.ast.LoadLocal;
 import org.orthodox.universel.ast.navigation.NameTest;
 import org.orthodox.universel.ast.navigation.NavigationAxis;
 import org.orthodox.universel.ast.navigation.NavigationStep;
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.methods.MethodDeclaration;
+import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.ast.methods.MethodDeclaration;
 
 import static java.util.stream.IntStream.range;
 

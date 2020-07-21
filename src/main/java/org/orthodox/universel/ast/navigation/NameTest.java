@@ -29,10 +29,10 @@
 package org.orthodox.universel.ast.navigation;
 
 import org.beanplanet.core.models.Named;
-import org.orthodox.universel.cst.Expression;
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.TokenImage;
-import org.orthodox.universel.cst.UniversalCodeVisitor;
+import org.orthodox.universel.ast.Expression;
+import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.ast.TokenImage;
+import org.orthodox.universel.ast.UniversalCodeVisitor;
 
 import java.util.Objects;
 

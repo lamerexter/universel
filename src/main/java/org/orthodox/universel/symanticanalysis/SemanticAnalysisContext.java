@@ -31,8 +31,7 @@ package org.orthodox.universel.symanticanalysis;
 import org.beanplanet.messages.domain.Message;
 import org.beanplanet.messages.domain.Messages;
 import org.orthodox.universel.compiler.Scope;
-import org.orthodox.universel.cst.ImportStmt;
-import org.orthodox.universel.cst.Node;
+import org.orthodox.universel.ast.ImportStmt;
 import org.orthodox.universel.exec.navigation.NavigatorRegistry;
 
 import java.util.ArrayDeque;

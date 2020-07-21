@@ -30,7 +30,7 @@ package org.orthodox.universel.exec;
 
 import org.beanplanet.core.lang.conversion.TypeConverter;
 import org.beanplanet.core.models.TypeConvertingValue;
-import org.orthodox.universel.cst.Type;
+import org.orthodox.universel.ast.Type;
 
 import java.util.Objects;
 

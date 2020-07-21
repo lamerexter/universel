@@ -29,17 +29,15 @@
 package org.orthodox.universel.symanticanalysis;
 
 import org.beanplanet.core.util.CollectionUtil;
-import org.orthodox.universel.cst.ArrayTypeImpl;
-import org.orthodox.universel.cst.Type;
-import org.orthodox.universel.cst.type.reference.ReferenceType;
-import org.orthodox.universel.cst.type.reference.TypeReference;
+import org.orthodox.universel.ast.ArrayTypeImpl;
+import org.orthodox.universel.ast.Type;
+import org.orthodox.universel.ast.type.reference.ReferenceType;
+import org.orthodox.universel.ast.type.reference.TypeReference;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.orthodox.universel.compiler.Messages.MethodCall.METHOD_AMBIGUOUS;
 import static org.orthodox.universel.compiler.Messages.TYPE.TYPE_AMBIGUOUS;
 
 /**

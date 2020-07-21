@@ -28,12 +28,12 @@
 
 package org.orthodox.universel.exec.operators.binary.impl.range;
 
-import org.orthodox.universel.cst.Operator;
+import org.orthodox.universel.ast.Operator;
 import org.orthodox.universel.exec.operators.binary.BinaryOperator;
 import org.orthodox.universel.exec.operators.range.EnumRange;
 import org.orthodox.universel.exec.operators.range.Range;
 
-import static org.orthodox.universel.cst.Operator.*;
+import static org.orthodox.universel.ast.Operator.*;
 
 /**
  * Built-in character range operator functions.

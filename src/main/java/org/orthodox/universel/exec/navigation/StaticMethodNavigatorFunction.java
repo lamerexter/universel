@@ -30,7 +30,7 @@ package org.orthodox.universel.exec.navigation;
 
 import org.beanplanet.core.lang.TypeUtil;
 import org.orthodox.universel.ast.navigation.NavigationStep;
-import org.orthodox.universel.cst.Node;
+import org.orthodox.universel.ast.Node;
 
 import java.lang.reflect.Method;
 

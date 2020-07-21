@@ -15,10 +15,9 @@
  ******************************************************************************/
 package org.orthodox.universel.ast.navigation;
 
-import org.orthodox.universel.cst.Expression;
-import org.orthodox.universel.cst.TokenImage;
+import org.orthodox.universel.ast.Expression;
+import org.orthodox.universel.ast.TokenImage;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 

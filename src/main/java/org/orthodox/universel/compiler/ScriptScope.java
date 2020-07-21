@@ -32,7 +32,7 @@ import org.orthodox.universel.ast.LoadLocal;
 import org.orthodox.universel.ast.navigation.NavigationAxis;
 import org.orthodox.universel.ast.navigation.NavigationStep;
 import org.orthodox.universel.ast.navigation.NodeType;
-import org.orthodox.universel.cst.Node;
+import org.orthodox.universel.ast.Node;
 import org.orthodox.universel.exec.navigation.NavigatorRegistry;
 
 import java.util.Objects;

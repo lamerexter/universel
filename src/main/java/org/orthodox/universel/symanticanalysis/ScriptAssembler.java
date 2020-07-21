@@ -31,20 +31,17 @@ package org.orthodox.universel.symanticanalysis;
 import org.beanplanet.core.collections.ListBuilder;
 import org.beanplanet.core.models.path.NamePath;
 import org.beanplanet.core.models.path.SimpleNamePath;
-import org.orthodox.universel.ast.InstanceMethodCall;
-import org.orthodox.universel.ast.LoadLocal;
-import org.orthodox.universel.ast.NodeSequence;
+import org.orthodox.universel.ast.*;
 import org.orthodox.universel.ast.allocation.ObjectCreationExpression;
-import org.orthodox.universel.cst.*;
-import org.orthodox.universel.cst.literals.NullLiteralExpr;
-import org.orthodox.universel.cst.methods.MethodDeclaration;
-import org.orthodox.universel.cst.type.Parameter;
-import org.orthodox.universel.cst.type.declaration.ClassDeclaration;
-import org.orthodox.universel.cst.type.declaration.TypeDeclaration;
-import org.orthodox.universel.cst.type.declaration.TypeDeclarationReference;
-import org.orthodox.universel.cst.type.reference.ResolvedTypeReferenceOld;
-import org.orthodox.universel.cst.type.reference.TypeNameReference;
-import org.orthodox.universel.cst.type.reference.TypeReference;
+import org.orthodox.universel.ast.literals.NullLiteralExpr;
+import org.orthodox.universel.ast.methods.MethodDeclaration;
+import org.orthodox.universel.ast.type.Parameter;
+import org.orthodox.universel.ast.type.declaration.ClassDeclaration;
+import org.orthodox.universel.ast.type.declaration.TypeDeclaration;
+import org.orthodox.universel.ast.type.declaration.TypeDeclarationReference;
+import org.orthodox.universel.ast.type.reference.ResolvedTypeReferenceOld;
+import org.orthodox.universel.ast.type.reference.TypeNameReference;
+import org.orthodox.universel.ast.type.reference.TypeReference;
 import org.orthodox.universel.symanticanalysis.name.InternalNodeSequence;
 
 import java.util.List;
@@ -57,7 +54,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.orthodox.universel.ast.NodeSequence.emptyNodeSequence;
 import static org.orthodox.universel.compiler.CompilationDefaults.*;
-import static org.orthodox.universel.cst.Modifiers.*;
+import static org.orthodox.universel.ast.Modifiers.*;
 
 /**
  * This is where semantic analysis really begins. Looks at what the incoming script looks like and assembles a

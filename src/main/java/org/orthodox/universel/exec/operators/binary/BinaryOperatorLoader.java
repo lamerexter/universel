@@ -27,8 +27,10 @@
  */
 package org.orthodox.universel.exec.operators.binary;
 
+import org.orthodox.universel.ast.BinaryExpression;
+
 /**
- * A strategy for loading <code>{@link org.orthodox.universel.cst.BinaryExpression}</code> instances.
+ * A strategy for loading <code>{@link BinaryExpression}</code> instances.
  *
  * @author Gary Watson
  */

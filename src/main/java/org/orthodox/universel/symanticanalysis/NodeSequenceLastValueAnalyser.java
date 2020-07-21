@@ -29,7 +29,7 @@
 package org.orthodox.universel.symanticanalysis;
 
 import org.orthodox.universel.ast.NodeSequence;
-import org.orthodox.universel.cst.Node;
+import org.orthodox.universel.ast.Node;
 
 import java.util.ArrayList;
 import java.util.List;

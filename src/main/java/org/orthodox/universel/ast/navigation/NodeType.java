@@ -27,8 +27,8 @@
  */
 package org.orthodox.universel.ast.navigation;
 
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.TokenImage;
+import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.ast.TokenImage;
 
 import java.util.Objects;
 

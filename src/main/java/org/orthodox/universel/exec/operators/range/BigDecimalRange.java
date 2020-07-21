@@ -28,7 +28,7 @@
 
 package org.orthodox.universel.exec.operators.range;
 
-import org.orthodox.universel.cst.Operator;
+import org.orthodox.universel.ast.Operator;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

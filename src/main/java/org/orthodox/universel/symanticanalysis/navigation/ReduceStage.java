@@ -28,7 +28,7 @@
 
 package org.orthodox.universel.symanticanalysis.navigation;
 
-import org.orthodox.universel.cst.Node;
+import org.orthodox.universel.ast.Node;
 
 public class ReduceStage extends AbstractNavigationStage {
     public ReduceStage(final Node node,
@@ -38,4 +38,5 @@ public class ReduceStage extends AbstractNavigationStage {
         super(node, isSequence, inSequence);
     }
 
+    public boolean isReduce() { return true; }
 }

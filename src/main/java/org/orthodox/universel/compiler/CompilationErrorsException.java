@@ -28,14 +28,11 @@
 
 package org.orthodox.universel.compiler;
 
-import org.beanplanet.core.util.StringUtil;
 import org.beanplanet.messages.domain.Message;
 import org.beanplanet.messages.domain.Messages;
 import org.orthodox.universel.UniversalException;
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.TokenImage;
-
-import java.io.File;
+import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.ast.TokenImage;
 
 /**
  * A compilation exception, thrown when there are errors produced from compilation.

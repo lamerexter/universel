@@ -28,7 +28,7 @@
 
 package org.orthodox.universel.symanticanalysis.navigation;
 
-import org.orthodox.universel.cst.Node;
+import org.orthodox.universel.ast.Node;
 
 public class MapStage extends AbstractNavigationStage {
     public MapStage(final Node node,

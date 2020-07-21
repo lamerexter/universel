@@ -27,17 +27,17 @@
  */
 package org.orthodox.universel.exec.navigation;
 
-import org.orthodox.universel.cst.Operator;
+import org.orthodox.universel.ast.BinaryExpression;
+import org.orthodox.universel.ast.Operator;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.Collection;
 
 /**
  * A class and method tagging annotation for marking classes and methods as hbeing implementations of
- * {@link org.orthodox.universel.cst.BinaryExpression}s for binary {@link Operator}s.
+ * {@link BinaryExpression}s for binary {@link Operator}s.
  *
  * <p>Classes tagged by this annotation may have static methods which perform designated binary operators.</p>
  */

@@ -2,7 +2,7 @@ package org.orthodox.universel.parse.literals;
 
 import org.junit.jupiter.api.Test;
 import org.orthodox.universel.Universal;
-import org.orthodox.universel.cst.literals.BinaryIntegerLiteralExpr;
+import org.orthodox.universel.ast.literals.BinaryIntegerLiteralExpr;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;

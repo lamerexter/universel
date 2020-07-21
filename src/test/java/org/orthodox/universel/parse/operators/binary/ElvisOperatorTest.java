@@ -29,10 +29,9 @@
 package org.orthodox.universel.parse.operators.binary;
 
 import org.junit.jupiter.api.Test;
-import org.orthodox.universel.cst.Expression;
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.conditionals.ElvisExpression;
-import org.orthodox.universel.cst.literals.StringLiteralExpr;
+import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.ast.conditionals.ElvisExpression;
+import org.orthodox.universel.ast.literals.StringLiteralExpr;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;

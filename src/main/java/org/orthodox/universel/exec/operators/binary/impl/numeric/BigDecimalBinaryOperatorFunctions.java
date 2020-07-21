@@ -28,7 +28,7 @@
 
 package org.orthodox.universel.exec.operators.binary.impl.numeric;
 
-import org.orthodox.universel.cst.Operator;
+import org.orthodox.universel.ast.Operator;
 import org.orthodox.universel.exec.operators.binary.BinaryOperator;
 import org.orthodox.universel.exec.operators.range.BigDecimalRange;
 import org.orthodox.universel.exec.operators.range.Range;
@@ -36,7 +36,7 @@ import org.orthodox.universel.exec.operators.range.Range;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-import static org.orthodox.universel.cst.Operator.*;
+import static org.orthodox.universel.ast.Operator.*;
 
 @BinaryOperator
 public class BigDecimalBinaryOperatorFunctions {

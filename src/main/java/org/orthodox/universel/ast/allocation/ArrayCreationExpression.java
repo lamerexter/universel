@@ -28,11 +28,10 @@
 package org.orthodox.universel.ast.allocation;
 
 import org.beanplanet.core.collections.ListBuilder;
-import org.orthodox.universel.cst.*;
-import org.orthodox.universel.cst.type.reference.ArrayTypeReference;
-import org.orthodox.universel.cst.type.reference.TypeReference;
+import org.orthodox.universel.ast.*;
+import org.orthodox.universel.ast.type.reference.ArrayTypeReference;
+import org.orthodox.universel.ast.type.reference.TypeReference;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 

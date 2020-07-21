@@ -40,14 +40,14 @@ import org.orthodox.universel.ast.navigation.ArrayNodeTest;
 import org.orthodox.universel.ast.navigation.ListNodeTest;
 import org.orthodox.universel.ast.navigation.NavigationStep;
 import org.orthodox.universel.ast.navigation.SetNodeTest;
-import org.orthodox.universel.cst.Name;
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.ParameterisedTypeImpl;
-import org.orthodox.universel.cst.methods.GeneratedStaticLambdaFunction;
-import org.orthodox.universel.cst.methods.LambdaFunction;
-import org.orthodox.universel.cst.type.Parameter;
-import org.orthodox.universel.cst.type.reference.ResolvedTypeReferenceOld;
-import org.orthodox.universel.cst.type.reference.TypeReference;
+import org.orthodox.universel.ast.Name;
+import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.ast.ParameterisedTypeImpl;
+import org.orthodox.universel.ast.methods.GeneratedStaticLambdaFunction;
+import org.orthodox.universel.ast.methods.LambdaFunction;
+import org.orthodox.universel.ast.type.Parameter;
+import org.orthodox.universel.ast.type.reference.ResolvedTypeReferenceOld;
+import org.orthodox.universel.ast.type.reference.TypeReference;
 import org.orthodox.universel.exec.navigation.Navigator;
 import org.orthodox.universel.exec.navigation.ReductionNavigator;
 import org.orthodox.universel.symanticanalysis.name.InternalNodeSequence;
@@ -67,8 +67,8 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.beanplanet.core.lang.TypeUtil.ensureNonPrimitiveType;
 import static org.beanplanet.core.lang.TypeUtil.forName;
-import static org.orthodox.universel.cst.Modifiers.FINAL;
-import static org.orthodox.universel.cst.Modifiers.valueOf;
+import static org.orthodox.universel.ast.Modifiers.FINAL;
+import static org.orthodox.universel.ast.Modifiers.valueOf;
 
 @Navigator
 public class UniversalCollectionReductionNavigators {

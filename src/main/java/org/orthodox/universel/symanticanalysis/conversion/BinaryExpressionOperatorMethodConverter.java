@@ -28,14 +28,13 @@
 
 package org.orthodox.universel.symanticanalysis.conversion;
 
-import org.orthodox.universel.cst.*;
+import org.orthodox.universel.ast.*;
 import org.orthodox.universel.exec.operators.binary.BinaryOperatorRegistry;
 import org.orthodox.universel.exec.operators.binary.ConcurrentBinaryOperatorRegistry;
 import org.orthodox.universel.exec.operators.binary.PackageScanBinaryOperatorLoader;
 import org.orthodox.universel.symanticanalysis.SemanticAnalyser;
 import org.orthodox.universel.symanticanalysis.SemanticAnalysisContext;
 
-import javax.lang.model.type.NullType;
 import java.lang.reflect.Method;
 import java.util.Optional;
 

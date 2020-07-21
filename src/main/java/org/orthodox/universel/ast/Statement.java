@@ -15,9 +15,6 @@
  ******************************************************************************/
 package org.orthodox.universel.ast;
 
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.TokenImage;
-
 /**
  * The superclass of all statement AST nodes.
  * 

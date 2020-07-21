@@ -30,11 +30,7 @@ package org.orthodox.universel.exec.operators.binary.impl;
 
 import org.orthodox.universel.exec.operators.binary.BinaryOperator;
 
-import java.util.Objects;
-
-import static org.orthodox.universel.cst.Operator.EQUAL;
-import static org.orthodox.universel.cst.Operator.INSTANCE_OF;
-import static org.orthodox.universel.cst.Operator.TREBLE_EQUAL;
+import static org.orthodox.universel.ast.Operator.INSTANCE_OF;
 
 @BinaryOperator
 public class InstanceOfOperatorFunctions {

@@ -28,12 +28,12 @@
 
 package org.orthodox.universel.exec.operators.binary.impl.numeric;
 
-import org.orthodox.universel.cst.Operator;
+import org.orthodox.universel.ast.Operator;
 import org.orthodox.universel.exec.operators.binary.BinaryOperator;
 import org.orthodox.universel.exec.operators.range.Range;
 import org.orthodox.universel.exec.operators.range.ShortRange;
 
-import static org.orthodox.universel.cst.Operator.*;
+import static org.orthodox.universel.ast.Operator.*;
 
 @BinaryOperator
 public class ShortBinaryOperatorFunctions {

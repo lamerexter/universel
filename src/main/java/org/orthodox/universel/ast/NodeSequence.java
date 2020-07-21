@@ -30,7 +30,6 @@ package org.orthodox.universel.ast;
 
 import org.beanplanet.core.collections.ListBuilder;
 import org.beanplanet.core.models.Builder;
-import org.orthodox.universel.cst.*;
 
 import java.util.Collections;
 import java.util.List;
@@ -39,7 +38,7 @@ import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
-import static org.orthodox.universel.cst.TokenImage.range;
+import static org.orthodox.universel.ast.TokenImage.range;
 
 public class NodeSequence<T extends Node> extends Node implements CompositeNode {
     private List<T> nodes;

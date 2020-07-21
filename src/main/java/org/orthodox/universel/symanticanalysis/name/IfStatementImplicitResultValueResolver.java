@@ -30,9 +30,8 @@ package org.orthodox.universel.symanticanalysis.name;
 
 import org.orthodox.universel.ast.NodeSequence;
 import org.orthodox.universel.ast.conditionals.IfStatement;
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.Type;
-import org.orthodox.universel.cst.literals.NullLiteralExpr;
+import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.ast.literals.NullLiteralExpr;
 import org.orthodox.universel.symanticanalysis.AbstractSemanticAnalyser;
 
 import java.util.List;

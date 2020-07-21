@@ -1,8 +1,8 @@
 package org.orthodox.universel.ast.allocation;
 
-import org.orthodox.universel.cst.CompositeNode;
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.TokenImage;
+import org.orthodox.universel.ast.CompositeNode;
+import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.ast.TokenImage;
 
 import java.util.List;
 import java.util.Objects;

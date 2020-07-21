@@ -29,7 +29,7 @@
 package org.orthodox.universel.exec;
 
 import org.beanplanet.core.models.Value;
-import org.orthodox.universel.cst.Type;
+import org.orthodox.universel.ast.Type;
 
 public interface TypedValue extends Value {
     Type getValueType();

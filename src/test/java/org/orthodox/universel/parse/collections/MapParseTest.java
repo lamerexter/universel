@@ -30,9 +30,9 @@ package org.orthodox.universel.parse.collections;
 
 import org.junit.jupiter.api.Test;
 import org.orthodox.universel.Universal;
-import org.orthodox.universel.cst.collections.MapEntryExpr;
-import org.orthodox.universel.cst.collections.MapExpr;
-import org.orthodox.universel.cst.literals.*;
+import org.orthodox.universel.ast.collections.MapEntryExpr;
+import org.orthodox.universel.ast.collections.MapExpr;
+import org.orthodox.universel.ast.literals.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;

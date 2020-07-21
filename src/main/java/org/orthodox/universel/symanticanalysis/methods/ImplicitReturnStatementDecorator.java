@@ -31,9 +31,9 @@ package org.orthodox.universel.symanticanalysis.methods;
 import org.orthodox.universel.ast.NodeSequence;
 import org.orthodox.universel.ast.ReturnStatement;
 import org.orthodox.universel.compiler.TransformationUtil;
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.literals.NullLiteralExpr;
-import org.orthodox.universel.cst.methods.MethodDeclaration;
+import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.ast.literals.NullLiteralExpr;
+import org.orthodox.universel.ast.methods.MethodDeclaration;
 import org.orthodox.universel.symanticanalysis.AbstractSemanticAnalyser;
 
 import java.util.Objects;

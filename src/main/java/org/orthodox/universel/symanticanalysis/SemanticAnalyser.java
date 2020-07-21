@@ -28,8 +28,7 @@
 
 package org.orthodox.universel.symanticanalysis;
 
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.UniversalCodeVisitor;
+import org.orthodox.universel.ast.Node;
 
 public interface SemanticAnalyser {
     Node performAnalysis(SemanticAnalysisContext context, Node from);

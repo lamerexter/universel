@@ -31,13 +31,13 @@ package org.orthodox.universel.parse.types.script;
 import org.junit.jupiter.api.Test;
 import org.orthodox.universel.ast.ReturnStatement;
 import org.orthodox.universel.compiler.CompiledUnit;
-import org.orthodox.universel.cst.Modifiers;
-import org.orthodox.universel.cst.TokenImage;
-import org.orthodox.universel.cst.literals.DecimalIntegerLiteralExpr;
-import org.orthodox.universel.cst.literals.NullLiteralExpr;
-import org.orthodox.universel.cst.methods.MethodDeclaration;
-import org.orthodox.universel.cst.type.reference.PrimitiveType;
-import org.orthodox.universel.cst.type.reference.VoidType;
+import org.orthodox.universel.ast.Modifiers;
+import org.orthodox.universel.ast.TokenImage;
+import org.orthodox.universel.ast.literals.DecimalIntegerLiteralExpr;
+import org.orthodox.universel.ast.literals.NullLiteralExpr;
+import org.orthodox.universel.ast.methods.MethodDeclaration;
+import org.orthodox.universel.ast.type.reference.PrimitiveType;
+import org.orthodox.universel.ast.type.reference.VoidType;
 import org.orthodox.universel.BeanWithProperties;
 
 import java.lang.reflect.Method;
@@ -51,8 +51,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.orthodox.universel.Universal.compile;
 import static org.orthodox.universel.Universal.parse;
 import static org.orthodox.universel.compiler.Messages.MethodDeclaration.MISSING_RETURN;
-import static org.orthodox.universel.cst.Modifiers.PUBLIC;
-import static org.orthodox.universel.cst.Modifiers.STATIC;
+import static org.orthodox.universel.ast.Modifiers.PUBLIC;
+import static org.orthodox.universel.ast.Modifiers.STATIC;
 
 /**
  * Unit tests for method declarations scoped at the enclosing script level.

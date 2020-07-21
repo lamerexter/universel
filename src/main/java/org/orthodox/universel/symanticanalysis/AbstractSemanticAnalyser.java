@@ -31,12 +31,12 @@ package org.orthodox.universel.symanticanalysis;
 import org.orthodox.universel.compiler.ImportScope;
 import org.orthodox.universel.compiler.MethodScope;
 import org.orthodox.universel.compiler.TypeDeclarationScope;
-import org.orthodox.universel.cst.ImportDecl;
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.Script;
-import org.orthodox.universel.cst.UniversalVisitorAdapter;
-import org.orthodox.universel.cst.methods.MethodDeclaration;
-import org.orthodox.universel.cst.type.declaration.ClassDeclaration;
+import org.orthodox.universel.ast.ImportDecl;
+import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.ast.Script;
+import org.orthodox.universel.ast.UniversalVisitorAdapter;
+import org.orthodox.universel.ast.methods.MethodDeclaration;
+import org.orthodox.universel.ast.type.declaration.ClassDeclaration;
 
 public class AbstractSemanticAnalyser extends UniversalVisitorAdapter implements SemanticAnalyser {
     private SemanticAnalysisContext context;

@@ -28,9 +28,6 @@
 
 package org.orthodox.universel.compiler;
 
-import org.orthodox.universel.ast.navigation.NavigationStep;
-import org.orthodox.universel.cst.Node;
-
 public interface NameScope extends Scope {
     /**
      * Determines whether this name scope can definitively resolve a given name.

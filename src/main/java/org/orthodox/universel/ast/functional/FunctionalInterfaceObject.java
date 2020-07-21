@@ -28,12 +28,11 @@
 
 package org.orthodox.universel.ast.functional;
 
-import org.orthodox.universel.cst.CompositeNode;
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.TokenImage;
-import org.orthodox.universel.cst.UniversalCodeVisitor;
-import org.orthodox.universel.cst.methods.LambdaFunction;
-import org.orthodox.universel.cst.methods.MethodDeclaration;
+import org.orthodox.universel.ast.CompositeNode;
+import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.ast.TokenImage;
+import org.orthodox.universel.ast.UniversalCodeVisitor;
+import org.orthodox.universel.ast.methods.LambdaFunction;
 
 import java.util.List;
 import java.util.Objects;

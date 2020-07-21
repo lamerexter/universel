@@ -32,12 +32,11 @@ import org.beanplanet.core.lang.TypeUtil;
 import org.beanplanet.core.models.path.NamePath;
 import org.beanplanet.core.models.path.SimpleNamePath;
 import org.beanplanet.core.util.StringUtil;
-import org.orthodox.universel.ast.NodeSequence;
-import org.orthodox.universel.cst.*;
-import org.orthodox.universel.cst.conditionals.TernaryExpression;
-import org.orthodox.universel.cst.methods.MethodDeclaration;
-import org.orthodox.universel.cst.type.Parameter;
-import org.orthodox.universel.cst.type.reference.*;
+import org.orthodox.universel.ast.*;
+import org.orthodox.universel.ast.conditionals.TernaryExpression;
+import org.orthodox.universel.ast.methods.MethodDeclaration;
+import org.orthodox.universel.ast.type.Parameter;
+import org.orthodox.universel.ast.type.reference.*;
 
 import javax.lang.model.type.NullType;
 import java.util.*;

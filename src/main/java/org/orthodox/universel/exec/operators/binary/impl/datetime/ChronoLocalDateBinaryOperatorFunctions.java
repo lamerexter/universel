@@ -32,7 +32,7 @@ import org.orthodox.universel.exec.operators.binary.BinaryOperator;
 
 import java.time.chrono.ChronoLocalDate;
 
-import static org.orthodox.universel.cst.Operator.*;
+import static org.orthodox.universel.ast.Operator.*;
 
 @BinaryOperator
 public class ChronoLocalDateBinaryOperatorFunctions {

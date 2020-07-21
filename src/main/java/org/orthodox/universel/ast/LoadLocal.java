@@ -28,10 +28,7 @@
 
 package org.orthodox.universel.ast;
 
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.TokenImage;
-import org.orthodox.universel.cst.UniversalCodeVisitor;
-import org.orthodox.universel.cst.type.reference.TypeReference;
+import org.orthodox.universel.ast.type.reference.TypeReference;
 
 import java.util.Objects;
 

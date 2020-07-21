@@ -29,7 +29,7 @@
 package org.orthodox.universel.compiler.codegen;
 
 import org.objectweb.asm.Type;
-import org.orthodox.universel.cst.type.reference.TypeReference;
+import org.orthodox.universel.ast.type.reference.TypeReference;
 
 public class CodeGenUtil {
     public static final Type[] EMPTY_TYPES = {};

@@ -31,12 +31,7 @@ package org.orthodox.universel.parse;
 import org.junit.jupiter.api.Test;
 import org.orthodox.universel.Universal;
 import org.orthodox.universel.ast.PackageDeclaration;
-import org.orthodox.universel.cst.ImportDecl;
-import org.orthodox.universel.cst.Name;
 
-import java.util.stream.Collectors;
-
-import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;

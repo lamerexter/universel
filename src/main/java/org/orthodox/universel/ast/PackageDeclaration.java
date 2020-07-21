@@ -30,10 +30,6 @@ package org.orthodox.universel.ast;
 
 import org.beanplanet.core.models.path.NamePath;
 import org.beanplanet.core.models.path.SimpleNamePath;
-import org.orthodox.universel.cst.Name;
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.TokenImage;
-import org.orthodox.universel.cst.UniversalCodeVisitor;
 
 import java.util.List;
 import java.util.Objects;

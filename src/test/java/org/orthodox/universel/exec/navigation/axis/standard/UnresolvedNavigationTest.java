@@ -33,10 +33,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.orthodox.universel.compiler.CompiledUnit;
 import org.orthodox.universel.ast.navigation.NavigationStream;
-import org.orthodox.universel.compiler.Messages;
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.ParseTree;
-import org.orthodox.universel.cst.Script;
+import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.ast.ParseTree;
+import org.orthodox.universel.ast.Script;
 import org.orthodox.universel.BeanWithProperties;
 
 import java.math.BigDecimal;
@@ -49,7 +48,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.orthodox.universel.Universal.compile;
 import static org.orthodox.universel.Universal.execute;
 import static org.orthodox.universel.compiler.Messages.NAME.NAME_NOT_RESOLVED;
-import static org.orthodox.universel.compiler.Messages.NavigationExpression.UNRESOLVED_STEP;
 
 public class UnresolvedNavigationTest {
     private BeanWithProperties binding;

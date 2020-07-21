@@ -6,10 +6,10 @@ import org.beanplanet.core.models.SimpleNameValue;
 import org.beanplanet.core.models.path.NamePath;
 import org.beanplanet.messages.domain.Messages;
 import org.orthodox.universel.ast.navigation.NavigationStep;
-import org.orthodox.universel.cst.ImportStmt;
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.Type;
-import org.orthodox.universel.cst.type.reference.ResolvedTypeReferenceOld;
+import org.orthodox.universel.ast.ImportStmt;
+import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.ast.Type;
+import org.orthodox.universel.ast.type.reference.ResolvedTypeReferenceOld;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;

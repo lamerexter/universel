@@ -28,9 +28,10 @@
 
 package org.orthodox.universel.symanticanalysis.conversion;
 
-import org.orthodox.universel.cst.CompositeNode;
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.UniversalCodeVisitor;
+import org.orthodox.universel.ast.CompositeNode;
+import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.ast.Type;
+import org.orthodox.universel.ast.UniversalCodeVisitor;
 
 import java.util.Collections;
 import java.util.List;
@@ -39,6 +40,11 @@ public class TypeConversion extends Node implements CompositeNode {
     private final Node source;
 
     public TypeConversion(Node source, Class<?> targetType) {
+        super(source.getTokenImage(), targetType);
+        this.source = source;
+    }
+
+    public TypeConversion(Node source, Type targetType) {
         super(source.getTokenImage(), targetType);
         this.source = source;
     }

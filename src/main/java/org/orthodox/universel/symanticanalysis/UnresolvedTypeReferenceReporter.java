@@ -28,15 +28,9 @@
 
 package org.orthodox.universel.symanticanalysis;
 
-import org.orthodox.universel.ast.navigation.NameTest;
 import org.orthodox.universel.compiler.Messages;
-import org.orthodox.universel.cst.ArrayTypeImpl;
-import org.orthodox.universel.cst.type.reference.ReferenceType;
-import org.orthodox.universel.cst.type.reference.TypeReference;
-
-import java.util.Objects;
-
-import static org.orthodox.universel.compiler.Messages.NAME.NAME_NOT_RESOLVED;
+import org.orthodox.universel.ast.type.reference.ReferenceType;
+import org.orthodox.universel.ast.type.reference.TypeReference;
 
 /**
  * Iterates over the AST, performing a depth-first post-order traversal to establish the types on the AST. Essentially,

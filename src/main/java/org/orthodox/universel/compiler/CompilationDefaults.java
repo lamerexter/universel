@@ -28,9 +28,9 @@
 
 package org.orthodox.universel.compiler;
 
-import org.orthodox.universel.cst.Modifiers;
+import org.orthodox.universel.ast.Modifiers;
 
-import static org.orthodox.universel.cst.Modifiers.*;
+import static org.orthodox.universel.ast.Modifiers.*;
 
 /**
  * Contains default values affecting compilation.

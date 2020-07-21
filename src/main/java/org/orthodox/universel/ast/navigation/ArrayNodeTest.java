@@ -15,8 +15,8 @@
  ******************************************************************************/
 package org.orthodox.universel.ast.navigation;
 
-import org.orthodox.universel.cst.Expression;
-import org.orthodox.universel.cst.TokenImage;
+import org.orthodox.universel.ast.Expression;
+import org.orthodox.universel.ast.TokenImage;
 
 public class ArrayNodeTest extends Expression implements ReductionNodeTest {
     public ArrayNodeTest(TokenImage tokenImage) {

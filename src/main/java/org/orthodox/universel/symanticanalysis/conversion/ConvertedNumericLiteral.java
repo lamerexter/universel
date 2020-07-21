@@ -29,11 +29,11 @@
 package org.orthodox.universel.symanticanalysis.conversion;
 
 import org.orthodox.universel.ast.AstVisitor;
-import org.orthodox.universel.cst.Expression;
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.TokenImage;
-import org.orthodox.universel.cst.UniversalCodeVisitor;
-import org.orthodox.universel.cst.literals.NumericLiteral;
+import org.orthodox.universel.ast.Expression;
+import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.ast.TokenImage;
+import org.orthodox.universel.ast.UniversalCodeVisitor;
+import org.orthodox.universel.ast.literals.NumericLiteral;
 
 import static org.beanplanet.core.lang.TypeUtil.primitiveTypeFor;
 

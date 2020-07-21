@@ -32,7 +32,6 @@ import org.beanplanet.core.lang.FilteringPackageClassScanner;
 import org.beanplanet.core.lang.PackageResourceScanner;
 import org.beanplanet.core.lang.conversion.TypeConversionException;
 import org.beanplanet.core.logging.Logger;
-import org.orthodox.universel.ast.navigation.ListNodeTest;
 import org.orthodox.universel.ast.navigation.NavigationStep;
 import org.orthodox.universel.ast.navigation.ReductionNodeTest;
 
@@ -50,7 +49,7 @@ import static org.beanplanet.core.lang.TypeUtil.getMethodsInClassHierarchy;
 import static org.beanplanet.core.util.CollectionUtil.nullSafe;
 import static org.beanplanet.core.util.StringUtil.asCsvList;
 import static org.beanplanet.core.util.StringUtil.asDelimitedString;
-import static org.orthodox.universel.cst.Modifiers.isStatic;
+import static org.orthodox.universel.ast.Modifiers.isStatic;
 
 public class PackageScanNavigatorLoader implements NavigatorLoader, Logger {
     /**

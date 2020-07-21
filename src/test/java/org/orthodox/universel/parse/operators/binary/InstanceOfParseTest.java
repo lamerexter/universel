@@ -30,13 +30,13 @@ package org.orthodox.universel.parse.operators.binary;
 
 import org.junit.jupiter.api.Test;
 import org.orthodox.universel.Universal;
-import org.orthodox.universel.cst.InstanceofExpression;
-import org.orthodox.universel.cst.collections.ListExpr;
-import org.orthodox.universel.cst.literals.DecimalIntegerLiteralExpr;
-import org.orthodox.universel.cst.literals.StringLiteralExpr;
-import org.orthodox.universel.cst.type.reference.ClassOrInterfaceType;
-import org.orthodox.universel.cst.type.reference.PrimitiveType;
-import org.orthodox.universel.cst.type.reference.ReferenceType;
+import org.orthodox.universel.ast.InstanceofExpression;
+import org.orthodox.universel.ast.collections.ListExpr;
+import org.orthodox.universel.ast.literals.DecimalIntegerLiteralExpr;
+import org.orthodox.universel.ast.literals.StringLiteralExpr;
+import org.orthodox.universel.ast.type.reference.ClassOrInterfaceType;
+import org.orthodox.universel.ast.type.reference.PrimitiveType;
+import org.orthodox.universel.ast.type.reference.ReferenceType;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;

@@ -28,10 +28,14 @@
 
 package org.orthodox.universel;
 
-import org.orthodox.universel.cst.ParameterisedType;
+import org.orthodox.universel.ast.ParameterisedType;
 import org.orthodox.universel.exec.TypedValue;
 
+import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
@@ -52,6 +56,22 @@ public class ResultTestUtil {
 
         assertThat("Parameterised type result has correct number of parameter types", resultPt.getTypeParameters().size(), equalTo(parameterisedTypes.length));
         assertThat("Parameterised type raw result matches", resultPt.getRawType().getTypeClass(), equalTo(rawType));
+
+        IntStream.range(0, parameterisedTypes.length)
+                 .forEach(i -> assertThat("Parameterised type result has correct parameter type ["+parameterisedTypes[i].getSimpleName()+"] at index "+i,
+                                          resultPt.getTypeParameters().get(i).getTypeClass(), equalTo(parameterisedTypes[i])));
+    }
+
+    public static <T, R> void assertResultIsParameterisedStream(final TypedValue result,
+                                                                final List<?> resultsList,
+                                                                final Class<?> ... parameterisedTypes) {
+        assertThat("Result is a stream", result.getValue(), instanceOf(Stream.class));
+        assertThat("Result stream values matche expected", ((Stream<?>)result.getValue()).collect(Collectors.toList()), equalTo(resultsList));
+        assertThat("Result is a parameterised type", result.getValueType(), instanceOf(ParameterisedType.class));
+
+        ParameterisedType resultPt = (ParameterisedType)result.getValueType();
+
+        assertThat("Parameterised type result has correct number of parameter types", resultPt.getTypeParameters().size(), equalTo(parameterisedTypes.length));
 
         IntStream.range(0, parameterisedTypes.length)
                  .forEach(i -> assertThat("Parameterised type result has correct parameter type ["+parameterisedTypes[i].getSimpleName()+"] at index "+i,

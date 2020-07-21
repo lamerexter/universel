@@ -28,9 +28,8 @@
 
 package org.orthodox.universel.symanticanalysis.navigation;
 
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.Type;
-import org.orthodox.universel.cst.type.reference.TypeReference;
+import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.ast.Type;
 
 public interface NavigationStage {
     Class<?> getTypeDescriptor();
@@ -40,4 +39,6 @@ public interface NavigationStage {
     Node getNode();
     boolean isSequence();
     boolean getInSequence();
+
+    default boolean isReduce() { return false; }
 }

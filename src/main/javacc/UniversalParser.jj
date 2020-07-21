@@ -53,15 +53,14 @@ import org.orthodox.universel.ast.*;
 import org.orthodox.universel.ast.allocation.*;
 import org.orthodox.universel.ast.conditionals.*;
 import org.orthodox.universel.ast.navigation.*;
-import org.orthodox.universel.cst.*;
-import org.orthodox.universel.cst.collections.*;
-import org.orthodox.universel.cst.conditionals.*;
-import org.orthodox.universel.cst.type.*;
-import org.orthodox.universel.cst.type.reference.*;
-import org.orthodox.universel.cst.type.reference.WildcardType;
-import org.orthodox.universel.cst.methods.*;
-import org.orthodox.universel.cst.literals.*;
-import org.orthodox.universel.cst.TokenImage.TokenImageBuilder;
+import org.orthodox.universel.ast.*;
+import org.orthodox.universel.ast.collections.*;
+import org.orthodox.universel.ast.type.*;
+import org.orthodox.universel.ast.type.reference.*;
+import org.orthodox.universel.ast.type.reference.WildcardType;
+import org.orthodox.universel.ast.methods.*;
+import org.orthodox.universel.ast.literals.*;
+import org.orthodox.universel.ast.TokenImage.TokenImageBuilder;
 import java.io.StringReader;
 
 import static org.orthodox.universel.ast.NodeSequence.NodeSequenceBuilder;
@@ -524,7 +523,7 @@ List<Node> BodyElements() :
 {
     (
       (
-        LOOKAHEAD(2)node=ClassOrInterfaceBodyDeclaration()  // Lookahead because class can start a type decl or be a path step
+        LOOKAHEAD(Modifiers() MethodDeclaration())node=ClassOrInterfaceBodyDeclaration()
         |
         node=StatementOrExpression()
       ) { nodes = add(nodes, node); }

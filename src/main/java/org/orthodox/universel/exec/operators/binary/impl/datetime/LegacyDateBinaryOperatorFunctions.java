@@ -35,8 +35,8 @@ import java.time.Instant;
 import java.time.Period;
 import java.util.Date;
 
-import static org.orthodox.universel.cst.Operator.MINUS;
-import static org.orthodox.universel.cst.Operator.PLUS;
+import static org.orthodox.universel.ast.Operator.MINUS;
+import static org.orthodox.universel.ast.Operator.PLUS;
 
 @BinaryOperator
 public class LegacyDateBinaryOperatorFunctions {

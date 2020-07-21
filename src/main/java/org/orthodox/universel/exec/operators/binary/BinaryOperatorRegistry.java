@@ -27,7 +27,7 @@
  */
 package org.orthodox.universel.exec.operators.binary;
 
-import org.orthodox.universel.cst.Operator;
+import org.orthodox.universel.ast.Operator;
 
 import java.lang.reflect.Method;
 import java.util.Optional;

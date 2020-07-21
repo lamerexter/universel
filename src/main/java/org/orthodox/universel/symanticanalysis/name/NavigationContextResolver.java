@@ -29,12 +29,11 @@
 package org.orthodox.universel.symanticanalysis.name;
 
 import org.beanplanet.core.collections.ListBuilder;
-import org.orthodox.universel.ast.navigation.NavigationAxis;
 import org.orthodox.universel.ast.navigation.NavigationStep;
 import org.orthodox.universel.ast.navigation.NavigationStream;
 import org.orthodox.universel.ast.navigation.NodeType;
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.TokenImage;
+import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.ast.TokenImage;
 import org.orthodox.universel.symanticanalysis.AbstractSemanticAnalyser;
 
 import static org.orthodox.universel.ast.navigation.NavigationAxis.*;

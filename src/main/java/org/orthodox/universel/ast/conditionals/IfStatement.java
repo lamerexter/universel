@@ -16,9 +16,8 @@
 package org.orthodox.universel.ast.conditionals;
 
 import org.beanplanet.core.collections.ListBuilder;
-import org.orthodox.universel.ast.Statement;
-import org.orthodox.universel.cst.*;
-import org.orthodox.universel.cst.type.reference.ResolvedTypeReferenceOld;
+import org.orthodox.universel.ast.*;
+import org.orthodox.universel.ast.type.reference.ResolvedTypeReferenceOld;
 
 import java.util.LinkedHashSet;
 import java.util.List;

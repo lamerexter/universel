@@ -2,6 +2,7 @@ package org.orthodox.universel.cst;
 
 import org.beanplanet.testing.utils.BeanTestSupport;
 import org.junit.jupiter.api.Test;
+import org.orthodox.universel.ast.TokenImage;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;

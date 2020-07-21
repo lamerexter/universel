@@ -29,7 +29,7 @@
 package org.orthodox.universel.exec.navigation;
 
 import org.orthodox.universel.ast.navigation.NavigationStep;
-import org.orthodox.universel.cst.Node;
+import org.orthodox.universel.ast.Node;
 
 public interface NavigatorFunction {
     Node navigationTransform(Class<?> fromType, NavigationStep<?> step);

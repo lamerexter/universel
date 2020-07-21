@@ -31,7 +31,7 @@ package org.orthodox.universel.exec.operators.binary.impl;
 import org.orthodox.universel.exec.operators.binary.BinaryOperator;
 
 import static java.lang.String.valueOf;
-import static org.orthodox.universel.cst.Operator.PLUS;
+import static org.orthodox.universel.ast.Operator.PLUS;
 
 @BinaryOperator
 public class CharacterSequenceBinaryOperatorFunctions {

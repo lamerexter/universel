@@ -33,14 +33,13 @@ import org.beanplanet.core.lang.TypeUtil;
 import org.beanplanet.core.models.path.NamePath;
 import org.beanplanet.core.models.path.SimpleNamePath;
 import org.beanplanet.messages.domain.Messages;
-import org.orthodox.universel.ast.StaticMethodCall;
+import org.orthodox.universel.ast.*;
 import org.orthodox.universel.ast.allocation.ObjectCreationExpression;
 import org.orthodox.universel.ast.navigation.NameTest;
 import org.orthodox.universel.ast.navigation.NavigationAxis;
 import org.orthodox.universel.ast.navigation.NavigationStep;
-import org.orthodox.universel.cst.*;
-import org.orthodox.universel.cst.type.LoadTypeExpression;
-import org.orthodox.universel.cst.type.reference.ResolvedTypeReferenceOld;
+import org.orthodox.universel.ast.type.LoadTypeExpression;
+import org.orthodox.universel.ast.type.reference.ResolvedTypeReferenceOld;
 
 import javax.lang.model.type.NullType;
 import java.lang.reflect.Constructor;

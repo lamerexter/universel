@@ -28,7 +28,7 @@
 
 package org.orthodox.universel.symanticanalysis.conversion;
 
-import org.orthodox.universel.cst.*;
+import org.orthodox.universel.ast.*;
 
 import java.lang.reflect.Method;
 import java.util.List;

@@ -30,15 +30,14 @@
 package org.orthodox.universel.ast;
 
 
-import org.orthodox.universel.cst.*;
-import org.orthodox.universel.cst.annotation.Annotation;
-import org.orthodox.universel.cst.collections.ListExpr;
-import org.orthodox.universel.cst.collections.MapExpr;
-import org.orthodox.universel.cst.collections.SetExpr;
-import org.orthodox.universel.cst.conditionals.ElvisExpression;
-import org.orthodox.universel.cst.conditionals.TernaryExpression;
-import org.orthodox.universel.cst.literals.*;
-import org.orthodox.universel.cst.type.reference.TypeReference;
+import org.orthodox.universel.ast.annotation.Annotation;
+import org.orthodox.universel.ast.collections.ListExpr;
+import org.orthodox.universel.ast.collections.MapExpr;
+import org.orthodox.universel.ast.collections.SetExpr;
+import org.orthodox.universel.ast.conditionals.ElvisExpression;
+import org.orthodox.universel.ast.conditionals.TernaryExpression;
+import org.orthodox.universel.ast.literals.*;
+import org.orthodox.universel.ast.type.reference.TypeReference;
 
 /**
  * A use of the <a href="">visitor pattern</a> for working with AST nodes. There is a <code>visit&lt;AstNode&gt;(&lt;AstNode&gt)</code>

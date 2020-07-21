@@ -38,8 +38,8 @@ import static org.beanplanet.core.lang.TypeUtil.findMethod;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.orthodox.universel.Universal.compile;
-import static org.orthodox.universel.cst.Modifiers.PUBLIC;
-import static org.orthodox.universel.cst.Modifiers.STATIC;
+import static org.orthodox.universel.ast.Modifiers.PUBLIC;
+import static org.orthodox.universel.ast.Modifiers.STATIC;
 
 /**
  * Unit tests for method declarations scoped at the enclosing script level.

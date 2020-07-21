@@ -28,15 +28,15 @@
 
 package org.orthodox.universel.ast.navigation;
 
-import org.orthodox.universel.cst.CompositeNode;
-import org.orthodox.universel.cst.Expression;
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.UniversalCodeVisitor;
+import org.orthodox.universel.ast.CompositeNode;
+import org.orthodox.universel.ast.Expression;
+import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.ast.UniversalCodeVisitor;
 
 import java.util.List;
 import java.util.Objects;
 
-import static org.orthodox.universel.cst.TokenImage.range;
+import static org.orthodox.universel.ast.TokenImage.range;
 
 /**
  * A universal navigation stream, consisting of a number of navigation steps.

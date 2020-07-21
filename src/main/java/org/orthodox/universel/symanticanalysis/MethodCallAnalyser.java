@@ -29,7 +29,7 @@
 package org.orthodox.universel.symanticanalysis;
 
 import org.beanplanet.core.lang.TypeUtil;
-import org.orthodox.universel.cst.*;
+import org.orthodox.universel.ast.*;
 
 import javax.lang.model.type.NullType;
 import java.lang.reflect.Constructor;

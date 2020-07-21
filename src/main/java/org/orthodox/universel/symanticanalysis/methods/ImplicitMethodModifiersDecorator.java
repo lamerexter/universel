@@ -28,8 +28,8 @@
 
 package org.orthodox.universel.symanticanalysis.methods;
 
-import org.orthodox.universel.cst.Modifiers;
-import org.orthodox.universel.cst.methods.MethodDeclaration;
+import org.orthodox.universel.ast.Modifiers;
+import org.orthodox.universel.ast.methods.MethodDeclaration;
 import org.orthodox.universel.symanticanalysis.AbstractSemanticAnalyser;
 
 /**

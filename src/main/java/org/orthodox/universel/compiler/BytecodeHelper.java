@@ -7,8 +7,8 @@ import org.beanplanet.core.models.path.NamePath;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
-import org.orthodox.universel.cst.Operator;
-import org.orthodox.universel.cst.type.reference.TypeReference;
+import org.orthodox.universel.ast.Operator;
+import org.orthodox.universel.ast.type.reference.TypeReference;
 
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -316,7 +316,7 @@ public class BytecodeHelper {
         }
     }
 
-    public void emitLoadLocal(boolean staticMethod, int paramPosition, org.orthodox.universel.cst.Type type) {
+    public void emitLoadLocal(boolean staticMethod, int paramPosition, org.orthodox.universel.ast.Type type) {
         int varPosition = staticMethod ? paramPosition : paramPosition+1;
         if (type.isPrimitiveType()) {
             if (type.getTypeClass() == boolean.class

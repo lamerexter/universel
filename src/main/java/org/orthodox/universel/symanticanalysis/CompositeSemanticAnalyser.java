@@ -29,8 +29,8 @@
 package org.orthodox.universel.symanticanalysis;
 
 import org.beanplanet.core.logging.Logger;
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.type.reference.ReferenceType;
+import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.ast.type.reference.ReferenceType;
 
 import java.util.Objects;
 

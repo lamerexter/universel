@@ -28,8 +28,7 @@
 
 package org.orthodox.universel.compiler;
 
-import org.beanplanet.core.lang.TypeUtil;
-import org.orthodox.universel.cst.Node;
+import org.orthodox.universel.ast.Node;
 import org.orthodox.universel.symanticanalysis.JvmInstructionNode;
 
 import java.util.Objects;

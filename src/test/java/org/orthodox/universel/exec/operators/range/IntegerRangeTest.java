@@ -29,7 +29,7 @@
 package org.orthodox.universel.exec.operators.range;
 
 import org.junit.jupiter.api.Test;
-import org.orthodox.universel.cst.Operator;
+import org.orthodox.universel.ast.Operator;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;

@@ -30,7 +30,7 @@ package org.orthodox.universel.exec.operators.binary.impl;
 
 import org.orthodox.universel.exec.operators.binary.BinaryOperator;
 
-import static org.orthodox.universel.cst.Operator.ELVIS;
+import static org.orthodox.universel.ast.Operator.ELVIS;
 
 @BinaryOperator
 public class ElvisBinaryOperatorFunctions {

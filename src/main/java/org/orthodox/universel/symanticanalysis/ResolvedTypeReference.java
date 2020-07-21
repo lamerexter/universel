@@ -29,9 +29,9 @@
 package org.orthodox.universel.symanticanalysis;
 
 import org.beanplanet.core.models.path.NamePath;
-import org.orthodox.universel.cst.TokenImage;
-import org.orthodox.universel.cst.Type;
-import org.orthodox.universel.cst.type.reference.TypeReference;
+import org.orthodox.universel.ast.TokenImage;
+import org.orthodox.universel.ast.Type;
+import org.orthodox.universel.ast.type.reference.TypeReference;
 
 import java.util.Objects;
 

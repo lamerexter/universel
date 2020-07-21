@@ -30,10 +30,9 @@ package org.orthodox.universel.compiler;
 
 import org.beanplanet.core.models.path.NamePath;
 import org.orthodox.universel.ast.navigation.NavigationStep;
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.Type;
+import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.ast.Type;
 
-import java.util.Collections;
 import java.util.List;
 
 import static java.util.Collections.emptyList;

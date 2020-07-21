@@ -15,9 +15,8 @@
  ******************************************************************************/
 package org.orthodox.universel.ast.navigation;
 
-import org.orthodox.universel.cst.*;
+import org.orthodox.universel.ast.*;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 

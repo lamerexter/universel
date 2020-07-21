@@ -30,8 +30,8 @@ package org.orthodox.universel.exec.operators.binary.impl;
 
 import org.orthodox.universel.exec.operators.binary.BinaryOperator;
 
-import static org.orthodox.universel.cst.Operator.EQUAL;
-import static org.orthodox.universel.cst.Operator.TREBLE_EQUAL;
+import static org.orthodox.universel.ast.Operator.EQUAL;
+import static org.orthodox.universel.ast.Operator.TREBLE_EQUAL;
 
 @BinaryOperator
 public class BooleanEqualityOperatorFunctions {

@@ -28,10 +28,10 @@
 
 package org.orthodox.universel.symanticanalysis.conversion;
 
-import org.orthodox.universel.cst.BinaryExpression;
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.literals.NumericLiteral;
-import org.orthodox.universel.cst.type.reference.ResolvedTypeReferenceOld;
+import org.orthodox.universel.ast.BinaryExpression;
+import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.ast.literals.NumericLiteral;
+import org.orthodox.universel.ast.type.reference.ResolvedTypeReferenceOld;
 import org.orthodox.universel.symanticanalysis.AbstractSemanticAnalyser;
 
 import java.math.BigDecimal;

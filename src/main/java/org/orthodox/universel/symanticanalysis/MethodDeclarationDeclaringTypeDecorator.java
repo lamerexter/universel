@@ -28,11 +28,11 @@
 
 package org.orthodox.universel.symanticanalysis;
 
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.methods.MethodDeclaration;
-import org.orthodox.universel.cst.type.declaration.ClassDeclaration;
-import org.orthodox.universel.cst.type.declaration.TypeDeclaration;
-import org.orthodox.universel.cst.type.declaration.TypeDeclarationReference;
+import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.ast.methods.MethodDeclaration;
+import org.orthodox.universel.ast.type.declaration.ClassDeclaration;
+import org.orthodox.universel.ast.type.declaration.TypeDeclaration;
+import org.orthodox.universel.ast.type.declaration.TypeDeclarationReference;
 
 import java.util.ArrayDeque;
 import java.util.Deque;

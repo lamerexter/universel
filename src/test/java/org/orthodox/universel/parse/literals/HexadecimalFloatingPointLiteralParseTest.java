@@ -2,8 +2,8 @@ package org.orthodox.universel.parse.literals;
 
 import org.junit.jupiter.api.Test;
 import org.orthodox.universel.Universal;
-import org.orthodox.universel.cst.UnaryExpression;
-import org.orthodox.universel.cst.literals.HexadecimalFloatingPointLiteralExpr;
+import org.orthodox.universel.ast.UnaryExpression;
+import org.orthodox.universel.ast.literals.HexadecimalFloatingPointLiteralExpr;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.endsWith;

@@ -1,18 +1,13 @@
 package org.orthodox.universel.parse.literals;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.orthodox.universal.parser.TokenMgrException;
-import org.orthodox.universal.parser.UniversalParser;
 import org.orthodox.universel.Universal;
-import org.orthodox.universel.cst.Expression;
-import org.orthodox.universel.cst.UnaryExpression;
-import org.orthodox.universel.cst.literals.DecimalIntegerLiteralExpr;
+import org.orthodox.universel.ast.UnaryExpression;
+import org.orthodox.universel.ast.literals.DecimalIntegerLiteralExpr;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
 
 public class DecimalIntegerLiteralParseTest {
     @Test

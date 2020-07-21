@@ -30,16 +30,16 @@ package org.orthodox.universel.symanticanalysis.name;
 
 import org.beanplanet.core.collections.ListBuilder;
 import org.beanplanet.core.models.Builder;
-import org.orthodox.universel.cst.CompositeNode;
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.Type;
-import org.orthodox.universel.cst.UniversalCodeVisitor;
+import org.orthodox.universel.ast.CompositeNode;
+import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.ast.Type;
+import org.orthodox.universel.ast.UniversalCodeVisitor;
 
 import java.util.List;
 import java.util.Objects;
 
 import static org.beanplanet.core.lang.TypeUtil.loadClassOrNull;
-import static org.orthodox.universel.cst.TokenImage.range;
+import static org.orthodox.universel.ast.TokenImage.range;
 
 public class InternalNodeSequence extends Node implements CompositeNode {
     private List<Node> nodes;

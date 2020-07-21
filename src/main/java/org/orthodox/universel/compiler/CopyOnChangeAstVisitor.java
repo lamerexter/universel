@@ -28,14 +28,11 @@
 
 package org.orthodox.universel.compiler;
 
-import org.orthodox.universel.ast.NodeSequence;
-import org.orthodox.universel.cst.*;
+import org.orthodox.universel.ast.*;
 import org.orthodox.universel.symanticanalysis.SemanticAnalyser;
 import org.orthodox.universel.symanticanalysis.SemanticAnalysisContext;
 
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * <p>

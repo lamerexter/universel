@@ -34,8 +34,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 
-import static org.orthodox.universel.cst.Operator.CONTAINS;
-import static org.orthodox.universel.cst.Operator.IN;
+import static org.orthodox.universel.ast.Operator.CONTAINS;
+import static org.orthodox.universel.ast.Operator.IN;
 
 @BinaryOperator
 public class MapOperatorFunctions {

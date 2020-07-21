@@ -1,12 +1,10 @@
 package org.orthodox.universel.parse.literals;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.orthodox.universal.parser.TokenMgrException;
 import org.orthodox.universel.Universal;
-import org.orthodox.universel.cst.Operator;
-import org.orthodox.universel.cst.UnaryExpression;
-import org.orthodox.universel.cst.literals.HexadecimalIntegerLiteralExpr;
+import org.orthodox.universel.ast.Operator;
+import org.orthodox.universel.ast.UnaryExpression;
+import org.orthodox.universel.ast.literals.HexadecimalIntegerLiteralExpr;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.endsWith;

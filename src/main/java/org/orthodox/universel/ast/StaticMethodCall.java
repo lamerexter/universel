@@ -29,9 +29,8 @@
 package org.orthodox.universel.ast;
 
 import org.beanplanet.core.collections.ListBuilder;
-import org.orthodox.universel.cst.*;
-import org.orthodox.universel.cst.type.reference.ResolvedTypeReferenceOld;
-import org.orthodox.universel.cst.type.reference.TypeReference;
+import org.orthodox.universel.ast.type.reference.ResolvedTypeReferenceOld;
+import org.orthodox.universel.ast.type.reference.TypeReference;
 
 import java.util.Collections;
 import java.util.List;

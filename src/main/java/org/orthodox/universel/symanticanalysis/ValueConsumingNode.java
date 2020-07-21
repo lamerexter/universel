@@ -28,9 +28,9 @@
 
 package org.orthodox.universel.symanticanalysis;
 
-import org.orthodox.universel.cst.CompositeNode;
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.UniversalCodeVisitor;
+import org.orthodox.universel.ast.CompositeNode;
+import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.ast.UniversalCodeVisitor;
 
 import java.util.List;
 import java.util.Objects;

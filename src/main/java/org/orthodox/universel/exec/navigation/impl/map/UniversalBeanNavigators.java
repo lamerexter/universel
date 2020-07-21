@@ -32,16 +32,16 @@ import org.beanplanet.core.beans.TypePropertiesSource;
 import org.orthodox.universel.ast.InstanceMethodCall;
 import org.orthodox.universel.ast.navigation.NameTest;
 import org.orthodox.universel.ast.navigation.NavigationStep;
-import org.orthodox.universel.cst.Node;
-import org.orthodox.universel.cst.type.reference.ResolvedTypeReferenceOld;
-import org.orthodox.universel.cst.type.reference.TypeReference;
+import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.ast.type.reference.ResolvedTypeReferenceOld;
+import org.orthodox.universel.ast.type.reference.TypeReference;
 import org.orthodox.universel.exec.navigation.MappingNavigator;
 import org.orthodox.universel.exec.navigation.Navigator;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 
-import static org.orthodox.universel.cst.TypeInferenceUtil.*;
+import static org.orthodox.universel.ast.TypeInferenceUtil.*;
 
 @Navigator
 public class UniversalBeanNavigators {
