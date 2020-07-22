@@ -40,5 +40,7 @@ public interface NavigationStage {
     boolean isSequence();
     boolean getInSequence();
 
+    default boolean isFilter() { return false; }
+    default boolean isMap() { return false; }
     default boolean isReduce() { return false; }
 }

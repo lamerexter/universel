@@ -47,6 +47,8 @@ import static org.orthodox.universel.compiler.Messages.NAME.NAME_NOT_RESOLVED;
 public class UnresolvedNameReporter extends AbstractSemanticAnalyser {
     @Override
     public Node visitNavigationStream(final NavigationStream node) {
+        super.visitNavigationStream(node);
+
         node.getSteps().stream()
             .filter(NavigationStep.class::isInstance)
             .map(NavigationStep.class::cast)

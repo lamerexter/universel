@@ -39,13 +39,18 @@ import org.orthodox.universel.ast.navigation.NameTest;
 import org.orthodox.universel.ast.navigation.NavigationAxis;
 import org.orthodox.universel.ast.navigation.NavigationStep;
 import org.orthodox.universel.ast.type.LoadTypeExpression;
+import org.orthodox.universel.ast.type.StaticFieldGetExpression;
 import org.orthodox.universel.ast.type.reference.ResolvedTypeReferenceOld;
 
 import javax.lang.model.type.NullType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -55,6 +60,7 @@ import static java.util.Collections.emptyList;
 import static org.beanplanet.core.lang.TypeUtil.ensureNonPrimitiveType;
 import static org.beanplanet.core.util.CollectionUtil.isEmptyOrNull;
 import static org.beanplanet.core.util.StringUtil.asDelimitedString;
+import static org.orthodox.universel.ast.Type.forClass;
 import static org.orthodox.universel.compiler.Messages.Constructor.CONSTRUCTOR_AMBIGUOUS;
 import static org.orthodox.universel.compiler.Messages.MethodCall.METHOD_AMBIGUOUS;
 import static org.orthodox.universel.compiler.Messages.MethodCall.METHOD_NOT_FOUND;
@@ -98,13 +104,21 @@ public class ImportScope implements Scope {
     }
 
     private Node resolveNameReference(final NavigationStep<NameTest> step) {
+        Node transformedStep = resolveTypeFromImports(step);
+        if (transformedStep != null) return transformedStep;
+
+        transformedStep = resolveFieldReferenceFromImports(step);
+        if (transformedStep != null) return transformedStep;
+
+        return null;
+    }
+
+    private Node resolveTypeFromImports(final NavigationStep<NameTest> step) {
         final List<Class<?>> typesFromNotOnDemandImports = resolveTypeNameFromImports(step, importStatements.stream().filter(ImportStmt::isNotOnDemand).collect(Collectors.toList()));
         if (typesFromNotOnDemandImports.size() == 1) return new LoadTypeExpression(step.getTokenImage(), new ResolvedTypeReferenceOld(step.getTokenImage(), typesFromNotOnDemandImports.get(0)));
-//        if (typesFromNotOnDemandImports.size() == 1) return new ResolvedTypeReferenceOld(step.getTokenImage(), typesFromNotOnDemandImports.get(0));
 
         final List<Class<?>> typesFromOnDemandImports = resolveTypeNameFromImports(step, importStatements.stream().filter(ImportStmt::isOnDemand).collect(Collectors.toList()));
         if (typesFromOnDemandImports.size() == 1)  return new LoadTypeExpression(step.getTokenImage(), new ResolvedTypeReferenceOld(step.getTokenImage(), typesFromOnDemandImports.get(0)));;
-//        if (typesFromOnDemandImports.size() == 1) return new ResolvedTypeReferenceOld(step.getTokenImage(), typesFromOnDemandImports.get(0));
 
         //--------------------------------------------------------------------------------------------------------------
         // Determine if name can be ambiguously resolved to two or more types from the imports.
@@ -125,7 +139,7 @@ public class ImportScope implements Scope {
                                                  typesFromOnDemandImports));
         }
 
-        return step;
+        return null;
     }
 
     private List<Class<?>> resolveTypeNameFromImports(final NavigationStep<NameTest> step, final List<ImportStmt> importStatements) {
@@ -146,6 +160,48 @@ public class ImportScope implements Scope {
             if (referredType == null) continue;
 
             matchingNameTransformations.add(referredType);
+        }
+
+        return matchingNameTransformations;
+    }
+
+    private Node resolveFieldReferenceFromImports(final NavigationStep<NameTest> step) {
+        final List<Node> fieldReferencesFromExplicitImports = resolveFieldReferenceFromImports(step, importStatements.stream().filter(ImportStmt::isNotOnDemand).collect(Collectors.toList()));
+        if (fieldReferencesFromExplicitImports.size() == 1) return fieldReferencesFromExplicitImports.get(0);
+
+        final List<Node> fieldReferencesFromOnDemandImports = resolveFieldReferenceFromImports(step, importStatements.stream().filter(ImportStmt::isOnDemand).collect(Collectors.toList()));
+        if (fieldReferencesFromOnDemandImports.size() == 1)  return fieldReferencesFromOnDemandImports.get(0);
+
+        return null;
+    }
+
+    private List<Node> resolveFieldReferenceFromImports(final NavigationStep<NameTest> step, final List<ImportStmt> importStatements) {
+        final String name = step.getNodeTest().getName();
+
+        List<Node> matchingNameTransformations = new ArrayList<>();
+        for (int n=importStatements.size()-1; n >= 0; n--) {
+            ImportStmt importStmt = importStatements.get(n);
+
+            SimpleNamePath declaringTypeFqName = new SimpleNamePath(importStmt.getElements().stream().map(Name::getName).collect(Collectors.toList()));
+            if ( !importStmt.isOnDemand() ) {
+                if ( !Objects.equals(name, declaringTypeFqName.getLastElement()) ) continue;
+                declaringTypeFqName = declaringTypeFqName.parentPath();
+            }
+
+            Class<?> declaringType = TypeUtil.loadClassOrNull(declaringTypeFqName.join("."));
+            if (declaringType == null) continue;
+
+            try {
+                java.lang.reflect.Field field = declaringType.getField(name);
+                if ( !Modifier.isStatic(field.getModifiers()) ) continue;
+                matchingNameTransformations.add(new StaticFieldGetExpression(step.getTokenImage(),
+                                                                             forClass(declaringType),
+                                                                             forClass(field.getType()),
+                                                                             name
+                ));
+            } catch (NoSuchFieldException notFoundIgnoredEx) {
+                continue;
+            }
         }
 
         return matchingNameTransformations;

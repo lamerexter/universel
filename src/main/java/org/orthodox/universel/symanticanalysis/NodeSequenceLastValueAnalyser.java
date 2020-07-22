@@ -37,7 +37,7 @@ import java.util.Objects;
 
 public class NodeSequenceLastValueAnalyser extends AbstractSemanticAnalyser {
     @Override
-    public Node visitNodeSequence(final NodeSequence<? extends Node> node) {
+    public NodeSequence<? extends Node> visitNodeSequence(final NodeSequence<? extends Node> node) {
         List<Node> transformedNodes = new ArrayList<>(node.getNodes().size());
         for (int n = 0; n < node.getChildNodes().size(); n++) {
             Node child = node.getChildNodes().get(n);

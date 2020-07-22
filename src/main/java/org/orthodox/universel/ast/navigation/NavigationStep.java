@@ -16,33 +16,35 @@
 package org.orthodox.universel.ast.navigation;
 
 import org.orthodox.universel.ast.*;
+import org.orthodox.universel.symanticanalysis.name.InternalNodeSequence;
 
 import java.util.List;
 import java.util.Objects;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.orthodox.universel.symanticanalysis.name.InternalNodeSequence.emptyNodeSequence;
 
 public class NavigationStep<N extends NodeTest> extends Expression implements CompositeNode {
     protected String axis;
 
     protected N nodeTest;
 
-    protected List<Node> predicates;
+    protected InternalNodeSequence filters;
 
-    public NavigationStep(TokenImage tokenImage, String axis, N nodeTest, List<Node> predicates) {
+    public NavigationStep(final TokenImage tokenImage, final String axis, final N nodeTest, final InternalNodeSequence filters) {
         super(tokenImage);
         this.axis = axis;
         this.nodeTest = nodeTest;
-        this.predicates = predicates;
+        this.filters = filters;
     }
 
-    public NavigationStep(TokenImage tokenImage, NavigationAxis axis, N nodeTest) {
+    public NavigationStep(final TokenImage tokenImage, final NavigationAxis axis, final N nodeTest) {
         this(tokenImage, axis.getCanonicalName(), nodeTest, null);
     }
 
-    public NavigationStep(TokenImage tokenImage, NavigationAxis axis, N nodeTest, List<Node> predicates) {
-        this(tokenImage, axis.getCanonicalName(), nodeTest, predicates);
+    public NavigationStep(final TokenImage tokenImage, final NavigationAxis axis, final N nodeTest, final InternalNodeSequence filters) {
+        this(tokenImage, axis.getCanonicalName(), nodeTest, filters);
     }
 
     public String getAxis() {
@@ -53,8 +55,8 @@ public class NavigationStep<N extends NodeTest> extends Expression implements Co
         return nodeTest;
     }
 
-    public List<Node> getPredicates() {
-        return predicates == null ? emptyList() : predicates;
+    public InternalNodeSequence getFilters() {
+        return filters == null ? emptyNodeSequence() : filters;
     }
 
    @Override
@@ -67,12 +69,12 @@ public class NavigationStep<N extends NodeTest> extends Expression implements Co
          return false;
       NavigationStep<?> that = (NavigationStep<?>) o;
       return Objects.equals(getAxis(), that.getAxis()) && Objects.equals(getNodeTest(), that.getNodeTest()) && Objects
-              .equals(getPredicates(), that.getPredicates());
+              .equals(getFilters(), that.getFilters());
    }
 
    @Override
    public int hashCode() {
-      return Objects.hash(super.hashCode(), getAxis(), getNodeTest(), getPredicates());
+      return Objects.hash(super.hashCode(), getAxis(), getNodeTest(), getFilters());
    }
 
    @Override

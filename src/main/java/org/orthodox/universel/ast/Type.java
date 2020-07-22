@@ -39,8 +39,8 @@ import java.util.stream.Stream;
  * a type currently under compilation.
  */
 public interface Type {
-    static Type forClass(Class<Stream> streamClass) {
-        return new ResolvedTypeReferenceOld(streamClass);
+    static Type forClass(Class<?> clazz) {
+        return new ResolvedTypeReferenceOld(clazz);
     }
 
     /**

@@ -103,6 +103,20 @@ public class TransformationUtil {
 
     }
 
+    public static Node autoBoxIfNecessary(Node node, Class<?> targetType) {
+        Class<?> nodeType = node.getTypeDescriptor();
+
+        if ( boxCompatible(nodeType, targetType) ) {
+            return box(node);
+        }
+
+        if ( unboxCompatible(nodeType, targetType) ) {
+            return unbox(node);
+        }
+
+        return node;
+    }
+
     public static Node autoBoxOrPromoteIfNecessary(Node node, Class<?> targetType) {
         Class<?> nodeType = node.getTypeDescriptor();
 

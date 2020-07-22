@@ -77,4 +77,12 @@ public class TypeInferenceUtil {
                     .findFirst()
                     .orElse(new ResolvedTypeReferenceOld(commonClass));
     }
+
+    public static boolean isBoolean(Type type) {
+        return type.getTypeClass() == boolean.class || type.getTypeClass() == Boolean.class;
+    }
+
+    public static boolean isPredicate(Type type) {
+        return isBoolean(type);
+    }
 }

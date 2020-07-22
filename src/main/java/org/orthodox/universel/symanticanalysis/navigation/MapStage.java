@@ -37,4 +37,7 @@ public class MapStage extends AbstractNavigationStage {
     ) {
         super(node, isSequence, inSequence);
     }
+
+    public boolean isMap() { return true; }
+
 }

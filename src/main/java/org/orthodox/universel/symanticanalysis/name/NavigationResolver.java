@@ -46,6 +46,7 @@ import org.orthodox.universel.symanticanalysis.AbstractSemanticAnalyser;
 import org.orthodox.universel.symanticanalysis.JvmInstructionNode;
 import org.orthodox.universel.symanticanalysis.conversion.BoxConversion;
 import org.orthodox.universel.symanticanalysis.conversion.TypeConversion;
+import org.orthodox.universel.symanticanalysis.navigation.FilterStage;
 import org.orthodox.universel.symanticanalysis.navigation.MapStage;
 import org.orthodox.universel.symanticanalysis.navigation.NavigationStage;
 import org.orthodox.universel.symanticanalysis.navigation.ReduceStage;
@@ -56,12 +57,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
 import static org.beanplanet.core.lang.TypeUtil.isPrimitiveType;
 import static org.orthodox.universel.ast.Modifiers.*;
 import static org.orthodox.universel.ast.Type.forClass;
+import static org.orthodox.universel.ast.TypeInferenceUtil.isPredicate;
+import static org.orthodox.universel.compiler.TransformationUtil.autoBoxIfNecessary;
 
 public class NavigationResolver extends AbstractSemanticAnalyser {
 
@@ -204,6 +208,9 @@ public class NavigationResolver extends AbstractSemanticAnalyser {
                     ));
                 }
 
+                //------------------------------------------------------------------------------------------------------
+                // Map / Reduce handling
+                //------------------------------------------------------------------------------------------------------
                 Node transformStep = transformStep((NavigationStep<?>) step);
 
                 if (Objects.equals(transformStep, step)) {
@@ -217,6 +224,18 @@ public class NavigationResolver extends AbstractSemanticAnalyser {
                 navSages.add(isReduction ? new ReduceStage(transformStep, isSequence, inSequence) : new MapStage(transformStep, isSequence, inSequence));
                 inSequence = (inSequence || isSequence);
 //                inSequence = (inSequence || isSequence) && !isReduction;
+
+                //------------------------------------------------------------------------------------------------------
+                // Filter handling
+                //------------------------------------------------------------------------------------------------------
+                for (Node filter : ((NavigationStep<?>) step).getFilters()) {
+                    Type filterType = filter.getType();
+                    if (filterType == null) return null; // Can't proceed yet
+
+                    if ( isPredicate(filterType) ) {
+                       navSages.add(new FilterStage(filter, inSequence));
+                    }
+                }
             } finally {
                 if (previousStepScope != null) getContext().popScope();
             }
@@ -244,7 +263,7 @@ public class NavigationResolver extends AbstractSemanticAnalyser {
                     // Convert to stream
                     step = new TypeConversion(step, new ParameterisedTypeImpl(step.getTokenImage(), forClass(Stream.class), step.getType().getComponentType()));
                 }
-            } else {
+            } else if ( stage.isMap() ){
                 if (stage.isSequence()) {
                     if (inStream) {
 
@@ -258,7 +277,7 @@ public class NavigationResolver extends AbstractSemanticAnalyser {
                     // Convert singleton to singleton stream and insert into flatmap
                     Class<?> previousStepType = previousStage.isSequence() ? previousStage.getType().getComponentType().getTypeClass() : previousStage.getTypeDescriptor();
                     LambdaFunction generatedMethod = new GeneratedStaticLambdaFunction(new ResolvedTypeReferenceOld(step),
-                                                                                       new SimpleNamePath("nav", "step", String.valueOf(n), "fio"),
+                                                                                       new SimpleNamePath("nav", "map", "step", String.valueOf(n), "fio"),
                                                                                        NodeSequence.<Parameter>builder()
                                                                                            .add(new Parameter(valueOf(FINAL),
                                                                                                               new ResolvedTypeReferenceOld(previousStage.getNode().getTokenImage(), previousStepType),
@@ -279,6 +298,38 @@ public class NavigationResolver extends AbstractSemanticAnalyser {
                                                                            singletonList(new ResolvedTypeReferenceOld(Function.class)),
                                                                            singletonList(new FunctionalInterfaceObject(step.getTokenImage(),
                                                                                                                        Function.class, Object.class, singletonList(Object.class), "apply",
+                                                                                                                       generatedMethod
+                                                                                         )
+                                                                           )
+                                               ))
+                                               .build();
+                }
+            } else if ( stage.isFilter() ) {
+                if ( inStream ) {
+                    // Simply translate the filter to a stream filter operation
+                    Class<?> previousStepType = previousStage.isSequence() ? previousStage.getType().getComponentType().getTypeClass() : previousStage.getTypeDescriptor();
+                    LambdaFunction generatedMethod = new GeneratedStaticLambdaFunction(new ResolvedTypeReferenceOld(step.getTokenImage(), boolean.class),
+                                                                                       new SimpleNamePath("nav", "filter", "step", String.valueOf(n), "fio"),
+                                                                                       NodeSequence.<Parameter>builder()
+                                                                                           .add(new Parameter(valueOf(FINAL),
+                                                                                                              new ResolvedTypeReferenceOld(previousStage.getNode().getTokenImage(), previousStepType),
+                                                                                                              false,
+                                                                                                              new Name(previousStage.getNode().getTokenImage(), "filter")
+                                                                                           ))
+                                                                                           .build(),
+                                                                                       NodeSequence.builder()
+                                                                                                   .add(new LoadLocal(previousStage.getNode().getTokenImage(), previousStepType, 0))
+                                                                                                   .add(new ReturnStatement(autoBoxIfNecessary(step, boolean.class)))
+                                                                                                   .build()
+                    );
+                    step = InternalNodeSequence.builder()
+                                               .add(new InstanceMethodCall(step.getTokenImage(),
+                                                                           new ResolvedTypeReferenceOld(step.getTokenImage(), Stream.class),
+                                                                           new ParameterisedTypeImpl(step.getTokenImage(), forClass(Stream.class), step.getType()),
+                                                                           "filter",
+                                                                           singletonList(new ResolvedTypeReferenceOld(Predicate.class)),
+                                                                           singletonList(new FunctionalInterfaceObject(step.getTokenImage(),
+                                                                                                                       Predicate.class, boolean.class, singletonList(Object.class), "test",
                                                                                                                        generatedMethod
                                                                                          )
                                                                            )

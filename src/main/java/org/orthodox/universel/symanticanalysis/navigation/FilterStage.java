@@ -26,11 +26,16 @@
  *
  */
 
-package org.orthodox.universel.ast.navigation;
+package org.orthodox.universel.symanticanalysis.navigation;
 
-/**
- * A tagging interface for node tests which provide the <i>reduce</i> functionality in the common filter-map-reduce
- * pattern.
- */
-public interface FilterNodeTest extends NodeTest {
+import org.orthodox.universel.ast.Node;
+
+public class FilterStage extends AbstractNavigationStage {
+    public FilterStage(final Node node,
+                       final boolean inSequence
+    ) {
+        super(node, false, inSequence);
+    }
+
+    public boolean isFilter() { return true; }
 }

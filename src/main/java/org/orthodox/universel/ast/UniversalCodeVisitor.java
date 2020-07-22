@@ -49,6 +49,7 @@ import org.orthodox.universel.ast.methods.LambdaFunction;
 import org.orthodox.universel.ast.methods.MethodDeclaration;
 import org.orthodox.universel.ast.type.LoadTypeExpression;
 import org.orthodox.universel.ast.type.Parameter;
+import org.orthodox.universel.ast.type.StaticFieldGetExpression;
 import org.orthodox.universel.ast.type.declaration.ClassDeclaration;
 import org.orthodox.universel.ast.type.declaration.InterfaceDeclaration;
 import org.orthodox.universel.ast.type.reference.TypeReference;
@@ -181,6 +182,8 @@ public interface UniversalCodeVisitor {
     Node visitSet(SetExpr node);
 
     Node visitStringLiteral(StringLiteralExpr node);
+
+    Node visitStaticFieldGet(StaticFieldGetExpression node);
 
     //   Node visitSetExpression(SetExpression node);
     Node visitTernaryExpression(TernaryExpression node);

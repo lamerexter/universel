@@ -42,8 +42,25 @@ import static org.orthodox.universel.Universal.execute;
 public class SingleStepBigDecimalArrayPropertyNavigationTest {
     @Test
     void read() {
-        BigDecimal[] value = {BigDecimal.ZERO, BigDecimal.ONE};
-        assertThat(execute("bigDecimalArrayProperty", new JavaBean<>(new BeanWithProperties()).with("bigDecimalArrayProperty", value).getBean()), allOf(equalTo(value), sameInstance(value)));
+        final BigDecimal[] value = {BigDecimal.ZERO, BigDecimal.ONE};
+        final BeanWithProperties binding = new JavaBean<>(new BeanWithProperties()).with("bigDecimalArrayProperty", value).getBean();
+        assertThat(execute("bigDecimalArrayProperty", binding), allOf(equalTo(value), sameInstance(value)));
+    }
+
+    @Test
+    void readFiltered() {
+        final BigDecimal[] value = {BigDecimal.ZERO, BigDecimal.ONE};
+        final BeanWithProperties binding = new JavaBean<>(new BeanWithProperties()).with("bigDecimalArrayProperty", value).getBean();
+        assertThat(execute("bigDecimalArrayProperty[true]\\[[]]", binding), equalTo(value));
+        assertThat(execute("import java.lang.Boolean.* bigDecimalArrayProperty[true]\\[[]]", binding), equalTo(value));
+        assertThat(execute("import java.lang.Boolean.* bigDecimalArrayProperty[TRUE]\\[[]]", binding), equalTo(value));
+        assertThat(execute("import java.lang.Boolean.* bigDecimalArrayProperty[1 == 1]\\[[]]", binding), equalTo(value));
+
+        assertThat(execute("bigDecimalArrayProperty[false]\\[[]]", binding), equalTo(new BigDecimal[]{}));
+        assertThat(execute("import java.lang.Boolean.* bigDecimalArrayProperty[false]\\[[]]", binding), equalTo(new BigDecimal[]{}));
+        assertThat(execute("import java.lang.Boolean.* bigDecimalArrayProperty[FALSE]\\[[]]", binding), equalTo(new BigDecimal[]{}));
+        assertThat(execute("import java.lang.Boolean.* bigDecimalArrayProperty[1 == 0]\\[[]]", binding), equalTo(new BigDecimal[]{}));
+//        assertThat(execute("import java.lang.Boolean.* bigDecimalArrayProperty[1 == 1][false]\\[[]]", binding), equalTo(value));
     }
 
     @Test

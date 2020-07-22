@@ -452,11 +452,15 @@ public class BytecodeHelper {
         }
     }
 
-    private static String getInternalName(final TypeReference type) {
-        return Type.getInternalName(type.getTypeDescriptor());
+    private static String getInternalName(final org.orthodox.universel.ast.Type type) {
+        return Type.getInternalName(type.getTypeClass());
     }
 
-    private static String getDescriptor(final TypeReference type) {
-        return Type.getDescriptor(type.getTypeDescriptor());
+    private static String getDescriptor(final org.orthodox.universel.ast.Type type) {
+        return Type.getDescriptor(type.getTypeClass());
+    }
+
+    public void emitGetStaticField(final org.orthodox.universel.ast.Type declaringType, final org.orthodox.universel.ast.Type fieldType, final String fieldName) {
+        peekMethodVisitor().visitFieldInsn(GETSTATIC, getInternalName(declaringType), fieldName, getDescriptor(fieldType));
     }
 }

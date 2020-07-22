@@ -3,28 +3,29 @@ package org.orthodox.universel.compiler;
 import org.beanplanet.core.io.resource.ByteArrayResource;
 import org.beanplanet.core.models.path.NamePath;
 import org.beanplanet.core.util.IterableUtil;
-import org.objectweb.asm.*;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.*;
 import org.orthodox.universel.UniversalException;
 import org.orthodox.universel.ast.*;
 import org.orthodox.universel.ast.allocation.ArrayCreationExpression;
 import org.orthodox.universel.ast.allocation.ObjectCreationExpression;
-import org.orthodox.universel.ast.conditionals.IfStatement;
-import org.orthodox.universel.ast.conditionals.IfStatement.ElseIf;
-import org.orthodox.universel.ast.functional.FunctionalInterfaceObject;
-import org.orthodox.universel.compiler.CompilationContext.CompilingTypeInfo;
 import org.orthodox.universel.ast.annotation.Annotation;
 import org.orthodox.universel.ast.collections.ListExpr;
 import org.orthodox.universel.ast.collections.MapEntryExpr;
 import org.orthodox.universel.ast.collections.MapExpr;
 import org.orthodox.universel.ast.collections.SetExpr;
+import org.orthodox.universel.ast.conditionals.IfStatement;
+import org.orthodox.universel.ast.conditionals.IfStatement.ElseIf;
 import org.orthodox.universel.ast.conditionals.TernaryExpression;
+import org.orthodox.universel.ast.functional.FunctionalInterfaceObject;
 import org.orthodox.universel.ast.literals.*;
 import org.orthodox.universel.ast.methods.LambdaFunction;
 import org.orthodox.universel.ast.methods.MethodDeclaration;
 import org.orthodox.universel.ast.type.LoadTypeExpression;
+import org.orthodox.universel.ast.type.StaticFieldGetExpression;
 import org.orthodox.universel.ast.type.declaration.ClassDeclaration;
 import org.orthodox.universel.ast.type.reference.TypeReference;
+import org.orthodox.universel.compiler.CompilationContext.CompilingTypeInfo;
 import org.orthodox.universel.exec.operators.binary.BinaryOperatorRegistry;
 import org.orthodox.universel.exec.operators.binary.ConcurrentBinaryOperatorRegistry;
 import org.orthodox.universel.exec.operators.binary.PackageScanBinaryOperatorLoader;
@@ -42,7 +43,6 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Function;
 
-import static java.lang.String.valueOf;
 import static java.lang.reflect.Modifier.PUBLIC;
 import static java.lang.reflect.Modifier.STATIC;
 import static org.beanplanet.core.lang.TypeUtil.findMethod;
@@ -298,7 +298,7 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
     }
 
     @Override
-    public Node visitInternalNodeSequence(InternalNodeSequence node) {
+    public InternalNodeSequence visitInternalNodeSequence(InternalNodeSequence node) {
         for (int n = 0; n < node.getNodes().size(); n++) {
             Node child = node.getNodes().get(n);
 
@@ -529,7 +529,7 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
     }
 
     @Override
-    public Node visitNodeSequence(final NodeSequence<? extends Node> node) {
+    public NodeSequence<? extends Node> visitNodeSequence(final NodeSequence<? extends Node> node) {
 //        int startingStackSize = compilationContext.getVirtualMachine().stackSize();
         for (int n = 0; n < node.getNodes().size(); n++) {
             Node child = node.getNodes().get(n);
@@ -703,6 +703,12 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
         }
         compilationContext.getVirtualMachine().loadOperandOfType(LinkedHashSet.class);
 
+        return node;
+    }
+
+    @Override
+    public Node visitStaticFieldGet(final StaticFieldGetExpression node) {
+        compilationContext.getBytecodeHelper().emitGetStaticField(node.getDeclaringType(), node.getFieldType(), node.getFieldName());
         return node;
     }
 

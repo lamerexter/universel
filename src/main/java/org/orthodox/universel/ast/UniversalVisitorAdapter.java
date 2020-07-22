@@ -31,24 +31,25 @@ package org.orthodox.universel.ast;
 import org.orthodox.universel.ast.NodeSequence.NodeSequenceBuilder;
 import org.orthodox.universel.ast.allocation.ArrayCreationExpression;
 import org.orthodox.universel.ast.allocation.ObjectCreationExpression;
-import org.orthodox.universel.ast.conditionals.IfStatement;
-import org.orthodox.universel.ast.conditionals.IfStatement.ElseIf;
-import org.orthodox.universel.ast.functional.FunctionalInterfaceObject;
-import org.orthodox.universel.ast.navigation.NameTest;
-import org.orthodox.universel.ast.navigation.NavigationStep;
-import org.orthodox.universel.ast.navigation.NavigationStream;
-import org.orthodox.universel.ast.navigation.NodeTest;
 import org.orthodox.universel.ast.annotation.Annotation;
 import org.orthodox.universel.ast.collections.ListExpr;
 import org.orthodox.universel.ast.collections.MapEntryExpr;
 import org.orthodox.universel.ast.collections.MapExpr;
 import org.orthodox.universel.ast.collections.SetExpr;
+import org.orthodox.universel.ast.conditionals.IfStatement;
+import org.orthodox.universel.ast.conditionals.IfStatement.ElseIf;
 import org.orthodox.universel.ast.conditionals.TernaryExpression;
+import org.orthodox.universel.ast.functional.FunctionalInterfaceObject;
 import org.orthodox.universel.ast.literals.*;
 import org.orthodox.universel.ast.methods.LambdaFunction;
 import org.orthodox.universel.ast.methods.MethodDeclaration;
+import org.orthodox.universel.ast.navigation.NameTest;
+import org.orthodox.universel.ast.navigation.NavigationStep;
+import org.orthodox.universel.ast.navigation.NavigationStream;
+import org.orthodox.universel.ast.navigation.NodeTest;
 import org.orthodox.universel.ast.type.LoadTypeExpression;
 import org.orthodox.universel.ast.type.Parameter;
+import org.orthodox.universel.ast.type.StaticFieldGetExpression;
 import org.orthodox.universel.ast.type.declaration.ClassDeclaration;
 import org.orthodox.universel.ast.type.declaration.InterfaceDeclaration;
 import org.orthodox.universel.ast.type.reference.TypeReference;
@@ -166,7 +167,7 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
     }
 
     @Override
-    public Node visitInternalNodeSequence(InternalNodeSequence node) {
+    public InternalNodeSequence visitInternalNodeSequence(InternalNodeSequence node) {
         List<Node> transformedNodes = new ArrayList<>(node.getNodes().size());
         for (Node child : node.getNodes()) {
             transformedNodes.add(child.accept(this));
@@ -420,7 +421,7 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
     }
 
     @Override
-    public Node visitNodeSequence(final NodeSequence<? extends Node> node) {
+    public NodeSequence<? extends Node> visitNodeSequence(final NodeSequence<? extends Node> node) {
         List<Node> transformedNodes = new ArrayList<>(node.getNodes().size());
         for (Node child : node.getNodes()) {
             transformedNodes.add(child.accept(this));
@@ -440,6 +441,7 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
         return node;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T extends NodeTest> NavigationStep<?> visitNavigationStep(NavigationStep<T> node) {
         Node transformedNodeTest = (Node)node.getNodeTest();
@@ -447,8 +449,11 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
             transformedNodeTest = node.getNodeTest().accept(this);
         }
 
-        boolean noTransformationChanges = Objects.equals(node.getNodeTest(), transformedNodeTest);
-        return noTransformationChanges ? node : new NavigationStep<>(node.getTokenImage(), node.getAxis(), (NodeTest)transformedNodeTest, node.getPredicates());
+        InternalNodeSequence transformedFilters = visitInternalNodeSequence(node.getFilters());
+
+        boolean noTransformationChanges = Objects.equals(node.getNodeTest(), transformedNodeTest)
+            && Objects.equals(node.getFilters(), transformedFilters);
+        return noTransformationChanges ? node : new NavigationStep<>(node.getTokenImage(), node.getAxis(), (NodeTest)transformedNodeTest, transformedFilters);
     }
 
     @Override
@@ -531,6 +536,11 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
 
     @Override
     public Node visitStringLiteral(final StringLiteralExpr node) {
+        return node;
+    }
+
+    @Override
+    public Node visitStaticFieldGet(final StaticFieldGetExpression node) {
         return node;
     }
 

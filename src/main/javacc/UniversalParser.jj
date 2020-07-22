@@ -62,8 +62,11 @@ import org.orthodox.universel.ast.methods.*;
 import org.orthodox.universel.ast.literals.*;
 import org.orthodox.universel.ast.TokenImage.TokenImageBuilder;
 import java.io.StringReader;
+import org.orthodox.universel.symanticanalysis.name.InternalNodeSequence;
+import org.orthodox.universel.symanticanalysis.name.InternalNodeSequence.InternalNodeSequenceBuilder;
 
-import static org.orthodox.universel.ast.NodeSequence.NodeSequenceBuilder;
+import static java.util.Collections.singletonList;
+import static org.orthodox.universel.symanticanalysis.name.InternalNodeSequence.builder;
 
 public class UniversalParser
 {
@@ -79,6 +82,9 @@ public class UniversalParser
         return new TokenImage(startLine, startColumn, endLine, endColumn);
     }
 
+    private TokenImage tokenImageToEnd(int startLine, int startColumn) {
+        return tokenImage(startLine, startColumn, token.endLine, token.endColumn);
+    }
 
    private <T> List<T> add(List<T> list, Object obj) {
       if (list == null) {
@@ -1451,6 +1457,7 @@ public NavigationStream NavigationStream():
 public Node NavigationFirstStep():
 {
     List<Node> argumentsList = null;
+    InternalNodeSequence filters = null;
     Name name = null;
     NodeTest nodeTest = null;
 }
@@ -1464,13 +1471,15 @@ public Node NavigationFirstStep():
                                                                                  name, argumentsList); }
         ]
 
+	    [ LOOKAHEAD(2) filters=FiltersList() ]
+
     )
 
     { return new NavigationStep<NodeTest>(TokenImage.builder()
                                                     .range(name)
                                                     .endLine(token.endLine)
                                                     .endColumn(token.endColumn)
-                                                    .build(), NavigationAxis.DEFAULT, nodeTest); }
+                                                    .build(), NavigationAxis.DEFAULT, nodeTest, filters); }
 }
 
 public Node NavigationNextSteps():
@@ -1519,6 +1528,28 @@ List<Node> ArgumentsList() :
    expr=PrimaryExpression() { argumentsList=add(argumentsList, expr); } ("," expr=PrimaryExpression() { argumentsList=add(argumentsList, expr); } )*
 
    { return argumentsList; }
+}
+
+InternalNodeSequence FiltersList() :
+{
+    int startLine = -1, startColumn = -1;
+    List<Node> filtersList = null;
+    InternalNodeSequenceBuilder flb = InternalNodeSequence.builder();
+    Node expr;
+}
+{
+   "["                             { startLine=token.beginLine; startColumn=token.beginColumn; }
+   expr=PrimaryExpression()
+   "]"                             { flb.add(new NodeSequence<Node>(tokenImageToEnd(startLine, startColumn), singletonList(expr))); }
+
+   (
+        LOOKAHEAD(2)
+        "["                        { startLine=token.beginLine; startColumn=token.beginColumn; }
+        expr=PrimaryExpression()
+        "]"                        { flb.add(new NodeSequence<Node>(tokenImageToEnd(startLine, startColumn), singletonList(expr))); }
+   )*
+
+   { return flb.build(); }
 }
 
 ListExpr ListExpression() :
