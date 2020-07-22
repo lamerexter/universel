@@ -52,15 +52,13 @@ public class SingleStepBigDecimalArrayPropertyNavigationTest {
         final BigDecimal[] value = {BigDecimal.ZERO, BigDecimal.ONE};
         final BeanWithProperties binding = new JavaBean<>(new BeanWithProperties()).with("bigDecimalArrayProperty", value).getBean();
         assertThat(execute("bigDecimalArrayProperty[true]\\[[]]", binding), equalTo(value));
-        assertThat(execute("import java.lang.Boolean.* bigDecimalArrayProperty[true]\\[[]]", binding), equalTo(value));
         assertThat(execute("import java.lang.Boolean.* bigDecimalArrayProperty[TRUE]\\[[]]", binding), equalTo(value));
         assertThat(execute("import java.lang.Boolean.* bigDecimalArrayProperty[1 == 1]\\[[]]", binding), equalTo(value));
 
         assertThat(execute("bigDecimalArrayProperty[false]\\[[]]", binding), equalTo(new BigDecimal[]{}));
-        assertThat(execute("import java.lang.Boolean.* bigDecimalArrayProperty[false]\\[[]]", binding), equalTo(new BigDecimal[]{}));
         assertThat(execute("import java.lang.Boolean.* bigDecimalArrayProperty[FALSE]\\[[]]", binding), equalTo(new BigDecimal[]{}));
         assertThat(execute("import java.lang.Boolean.* bigDecimalArrayProperty[1 == 0]\\[[]]", binding), equalTo(new BigDecimal[]{}));
-//        assertThat(execute("import java.lang.Boolean.* bigDecimalArrayProperty[1 == 1][false]\\[[]]", binding), equalTo(value));
+        assertThat(execute("import java.lang.Boolean.* bigDecimalArrayProperty[1 == 1][FALSE]\\[[]]", binding), equalTo(new BigDecimal[]{}));
     }
 
     @Test
