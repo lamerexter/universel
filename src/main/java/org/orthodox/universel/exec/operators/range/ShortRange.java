@@ -33,7 +33,7 @@ import org.orthodox.universel.ast.Operator;
 /**
  * A more efficient implementation of a range of short.
  */
-public class ShortRange extends AbstractRange<Short> {
+public class ShortRange extends NumericRange<Short> {
     public ShortRange(Operator rangeOperator, Short lhs, Short rhs) {
         this(lhs, lhsOperatorFor(rangeOperator), rhs, rhsOperatorFor(rangeOperator));
     }

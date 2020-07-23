@@ -33,7 +33,7 @@ import org.orthodox.universel.ast.Operator;
 /**
  * A more efficient implementation of a range of integer.
  */
-public class IntegerRange extends AbstractRange<Integer> {
+public class IntegerRange extends NumericRange<Integer> {
     public IntegerRange(Operator rangeOperator, Integer lhs, Integer rhs) {
         this(lhs, lhsOperatorFor(rangeOperator), rhs, rhsOperatorFor(rangeOperator));
     }

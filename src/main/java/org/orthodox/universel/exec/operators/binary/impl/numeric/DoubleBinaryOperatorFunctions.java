@@ -31,7 +31,6 @@ package org.orthodox.universel.exec.operators.binary.impl.numeric;
 import org.orthodox.universel.ast.Operator;
 import org.orthodox.universel.exec.operators.binary.BinaryOperator;
 import org.orthodox.universel.exec.operators.range.DoubleRange;
-import org.orthodox.universel.exec.operators.range.Range;
 
 import static org.orthodox.universel.ast.Operator.*;
 
@@ -106,7 +105,7 @@ public class DoubleBinaryOperatorFunctions {
             RANGE_LEFT_GTE_RIGHT_GT, RANGE_LEFT_GTE_RIGHT_GTE, RANGE_LEFT_GTE_RIGHT_INCLUSIVE, RANGE_LEFT_GTE_RIGHT_LT, RANGE_LEFT_GTE_RIGHT_LTE,
             RANGE_LEFT_INCLUSIVE_RIGHT_GT, RANGE_LEFT_INCLUSIVE_RIGHT_GTE, RANGE_LEFT_INCLUSIVE_RIGHT_LT, RANGE_LEFT_INCLUSIVE_RIGHT_LTE
     })
-    public static Range<Double> doubleRange(double lhs, double rhs, Operator operator) {
+    public static DoubleRange doubleRange(double lhs, double rhs, Operator operator) {
         return new DoubleRange(operator, lhs, rhs);
     }
 

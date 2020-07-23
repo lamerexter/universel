@@ -30,7 +30,6 @@ package org.orthodox.universel.exec.operators.binary.impl.numeric;
 
 import org.orthodox.universel.ast.Operator;
 import org.orthodox.universel.exec.operators.binary.BinaryOperator;
-import org.orthodox.universel.exec.operators.range.Range;
 import org.orthodox.universel.exec.operators.range.ShortRange;
 
 import static org.orthodox.universel.ast.Operator.*;
@@ -121,7 +120,7 @@ public class ShortBinaryOperatorFunctions {
             RANGE_LEFT_GTE_RIGHT_GT, RANGE_LEFT_GTE_RIGHT_GTE, RANGE_LEFT_GTE_RIGHT_INCLUSIVE, RANGE_LEFT_GTE_RIGHT_LT, RANGE_LEFT_GTE_RIGHT_LTE,
             RANGE_LEFT_INCLUSIVE_RIGHT_GT, RANGE_LEFT_INCLUSIVE_RIGHT_GTE, RANGE_LEFT_INCLUSIVE_RIGHT_LT, RANGE_LEFT_INCLUSIVE_RIGHT_LTE
     })
-    public static Range<Short> shortRange(short lhs, short rhs, Operator operator) {
+    public static ShortRange shortRange(short lhs, short rhs, Operator operator) {
         return new ShortRange(operator, lhs, rhs);
     }
 

@@ -33,7 +33,7 @@ import org.orthodox.universel.ast.Operator;
 /**
  * A more efficient implementation of a byte range.
  */
-public class ByteRange extends AbstractRange<Byte> {
+public class ByteRange extends NumericRange<Byte> {
     public ByteRange(Operator rangeOperator, Byte lhs, Byte rhs) {
         this(lhs, lhsOperatorFor(rangeOperator), rhs, rhsOperatorFor(rangeOperator));
     }

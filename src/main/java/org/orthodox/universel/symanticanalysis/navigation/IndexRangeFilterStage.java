@@ -30,12 +30,10 @@ package org.orthodox.universel.symanticanalysis.navigation;
 
 import org.orthodox.universel.ast.Node;
 
-public abstract class FilterStage extends AbstractNavigationStage {
-    public FilterStage(final Node node,
-                       final boolean inSequence
+public class IndexRangeFilterStage extends FilterStage {
+    public IndexRangeFilterStage(final Node node,
+                                 final boolean inSequence
     ) {
-        super(node, false, inSequence);
+        super(node, inSequence);
     }
-
-    public boolean isFilter() { return true; }
 }

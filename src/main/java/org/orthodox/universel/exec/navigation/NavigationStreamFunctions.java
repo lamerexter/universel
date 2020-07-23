@@ -26,16 +26,25 @@
  *
  */
 
-package org.orthodox.universel.symanticanalysis.navigation;
+package org.orthodox.universel.exec.navigation;
 
-import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.exec.operators.range.NumericRange;
 
-public abstract class FilterStage extends AbstractNavigationStage {
-    public FilterStage(final Node node,
-                       final boolean inSequence
-    ) {
-        super(node, false, inSequence);
+import java.util.List;
+import java.util.stream.Stream;
+
+/**
+ * Navigation stage implementation functions.
+ */
+public class NavigationStreamFunctions {
+    /**
+     * Implementation of a numeric range of indices to be included from a given list and returned as a stream.
+     *
+     * @param list the list whose sub-list, consisting of the elements within the given range of indices, is to be returned.
+     * @param range the range indices (inclusive) of elements to be returned.
+     * @return a stream of elements from the given list, whose indices are in the given range, inclusively.
+     */
+    public static <T> Stream<T> indexRangeStream(final List<T> list, final NumericRange<?> range) {
+        return list.subList(range.getLowerBound().intValue(), range.getUpperBound().intValue()+1).stream();
     }
-
-    public boolean isFilter() { return true; }
 }

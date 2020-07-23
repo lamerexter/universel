@@ -31,7 +31,6 @@ package org.orthodox.universel.exec.operators.binary.impl.numeric;
 import org.orthodox.universel.ast.Operator;
 import org.orthodox.universel.exec.operators.binary.BinaryOperator;
 import org.orthodox.universel.exec.operators.range.BigIntegerRange;
-import org.orthodox.universel.exec.operators.range.Range;
 
 import java.math.BigInteger;
 
@@ -118,7 +117,7 @@ public class BigIntegerBinaryOperatorFunctions {
             RANGE_LEFT_GTE_RIGHT_GT, RANGE_LEFT_GTE_RIGHT_GTE, RANGE_LEFT_GTE_RIGHT_INCLUSIVE, RANGE_LEFT_GTE_RIGHT_LT, RANGE_LEFT_GTE_RIGHT_LTE,
             RANGE_LEFT_INCLUSIVE_RIGHT_GT, RANGE_LEFT_INCLUSIVE_RIGHT_GTE, RANGE_LEFT_INCLUSIVE_RIGHT_LT, RANGE_LEFT_INCLUSIVE_RIGHT_LTE
     })
-    public static Range<BigInteger> bigInteger(BigInteger lhs, BigInteger rhs, Operator operator) {
+    public static BigIntegerRange bigInteger(BigInteger lhs, BigInteger rhs, Operator operator) {
         return new BigIntegerRange(operator, lhs, rhs);
     }
 

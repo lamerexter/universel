@@ -31,7 +31,6 @@ package org.orthodox.universel.exec.operators.binary.impl.numeric;
 import org.orthodox.universel.ast.Operator;
 import org.orthodox.universel.exec.operators.binary.BinaryOperator;
 import org.orthodox.universel.exec.operators.range.BigDecimalRange;
-import org.orthodox.universel.exec.operators.range.Range;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -105,7 +104,7 @@ public class BigDecimalBinaryOperatorFunctions {
             RANGE_LEFT_GTE_RIGHT_GT, RANGE_LEFT_GTE_RIGHT_GTE, RANGE_LEFT_GTE_RIGHT_INCLUSIVE, RANGE_LEFT_GTE_RIGHT_LT, RANGE_LEFT_GTE_RIGHT_LTE,
             RANGE_LEFT_INCLUSIVE_RIGHT_GT, RANGE_LEFT_INCLUSIVE_RIGHT_GTE, RANGE_LEFT_INCLUSIVE_RIGHT_LT, RANGE_LEFT_INCLUSIVE_RIGHT_LTE
     })
-    public static Range<BigDecimal> bigDecimal(BigDecimal lhs, BigDecimal rhs, Operator operator) {
+    public static BigDecimalRange bigDecimal(BigDecimal lhs, BigDecimal rhs, Operator operator) {
         return new BigDecimalRange(operator, lhs, rhs);
     }
 

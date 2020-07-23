@@ -33,7 +33,7 @@ import org.orthodox.universel.ast.Operator;
 /**
  * A more efficient implementation of a range of long.
  */
-public class LongRange extends AbstractRange<Long> {
+public class LongRange extends NumericRange<Long> {
     public LongRange(Operator rangeOperator, Long lhs, Long rhs) {
         this(lhs, lhsOperatorFor(rangeOperator), rhs, rhsOperatorFor(rangeOperator));
     }

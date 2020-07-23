@@ -36,7 +36,7 @@ import java.math.BigInteger;
 /**
  * A more efficient implementation of a range of {@link BigInteger}.
  */
-public class BigDecimalRange extends AbstractRange<BigDecimal> {
+public class BigDecimalRange extends NumericRange<BigDecimal> {
     public BigDecimalRange(Operator rangeOperator, BigDecimal lhs, BigDecimal rhs) {
         this(lhs, lhsOperatorFor(rangeOperator), rhs, rhsOperatorFor(rangeOperator));
     }

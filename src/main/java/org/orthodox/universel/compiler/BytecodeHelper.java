@@ -178,10 +178,10 @@ public class BytecodeHelper {
                                        String name,
                                        Class<?> ... parameterTypes) {
         peekMethodVisitor().visitMethodInsn(INVOKESTATIC,
-                                            declaringType.getName().join("/"),
+                                            getInternalName(declaringType),
                                             name,
-                                            Type.getMethodDescriptor(Type.getType(returnType), typeArrayFor(parameterTypes)),
-                                            false);
+                                            getMethodDescriptor(returnType, parameterTypes),
+                                            declaringType.isInterface());
     }
 
     public void convert(final Class<?> fromType, final Class<?> toType) {
@@ -453,11 +453,15 @@ public class BytecodeHelper {
     }
 
     private static String getInternalName(final org.orthodox.universel.ast.Type type) {
-        return Type.getInternalName(type.getTypeClass());
+        return type.getTypeClass() != null ? Type.getInternalName(type.getTypeClass()) : type.getName().join("/");
     }
 
     private static String getDescriptor(final org.orthodox.universel.ast.Type type) {
         return Type.getDescriptor(type.getTypeClass());
+    }
+
+    private static String getMethodDescriptor(Class<?> returnType, Class<?> ... argTypes) {
+        return Type.getMethodDescriptor(Type.getType(returnType), typeArrayFor(argTypes));
     }
 
     public void emitGetStaticField(final org.orthodox.universel.ast.Type declaringType, final org.orthodox.universel.ast.Type fieldType, final String fieldName) {

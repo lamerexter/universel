@@ -31,7 +31,6 @@ package org.orthodox.universel.exec.operators.binary.impl.numeric;
 import org.orthodox.universel.ast.Operator;
 import org.orthodox.universel.exec.operators.binary.BinaryOperator;
 import org.orthodox.universel.exec.operators.range.IntegerRange;
-import org.orthodox.universel.exec.operators.range.Range;
 
 import static org.orthodox.universel.ast.Operator.*;
 
@@ -136,7 +135,7 @@ public class IntegerBinaryOperatorFunctions {
             RANGE_LEFT_GTE_RIGHT_GT, RANGE_LEFT_GTE_RIGHT_GTE, RANGE_LEFT_GTE_RIGHT_INCLUSIVE, RANGE_LEFT_GTE_RIGHT_LT, RANGE_LEFT_GTE_RIGHT_LTE,
             RANGE_LEFT_INCLUSIVE_RIGHT_GT, RANGE_LEFT_INCLUSIVE_RIGHT_GTE, RANGE_LEFT_INCLUSIVE_RIGHT_LT, RANGE_LEFT_INCLUSIVE_RIGHT_LTE
     })
-    public static Range<Integer> intRange(int lhs, int rhs, Operator operator) {
+    public static IntegerRange intRange(int lhs, int rhs, Operator operator) {
         return new IntegerRange(operator, lhs, rhs);
     }
 

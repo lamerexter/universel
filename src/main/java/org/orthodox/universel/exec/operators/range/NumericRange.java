@@ -26,16 +26,15 @@
  *
  */
 
-package org.orthodox.universel.symanticanalysis.navigation;
+package org.orthodox.universel.exec.operators.range;
 
-import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.ast.Operator;
 
-public abstract class FilterStage extends AbstractNavigationStage {
-    public FilterStage(final Node node,
-                       final boolean inSequence
-    ) {
-        super(node, false, inSequence);
+/**
+ * A more efficient implementation of a range of integer.
+ */
+public abstract class NumericRange<T extends Number> extends AbstractRange<T> {
+    public NumericRange(T lhs, Operator lhsOperator, T rhs, Operator rhsOperator) {
+        super(lhs, lhsOperator, rhs, rhsOperator);
     }
-
-    public boolean isFilter() { return true; }
 }

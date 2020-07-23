@@ -33,7 +33,7 @@ import org.orthodox.universel.ast.Operator;
 /**
  * A more efficient implementation of a range of float.
  */
-public class DoubleRange extends AbstractRange<Double> {
+public class DoubleRange extends NumericRange<Double> {
     public DoubleRange(Operator rangeOperator, Double lhs, Double rhs) {
         this(lhs, lhsOperatorFor(rangeOperator), rhs, rhsOperatorFor(rangeOperator));
     }

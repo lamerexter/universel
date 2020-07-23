@@ -35,7 +35,7 @@ import java.math.BigInteger;
 /**
  * A more efficient implementation of a range of {@link java.math.BigInteger}.
  */
-public class BigIntegerRange extends AbstractRange<BigInteger> {
+public class BigIntegerRange extends NumericRange<BigInteger> {
     public BigIntegerRange(Operator rangeOperator, BigInteger lhs, BigInteger rhs) {
         this(lhs, lhsOperatorFor(rangeOperator), rhs, rhsOperatorFor(rangeOperator));
     }

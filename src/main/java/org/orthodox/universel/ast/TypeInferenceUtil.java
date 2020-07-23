@@ -85,4 +85,8 @@ public class TypeInferenceUtil {
     public static boolean isPredicate(Type type) {
         return isBoolean(type);
     }
+
+    public static boolean isIntegerType(final Type filterType) {
+        return TypeUtil.isIntegerNumericType(filterType.getTypeClass());
+    }
 }
