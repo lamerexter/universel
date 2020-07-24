@@ -46,6 +46,9 @@ import java.util.Objects;
  * @author Gary Watson
  */
 public abstract class TypeReference extends Node implements Type {
+    public static TypeReference forClass(Class<?> clazz) {
+        return new ResolvedTypeReferenceOld(clazz);
+    }
 
     /**
      * Constructs a new type AST type reference instance.

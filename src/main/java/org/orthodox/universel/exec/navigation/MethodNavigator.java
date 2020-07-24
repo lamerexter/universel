@@ -27,17 +27,18 @@
  */
 package org.orthodox.universel.exec.navigation;
 
-import org.orthodox.universel.ast.navigation.NavigationStep;
-import org.orthodox.universel.ast.navigation.ReductionNodeTest;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import java.util.List;
-
-public interface NavigatorRegistry {
-   void addMappingNavigator(Class<?> fromType, List<String> axes, List<String> names, NavigatorFunction navigator);
-   void addMethodNavigator(Class<?> fromType, List<String> axes, List<String> names, NavigatorFunction navigator);
-   void addReductionNavigator(Class<?> fromType, List<String> axes, Class<? extends ReductionNodeTest> reductionType, NavigatorFunction navigator);
-   List<NavigatorFunction> lookup(Class<?> fromType, NavigationStep<?> step);
-   
-   int size();
-   void clear();
+/**
+ * A method tagging annotation for marking a method as being an implementations of a method navigator (for example an
+ * instance method on a bean or object).
+ */
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface MethodNavigator {
+    String[] axis() default { "default" };
+    String[] name() default { "*" };
 }

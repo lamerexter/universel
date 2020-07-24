@@ -29,32 +29,77 @@
 package org.orthodox.universel.exec.navigation.impl.map;
 
 import org.beanplanet.core.beans.TypePropertiesSource;
+import org.beanplanet.core.lang.TypeUtil;
 import org.orthodox.universel.ast.InstanceMethodCall;
+import org.orthodox.universel.ast.MethodCall;
+import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.ast.TypeInferenceUtil;
 import org.orthodox.universel.ast.navigation.NameTest;
 import org.orthodox.universel.ast.navigation.NavigationStep;
-import org.orthodox.universel.ast.Node;
 import org.orthodox.universel.ast.type.reference.ResolvedTypeReferenceOld;
 import org.orthodox.universel.ast.type.reference.TypeReference;
 import org.orthodox.universel.exec.navigation.MappingNavigator;
+import org.orthodox.universel.exec.navigation.MethodNavigator;
 import org.orthodox.universel.exec.navigation.Navigator;
+import org.orthodox.universel.symanticanalysis.ResolvedTypeReference;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import static org.orthodox.universel.ast.TypeInferenceUtil.*;
+import static java.lang.reflect.Modifier.PROTECTED;
+import static java.lang.reflect.Modifier.PUBLIC;
+import static java.util.Arrays.stream;
+import static org.beanplanet.core.lang.TypeUtil.streamMethods;
+import static org.orthodox.universel.ast.TypeInferenceUtil.resolveType;
 
 @Navigator
 public class UniversalBeanNavigators {
-    @MappingNavigator(axis = "default", name="*")
-    public static Node propertyNavigator(final Class<?> fromType, final NavigationStep<NameTest> step) {
+    @MappingNavigator(axis = "default", name = "*")
+    public static Node universalPropertyNavigator(final Class<?> fromType, final NavigationStep<NameTest> step) {
         TypePropertiesSource<?> properties = new TypePropertiesSource<>(fromType);
-        if ( !properties.isReadableProperty(step.getNodeTest().getName()) ) return step;
+        if (!properties.isReadableProperty(step.getNodeTest().getName())) return step;
 
         PropertyDescriptor propertyDescriptor = properties.assertAndGetReadablePropertyDescriptor(step.getNodeTest().getName());
         Method readMethod = propertyDescriptor.getReadMethod();
         return new InstanceMethodCall(step.getTokenImage(),
                                       new ResolvedTypeReferenceOld(step.getTokenImage(), readMethod.getDeclaringClass()),
                                       (TypeReference) resolveType(readMethod.getGenericReturnType()),
-                                      readMethod.getName());
+                                      readMethod.getName()
+        );
+    }
+
+    @MethodNavigator()
+    public static Node universalMethodNavigator(final Class<?> fromType, final NavigationStep<MethodCall> step) {
+        final List<Method> matchingMethods = streamMethods(PUBLIC | PROTECTED, step.getNodeTest().getName().getName(), fromType, null, (Class<?>[]) null)
+                                                 .filter(m -> parameterTypesCompatible(step.getNodeTest(), m))
+                                                 .collect(Collectors.toList());
+        if (matchingMethods.size() != 1) return step;
+        final Method matchingMethod = matchingMethods.get(0);
+        return new InstanceMethodCall(step.getTokenImage(),
+                                      new ResolvedTypeReferenceOld(step.getTokenImage(), matchingMethod.getDeclaringClass()),
+                                      (TypeReference) resolveType(matchingMethod.getGenericReturnType()),
+                                      matchingMethod.getName(),
+                                      Arrays.stream(matchingMethod.getParameterTypes()).map(TypeReference::forClass).collect(Collectors.toList()),
+                                      step.getNodeTest().getParameters()
+        );
+    }
+
+    private static boolean parameterTypesCompatible(MethodCall methodCall, Method method) {
+        if (methodCall.getParameters().size() != method.getParameters().length) return false;
+
+        for (int n = 0; n < methodCall.getParameters().size(); n++) {
+            if (!parameterTypesMatch(methodCall.getParameters().get(n).getType().getTypeClass(), method.getParameterTypes()[n])) return false;
+        }
+
+        return true;
+    }
+
+    private static boolean parameterTypesMatch(Class<?> caller, Class<?> callee) {
+        return callee.isAssignableFrom(caller);
     }
 }

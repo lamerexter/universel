@@ -27,6 +27,8 @@
  */
 package org.orthodox.universel.exec.navigation;
 
+import org.orthodox.universel.ast.navigation.NavigationAxis;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -35,13 +37,10 @@ import java.lang.annotation.Target;
 /**
  * A method tagging annotation for marking a method as being an implementations of a name navigator (for example a
  * field, property or method name).
- *
- * <p>Methods annotation may have static methods which perform name-based navigator functions.</p>
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface MappingNavigator {
-    String[] value() default {};
-    String[] axis() default {};
-    String[] name() default {"*" };
+    String[] axis() default { "default" };
+    String[] name() default { "*" };
 }

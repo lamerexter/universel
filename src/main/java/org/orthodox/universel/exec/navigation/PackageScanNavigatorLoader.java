@@ -38,11 +38,15 @@ import org.orthodox.universel.ast.navigation.ReductionNodeTest;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.*;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.WildcardType;
 import java.net.URL;
 import java.util.*;
 import java.util.function.Predicate;
 
+import static java.lang.reflect.Modifier.isAbstract;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.util.Arrays.asList;
 import static org.beanplanet.core.lang.TypeUtil.getMethodsInClassHierarchy;
@@ -69,21 +73,29 @@ public class PackageScanNavigatorLoader implements NavigatorLoader, Logger {
         this.navigatorPackagesResource = navigatorPackagesResource;
     }
 
-    protected static final Predicate<Class<?>> ANNOTATED_CLASS_FILTER = new Predicate<Class<?>>() {
-        public boolean test(Class<?> clazz) {
-            return clazz.isAnnotationPresent(Navigator.class);
-        }
-    };
+    protected static final Predicate<Class<?>> ANNOTATED_CLASS_FILTER = clazz -> clazz.isAnnotationPresent(Navigator.class);
+
     protected static final Predicate<Class<?>> PACKAGE_SCAN_CLASS_FILTER = ANNOTATED_CLASS_FILTER;
 
     protected PackageResourceScanner<Class<?>> packageScanner = new FilteringPackageClassScanner(PACKAGE_SCAN_CLASS_FILTER);
 
-    private static final Predicate<Method> ANNOTATED_MAPPING_FILTER = method -> {
+    private static final Predicate<Method> NAME_NAVIGATOR_METHOD_FILTER = method -> {
         Class<?>[] paramTypes = method.getParameterTypes();
         return isPublic(method.getModifiers())
                && isStatic(method.getModifiers())
-               && !Modifier.isAbstract(method.getModifiers())
+               && !isAbstract(method.getModifiers())
                && method.isAnnotationPresent(MappingNavigator.class)
+               && (paramTypes.length == 2)
+               && paramTypes[0] == Class.class
+               && paramTypes[1] == NavigationStep.class;
+    };
+
+    private static final Predicate<Method> METHOD_NAVIGATOR_METHOD_FILTER = method -> {
+        Class<?>[] paramTypes = method.getParameterTypes();
+        return isPublic(method.getModifiers())
+               && isStatic(method.getModifiers())
+               && !isAbstract(method.getModifiers())
+               && method.isAnnotationPresent(MethodNavigator.class)
                && (paramTypes.length == 2)
                && paramTypes[0] == Class.class
                && paramTypes[1] == NavigationStep.class;
@@ -93,7 +105,7 @@ public class PackageScanNavigatorLoader implements NavigatorLoader, Logger {
         Class<?>[] paramTypes = method.getParameterTypes();
         return isPublic(method.getModifiers())
                && isStatic(method.getModifiers())
-               && !Modifier.isAbstract(method.getModifiers())
+               && !isAbstract(method.getModifiers())
                && method.isAnnotationPresent(ReductionNavigator.class)
                && (paramTypes.length == 2)
                && paramTypes[0] == Class.class
@@ -191,6 +203,11 @@ public class PackageScanNavigatorLoader implements NavigatorLoader, Logger {
 
         visitedClasses = new HashSet<>();
         for (Class<?> clazz : classes) {
+            loadMethodNavigators(visitedClasses, registry, clazz);
+        }
+
+        visitedClasses = new HashSet<>();
+        for (Class<?> clazz : classes) {
             loadReductionFilters(visitedClasses, registry, clazz);
         }
     }
@@ -201,8 +218,20 @@ public class PackageScanNavigatorLoader implements NavigatorLoader, Logger {
         }
 
         getMethodsInClassHierarchy(clazz)
-                .filter(ANNOTATED_MAPPING_FILTER)
+                .filter(NAME_NAVIGATOR_METHOD_FILTER)
                 .forEach(m -> addStaticMethodMappingNavigatorToRegistry(registry, m));
+
+        visitedClasses.add(clazz);
+    }
+
+    protected void loadMethodNavigators(Set<Class<?>> visitedClasses, NavigatorRegistry registry, Class<?> clazz) {
+        if (visitedClasses.contains(clazz)) {
+            return;
+        }
+
+        getMethodsInClassHierarchy(clazz)
+            .filter(METHOD_NAVIGATOR_METHOD_FILTER)
+            .forEach(m -> addMethodNavigatorToRegistry(registry, m));
 
         visitedClasses.add(clazz);
     }
@@ -245,7 +274,16 @@ public class PackageScanNavigatorLoader implements NavigatorLoader, Logger {
     private void addStaticMethodMappingNavigatorToRegistry(NavigatorRegistry registry, Method method) {
         MappingNavigator navigatorAnnotation = method.getAnnotation(MappingNavigator.class);
         registry.addMappingNavigator(determineNavigationSourceType(method.getGenericParameterTypes()[0]),
-                                     asList(navigatorAnnotation.axis().length == 0 ? navigatorAnnotation.value() : navigatorAnnotation.axis()),
+                                     asList(navigatorAnnotation.axis()),
+                                     asList(navigatorAnnotation.name()),
+                                     new StaticMethodNavigatorFunction(method)
+        );
+    }
+
+    private void addMethodNavigatorToRegistry(NavigatorRegistry registry, Method method) {
+        MethodNavigator navigatorAnnotation = method.getAnnotation(MethodNavigator.class);
+        registry.addMethodNavigator(determineNavigationSourceType(method.getGenericParameterTypes()[0]),
+                                     asList(navigatorAnnotation.axis()),
                                      asList(navigatorAnnotation.name()),
                                      new StaticMethodNavigatorFunction(method)
         );

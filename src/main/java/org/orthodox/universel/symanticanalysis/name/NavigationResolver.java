@@ -315,6 +315,7 @@ public class NavigationResolver extends AbstractSemanticAnalyser {
                                                                                                    .add(new ReturnStatement(step))
                                                                                                    .build()
                     );
+                    prevMapStageType = step.getType();
                     step = InternalNodeSequence.builder()
                                                .add(new InstanceMethodCall(step.getTokenImage(),
                                                                            new ResolvedTypeReferenceOld(step.getTokenImage(), Stream.class),

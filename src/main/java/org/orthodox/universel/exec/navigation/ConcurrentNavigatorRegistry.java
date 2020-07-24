@@ -31,6 +31,7 @@ import org.beanplanet.core.lang.TypeTree;
 import org.beanplanet.core.lang.TypeUtil;
 import org.beanplanet.core.models.tree.TreeNode;
 import org.beanplanet.core.util.MultiValueListMapImpl;
+import org.orthodox.universel.ast.MethodCall;
 import org.orthodox.universel.ast.navigation.NameTest;
 import org.orthodox.universel.ast.navigation.NavigationStep;
 import org.orthodox.universel.ast.navigation.ReductionNodeTest;
@@ -47,6 +48,7 @@ import static org.beanplanet.core.lang.TypeUtil.ensureNonPrimitiveType;
  */
 public class ConcurrentNavigatorRegistry implements NavigatorRegistry {
     private Map<Class<?>, Map<String, Map<String, List<NavigatorFunction>>>> mappingNavigators = new ConcurrentHashMap<>();
+    private Map<Class<?>, Map<String, Map<String, List<NavigatorFunction>>>> methodNavigators = new ConcurrentHashMap<>();
     private Map<Class<?>, Map<String, Map<Class<? extends ReductionNodeTest>, List<NavigatorFunction>>>> reductionNavigators = new ConcurrentHashMap<>();
     private static final NameTest WILDCARD_NAMETEST = new NameTest(null, "*");
 
@@ -55,6 +57,17 @@ public class ConcurrentNavigatorRegistry implements NavigatorRegistry {
         for (String axis : axes) {
             for (String name : names) {
                 this.mappingNavigators.computeIfAbsent(fromType, k -> new ConcurrentHashMap<>())
+                                      .computeIfAbsent(axis, k -> new MultiValueListMapImpl<>())
+                                      .computeIfAbsent(name, k -> new ArrayList<>(Collections.singletonList(navigator)));
+            }
+        }
+    }
+
+    @Override
+    public void addMethodNavigator(final Class<?> fromType, final List<String> axes, final List<String> names, final NavigatorFunction navigator) {
+        for (String axis : axes) {
+            for (String name : names) {
+                this.methodNavigators.computeIfAbsent(fromType, k -> new ConcurrentHashMap<>())
                                       .computeIfAbsent(axis, k -> new MultiValueListMapImpl<>())
                                       .computeIfAbsent(name, k -> new ArrayList<>(Collections.singletonList(navigator)));
             }
@@ -75,6 +88,8 @@ public class ConcurrentNavigatorRegistry implements NavigatorRegistry {
     public List<NavigatorFunction> lookup(final Class<?> fromType, final NavigationStep<?> step) {
         if ( step.getNodeTest() instanceof  NameTest ) {
             return lookupNameNavigators(fromType, (NavigationStep<NameTest>)step);
+        } else if ( step.getNodeTest() instanceof MethodCall) {
+            return lookupMethodCallNavigators(fromType, (NavigationStep<MethodCall>)step);
         } else if ( step.getNodeTest() instanceof ReductionNodeTest ) {
             return lookupReductionNavigators(fromType, (NavigationStep<ReductionNodeTest>)step);
         }
@@ -96,15 +111,36 @@ public class ConcurrentNavigatorRegistry implements NavigatorRegistry {
                                                .getOrDefault(step.getAxis(), emptyMap())
                                                .getOrDefault(step.getNodeTest().getName(), emptyList()));
 
-            if ( step.getNodeTest() instanceof NameTest ) {
-                navigators.addAll(mappingNavigators.getOrDefault(fromTypeNode.getManagedObject(), emptyMap())
-                                                   .getOrDefault(step.getAxis(), emptyMap())
-                                                   .getOrDefault(WILDCARD_NAMETEST.getName(), emptyList()));
-            }
+            navigators.addAll(mappingNavigators.getOrDefault(fromTypeNode.getManagedObject(), emptyMap())
+                                               .getOrDefault(step.getAxis(), emptyMap())
+                                               .getOrDefault(WILDCARD_NAMETEST.getName(), emptyList()));
         }
 
         return navigators;
     }
+
+    public List<NavigatorFunction> lookupMethodCallNavigators(final Class<?> fromType, final NavigationStep<MethodCall> step) {
+        //--------------------------------------------------------------------------------------------------------------
+        // Look for navigator matches in the following order:
+        // 1) an exact match navigator on type, over the given axis and on the given name and parameters, then
+        // 2) an exact match navigator on type, over the given axis and on the wildcard name and parameters, then
+        // 3) As above, but on the supertype hierarchy.
+        //--------------------------------------------------------------------------------------------------------------
+        TypeTree fromTypeTree = new TypeTree(null, fromType);
+        List<NavigatorFunction> navigators = new ArrayList<>();
+        for (TreeNode<Class<?>> fromTypeNode : fromTypeTree.postorderIterable()) {
+            navigators.addAll(methodNavigators.getOrDefault(fromTypeNode.getManagedObject(), emptyMap())
+                                               .getOrDefault(step.getAxis(), emptyMap())
+                                               .getOrDefault(step.getNodeTest().getName().getName(), emptyList()));
+
+            navigators.addAll(methodNavigators.getOrDefault(fromTypeNode.getManagedObject(), emptyMap())
+                                               .getOrDefault(step.getAxis(), emptyMap())
+                                               .getOrDefault(WILDCARD_NAMETEST.getName(), emptyList()));
+        }
+
+        return navigators;
+    }
+
 
     public List<NavigatorFunction> lookupReductionNavigators(final Class<?> fromType, final NavigationStep<? extends ReductionNodeTest> step) {
         //--------------------------------------------------------------------------------------------------------------
