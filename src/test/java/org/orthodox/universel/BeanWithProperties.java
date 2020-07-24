@@ -695,31 +695,121 @@ public class BeanWithProperties {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (!(o instanceof BeanWithProperties))
-            return false;
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (!(o instanceof BeanWithProperties)) return false;
         BeanWithProperties that = (BeanWithProperties) o;
-        return isBooleanProperty() == that.isBooleanProperty() && getByteProperty() == that.getByteProperty() && getCharProperty() == that.getCharProperty() && Double.compare(that.getDoubleProperty(), getDoubleProperty()) == 0 && Float.compare(that.getFloatProperty(), getFloatProperty()) == 0 && getIntProperty() == that.getIntProperty() && getLongProperty() == that.getLongProperty() && getShortProperty() == that.getShortProperty() && Objects.equals(getBigDecimalProperty(), that.getBigDecimalProperty()) && Objects.equals(getBigIntegerProperty(), that.getBigIntegerProperty()) && Objects.equals(getTypeProperty(), that.getTypeProperty()) && Objects.equals(getStringProperty(), that.getStringProperty()) && Objects.equals(getReferenceProperty(), that.getReferenceProperty()) && Objects.equals(getBooleanWrapperProperty(), that.getBooleanWrapperProperty()) && Objects.equals(getByteWrapperProperty(), that.getByteWrapperProperty()) && Objects.equals(getCharWrapperProperty(), that.getCharWrapperProperty()) && Objects.equals(getDoubleWrapperProperty(), that.getDoubleWrapperProperty()) && Objects.equals(getFloatWrapperProperty(), that.getFloatWrapperProperty()) && Objects.equals(getIntWrapperProperty(), that.getIntWrapperProperty()) && Objects.equals(getLongWrapperProperty(), that.getLongWrapperProperty()) && Objects.equals(getShortWrapperProperty(), that.getShortWrapperProperty()) && Objects.equals(getStringWrapperProperty(), that.getStringWrapperProperty()) && Objects.equals(getBooleanWrapperListProperty(), that.getBooleanWrapperListProperty()) && Objects.equals(getBigDecimalListProperty(), that.getBigDecimalListProperty()) && Objects.equals(getBigIntegerListProperty(), that.getBigIntegerListProperty()) && Objects.equals(getByteWrapperListProperty(), that.getByteWrapperListProperty()) && Objects.equals(getCharWrapperListProperty(), that.getCharWrapperListProperty()) && Objects.equals(getTypeListProperty(), that.getTypeListProperty()) && Objects.equals(getDoubleWrapperListProperty(), that.getDoubleWrapperListProperty()) && Objects.equals(getFloatWrapperListProperty(), that.getFloatWrapperListProperty()) && Objects.equals(getIntWrapperListProperty(), that.getIntWrapperListProperty()) && Objects.equals(getLongWrapperListProperty(), that.getLongWrapperListProperty()) && Objects.equals(getShortWrapperListProperty(), that.getShortWrapperListProperty()) && Objects.equals(getStringListProperty(), that.getStringListProperty()) && Objects.equals(getReferenceListProperty(), that.getReferenceListProperty()) && Arrays.equals(getBooleanArrayProperty(), that.getBooleanArrayProperty()) && Arrays.equals(getBigDecimalArrayProperty(), that.getBigDecimalArrayProperty()) && Arrays.equals(getBigIntegerArrayProperty(), that.getBigIntegerArrayProperty()) && Arrays.equals(getByteArrayProperty(), that.getByteArrayProperty()) && Arrays.equals(getCharArrayProperty(), that.getCharArrayProperty()) && Arrays.equals(getTypeArrayProperty(), that.getTypeArrayProperty()) && Arrays.equals(getDoubleArrayProperty(), that.getDoubleArrayProperty()) && Arrays.equals(getFloatArrayProperty(), that.getFloatArrayProperty()) && Arrays.equals(getIntArrayProperty(), that.getIntArrayProperty()) && Arrays.equals(getLongArrayProperty(), that.getLongArrayProperty()) && Arrays.equals(getShortArrayProperty(), that.getShortArrayProperty()) && Arrays.equals(getStringArrayProperty(), that.getStringArrayProperty()) && Arrays.equals(getReferenceArrayProperty(), that.getReferenceArrayProperty()) && Arrays.equals(getBooleanWrapperArrayProperty(), that.getBooleanWrapperArrayProperty()) && Arrays.equals(getByteWrapperArrayProperty(), that.getByteWrapperArrayProperty()) && Arrays.equals(getCharWrapperArrayProperty(), that.getCharWrapperArrayProperty()) && Arrays.equals(getDoubleWrapperArrayProperty(), that.getDoubleWrapperArrayProperty()) && Arrays.equals(getFloatWrapperArrayProperty(), that.getFloatWrapperArrayProperty()) && Arrays.equals(getIntWrapperArrayProperty(), that.getIntWrapperArrayProperty()) && Arrays.equals(getLongWrapperArrayProperty(), that.getLongWrapperArrayProperty()) && Arrays.equals(getShortWrapperArrayProperty(), that.getShortWrapperArrayProperty());
+        return isBooleanProperty() == that.isBooleanProperty() &&
+               getByteProperty() == that.getByteProperty() &&
+               getCharProperty() == that.getCharProperty() &&
+               Double.compare(that.getDoubleProperty(), getDoubleProperty()) == 0 &&
+               Float.compare(that.getFloatProperty(), getFloatProperty()) == 0 &&
+               getIntProperty() == that.getIntProperty() &&
+               getLongProperty() == that.getLongProperty() &&
+               getShortProperty() == that.getShortProperty() &&
+               Objects.equals(getBigDecimalProperty(), that.getBigDecimalProperty()) &&
+               Objects.equals(getBigIntegerProperty(), that.getBigIntegerProperty()) &&
+               Objects.equals(getReferenceProperty(), that.getReferenceProperty()) &&
+               Objects.equals(getStringProperty(), that.getStringProperty()) &&
+               Objects.equals(getTypeProperty(), that.getTypeProperty()) &&
+               Objects.equals(getBooleanWrapperProperty(), that.getBooleanWrapperProperty()) &&
+               Objects.equals(getByteWrapperProperty(), that.getByteWrapperProperty()) &&
+               Objects.equals(getCharWrapperProperty(), that.getCharWrapperProperty()) &&
+               Objects.equals(getDoubleWrapperProperty(), that.getDoubleWrapperProperty()) &&
+               Objects.equals(getFloatWrapperProperty(), that.getFloatWrapperProperty()) &&
+               Objects.equals(getIntWrapperProperty(), that.getIntWrapperProperty()) &&
+               Objects.equals(getLongWrapperProperty(), that.getLongWrapperProperty()) &&
+               Objects.equals(getShortWrapperProperty(), that.getShortWrapperProperty()) &&
+               Objects.equals(getStringWrapperProperty(), that.getStringWrapperProperty()) &&
+               Objects.equals(getBooleanWrapperListProperty(), that.getBooleanWrapperListProperty()) &&
+               Objects.equals(getBigDecimalListProperty(), that.getBigDecimalListProperty()) &&
+               Objects.equals(getBigIntegerListProperty(), that.getBigIntegerListProperty()) &&
+               Objects.equals(getByteWrapperListProperty(), that.getByteWrapperListProperty()) &&
+               Objects.equals(getCharWrapperListProperty(), that.getCharWrapperListProperty()) &&
+               Objects.equals(getTypeListProperty(), that.getTypeListProperty()) &&
+               Objects.equals(getDoubleWrapperListProperty(), that.getDoubleWrapperListProperty()) &&
+               Objects.equals(getFloatWrapperListProperty(), that.getFloatWrapperListProperty()) &&
+               Objects.equals(getIntWrapperListProperty(), that.getIntWrapperListProperty()) &&
+               Objects.equals(getLongWrapperListProperty(), that.getLongWrapperListProperty()) &&
+               Objects.equals(getShortWrapperListProperty(), that.getShortWrapperListProperty()) &&
+               Objects.equals(getStringListProperty(), that.getStringListProperty()) &&
+               Objects.equals(getReferenceListProperty(), that.getReferenceListProperty()) &&
+               Objects.equals(getReferenceSetProperty(), that.getReferenceSetProperty()) &&
+               Arrays.equals(getBigDecimalArrayProperty(), that.getBigDecimalArrayProperty()) &&
+               Arrays.equals(getBigIntegerArrayProperty(), that.getBigIntegerArrayProperty()) &&
+               Arrays.equals(getBooleanArrayProperty(), that.getBooleanArrayProperty()) &&
+               Arrays.equals(getByteArrayProperty(), that.getByteArrayProperty()) &&
+               Arrays.equals(getCharArrayProperty(), that.getCharArrayProperty()) &&
+               Arrays.equals(getDoubleArrayProperty(), that.getDoubleArrayProperty()) &&
+               Arrays.equals(getFloatArrayProperty(), that.getFloatArrayProperty()) &&
+               Arrays.equals(getIntArrayProperty(), that.getIntArrayProperty()) &&
+               Arrays.equals(getLongArrayProperty(), that.getLongArrayProperty()) &&
+               Arrays.equals(getReferenceArrayProperty(), that.getReferenceArrayProperty()) &&
+               Arrays.equals(getShortArrayProperty(), that.getShortArrayProperty()) &&
+               Arrays.equals(getStringArrayProperty(), that.getStringArrayProperty()) &&
+               Arrays.equals(getTypeArrayProperty(), that.getTypeArrayProperty()) &&
+               Arrays.equals(getBooleanWrapperArrayProperty(), that.getBooleanWrapperArrayProperty()) &&
+               Arrays.equals(getByteWrapperArrayProperty(), that.getByteWrapperArrayProperty()) &&
+               Arrays.equals(getCharWrapperArrayProperty(), that.getCharWrapperArrayProperty()) &&
+               Arrays.equals(getDoubleWrapperArrayProperty(), that.getDoubleWrapperArrayProperty()) &&
+               Arrays.equals(getFloatWrapperArrayProperty(), that.getFloatWrapperArrayProperty()) &&
+               Arrays.equals(getIntWrapperArrayProperty(), that.getIntWrapperArrayProperty()) &&
+               Arrays.equals(getLongWrapperArrayProperty(), that.getLongWrapperArrayProperty()) &&
+               Arrays.equals(getShortWrapperArrayProperty(), that.getShortWrapperArrayProperty());
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(isBooleanProperty(), getBigDecimalProperty(), getBigIntegerProperty(), getByteProperty(), getCharProperty(), getTypeProperty(), getDoubleProperty(), getFloatProperty(), getIntProperty(), getLongProperty(), getShortProperty(), getStringProperty(), getReferenceProperty(), getBooleanWrapperProperty(), getByteWrapperProperty(), getCharWrapperProperty(), getDoubleWrapperProperty(), getFloatWrapperProperty(), getIntWrapperProperty(), getLongWrapperProperty(), getShortWrapperProperty(), getStringWrapperProperty(), getBooleanWrapperListProperty(), getBigDecimalListProperty(), getBigIntegerListProperty(), getByteWrapperListProperty(), getCharWrapperListProperty(), getTypeListProperty(), getDoubleWrapperListProperty(), getFloatWrapperListProperty(), getIntWrapperListProperty(), getLongWrapperListProperty(), getShortWrapperListProperty(), getStringListProperty(), getReferenceListProperty());
-        result = 31 * result + Arrays.hashCode(getBooleanArrayProperty());
+        int result = Objects.hash(getBigDecimalProperty(),
+                                  getBigIntegerProperty(),
+                                  isBooleanProperty(),
+                                  getByteProperty(),
+                                  getCharProperty(),
+                                  getDoubleProperty(),
+                                  getFloatProperty(),
+                                  getIntProperty(),
+                                  getLongProperty(),
+                                  getReferenceProperty(),
+                                  getShortProperty(),
+                                  getStringProperty(),
+                                  getTypeProperty(),
+                                  getBooleanWrapperProperty(),
+                                  getByteWrapperProperty(),
+                                  getCharWrapperProperty(),
+                                  getDoubleWrapperProperty(),
+                                  getFloatWrapperProperty(),
+                                  getIntWrapperProperty(),
+                                  getLongWrapperProperty(),
+                                  getShortWrapperProperty(),
+                                  getStringWrapperProperty(),
+                                  getBooleanWrapperListProperty(),
+                                  getBigDecimalListProperty(),
+                                  getBigIntegerListProperty(),
+                                  getByteWrapperListProperty(),
+                                  getCharWrapperListProperty(),
+                                  getTypeListProperty(),
+                                  getDoubleWrapperListProperty(),
+                                  getFloatWrapperListProperty(),
+                                  getIntWrapperListProperty(),
+                                  getLongWrapperListProperty(),
+                                  getShortWrapperListProperty(),
+                                  getStringListProperty(),
+                                  getReferenceListProperty(),
+                                  getReferenceSetProperty()
+        );
         result = 31 * result + Arrays.hashCode(getBigDecimalArrayProperty());
         result = 31 * result + Arrays.hashCode(getBigIntegerArrayProperty());
+        result = 31 * result + Arrays.hashCode(getBooleanArrayProperty());
         result = 31 * result + Arrays.hashCode(getByteArrayProperty());
         result = 31 * result + Arrays.hashCode(getCharArrayProperty());
-        result = 31 * result + Arrays.hashCode(getTypeArrayProperty());
         result = 31 * result + Arrays.hashCode(getDoubleArrayProperty());
         result = 31 * result + Arrays.hashCode(getFloatArrayProperty());
         result = 31 * result + Arrays.hashCode(getIntArrayProperty());
         result = 31 * result + Arrays.hashCode(getLongArrayProperty());
+        result = 31 * result + Arrays.hashCode(getReferenceArrayProperty());
         result = 31 * result + Arrays.hashCode(getShortArrayProperty());
         result = 31 * result + Arrays.hashCode(getStringArrayProperty());
-        result = 31 * result + Arrays.hashCode(getReferenceArrayProperty());
+        result = 31 * result + Arrays.hashCode(getTypeArrayProperty());
         result = 31 * result + Arrays.hashCode(getBooleanWrapperArrayProperty());
         result = 31 * result + Arrays.hashCode(getByteWrapperArrayProperty());
         result = 31 * result + Arrays.hashCode(getCharWrapperArrayProperty());

@@ -211,9 +211,9 @@ public class NavigationResolver extends AbstractSemanticAnalyser {
                     Type filterType = filter.getType();
                     if (filterType == null) return null; // Can't proceed yet
 
-                    if ( isPredicate(filterType) ) {
-                       navSages.add(new PredicateFilterStage(filter, inSequence));
-                    } else if ( isIndexFilter(filterType) ) {
+                    if (isPredicate(filterType)) {
+                        navSages.add(new PredicateFilterStage(filter, inSequence));
+                    } else if (isIndexFilter(filterType)) {
                         navSages.add(new IndexFilterStage(filter, inSequence));
                     } else if (isIndexRangeFilter(filterType)) {
                         navSages.add(new IndexRangeFilterStage(filter, inSequence));
@@ -249,20 +249,53 @@ public class NavigationResolver extends AbstractSemanticAnalyser {
 
 //            if (n != stages.size() - 1) {
             boolean isLastStage = n == stages.size() - 1;
-            if ( stage.isReduce() ) {
-                if ( !isLastStage ) {
+            if (stage.isReduce()) {
+                if (!isLastStage) {
                     inStream = true;
                     // Convert to stream
                     step = new TypeConversion(step, new ParameterisedTypeImpl(step.getTokenImage(), forClass(Stream.class), step.getType().getComponentType()));
                 }
-            } else if ( stage.isMap() ){
+            } else if (stage.isMap()) {
                 if (stage.isSequence()) {
+                    prevMapStageType = step.getType().getComponentType();
                     if (inStream) {
+                        // Convert sequence to stream and flatMap into existing stream
+                        LambdaFunction conversionLambda = new GeneratedStaticLambdaFunction(new ResolvedTypeReference(step.getTokenImage(), forClass(Stream.class)),
+                                                                                            new SimpleNamePath("nav", "flatMap", "stage", String.valueOf(n), "fio"),
+                                                                                            NodeSequence.<Parameter>builder()
+                                                                                                .add(new Parameter(valueOf(FINAL),
+                                                                                                                   new ResolvedTypeReference(previousStage.getNode().getTokenImage(), prevMapStageType),
+                                                                                                                   false,
+                                                                                                                   new Name(previousStage.getNode().getTokenImage(), "step")
+                                                                                                ))
+                                                                                                .build(),
+                                                                                            NodeSequence.builder()
+                                                                                                        .add(new ReturnStatement(
+                                                                                                                 InternalNodeSequence.builder()
+                                                                                                                                     .add(new LoadLocal(previousStage.getNode().getTokenImage(), prevMapStageType, 0))
+                                                                                                                                     .add(new TypeConversion(step, new ParameterisedTypeImpl(step.getTokenImage(), forClass(Stream.class), step.getType().getComponentType())))
+                                                                                                                                     .build()
+                                                                                                             )
+                                                                                                        )
+                                                                                                        .build()
+                        );
+                        step = InternalNodeSequence.builder()
+                                                   .add(new InstanceMethodCall(step.getTokenImage(),
+                                                                               new ResolvedTypeReferenceOld(step.getTokenImage(), Stream.class),
+                                                                               new ParameterisedTypeImpl(step.getTokenImage(), forClass(Stream.class), step.getType().getComponentType()),
+                                                                               "flatMap",
+                                                                               singletonList(new ResolvedTypeReferenceOld(Function.class)),
+                                                                               singletonList(new FunctionalInterfaceObject(step.getTokenImage(),
+                                                                                                                           Function.class, Object.class, singletonList(Object.class), "apply",
+                                                                                                                           conversionLambda
+                                                                                             )
+                                                                               )
+                                                   ))
+                                                   .build();
 
-                    } else if ( !isLastStage ) {
+                    } else if (!isLastStage) {
                         inStream = true;
                         // Convert to stream
-                        prevMapStageType = step.getType().getComponentType();
                         step = new TypeConversion(step, new ParameterisedTypeImpl(step.getTokenImage(), forClass(Stream.class), step.getType().getComponentType()));
                     }
                 } else if (inStream) {
@@ -298,9 +331,9 @@ public class NavigationResolver extends AbstractSemanticAnalyser {
                 } else {
                     prevMapStageType = step.getType();
                 }
-            } else if ( stage.isFilter() ) {
-                if ( stage instanceof PredicateFilterStage ) {
-                    if ( inStream ) {
+            } else if (stage.isFilter()) {
+                if (stage instanceof PredicateFilterStage) {
+                    if (inStream) {
                         // Simply translate the filter to a stream filter operation
                         LambdaFunction generatedMethod = new GeneratedStaticLambdaFunction(new ResolvedTypeReferenceOld(step.getTokenImage(), boolean.class),
                                                                                            new SimpleNamePath("nav", "predicatefilter", "stage", String.valueOf(n), "fio"),
@@ -312,7 +345,7 @@ public class NavigationResolver extends AbstractSemanticAnalyser {
                                                                                                ))
                                                                                                .build(),
                                                                                            NodeSequence.builder()
-                                                                                                       .add(new LoadLocal(previousStage.getNode().getTokenImage(), (TypeReference)prevMapStageType, 0))
+                                                                                                       .add(new LoadLocal(previousStage.getNode().getTokenImage(), (TypeReference) prevMapStageType, 0))
                                                                                                        .add(new ReturnStatement(autoBoxIfNecessary(step, boolean.class)))
                                                                                                        .build()
                         );
@@ -330,8 +363,8 @@ public class NavigationResolver extends AbstractSemanticAnalyser {
                                                    ))
                                                    .build();
                     }
-                } else if ( stage instanceof IndexFilterStage ) {
-                    if ( inStream ) {
+                } else if (stage instanceof IndexFilterStage) {
+                    if (inStream) {
                         step = InternalNodeSequence.builder()
                                                    .add(new InstanceMethodCall(step.getTokenImage(),
                                                                                new ResolvedTypeReferenceOld(step.getTokenImage(), Stream.class),
@@ -360,14 +393,15 @@ public class NavigationResolver extends AbstractSemanticAnalyser {
                                                    .resultType(new ParameterisedTypeImpl(step.getTokenImage(), forClass(Stream.class), prevMapStageType))
                                                    .build();
                     }
-                } else if ( stage instanceof IndexRangeFilterStage ) {
-                    if ( inStream ) {
+                } else if (stage instanceof IndexRangeFilterStage) {
+                    if (inStream) {
                         step = new StaticMethodCall(step.getTokenImage(),
                                                     new ResolvedTypeReferenceOld(step.getTokenImage(), NavigationStreamFunctions.class),
                                                     new ParameterisedTypeImpl(step.getTokenImage(), forClass(Stream.class), prevMapStageType),
                                                     "indexRangeStream",
                                                     asList(new ResolvedTypeReference(step.getTokenImage(), forClass(List.class)),
-                                                           new ResolvedTypeReference(step.getTokenImage(), forClass(NumericRange.class))),
+                                                           new ResolvedTypeReference(step.getTokenImage(), forClass(NumericRange.class))
+                                                    ),
                                                     asList(new InstanceMethodCall(step.getTokenImage(),
                                                                                   new ResolvedTypeReferenceOld(step.getTokenImage(), Stream.class),
                                                                                   new ResolvedTypeReferenceOld(step.getTokenImage(), Object.class),

@@ -44,7 +44,7 @@ public class LoadLocal extends Node {
         this.localIndex = localIndex;
     }
 
-    public LoadLocal(final TokenImage tokenImage, final TypeReference type, final int localIndex) {
+    public LoadLocal(final TokenImage tokenImage, final Type type, final int localIndex) {
         super(tokenImage, type);
         this.localIndex = localIndex;
     }

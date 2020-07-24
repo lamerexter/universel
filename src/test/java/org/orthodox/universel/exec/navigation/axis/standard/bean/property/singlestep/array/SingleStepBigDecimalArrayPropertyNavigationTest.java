@@ -53,52 +53,6 @@ public class SingleStepBigDecimalArrayPropertyNavigationTest {
     }
 
     @Test
-    void read_PredicateFiltered() {
-        final BigDecimal[] value = {BigDecimal.ZERO, BigDecimal.ONE};
-        final BeanWithProperties binding = new JavaBean<>(new BeanWithProperties()).with("bigDecimalArrayProperty", value).getBean();
-        assertThat(execute("bigDecimalArrayProperty[true]\\[[]]", binding), equalTo(value));
-        assertThat(execute("import java.lang.Boolean.* bigDecimalArrayProperty[TRUE]\\[[]]", binding), equalTo(value));
-        assertThat(execute("import java.lang.Boolean.* bigDecimalArrayProperty[1 == 1]\\[[]]", binding), equalTo(value));
-
-        assertThat(execute("bigDecimalArrayProperty[false]\\[[]]", binding), equalTo(new BigDecimal[]{}));
-        assertThat(execute("import java.lang.Boolean.* bigDecimalArrayProperty[FALSE]\\[[]]", binding), equalTo(new BigDecimal[]{}));
-        assertThat(execute("import java.lang.Boolean.* bigDecimalArrayProperty[1 == 0]\\[[]]", binding), equalTo(new BigDecimal[]{}));
-        assertThat(execute("import java.lang.Boolean.* bigDecimalArrayProperty[TRUE][false][true]\\[[]]", binding), equalTo(new BigDecimal[]{}));
-    }
-
-    @Test
-    void read_IndexFiltered() {
-        // Given
-        final int ARR_SIZE = 4;
-        final BigDecimal[] value = range(0, ARR_SIZE).mapToObj(i -> new BigDecimal(valueOf(i))).toArray(BigDecimal[]::new);
-        final BeanWithProperties binding = new JavaBean<>(new BeanWithProperties()).with("bigDecimalArrayProperty", value).getBean();
-
-        // Then
-        range(0, value.length).forEach(i ->  assertThat(execute(format("bigDecimalArrayProperty[%d]\\[[]]", i), binding), equalTo(new BigDecimal[] { value[i] })));
-
-        assertThrows(IndexOutOfBoundsException.class, () -> execute(format("bigDecimalArrayProperty[%d]\\[[]]", value.length), binding));
-    }
-
-    @Test
-    void read_IndexRangeFiltered() {
-        // Given
-        final int ARR_SIZE = 10;
-        final BigDecimal[] value = range(0, ARR_SIZE).mapToObj(i -> new BigDecimal(valueOf(i))).toArray(BigDecimal[]::new);
-        final BeanWithProperties binding = new JavaBean<>(new BeanWithProperties()).with("bigDecimalArrayProperty", value).getBean();
-
-        // Then
-        assertThat(execute(format("bigDecimalArrayProperty[0..<%d]\\[[]]", ARR_SIZE), binding), equalTo(value));
-        assertThat(execute("bigDecimalArrayProperty[0..2]\\[[]]", binding), equalTo(range(0, 3).mapToObj(i -> new BigDecimal(valueOf(i))).toArray(BigDecimal[]::new)));
-        assertThat(execute("bigDecimalArrayProperty[0f..2f]\\[[]]", binding), equalTo(range(0, 3).mapToObj(i -> new BigDecimal(valueOf(i))).toArray(BigDecimal[]::new)));
-        assertThat(execute("bigDecimalArrayProperty[0I..2I]\\[[]]", binding), equalTo(range(0, 3).mapToObj(i -> new BigDecimal(valueOf(i))).toArray(BigDecimal[]::new)));
-
-        assertThat(execute("bigDecimalArrayProperty[5..<7]\\[[]]", binding), equalTo(range(5, 7).mapToObj(i -> new BigDecimal(valueOf(i))).toArray(BigDecimal[]::new)));
-
-        assertThrows(IndexOutOfBoundsException.class, () -> execute(format("bigDecimalArrayProperty[0..%d]\\[[]]", ARR_SIZE), binding));
-        assertThrows(IndexOutOfBoundsException.class, () -> execute(format("bigDecimalArrayProperty[0<..5]\\[[]]", ARR_SIZE), binding));
-    }
-
-    @Test
     void read_nullValue() {
         assertThat(execute("bigDecimalArrayProperty", new BeanWithProperties()), nullValue());
     }
@@ -107,5 +61,4 @@ public class SingleStepBigDecimalArrayPropertyNavigationTest {
     void read_nullContext() {
         assertThat(execute(compile("bigDecimalArrayProperty", BeanWithProperties.class), null), nullValue());
     }
-
 }

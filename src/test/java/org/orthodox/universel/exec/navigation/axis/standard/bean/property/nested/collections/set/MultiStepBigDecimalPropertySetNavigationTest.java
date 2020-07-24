@@ -37,7 +37,10 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import static java.util.Arrays.asList;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.orthodox.universel.ResultTestUtil.assertResultIsParameterisedType;
+import static org.orthodox.universel.Universal.execute;
 import static org.orthodox.universel.Universal.executeWithResult;
 
 public class MultiStepBigDecimalPropertySetNavigationTest {
@@ -59,5 +62,43 @@ public class MultiStepBigDecimalPropertySetNavigationTest {
 
         // Then
         assertResultIsParameterisedType(result, new LinkedHashSet<>(asList(V1, V2, V3)), LinkedHashSet.class, BigDecimal.class);
+    }
+
+    @Test
+    void read_multiSetSteps_reduction() {
+        // Given
+        final BigDecimal B1V1 = new BigDecimal("11");
+        final BigDecimal B1V2 = new BigDecimal("12");
+        final BigDecimal B1V3 = new BigDecimal("13");
+        final BigDecimal B2V1 = new BigDecimal("21");
+        final BigDecimal B2V2 = new BigDecimal("22");
+        final BigDecimal B3V1 = new BigDecimal("31");
+        final BigDecimal ROGUE = new BigDecimal("999");
+        final BeanWithProperties binding
+            = new BeanWithProperties()
+                  .withReferenceSetProperty(new LinkedHashSet<>(asList(
+                      new BeanWithProperties().withReferenceSetProperty(new LinkedHashSet<>(asList(
+                          new BeanWithProperties().withBigDecimalProperty(B1V1),
+                          new BeanWithProperties().withBigDecimalProperty(B1V2),
+                          new BeanWithProperties().withBigDecimalProperty(B1V3)
+                      ))),
+                      new BeanWithProperties().withReferenceSetProperty(new LinkedHashSet<>(asList(
+                          new BeanWithProperties().withBigDecimalProperty(B2V1),
+                          new BeanWithProperties().withBigDecimalProperty(B2V2),
+                          new BeanWithProperties().withBigDecimalProperty(ROGUE)
+                      ))),
+                      new BeanWithProperties().withReferenceSetProperty(new LinkedHashSet<>(asList(
+                          new BeanWithProperties().withBigDecimalProperty(ROGUE),
+                          new BeanWithProperties().withBigDecimalProperty(B3V1)
+                      )))
+                  )));
+
+        // Then
+        assertThat(execute("referenceSetProperty\\referenceSetProperty\\bigDecimalProperty\\[]", binding),
+                   equalTo(asList(B1V1, B1V2, B1V3, B2V1, B2V2, ROGUE, ROGUE, B3V1))
+        );
+        assertThat(execute("referenceSetProperty\\referenceSetProperty\\bigDecimalProperty\\{}", binding),
+                   equalTo(new LinkedHashSet<>(asList(B1V1, B1V2, B1V3, B2V1, B2V2, ROGUE, B3V1)))
+        );
     }
 }
