@@ -29,7 +29,7 @@
 package org.orthodox.universel.exec.navigation;
 
 import org.beanplanet.core.lang.TypeUtil;
-import org.orthodox.universel.ast.navigation.NavigationStep;
+import org.orthodox.universel.ast.navigation.NavigationAxisAndNodeTest;
 import org.orthodox.universel.ast.Node;
 
 import java.lang.reflect.Method;
@@ -41,7 +41,10 @@ public class StaticMethodNavigatorFunction implements NavigatorFunction {
         this.navigatorTransformMethod = navigatorTransformMethod;
     }
 
-    public Node navigationTransform(final Class<?> fromType, final NavigationStep<?> step) {
-        return (Node) TypeUtil.invokeStaticMethod(navigatorTransformMethod, fromType, step);
+    public Node navigationTransform(final Class<?> fromType,
+                                    final Node instanceReadAccessor,
+                                    final NavigationAxisAndNodeTest<?> step
+    ) {
+        return (Node) TypeUtil.invokeStaticMethod(navigatorTransformMethod, fromType, instanceReadAccessor, step);
     }
 }

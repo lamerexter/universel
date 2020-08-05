@@ -26,35 +26,39 @@
  *
  */
 
-package org.orthodox.universel.symanticanalysis.methods;
+package org.orthodox.universel.symanticanalysis.navigation;
 
-import org.orthodox.universel.ast.navigation.NavigationAxis;
-import org.orthodox.universel.ast.navigation.NavigationStep;
-import org.orthodox.universel.ast.navigation.NavigationStream;
-import org.orthodox.universel.ast.MethodCall;
 import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.ast.navigation.NameTest;
+import org.orthodox.universel.ast.navigation.NavigationAxis;
+import org.orthodox.universel.ast.navigation.NavigationAxisAndNodeTest;
+import org.orthodox.universel.ast.navigation.NavigationStream;
 import org.orthodox.universel.symanticanalysis.AbstractSemanticAnalyser;
 
 import java.util.Objects;
 
-import static org.orthodox.universel.compiler.Messages.MethodCall.METHOD_NOT_FOUND;
+import static org.orthodox.universel.compiler.Messages.NAME.NAME_NOT_RESOLVED;
 
 /**
- * Runs at the end of semantic analysis to report on method calls which were not resolved.
+ * Runs at the end of semantic analysis to report on names which were not resolved. Ordinarily, names
+ * are resolved by transforming them to their actual intended purpose - for example, type name, local or member variable
+ * reference or property on an object in context).
  */
-public class UnresolvedMethodCallReporter extends AbstractSemanticAnalyser {
+public class UnresolvedNameReporter extends AbstractSemanticAnalyser {
     @Override
     public Node visitNavigationStream(final NavigationStream node) {
-        node.getSteps().stream()
-            .filter(NavigationStep.class::isInstance)
-            .map(NavigationStep.class::cast)
-            .filter(s -> s.getNodeTest() instanceof MethodCall)
-            .filter(s -> Objects.equals(s.getAxis(), NavigationAxis.DEFAULT.getCanonicalName()))
-            .forEach(s -> getContext().addError(METHOD_NOT_FOUND
-                                                    .relatedObject(s)
-                                                    .withParameters(((MethodCall)s.getNodeTest()).getName().getName())
+        super.visitNavigationStream(node);
 
-            ));
+        node.getInputSteps().stream()
+            .filter(NavigationAxisAndNodeTest.class::isInstance)
+            .map(NavigationAxisAndNodeTest.class::cast)
+            .filter(s -> s.getNodeTest() instanceof NameTest)
+            .filter(s -> Objects.equals(s.getAxis(), NavigationAxis.DEFAULT.getCanonicalName()))
+            .forEach(s -> getContext().addError(NAME_NOT_RESOLVED
+                                                    .relatedObject(s)
+                                                    .withParameters(((NameTest)s.getNodeTest()).getName()))
+
+            );
 
         return node;
     }

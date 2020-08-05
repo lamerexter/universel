@@ -28,8 +28,10 @@
 
 package org.orthodox.universel.compiler;
 
-import org.orthodox.universel.ast.navigation.NavigationStep;
+import org.orthodox.universel.ast.LoadLocal;
+import org.orthodox.universel.ast.navigation.NavigationAxisAndNodeTest;
 import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.ast.navigation.NavigationTransform;
 import org.orthodox.universel.exec.navigation.NavigatorRegistry;
 
 import java.util.Objects;
@@ -37,11 +39,17 @@ import java.util.Objects;
 import static org.beanplanet.core.util.ObjectUtil.nvl;
 
 public class BoundScope implements NameScope {
+    public static final int SCRIPT_BINDING_LOCAL_OFFSET = 0;
+
     private final NavigatorRegistry navigatorRegistry;
     private final Class<?> bindingType;
+    private final Node bindingAccessor;
 
-    public BoundScope(final Class<?> bindingType, final NavigatorRegistry navigatorRegistry) {
+    public BoundScope(final Class<?> bindingType,
+                      final Node bindingAccessor,
+                      final NavigatorRegistry navigatorRegistry) {
         this.bindingType = nvl(bindingType, Object.class);
+        this.bindingAccessor = bindingAccessor;
         this.navigatorRegistry = navigatorRegistry;
     }
 
@@ -49,14 +57,19 @@ public class BoundScope implements NameScope {
         return bindingType;
     }
 
+    public Node getBindingAccessor() {
+        return bindingAccessor;
+    }
+
     @Override
-    public Node navigate(final NavigationStep<?> step) {
+    public NavigationTransform navigate(Node source, final NavigationAxisAndNodeTest<?> step) {
         return navigatorRegistry.lookup(bindingType, step).stream()
-                         .map(navigator -> navigator.navigationTransform(bindingType, step))
+                         .map(navigator -> navigator.navigationTransform(bindingType, source, step))
                          .filter(Objects::nonNull)
                          .filter(transformedNode -> !Objects.equals(transformedNode, step))
+                         .map(target -> new NavigationTransform(getBindingAccessor(), target))
                          .findFirst()
-                         .orElse(step);
+                         .orElse(null);
     }
 
     @Override

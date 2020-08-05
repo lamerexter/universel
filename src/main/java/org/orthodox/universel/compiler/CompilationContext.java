@@ -5,7 +5,7 @@ import org.beanplanet.core.models.NameValue;
 import org.beanplanet.core.models.SimpleNameValue;
 import org.beanplanet.core.models.path.NamePath;
 import org.beanplanet.messages.domain.Messages;
-import org.orthodox.universel.ast.navigation.NavigationStep;
+import org.orthodox.universel.ast.navigation.NavigationAxisAndNodeTest;
 import org.orthodox.universel.ast.ImportStmt;
 import org.orthodox.universel.ast.Node;
 import org.orthodox.universel.ast.Type;
@@ -75,7 +75,7 @@ public class CompilationContext implements NameScope {
     }
 
     @Override
-    public Node navigate(final NavigationStep step) {
+    public Node navigate(final NavigationAxisAndNodeTest step) {
         return asStream(scopes.descendingIterator())
                     .map(s -> s.navigate(step))
                     .filter(Objects::nonNull)

@@ -31,8 +31,9 @@ package org.orthodox.universel.exec.navigation.axis.standard;
 import org.beanplanet.messages.domain.Message;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.orthodox.universel.compiler.CompiledUnit;
 import org.orthodox.universel.ast.navigation.NavigationStream;
+import org.orthodox.universel.compiler.CompiledUnit;
+import org.orthodox.universel.ast.navigation.NavigationExpression;
 import org.orthodox.universel.ast.Node;
 import org.orthodox.universel.ast.ParseTree;
 import org.orthodox.universel.ast.Script;
@@ -80,12 +81,12 @@ public class UnresolvedNavigationTest {
 
     @Test
     void invalidInnermostStepName_unresolved() {
-        assertNavigationStreamContainsUnresolvedName("referenceProperty\\referenceProperty\\invalidName", binding.getClass(), "invalidName", 2);
+        assertNavigationStreamContainsUnresolvedName("referenceProperty\\referenceProperty\\invalidName", binding.getClass(), "invalidName", 0);
     }
 
     @Test
     void invalidIntermediateStepName_unresolved() {
-        assertNavigationStreamContainsUnresolvedName("referenceProperty\\invalidName\\bigDecimalProperty", binding.getClass(), "invalidName", 1);
+        assertNavigationStreamContainsUnresolvedName("referenceProperty\\invalidName\\bigDecimalProperty", binding.getClass(), "invalidName", 0);
     }
 
     @Test
@@ -99,12 +100,12 @@ public class UnresolvedNavigationTest {
 
         Script scriptNode = (Script) compiledUnit.getAstNode();
         NavigationStream ns = new ParseTree(scriptNode).preorderParentUnawareStream()
-                                                   .filter(NavigationStream.class::isInstance)
-                                                   .map(NavigationStream.class::cast).findFirst().orElseGet(() -> fail("Unresolved navigation stream not found"));
+                                                           .filter(NavigationStream.class::isInstance)
+                                                           .map(NavigationStream.class::cast).findFirst().orElseGet(() -> fail("Unresolved navigation stream not found"));
 
         Optional<Message> notFoundMessage = compiledUnit.getMessages().findError(e -> e.getCode().equals(NAME_NOT_RESOLVED.getCode()) && asList(e.getMessageParameters()).contains(name));
         assertThat(notFoundMessage.isPresent(), is(true));
         assertThat(notFoundMessage.get().getRelatedObject() instanceof Node, is(true));
-        assertThat(((Node)notFoundMessage.get().getRelatedObject()).getTokenImage(), equalTo(ns.getSteps().get(stepIndex).getTokenImage()));
+        assertThat(((Node)notFoundMessage.get().getRelatedObject()).getTokenImage(), equalTo(ns.getInputSteps().get(stepIndex).getTokenImage()));
     }
 }

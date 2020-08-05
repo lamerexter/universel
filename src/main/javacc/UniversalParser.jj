@@ -1234,7 +1234,7 @@ public Expression Expression():
         |
         expr=AllocationExpression()
         |
-        expr = NavigationStream()
+        expr = NavigationExpression()
         |
         "(" expr=Expression() ")"
     )
@@ -1435,10 +1435,10 @@ Expression InterpolatedStringLiteral() :
     )
 }
 
-public NavigationStream NavigationStream():
+public NavigationExpression NavigationExpression():
 {
-    List<Node> steps = null;
-    Node step;
+    List<NavigationStep<? extends NodeTest>> steps = null;
+    NavigationStep<? extends NodeTest> step;
 }
 {
     (
@@ -1451,10 +1451,10 @@ public NavigationStream NavigationStream():
         )*
     )
 
-    { return new NavigationStream(steps); }
+    { return new NavigationExpression(steps); }
 }
 
-public Node NavigationFirstStep():
+public NavigationStep<? extends NodeTest> NavigationFirstStep():
 {
     List<Node> argumentsList = null;
     InternalNodeSequence filters = null;
@@ -1479,27 +1479,27 @@ public Node NavigationFirstStep():
                                                     .range(name)
                                                     .endLine(token.endLine)
                                                     .endColumn(token.endColumn)
-                                                    .build(), NavigationAxis.DEFAULT, nodeTest, filters); }
+                                                    .build(), new NavigationAxisAndNodeTest(nodeTest.getTokenImage(), NavigationAxis.DEFAULT, nodeTest), filters); }
 }
 
-public Node NavigationNextSteps():
+public NavigationStep<? extends NodeTest> NavigationNextSteps():
 {
     boolean isArrayReduction = false;
-    Node step = null;
+    NavigationStep<? extends NodeTest> step = null;
 }
 {
     (
         step=NavigationFirstStep()
         |
-        ( "["       { step = new NavigationStep<NodeTest>(tokenImage(), NavigationAxis.DEFAULT, new ListNodeTest(tokenImage())); }
+        ( "["       { step = new NavigationStep<NodeTest>(tokenImage(), new NavigationAxisAndNodeTest(tokenImage(), NavigationAxis.DEFAULT, new ListNodeTest(tokenImage()))); }
           [
             "[" "]" { isArrayReduction = true; }
           ]
 
-          "]"       { step = new NavigationStep<NodeTest>(tokenImage(), NavigationAxis.DEFAULT, isArrayReduction ? new ArrayNodeTest(tokenImage()) : new ListNodeTest(tokenImage())); }
+          "]"       { step = new NavigationStep<NodeTest>(tokenImage(),  new NavigationAxisAndNodeTest(tokenImage(), NavigationAxis.DEFAULT, isArrayReduction ? new ArrayNodeTest(tokenImage()) : new ListNodeTest(tokenImage()))); }
         )
         |
-        ("{" "}")  { step = new NavigationStep<NodeTest>(tokenImage(), NavigationAxis.DEFAULT, new SetNodeTest(tokenImage())); }
+        ("{" "}")  { step = new NavigationStep<NodeTest>(tokenImage(), new NavigationAxisAndNodeTest(tokenImage(), NavigationAxis.DEFAULT, new SetNodeTest(tokenImage()))); }
 //        |
 //        (<LSQB> <LSQB> "]]")  { step = new NavigationStep<NodeTest>(tokenImage(), NavigationAxis.DEFAULT, new ArrayNodeTest(tokenImage())); }
     )

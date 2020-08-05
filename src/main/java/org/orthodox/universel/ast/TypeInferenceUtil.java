@@ -41,8 +41,7 @@ import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.util.Arrays.stream;
-import static org.beanplanet.core.lang.TypeUtil.determineCommonSuperclass;
-import static org.beanplanet.core.util.ObjectUtil.nvl;
+import static org.beanplanet.core.lang.TypeUtil.isIntegerNumericType;
 
 public class TypeInferenceUtil {
     public static Type resolveType(java.lang.reflect.Type fromType) {
@@ -86,7 +85,7 @@ public class TypeInferenceUtil {
         return isBoolean(type);
     }
 
-    public static boolean isIntegerType(final Type filterType) {
-        return TypeUtil.isIntegerNumericType(filterType.getTypeClass());
+    public static boolean isIntegerType(final Type type) {
+        return isIntegerNumericType(type.getTypeClass());
     }
 }

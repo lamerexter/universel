@@ -28,7 +28,9 @@
 
 package org.orthodox.universel.symanticanalysis.conversion;
 
+import org.beanplanet.core.lang.TypeUtil;
 import org.orthodox.universel.ast.*;
+import org.orthodox.universel.compiler.TransformationUtil;
 import org.orthodox.universel.exec.operators.binary.BinaryOperatorRegistry;
 import org.orthodox.universel.exec.operators.binary.ConcurrentBinaryOperatorRegistry;
 import org.orthodox.universel.exec.operators.binary.PackageScanBinaryOperatorLoader;
@@ -39,7 +41,8 @@ import java.lang.reflect.Method;
 import java.util.Optional;
 
 import static java.util.Arrays.asList;
-import static org.beanplanet.core.lang.TypeUtil.isPrimitiveType;
+import static org.beanplanet.core.lang.TypeUtil.*;
+import static org.orthodox.universel.compiler.TransformationUtil.autoBoxIfNecessary;
 
 /**
  * <p>
@@ -94,7 +97,22 @@ public class BinaryExpressionOperatorMethodConverter extends UniversalVisitorAda
         }
 
         Optional<Method> binaryOperatorMethod = binaryOperatorRegistry.lookup(node.getOperator(), lhsType, rhsType);
-        return binaryOperatorMethod.isPresent() ? new BinaryExpressionOperatorMethodCall(node.getTokenImage(), node.getOperator(), binaryOperatorMethod.get(), asList(lhs, rhs)) : node;
+        if ( binaryOperatorMethod.isPresent()) {
+            return new BinaryExpressionOperatorMethodCall(node.getTokenImage(), node.getOperator(), binaryOperatorMethod.get(), asList(lhs, rhs));
+        }
+
+        if ( Operator.ELVIS != node.getOperator() && Operator.INSTANCE_OF != node.getOperator()
+             && isPrimitiveTypeOrWrapperClass(lhsType) && isPrimitiveTypeOrWrapperClass(rhsType) ) {
+            binaryOperatorMethod = binaryOperatorRegistry.lookup(node.getOperator(), primitiveTypeFor(lhsType), primitiveTypeFor(rhsType));
+            if ( binaryOperatorMethod.isPresent()) {
+                return new BinaryExpressionOperatorMethodCall(node.getTokenImage(), node.getOperator(), binaryOperatorMethod.get(), asList(autoBoxIfNecessary(lhs, primitiveTypeFor(lhsType)), autoBoxIfNecessary(rhs, primitiveTypeFor(rhsType))));
+            }
+            binaryOperatorMethod = binaryOperatorRegistry.lookup(node.getOperator(), getPrimitiveWrapperType(lhsType), getPrimitiveWrapperType(rhsType));
+            if ( binaryOperatorMethod.isPresent()) {
+                return new BinaryExpressionOperatorMethodCall(node.getTokenImage(), node.getOperator(), binaryOperatorMethod.get(), asList(autoBoxIfNecessary(lhs, getPrimitiveWrapperType(lhsType)), autoBoxIfNecessary(rhs, getPrimitiveWrapperType(rhsType))));
+            }
+        }
+        return node;
     }
 
     @Override

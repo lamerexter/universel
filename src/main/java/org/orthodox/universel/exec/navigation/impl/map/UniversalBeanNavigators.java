@@ -29,44 +29,41 @@
 package org.orthodox.universel.exec.navigation.impl.map;
 
 import org.beanplanet.core.beans.TypePropertiesSource;
-import org.beanplanet.core.lang.TypeUtil;
 import org.orthodox.universel.ast.InstanceMethodCall;
 import org.orthodox.universel.ast.MethodCall;
 import org.orthodox.universel.ast.Node;
-import org.orthodox.universel.ast.TypeInferenceUtil;
 import org.orthodox.universel.ast.navigation.NameTest;
-import org.orthodox.universel.ast.navigation.NavigationStep;
+import org.orthodox.universel.ast.navigation.NavigationAxisAndNodeTest;
 import org.orthodox.universel.ast.type.reference.ResolvedTypeReferenceOld;
 import org.orthodox.universel.ast.type.reference.TypeReference;
 import org.orthodox.universel.exec.navigation.MappingNavigator;
 import org.orthodox.universel.exec.navigation.MethodNavigator;
 import org.orthodox.universel.exec.navigation.Navigator;
-import org.orthodox.universel.symanticanalysis.ResolvedTypeReference;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.lang.reflect.Modifier.PROTECTED;
 import static java.lang.reflect.Modifier.PUBLIC;
-import static java.util.Arrays.stream;
 import static org.beanplanet.core.lang.TypeUtil.streamMethods;
 import static org.orthodox.universel.ast.TypeInferenceUtil.resolveType;
 
 @Navigator
 public class UniversalBeanNavigators {
     @MappingNavigator(axis = "default", name = "*")
-    public static Node universalPropertyNavigator(final Class<?> fromType, final NavigationStep<NameTest> step) {
+    public static Node universalPropertyNavigator(final Class<?> fromType,
+                                                  final Node instanceReadAccessor,
+                                                  final NavigationAxisAndNodeTest<NameTest> step) {
         TypePropertiesSource<?> properties = new TypePropertiesSource<>(fromType);
         if (!properties.isReadableProperty(step.getNodeTest().getName())) return step;
 
         PropertyDescriptor propertyDescriptor = properties.assertAndGetReadablePropertyDescriptor(step.getNodeTest().getName());
         Method readMethod = propertyDescriptor.getReadMethod();
         return new InstanceMethodCall(step.getTokenImage(),
+                                      instanceReadAccessor,
                                       new ResolvedTypeReferenceOld(step.getTokenImage(), readMethod.getDeclaringClass()),
                                       (TypeReference) resolveType(readMethod.getGenericReturnType()),
                                       readMethod.getName()
@@ -74,13 +71,16 @@ public class UniversalBeanNavigators {
     }
 
     @MethodNavigator()
-    public static Node universalMethodNavigator(final Class<?> fromType, final NavigationStep<MethodCall> step) {
+    public static Node universalMethodNavigator(final Class<?> fromType,
+                                                final Node instanceReadAccessor,
+                                                final NavigationAxisAndNodeTest<MethodCall> step) {
         final List<Method> matchingMethods = streamMethods(PUBLIC | PROTECTED, step.getNodeTest().getName().getName(), fromType, null, (Class<?>[]) null)
                                                  .filter(m -> parameterTypesCompatible(step.getNodeTest(), m))
                                                  .collect(Collectors.toList());
         if (matchingMethods.size() != 1) return step;
         final Method matchingMethod = matchingMethods.get(0);
         return new InstanceMethodCall(step.getTokenImage(),
+                                      instanceReadAccessor,
                                       new ResolvedTypeReferenceOld(step.getTokenImage(), matchingMethod.getDeclaringClass()),
                                       (TypeReference) resolveType(matchingMethod.getGenericReturnType()),
                                       matchingMethod.getName(),

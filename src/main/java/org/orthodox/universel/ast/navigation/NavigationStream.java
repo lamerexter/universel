@@ -28,68 +28,67 @@
 
 package org.orthodox.universel.ast.navigation;
 
+import org.beanplanet.core.collections.ListBuilder;
 import org.orthodox.universel.ast.CompositeNode;
-import org.orthodox.universel.ast.Expression;
 import org.orthodox.universel.ast.Node;
 import org.orthodox.universel.ast.UniversalCodeVisitor;
+import org.orthodox.universel.symanticanalysis.navigation.NavigationStage;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 import static org.orthodox.universel.ast.TokenImage.range;
 
-/**
- * A universal navigation stream, consisting of a number of navigation steps.
- */
-public class NavigationStream extends Expression implements CompositeNode {
-    /**
-     * The steps that comprise this stream.
-     */
-    private List<Node> steps;
+public class NavigationStream extends Node implements CompositeNode {
+    private final List<Node> inputSteps;
+    private final List<NavigationStage> targetStages;
 
-    /**
-     * Constructs a method call expression, consisting of a name and zero or more parameters.
-     *
-     * @param steps the steps that comprise this stream.
-     */
-    public NavigationStream(List<Node> steps) {
-        super(range(steps));
-        this.steps = steps;
+    public NavigationStream(List<Node> inputSteps, List<NavigationStage> targetStages) {
+        super(range(inputSteps));
+        this.inputSteps = inputSteps;
+        this.targetStages = targetStages;
     }
 
-    /**
-     * Called to accept a visitor.
-     *
-     * @param visitor the visitor visiting the node.
-     * @return true if visitation is to continue after this visit, false if visitation is requested to stop after this visit.
-     */
-    public Node accept(UniversalCodeVisitor visitor) {
-        return visitor.visitNavigationStream(this);
+    public List<Node> getInputSteps() {
+        return inputSteps == null ? Collections.emptyList() : inputSteps;
     }
 
-    public List<Node> getSteps() {
-        return steps;
+    public List<NavigationStage> getTargetStages() {
+        return targetStages == null ? Collections.emptyList() : targetStages;
     }
 
     @Override
-    public List<Node> getChildNodes() {
-        return getSteps();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (!(o instanceof NavigationStream))
-            return false;
-        if (!super.equals(o))
-            return false;
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (!(o instanceof NavigationStream)) return false;
+        if (!super.equals(o)) return false;
         NavigationStream nodes = (NavigationStream) o;
-        return Objects.equals(steps, nodes.steps);
+        return Objects.equals(getInputSteps(), nodes.getInputSteps()) &&
+               Objects.equals(getTargetStages(), nodes.getTargetStages());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), steps);
+        return Objects.hash(super.hashCode(), getInputSteps(), getTargetStages());
     }
+
+    /**
+     * Gets a list of the children of this node.
+     *
+     * @return the children of this node, which may be empty but not null.
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Node> getChildNodes() {
+        return ListBuilder.<Node>builder()
+                          .addAll(getInputSteps())
+                          .addAll((List)getTargetStages())
+                          .build();
+    }
+
+    public Node accept(UniversalCodeVisitor visitor) {
+        return visitor.visitNavigationStream(this);
+    }
+
 }

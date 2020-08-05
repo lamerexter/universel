@@ -38,7 +38,7 @@ import org.orthodox.universel.ast.allocation.ObjectCreationExpression;
 import org.orthodox.universel.ast.functional.FunctionalInterfaceObject;
 import org.orthodox.universel.ast.navigation.ArrayNodeTest;
 import org.orthodox.universel.ast.navigation.ListNodeTest;
-import org.orthodox.universel.ast.navigation.NavigationStep;
+import org.orthodox.universel.ast.navigation.NavigationAxisAndNodeTest;
 import org.orthodox.universel.ast.navigation.SetNodeTest;
 import org.orthodox.universel.ast.Name;
 import org.orthodox.universel.ast.Node;
@@ -73,9 +73,13 @@ import static org.orthodox.universel.ast.Modifiers.valueOf;
 @Navigator
 public class UniversalCollectionReductionNavigators {
     @ReductionNavigator(axis = "default", collectionType = List.class)
-    public static Node toListReduction(final Class<?> fromType, final NavigationStep<ListNodeTest> step) {
+    public static Node toListReduction(final Class<?> fromType,
+                                       final Node instanceReadAccessor,
+                                       final NavigationAxisAndNodeTest<ListNodeTest> step
+    ) {
         return InternalNodeSequence.builder()
                                    .add(new InstanceMethodCall(step.getTokenImage(),
+                                                               instanceReadAccessor,
                                                                new ResolvedTypeReferenceOld(step.getTokenImage(), Stream.class),
                                                                new ResolvedTypeReferenceOld(step.getTokenImage(), Object.class),
                                                                "collect",
@@ -87,14 +91,19 @@ public class UniversalCollectionReductionNavigators {
                                                                ))
                                    ))
                                    .resultType(new ParameterisedTypeImpl(new ResolvedTypeReferenceOld(step.getTokenImage(), List.class),
-                                                                         asList(new ResolvedTypeReferenceOld(step.getTokenImage(), ensureNonPrimitiveType(fromType)))))
+                                                                         asList(new ResolvedTypeReferenceOld(step.getTokenImage(), ensureNonPrimitiveType(fromType)))
+                                   ))
                                    .build();
     }
 
     @ReductionNavigator(axis = "default", collectionType = Set.class)
-    public static Node toSetReduction(final Class<?> fromType, final NavigationStep<SetNodeTest> step) {
+    public static Node toSetReduction(final Class<?> fromType,
+                                      final Node instanceReadAccessor,
+                                      final NavigationAxisAndNodeTest<SetNodeTest> step
+    ) {
         return InternalNodeSequence.builder()
                                    .add(new InstanceMethodCall(step.getTokenImage(),
+                                                               instanceReadAccessor,
                                                                new ResolvedTypeReferenceOld(step.getTokenImage(), Stream.class),
                                                                new ResolvedTypeReferenceOld(step.getTokenImage(), Object.class),
                                                                "collect",
@@ -125,17 +134,22 @@ public class UniversalCollectionReductionNavigators {
                                                                ))
                                    ))
                                    .resultType(new ParameterisedTypeImpl(new ResolvedTypeReferenceOld(step.getTokenImage(), LinkedHashSet.class),
-                                                                         asList(new ResolvedTypeReferenceOld(step.getTokenImage(), ensureNonPrimitiveType(fromType)))))
+                                                                         asList(new ResolvedTypeReferenceOld(step.getTokenImage(), ensureNonPrimitiveType(fromType)))
+                                   ))
                                    .build();
     }
 
     @ReductionNavigator(axis = "default", collectionType = Object[].class)
-    public static Node toArrayReduction(final Class<?> fromType, final NavigationStep<ArrayNodeTest> step) {
+    public static Node toArrayReduction(final Class<?> fromType,
+                                        final Node instanceReadAccessor,
+                                        final NavigationAxisAndNodeTest<ArrayNodeTest> step
+    ) {
         TypeReference arrayType = new ResolvedTypeReferenceOld(step.getTokenImage(), forName(fromType, 1));
 
         if (TypeUtil.isPrimitiveType(fromType)) {
             return InternalNodeSequence.builder()
                                        .add(new InstanceMethodCall(step.getTokenImage(),
+                                                                   instanceReadAccessor,
                                                                    new ResolvedTypeReferenceOld(step.getTokenImage(), Stream.class),
                                                                    new ResolvedTypeReferenceOld(step.getTokenImage(), Object.class),
                                                                    "collect",

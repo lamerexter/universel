@@ -26,18 +26,40 @@
  *
  */
 
-package org.orthodox.universel.symanticanalysis.navigation;
+package org.orthodox.universel.ast.navigation;
 
 import org.orthodox.universel.ast.Node;
 
-public class MapStage extends NavigationStage {
-    public MapStage(final Node node,
-                    final boolean isSequence,
-                    final boolean inSequence
-    ) {
-        super(node, isSequence, inSequence);
+import java.util.Objects;
+
+public class NavigationTransform {
+    private final Node source;
+    private final Node target;
+
+    public NavigationTransform(final Node source, final Node target) {
+        this.source = source;
+        this.target = target;
     }
 
-    public boolean isMap() { return true; }
+    public Node getSource() {
+        return source;
+    }
 
+    public Node getTarget() {
+        return target;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (!(o instanceof NavigationTransform)) return false;
+        NavigationTransform that = (NavigationTransform) o;
+        return Objects.equals(getSource(), that.getSource()) &&
+               Objects.equals(getTarget(), that.getTarget());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getSource(), getTarget());
+    }
 }

@@ -33,7 +33,7 @@ import org.orthodox.universel.ast.InstanceMethodCall;
 import org.orthodox.universel.ast.LoadLocal;
 import org.orthodox.universel.ast.StaticMethodCall;
 import org.orthodox.universel.ast.navigation.NavigationAxis;
-import org.orthodox.universel.ast.navigation.NavigationStep;
+import org.orthodox.universel.ast.navigation.NavigationAxisAndNodeTest;
 import org.orthodox.universel.ast.MethodCall;
 import org.orthodox.universel.ast.Node;
 import org.orthodox.universel.ast.Type;
@@ -61,7 +61,7 @@ public class TypeDeclarationScope implements Scope {
     }
 
     @Override
-    public Node navigate(final NavigationStep<?> step) {
+    public Node navigate(final NavigationAxisAndNodeTest<?> step) {
         if ( !step.getAxis().equals(NavigationAxis.DEFAULT.getCanonicalName()) ||
              !(step.getNodeTest() instanceof MethodCall) ) return step;
 

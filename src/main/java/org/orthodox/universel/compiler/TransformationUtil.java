@@ -42,8 +42,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static java.util.Arrays.asList;
-import static org.beanplanet.core.lang.TypeUtil.isPrimitiveType;
-import static org.beanplanet.core.lang.TypeUtil.isPrimitiveTypeWrapperClass;
+import static org.beanplanet.core.lang.TypeUtil.*;
 import static org.beanplanet.core.util.CollectionUtil.nullSafe;
 
 /**
@@ -93,7 +92,7 @@ public class TransformationUtil {
     private static final Set<Class<?>> STANDARD_NUMERIC_TYPES = new HashSet<>(widenNumericalTypeOrder);
 
     public static boolean isNumericExpressionType(Node node) {
-        return STANDARD_NUMERIC_TYPES.contains(node.getTypeDescriptor());
+        return STANDARD_NUMERIC_TYPES.contains(primitiveTypeFor(node.getTypeDescriptor()));
     }
 
     public static List<Node> autoBoxOrPromoteIfNecessary(List<Node> sourceParameters, List<Class<?>> targetArgumentTypes) {
@@ -164,7 +163,7 @@ public class TransformationUtil {
     }
 
     private static Set<Class<?>> numericTypeOperationKey(Class<?> lhsType, Class<?> rhsType) {
-        return new HashSet<>(asList(lhsType, rhsType));
+        return new HashSet<>(asList(primitiveTypeFor(lhsType), primitiveTypeFor(rhsType)));
     }
 
     private static Node box(final Node node) {

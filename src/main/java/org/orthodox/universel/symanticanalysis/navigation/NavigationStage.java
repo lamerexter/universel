@@ -31,16 +31,66 @@ package org.orthodox.universel.symanticanalysis.navigation;
 import org.orthodox.universel.ast.Node;
 import org.orthodox.universel.ast.Type;
 
-public interface NavigationStage {
-    Class<?> getTypeDescriptor();
+import java.util.Objects;
 
-    Type getType();
+public abstract class NavigationStage extends Node {
+    private Node node;
+    private boolean isSequence;
+    private boolean inSequence;
 
-    Node getNode();
-    boolean isSequence();
-    boolean getInSequence();
+    public NavigationStage(final Node node,
+                           final boolean isSequence,
+                           final boolean inSequence) {
+        this.node = node;
+        this.isSequence = isSequence;
+        this.inSequence = inSequence;
+    }
 
-    default boolean isFilter() { return false; }
-    default boolean isMap() { return false; }
-    default boolean isReduce() { return false; }
+    public Node getNode() {
+        return node;
+    }
+
+    public boolean isSequence() {
+        return isSequence;
+    }
+
+    public void setSequence(final boolean sequence) {
+        isSequence = sequence;
+    }
+
+    public boolean getInSequence() {
+        return inSequence;
+    }
+
+    public void setInSequence(final boolean inSequence) {
+        this.inSequence = inSequence;
+    }
+
+    public Class<?> getTypeDescriptor() {
+        return node == null ? null : node.getTypeDescriptor();
+    }
+
+    public Type getType() {
+        return node == null ? null : node.getType();
+    }
+
+    public boolean isFilter() { return false; }
+    public boolean isMap() { return false; }
+    public boolean isReduce() { return false; }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (!(o instanceof NavigationStage)) return false;
+        if (!super.equals(o)) return false;
+        NavigationStage that = (NavigationStage) o;
+        return isSequence() == that.isSequence() &&
+               getInSequence() == that.getInSequence() &&
+               Objects.equals(getNode(), that.getNode());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), getNode(), isSequence(), getInSequence());
+    }
 }

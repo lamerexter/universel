@@ -43,10 +43,19 @@ import static java.util.Collections.emptyList;
  * An intance method call expression, consisting of a name and zero or more parameter expressions.
  */
 public class InstanceMethodCall extends Expression implements CompositeNode {
-    /** A reference to the type declaring the static method. */
+    /**
+     * A factory for the instance on which this method call will take place.
+     */
+    private final Node instance;
+
+    /**
+     * A reference to the type declaring the static method.
+     */
     private final TypeReference declaringType;
 
-    /** The return type of the method call. */
+    /**
+     * The return type of the method call.
+     */
     private final TypeReference returnType;
 
     /**
@@ -54,7 +63,9 @@ public class InstanceMethodCall extends Expression implements CompositeNode {
      */
     private final String name;
 
-    /** The types of parameters of this method call. */
+    /**
+     * The types of parameters of this method call.
+     */
     private final List<TypeReference> parameterTypes;
 
     /**
@@ -63,24 +74,19 @@ public class InstanceMethodCall extends Expression implements CompositeNode {
     private final List<Node> parameters;
 
 
-
-    /** The enclosing type within which the instance method is declared. */
-//    private final Class<?> declaringClass;
-
-    /**
-     * The types of parameters of this method call.
-     */
-//    private final List<Class<?>> parameterClasses;
-
     /**
      * Constructs an instance method call expression, consisting of a name zero parameters.
      *
      * @param typeDescriptor the type of the node.
-     * @param tokenImage the parser token image.
+     * @param tokenImage     the parser token image.
      * @param declaringClass the enclosing type within which the instance method is declared.
-     * @param name the method name.
+     * @param name           the method name.
      */
-    public InstanceMethodCall(Class<?> typeDescriptor, TokenImage tokenImage, Class<?> declaringClass, String name) {
+    public InstanceMethodCall(final Class<?> typeDescriptor,
+                              final TokenImage tokenImage,
+                              final Class<?> declaringClass,
+                              final String name
+    ) {
         this(typeDescriptor, tokenImage, declaringClass, name, emptyList());
     }
 
@@ -88,13 +94,38 @@ public class InstanceMethodCall extends Expression implements CompositeNode {
      * Constructs an instance method call expression, consisting of a name and zero or more parameters.
      *
      * @param typeDescriptor the type of the node, or null if unknown at this time.
-     * @param tokenImage the parser token image.
+     * @param tokenImage     the parser token image.
      * @param declaringClass the enclosing type within which the instance method is declared.
-     * @param name the method name.
-     * @param parameters the parameter expressions of this method call.
+     * @param name           the method name.
+     * @param parameters     the parameter expressions of this method call.
      */
-    public InstanceMethodCall(Class<?> typeDescriptor, TokenImage tokenImage, Class<?> declaringClass, String name, Node ... parameters) {
+    public InstanceMethodCall(final Class<?> typeDescriptor,
+                              final TokenImage tokenImage,
+                              final Class<?> declaringClass,
+                              final String name,
+                              final Node... parameters
+    ) {
         this(typeDescriptor, tokenImage, declaringClass, name, asList(parameters));
+    }
+
+    /**
+     * Constructs an instance method call expression, consisting of a name and zero or more parameters.
+     *
+     * @param typeDescriptor   the type of the node, or null if unknown at this time.
+     * @param tokenImage       the parser token image.
+     * @param declaringClass   the enclosing type within which the static method is declared.
+     * @param name             the method name.
+     * @param parameterClasses the types of parameters of this method call.
+     * @param parameters       the parameter expressions of this method call.
+     */
+    public InstanceMethodCall(final Class<?> typeDescriptor,
+                              final TokenImage tokenImage,
+                              final Class<?> declaringClass,
+                              final String name,
+                              final List<Class<?>> parameterClasses,
+                              final List<Node> parameters
+    ) {
+        this(typeDescriptor, tokenImage, null, declaringClass, name, parameterClasses, parameters);
     }
 
     /**
@@ -107,25 +138,33 @@ public class InstanceMethodCall extends Expression implements CompositeNode {
      * @param parameters the parameter expressions of this method call.
      */
     public InstanceMethodCall(Class<?> typeDescriptor, TokenImage tokenImage, Class<?> declaringClass, String name, List<Node> parameters) {
-        this(typeDescriptor, tokenImage, declaringClass, name, parameters.stream().map(Node::getTypeDescriptor).collect(Collectors.toList()),parameters);
+        this(typeDescriptor, tokenImage, null, declaringClass, name, parameters.stream().map(Node::getTypeDescriptor).collect(Collectors.toList()),parameters);
     }
 
     /**
      * Constructs an instance method call expression, consisting of a name and zero or more parameters.
      *
-     * @param typeDescriptor the type of the node, or null if unknown at this time.
-     * @param tokenImage the parser token image.
-     * @param declaringClass the enclosing type within which the static method is declared.
-     * @param name the method name.
+     * @param typeDescriptor   the type of the node, or null if unknown at this time.
+     * @param tokenImage       the parser token image.
+     * @param instance         a factory for the instance on which this method call will take place, which may be null to indicate
+     *                         the instance has been created outside the scope of this call and is already at the top of the execution stack.
+     * @param declaringClass   the enclosing type within which the static method is declared.
+     * @param name             the method name.
      * @param parameterClasses the types of parameters of this method call.
-     * @param parameters the parameter expressions of this method call.
+     * @param parameters       the parameter expressions of this method call.
      */
-    public InstanceMethodCall(Class<?> typeDescriptor, TokenImage tokenImage, Class<?> declaringClass, String name, List<Class<?>> parameterClasses, List<Node> parameters) {
+    public InstanceMethodCall(final Class<?> typeDescriptor,
+                              final TokenImage tokenImage,
+                              final Node instance,
+                              final Class<?> declaringClass,
+                              final String name,
+                              final List<Class<?>> parameterClasses,
+                              final List<Node> parameters
+    ) {
         super(tokenImage, typeDescriptor);
-//        this.declaringClass = declaringClass;
-//        this.parameterClasses = parameterClasses;
 
         this.declaringType = new ResolvedTypeReferenceOld(tokenImage, declaringClass);
+        this.instance = instance;
         this.returnType = new ResolvedTypeReferenceOld(tokenImage, typeDescriptor);
         this.parameterTypes = IntStream.range(0, parameterClasses.size()).mapToObj(i -> new ResolvedTypeReferenceOld(parameters.get(i).getTokenImage(), parameterClasses.get(0))).collect(Collectors.toList());
         this.name = name;
@@ -135,48 +174,100 @@ public class InstanceMethodCall extends Expression implements CompositeNode {
     /**
      * Constructs an instance method call expression, consisting of a name and zero parameters.
      *
-     * @param tokenImage the parser token image.
+     * @param tokenImage    the parser token image.
      * @param declaringType reference to the type declaring the static method.
-     * @param returnType the return type of the method call.
-     * @param name the method name.
+     * @param returnType    the return type of the method call.
+     * @param name          the method name.
      */
-    public InstanceMethodCall(TokenImage tokenImage,
-                              TypeReference declaringType,
-                              TypeReference returnType,
-                              String name) {
+    public InstanceMethodCall(final TokenImage tokenImage,
+                              final TypeReference declaringType,
+                              final TypeReference returnType,
+                              final String name
+    ) {
         this(tokenImage, declaringType, returnType, name, emptyList(), emptyList());
+    }
+
+    /**
+     * Constructs an instance method call expression, consisting of a name and zero parameters.
+     *
+     * @param tokenImage    the parser token image.
+     * @param instance       a factory for the instance on which this method call will take place, which may be null to indicate
+     *                       the instance has been created outside the scope of this call and is already at the top of the execution stack.
+     * @param declaringType reference to the type declaring the static method.
+     * @param returnType    the return type of the method call.
+     * @param name          the method name.
+     */
+    public InstanceMethodCall(final TokenImage tokenImage,
+                              final Node instance,
+                              final TypeReference declaringType,
+                              final TypeReference returnType,
+                              final String name
+    ) {
+        this(tokenImage, instance, declaringType, returnType, name, emptyList(), emptyList());
     }
 
     /**
      * Constructs an instance method call expression, consisting of a name and zero or more parameters.
      *
-     * @param tokenImage the parser token image.
-     * @param declaringType reference to the type declaring the static method.
-     * @param returnType the return type of the method call.
-     * @param name the method name.
+     * @param tokenImage     the parser token image.
+     * @param declaringType  reference to the type declaring the static method.
+     * @param returnType     the return type of the method call.
+     * @param name           the method name.
      * @param parameterTypes types of parameters of this method call.
-     * @param parameters the parameter expressions of this method call.
+     * @param parameters     the parameter expressions of this method call.
      */
-    public InstanceMethodCall(TokenImage tokenImage,
-                              TypeReference declaringType,
-                              TypeReference returnType,
-                              String name,
-                              List<TypeReference> parameterTypes,
-                              List<Node> parameters) {
-        super(tokenImage, returnType);
-//        this.declaringClass = declaringType.getTypeDescriptor();
-//        this.parameterClasses = parameterTypes.stream().map(Node::getTypeDescriptor).collect(Collectors.toList());
+    public InstanceMethodCall(final TokenImage tokenImage,
+                              final TypeReference declaringType,
+                              final TypeReference returnType,
+                              final String name,
+                              final List<TypeReference> parameterTypes,
+                              final List<Node> parameters
+    ) {
+        this(tokenImage, null, declaringType, returnType, name, parameterTypes, parameters);
+    }
 
+    /**
+     * Constructs an instance method call expression, consisting of a name and zero or more parameters.
+     *
+     * @param tokenImage     the parser token image.
+     * @param instance       a factory for the instance on which this method call will take place, which may be null to indicate
+     *                       the instance has been created outside the scope of this call and is already at the top of the execution stack.
+     * @param declaringType  reference to the type declaring the static method.
+     * @param returnType     the return type of the method call.
+     * @param name           the method name.
+     * @param parameterTypes types of parameters of this method call.
+     * @param parameters     the parameter expressions of this method call.
+     */
+    public InstanceMethodCall(final TokenImage tokenImage,
+                              final Node instance,
+                              final TypeReference declaringType,
+                              final TypeReference returnType,
+                              final String name,
+                              final List<TypeReference> parameterTypes,
+                              final List<Node> parameters
+    ) {
+        super(tokenImage, returnType);
+
+        this.instance = instance;
         this.declaringType = declaringType;
         this.returnType = returnType;
         this.name = name;
-//        this.parameterTypes = IntStream.range(0, parameterClasses.size()).mapToObj(i -> new ResolvedTypeReference(parameters.get(i).getTokenImage(), parameterClasses.get(0))).collect(Collectors.toList());
         this.parameterTypes = parameterTypes;
         this.parameters = parameters;
     }
 
     public Class<?> getTypeDescriptor() {
         return returnType == null ? super.getTypeDescriptor() : returnType.getTypeDescriptor();
+    }
+
+    /**
+     * Gets the factory for the instance on which this method call will take place.
+     *
+     * @return the factory for the instance on which this method call will take place, which may be null to indicate the
+     * instance creation lies outside the scope of this method call and is already at the top of the execution stack.
+     */
+    public Node getInstance() {
+        return instance;
     }
 
     /**

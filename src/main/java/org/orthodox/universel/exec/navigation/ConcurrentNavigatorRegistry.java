@@ -28,12 +28,11 @@
 package org.orthodox.universel.exec.navigation;
 
 import org.beanplanet.core.lang.TypeTree;
-import org.beanplanet.core.lang.TypeUtil;
 import org.beanplanet.core.models.tree.TreeNode;
 import org.beanplanet.core.util.MultiValueListMapImpl;
 import org.orthodox.universel.ast.MethodCall;
 import org.orthodox.universel.ast.navigation.NameTest;
-import org.orthodox.universel.ast.navigation.NavigationStep;
+import org.orthodox.universel.ast.navigation.NavigationAxisAndNodeTest;
 import org.orthodox.universel.ast.navigation.ReductionNodeTest;
 
 import java.util.*;
@@ -85,19 +84,19 @@ public class ConcurrentNavigatorRegistry implements NavigatorRegistry {
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<NavigatorFunction> lookup(final Class<?> fromType, final NavigationStep<?> step) {
+    public List<NavigatorFunction> lookup(final Class<?> fromType, final NavigationAxisAndNodeTest<?> step) {
         if ( step.getNodeTest() instanceof  NameTest ) {
-            return lookupNameNavigators(fromType, (NavigationStep<NameTest>)step);
+            return lookupNameNavigators(fromType, (NavigationAxisAndNodeTest<NameTest>)step);
         } else if ( step.getNodeTest() instanceof MethodCall) {
-            return lookupMethodCallNavigators(fromType, (NavigationStep<MethodCall>)step);
+            return lookupMethodCallNavigators(fromType, (NavigationAxisAndNodeTest<MethodCall>)step);
         } else if ( step.getNodeTest() instanceof ReductionNodeTest ) {
-            return lookupReductionNavigators(fromType, (NavigationStep<ReductionNodeTest>)step);
+            return lookupReductionNavigators(fromType, (NavigationAxisAndNodeTest<ReductionNodeTest>)step);
         }
 
         return emptyList();
     }
 
-    public List<NavigatorFunction> lookupNameNavigators(final Class<?> fromType, final NavigationStep<NameTest> step) {
+    public List<NavigatorFunction> lookupNameNavigators(final Class<?> fromType, final NavigationAxisAndNodeTest<NameTest> step) {
         //--------------------------------------------------------------------------------------------------------------
         // Look for navigator matches in the following order:
         // 1) an exact match navigator on type, over the given axis and on the given name, then
@@ -119,7 +118,7 @@ public class ConcurrentNavigatorRegistry implements NavigatorRegistry {
         return navigators;
     }
 
-    public List<NavigatorFunction> lookupMethodCallNavigators(final Class<?> fromType, final NavigationStep<MethodCall> step) {
+    public List<NavigatorFunction> lookupMethodCallNavigators(final Class<?> fromType, final NavigationAxisAndNodeTest<MethodCall> step) {
         //--------------------------------------------------------------------------------------------------------------
         // Look for navigator matches in the following order:
         // 1) an exact match navigator on type, over the given axis and on the given name and parameters, then
@@ -142,7 +141,7 @@ public class ConcurrentNavigatorRegistry implements NavigatorRegistry {
     }
 
 
-    public List<NavigatorFunction> lookupReductionNavigators(final Class<?> fromType, final NavigationStep<? extends ReductionNodeTest> step) {
+    public List<NavigatorFunction> lookupReductionNavigators(final Class<?> fromType, final NavigationAxisAndNodeTest<? extends ReductionNodeTest> step) {
         //--------------------------------------------------------------------------------------------------------------
         // Look for navigator matches in the following order:
         // 1) an exact match navigator on type, over the given axis and on the given name, then

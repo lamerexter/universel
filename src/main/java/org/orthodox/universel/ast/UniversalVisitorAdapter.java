@@ -43,10 +43,7 @@ import org.orthodox.universel.ast.functional.FunctionalInterfaceObject;
 import org.orthodox.universel.ast.literals.*;
 import org.orthodox.universel.ast.methods.LambdaFunction;
 import org.orthodox.universel.ast.methods.MethodDeclaration;
-import org.orthodox.universel.ast.navigation.NameTest;
-import org.orthodox.universel.ast.navigation.NavigationStep;
-import org.orthodox.universel.ast.navigation.NavigationStream;
-import org.orthodox.universel.ast.navigation.NodeTest;
+import org.orthodox.universel.ast.navigation.*;
 import org.orthodox.universel.ast.type.LoadTypeExpression;
 import org.orthodox.universel.ast.type.Parameter;
 import org.orthodox.universel.ast.type.StaticFieldGetExpression;
@@ -59,6 +56,7 @@ import org.orthodox.universel.symanticanalysis.conversion.BinaryExpressionOperat
 import org.orthodox.universel.symanticanalysis.conversion.BoxConversion;
 import org.orthodox.universel.symanticanalysis.conversion.TypeConversion;
 import org.orthodox.universel.symanticanalysis.name.InternalNodeSequence;
+import org.orthodox.universel.symanticanalysis.navigation.NavigationStage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -441,30 +439,59 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
         return node;
     }
 
-    @SuppressWarnings("unchecked")
+//    @SuppressWarnings("unchecked")
+//    @Override
+//    public <T extends NodeTest> NavigationAxisAndTestStep<?> visitNavigationStep(NavigationAxisAndTestStep<T> node) {
+//        Node transformedNodeTest = (Node)node.getNodeTest();
+//        if (node.getNodeTest() != null) {
+//            transformedNodeTest = node.getNodeTest().accept(this);
+//        }
+//
+//        InternalNodeSequence transformedFilters = visitInternalNodeSequence(node.getFilters());
+//
+//        boolean noTransformationChanges = Objects.equals(node.getNodeTest(), transformedNodeTest)
+//            && Objects.equals(node.getFilters(), transformedFilters);
+//        return noTransformationChanges ? node : new NavigationAxisAndTestStep<>(node.getTokenImage(), node.getAxis(), (NodeTest)transformedNodeTest, transformedFilters);
+//    }
+//
+
     @Override
-    public <T extends NodeTest> NavigationStep<?> visitNavigationStep(NavigationStep<T> node) {
-        Node transformedNodeTest = (Node)node.getNodeTest();
-        if (node.getNodeTest() != null) {
-            transformedNodeTest = node.getNodeTest().accept(this);
-        }
+    public <T extends NodeTest> NavigationAxisAndNodeTest<T> visitNavigationAxisAndNodeTest(final NavigationAxisAndNodeTest<T> node) {
+        T transformedNodeTest = (T)node.getNodeTest().accept(this);
 
-        InternalNodeSequence transformedFilters = visitInternalNodeSequence(node.getFilters());
-
-        boolean noTransformationChanges = Objects.equals(node.getNodeTest(), transformedNodeTest)
-            && Objects.equals(node.getFilters(), transformedFilters);
-        return noTransformationChanges ? node : new NavigationStep<>(node.getTokenImage(), node.getAxis(), (NodeTest)transformedNodeTest, transformedFilters);
+        boolean noTransformationChanges = Objects.equals(node.getNodeTest(), transformedNodeTest);
+        return noTransformationChanges ? node : new NavigationAxisAndNodeTest(node.getTokenImage(), node.getAxis(), transformedNodeTest);
     }
 
     @Override
-    public Node visitNavigationStream(final NavigationStream node) {
-        List<Node> transformedSteps = new ArrayList<>(node.getSteps().size());
-        for (Node child : node.getSteps()) {
-            transformedSteps.add(child.accept(this));
-        }
+    public Node visitNavigationExpression(final NavigationExpression node) {
+        return node;
+//        List<Node> transformedSteps = new ArrayList<>(node.getSteps().size());
+//        for (Node child : node.getSteps()) {
+//            transformedSteps.add(child.accept(this));
+//        }
+//
+//        boolean noTransformationChanges = Objects.equals(node.getSteps(), transformedSteps);
+//        return noTransformationChanges ? node : new NavigationExpression(transformedSteps);
+    }
 
-        boolean noTransformationChanges = Objects.equals(node.getSteps(), transformedSteps);
-        return noTransformationChanges ? node : new NavigationStream(transformedSteps);
+    @Override
+    public NavigationFilterStep visitNavigationFilterStep(NavigationFilterStep node) {
+        Node transformedFilterExpression = node.getFilterExpression() == null ? null : node.getFilterExpression().accept(this);
+
+        boolean noTransformationChanges = Objects.equals(node.getFilterExpression(), transformedFilterExpression);
+        return noTransformationChanges ? node : new NavigationFilterStep(node.getTokenImage(), transformedFilterExpression);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Node visitNavigationStream(final NavigationStream node) {
+        List<Node> transformedInputSteps = transformNodeList(node.getInputSteps());
+        List<NavigationStage> transformedTargetStages = (List)transformNodeList(node.getTargetStages());
+
+        boolean noTransformationChanges = Objects.equals(node.getInputSteps(), transformedInputSteps) &&
+                                          Objects.equals(node.getTargetStages(), transformedTargetStages);
+        return noTransformationChanges ? node : new NavigationStream(transformedInputSteps, transformedTargetStages);
     }
 
     @Override
@@ -595,11 +622,16 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
     }
 
     protected NodeSequence<Node> transformNodeSequence(final NodeSequence<Node> nodeSequence) {
-        if ( nodeSequence == null ) return null;
+        if (nodeSequence == null) return null;
 
-        final NodeSequenceBuilder<Node> transformedNodes = NodeSequence.builder();
-        nodeSequence.getNodes().forEach(n -> transformedNodes.add(n.accept(this)));
+        return NodeSequence.builder()
+                           .addAll(transformNodeList(nodeSequence.getChildNodes()))
+                           .tokenImage(nodeSequence.getTokenImage())
+                           .resultType(nodeSequence.getResultType())
+                           .build();
+    }
 
-        return transformedNodes.build();
+    protected List<Node> transformNodeList(final List<? extends Node> nodeList) {
+        return nodeList == null ? null : nodeList.stream().map(n -> n.accept(this)).collect(Collectors.toList());
     }
 }

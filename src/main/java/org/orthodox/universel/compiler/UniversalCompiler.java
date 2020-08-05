@@ -18,10 +18,10 @@ import org.orthodox.universel.symanticanalysis.conversion.BinaryExpressionOperat
 import org.orthodox.universel.symanticanalysis.conversion.WideningNumericConversionAnalyser;
 import org.orthodox.universel.symanticanalysis.methods.ImplicitMethodModifiersDecorator;
 import org.orthodox.universel.symanticanalysis.methods.ImplicitReturnStatementDecorator;
-import org.orthodox.universel.symanticanalysis.methods.UnresolvedMethodCallReporter;
-import org.orthodox.universel.symanticanalysis.methods.UnresolvedNameReporter;
+import org.orthodox.universel.symanticanalysis.navigation.UnresolvedMethodCallReporter;
+import org.orthodox.universel.symanticanalysis.navigation.UnresolvedNameReporter;
 import org.orthodox.universel.symanticanalysis.name.IfStatementImplicitResultValueResolver;
-import org.orthodox.universel.symanticanalysis.name.NavigationResolver;
+import org.orthodox.universel.symanticanalysis.navigation.NavigationResolver;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -40,7 +40,6 @@ public class UniversalCompiler {
         return new CompositeSemanticAnalyser(
             new MethodDeclarationDeclaringTypeDecorator(),
             new ScriptAssembler(),
-            new BinaryExpressionOperatorMethodConverter(),
 //            new MethodCallAnalyser(),
 //            new ConditionalExpressionAnalyser(),
             new TypeReferenceResolver(),
@@ -51,6 +50,7 @@ public class UniversalCompiler {
             new NavigationResolver(),
             new IfStatementImplicitResultValueResolver(),
             new ImplicitReturnStatementDecorator(),
+            new BinaryExpressionOperatorMethodConverter(),
 
             // Lastly, when all opportunities for resolution has preceded, report any errors
             new TypeReferenceResolver(true),
@@ -80,7 +80,7 @@ public class UniversalCompiler {
             // Perform widening conversions, where applicable and realise types depth-first, post-order.
             //----------------------------------------------------------------------------------------------------------
             SemanticAnalysisContext semanticAnalysisContext = new SemanticAnalysisContext(compilationContext.getDefaultImports(), bindingType, messages, navigatorRegistry);
-            semanticAnalysisContext.pushScope(new ScriptScope(bindingType, navigatorRegistry));
+//            semanticAnalysisContext.pushScope(new ScriptScope(bindingType, navigatorRegistry));
             Node node = getSemanticAnalyser().performAnalysis(semanticAnalysisContext, script);
 
             return node;
@@ -149,8 +149,9 @@ public class UniversalCompiler {
 //                MethodVisitor mv = bch.generateMethod(ACC_PUBLIC + ACC_FINAL + ACC_STATIC, "exec", Object.class, bindingType == null ? Object.class : bindingType);
 
 //            CompilationContext compilationContext = new CompilationContext(bindingType, new VirtualMachine(bch), messages);
-            BoundScope scriptScope = new ScriptScope(bindingType, navigatorRegistry);
-            compilationContext.pushNameScope(scriptScope);
+
+//            BoundScope scriptScope = new ScriptScope(bindingType, navigatorRegistry);
+//            compilationContext.pushNameScope(scriptScope);
 
             CompilingAstVisitor compilingAstVisitor = new CompilingAstVisitor(compilationContext);
             compilationUnitNonTerminal.accept(compilingAstVisitor);

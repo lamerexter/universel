@@ -29,8 +29,11 @@
 package org.orthodox.universel.exec.navigation.axis.standard.bean.property.singlestep.array;
 
 import org.beanplanet.core.beans.JavaBean;
+import org.beanplanet.core.io.resource.Resource;
 import org.junit.jupiter.api.Test;
 import org.orthodox.universel.BeanWithProperties;
+import org.orthodox.universel.compiler.CompiledUnit;
+import org.orthodox.universel.tools.BytecodeOutput;
 
 import java.math.BigDecimal;
 import java.util.stream.IntStream;
@@ -41,8 +44,8 @@ import static java.util.stream.IntStream.range;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.orthodox.universel.Universal.compile;
-import static org.orthodox.universel.Universal.execute;
+import static org.orthodox.universel.Universal.*;
+import static org.orthodox.universel.tools.BytecodeOutput.printClass;
 
 public class SingleStepBigDecimalArrayPropertyNavigationTest {
     @Test
@@ -50,6 +53,23 @@ public class SingleStepBigDecimalArrayPropertyNavigationTest {
         final BigDecimal[] value = {BigDecimal.ZERO, BigDecimal.ONE};
         final BeanWithProperties binding = new JavaBean<>(new BeanWithProperties()).with("bigDecimalArrayProperty", value).getBean();
         assertThat(execute("bigDecimalArrayProperty", binding), allOf(equalTo(value), sameInstance(value)));
+    }
+
+    @Test
+    void filtered_implicitSelf() {
+        final BigDecimal[] value = {BigDecimal.ZERO, BigDecimal.ONE, new BigDecimal("3"), new BigDecimal("4"), new BigDecimal("5")};
+        final BeanWithProperties binding = new JavaBean<>(new BeanWithProperties()).with("bigDecimalArrayProperty", value).getBean();
+
+        assertThat(executeWithResult("bigDecimalArrayProperty[toBigInteger() < 3I]", binding).as(BigDecimal[].class),
+                   equalTo(new BigDecimal[] { BigDecimal.ZERO, BigDecimal.ONE }));
+        assertThat(executeWithResult("bigDecimalArrayProperty[toBigInteger() < 3I && toBigInteger() > 0]", binding).as(BigDecimal[].class),
+                   equalTo(new BigDecimal[] { BigDecimal.ONE }));
+        assertThat(executeWithResult("bigDecimalArrayProperty[toBigInteger() < 3I and toBigInteger() > 0]", binding).as(BigDecimal[].class),
+                   equalTo(new BigDecimal[] { BigDecimal.ONE }));
+        assertThat(executeWithResult("bigDecimalArrayProperty[toBigInteger() < 3I][toBigInteger() > 0]", binding).as(BigDecimal[].class),
+                   equalTo(new BigDecimal[] { BigDecimal.ONE }));
+        assertThat(executeWithResult("bigDecimalArrayProperty[toBigInteger() < 3I][toBigInteger() > 0]", binding).as(BigDecimal[].class),
+                   equalTo(new BigDecimal[] { BigDecimal.ONE }));
     }
 
     @Test

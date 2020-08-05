@@ -32,21 +32,18 @@ package org.orthodox.universel.ast;
 
 import org.orthodox.universel.ast.allocation.ArrayCreationExpression;
 import org.orthodox.universel.ast.allocation.ObjectCreationExpression;
-import org.orthodox.universel.ast.conditionals.IfStatement;
-import org.orthodox.universel.ast.functional.FunctionalInterfaceObject;
-import org.orthodox.universel.ast.navigation.NameTest;
-import org.orthodox.universel.ast.navigation.NavigationStep;
-import org.orthodox.universel.ast.navigation.NavigationStream;
-import org.orthodox.universel.ast.navigation.NodeTest;
 import org.orthodox.universel.ast.annotation.Annotation;
 import org.orthodox.universel.ast.collections.ListExpr;
 import org.orthodox.universel.ast.collections.MapEntryExpr;
 import org.orthodox.universel.ast.collections.MapExpr;
 import org.orthodox.universel.ast.collections.SetExpr;
+import org.orthodox.universel.ast.conditionals.IfStatement;
 import org.orthodox.universel.ast.conditionals.TernaryExpression;
+import org.orthodox.universel.ast.functional.FunctionalInterfaceObject;
 import org.orthodox.universel.ast.literals.*;
 import org.orthodox.universel.ast.methods.LambdaFunction;
 import org.orthodox.universel.ast.methods.MethodDeclaration;
+import org.orthodox.universel.ast.navigation.*;
 import org.orthodox.universel.ast.type.LoadTypeExpression;
 import org.orthodox.universel.ast.type.Parameter;
 import org.orthodox.universel.ast.type.StaticFieldGetExpression;
@@ -154,9 +151,15 @@ public interface UniversalCodeVisitor {
 
     Node visitNameTest(NameTest nameTest);
 
-    <T extends NodeTest> Node visitNavigationStep(NavigationStep<T> node);
+//    <T extends NodeTest> Node visitNavigationStep(NavigationAxisAndTestStep<T> node);
+
+    <T extends NodeTest> NavigationAxisAndNodeTest<T> visitNavigationAxisAndNodeTest(NavigationAxisAndNodeTest<T> node);
+
+    Node visitNavigationExpression(NavigationExpression node);
 
     Node visitNavigationStream(NavigationStream node);
+
+    NavigationFilterStep visitNavigationFilterStep(NavigationFilterStep node);
 
     Node visitNodeSequence(NodeSequence<? extends Node> node);
 

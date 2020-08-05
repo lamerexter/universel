@@ -66,10 +66,4 @@ public class MultiStepBigDecimalMethodArrayNavigationTest {
         };
         return new BeanWithProperties().withReferenceArrayProperty(R1);
     }
-
-    @Test
-    void doit() {
-        Object result = execute("import java.io.File.* listRoots()\\listFiles()\\file\\[]");
-        System.out.println(result);
-    }
 }

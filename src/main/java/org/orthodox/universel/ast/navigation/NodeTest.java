@@ -29,8 +29,16 @@
 package org.orthodox.universel.ast.navigation;
 
 import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.ast.TokenImage;
 import org.orthodox.universel.ast.UniversalCodeVisitor;
 
 public interface NodeTest {
+    /**
+     * Gets the parser token image backing this node.
+     *
+     * @return the parser token image backing this node.
+     */
+    TokenImage getTokenImage();
+
     Node accept(UniversalCodeVisitor visitor);
 }

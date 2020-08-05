@@ -37,7 +37,7 @@ import org.orthodox.universel.ast.*;
 import org.orthodox.universel.ast.allocation.ObjectCreationExpression;
 import org.orthodox.universel.ast.navigation.NameTest;
 import org.orthodox.universel.ast.navigation.NavigationAxis;
-import org.orthodox.universel.ast.navigation.NavigationStep;
+import org.orthodox.universel.ast.navigation.NavigationAxisAndNodeTest;
 import org.orthodox.universel.ast.type.LoadTypeExpression;
 import org.orthodox.universel.ast.type.StaticFieldGetExpression;
 import org.orthodox.universel.ast.type.reference.ResolvedTypeReferenceOld;
@@ -85,7 +85,7 @@ public class ImportScope implements Scope {
 
     @SuppressWarnings("unchecked")
     @Override
-    public Node navigate(final NavigationStep<?> step) {
+    public Node navigate(final NavigationAxisAndNodeTest<?> step) {
         if ( isEmptyOrNull(importStatements) ) return step;
 
         if ( !step.getAxis().equals(NavigationAxis.DEFAULT.getCanonicalName()) ) {
@@ -93,17 +93,17 @@ public class ImportScope implements Scope {
         }
 
         if ( step.getNodeTest() instanceof MethodCall ) {
-            return resolveMethodOrConstructorCallFromImports((NavigationStep<MethodCall>)step);
+            return resolveMethodOrConstructorCallFromImports((NavigationAxisAndNodeTest<MethodCall>)step);
         }
 
         if ( step.getNodeTest() instanceof NameTest) {
-            return resolveNameReference((NavigationStep<NameTest>)step);
+            return resolveNameReference((NavigationAxisAndNodeTest<NameTest>)step);
         }
 
         return step;
     }
 
-    private Node resolveNameReference(final NavigationStep<NameTest> step) {
+    private Node resolveNameReference(final NavigationAxisAndNodeTest<NameTest> step) {
         Node transformedStep = resolveTypeFromImports(step);
         if (transformedStep != null) return transformedStep;
 
@@ -113,7 +113,7 @@ public class ImportScope implements Scope {
         return null;
     }
 
-    private Node resolveTypeFromImports(final NavigationStep<NameTest> step) {
+    private Node resolveTypeFromImports(final NavigationAxisAndNodeTest<NameTest> step) {
         final List<Class<?>> typesFromNotOnDemandImports = resolveTypeNameFromImports(step, importStatements.stream().filter(ImportStmt::isNotOnDemand).collect(Collectors.toList()));
         if (typesFromNotOnDemandImports.size() == 1) return new LoadTypeExpression(step.getTokenImage(), new ResolvedTypeReferenceOld(step.getTokenImage(), typesFromNotOnDemandImports.get(0)));
 
@@ -142,7 +142,7 @@ public class ImportScope implements Scope {
         return null;
     }
 
-    private List<Class<?>> resolveTypeNameFromImports(final NavigationStep<NameTest> step, final List<ImportStmt> importStatements) {
+    private List<Class<?>> resolveTypeNameFromImports(final NavigationAxisAndNodeTest<NameTest> step, final List<ImportStmt> importStatements) {
         final String name = step.getNodeTest().getName();
 
         List<Class<?>> matchingNameTransformations = new ArrayList<>();
@@ -165,7 +165,7 @@ public class ImportScope implements Scope {
         return matchingNameTransformations;
     }
 
-    private Node resolveFieldReferenceFromImports(final NavigationStep<NameTest> step) {
+    private Node resolveFieldReferenceFromImports(final NavigationAxisAndNodeTest<NameTest> step) {
         final List<Node> fieldReferencesFromExplicitImports = resolveFieldReferenceFromImports(step, importStatements.stream().filter(ImportStmt::isNotOnDemand).collect(Collectors.toList()));
         if (fieldReferencesFromExplicitImports.size() == 1) return fieldReferencesFromExplicitImports.get(0);
 
@@ -175,7 +175,7 @@ public class ImportScope implements Scope {
         return null;
     }
 
-    private List<Node> resolveFieldReferenceFromImports(final NavigationStep<NameTest> step, final List<ImportStmt> importStatements) {
+    private List<Node> resolveFieldReferenceFromImports(final NavigationAxisAndNodeTest<NameTest> step, final List<ImportStmt> importStatements) {
         final String name = step.getNodeTest().getName();
 
         List<Node> matchingNameTransformations = new ArrayList<>();
@@ -207,7 +207,7 @@ public class ImportScope implements Scope {
         return matchingNameTransformations;
     }
 
-    public Node resolveMethodCall(final NavigationStep<MethodCall> step) {
+    public Node resolveMethodCall(final NavigationAxisAndNodeTest<MethodCall> step) {
         final MethodCall methodCall = step.getNodeTest();
 
         //--------------------------------------------------------------------------------------------------------------
@@ -298,7 +298,7 @@ public class ImportScope implements Scope {
         return step;
     }
 
-    private Node resolveMethodOrConstructorCallFromImports(final NavigationStep<MethodCall> step) {
+    private Node resolveMethodOrConstructorCallFromImports(final NavigationAxisAndNodeTest<MethodCall> step) {
         Node transformedMethodOrConstructorCallFromImports = resolveMethodCallFromImports(step);
         if ( transformedMethodOrConstructorCallFromImports != null) return transformedMethodOrConstructorCallFromImports;
 
@@ -307,7 +307,7 @@ public class ImportScope implements Scope {
         return transformedMethodOrConstructorCallFromImports == null ? step : transformedMethodOrConstructorCallFromImports;
     }
 
-    private Node resolveMethodCallFromImports(final NavigationStep<MethodCall> step) {
+    private Node resolveMethodCallFromImports(final NavigationAxisAndNodeTest<MethodCall> step) {
         final List<Method> callableMethodsFromNotOnDemandImports = findMatchingMethodsFromImports(step.getNodeTest(), importStatements.stream().filter(ImportStmt::isNotOnDemand).collect(Collectors.toList()));
         if (callableMethodsFromNotOnDemandImports.size() == 1) {
             return new StaticMethodCall(callableMethodsFromNotOnDemandImports.get(0).getReturnType(),
@@ -372,7 +372,7 @@ public class ImportScope implements Scope {
         return matchingMethods;
     }
 
-    private Node resolveConsructorCallFromImports(final NavigationStep<MethodCall> step) {
+    private Node resolveConsructorCallFromImports(final NavigationAxisAndNodeTest<MethodCall> step) {
         List<Constructor<?>> callableConstructorsFromImports = findMatchingConstructorsFromImports(step.getNodeTest());
         if (callableConstructorsFromImports.size() == 1) {
             return new ObjectCreationExpression(step.getTokenImage(),

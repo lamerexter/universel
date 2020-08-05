@@ -30,7 +30,7 @@ package org.orthodox.universel.symanticanalysis.navigation;
 
 import org.orthodox.universel.ast.Node;
 
-public class ReduceStage extends AbstractNavigationStage {
+public class ReduceStage extends NavigationStage {
     public ReduceStage(final Node node,
                        final boolean isSequence,
                        final boolean inSequence

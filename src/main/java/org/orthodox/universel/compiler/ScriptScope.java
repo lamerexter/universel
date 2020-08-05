@@ -29,8 +29,9 @@
 package org.orthodox.universel.compiler;
 
 import org.orthodox.universel.ast.LoadLocal;
+import org.orthodox.universel.ast.Script;
 import org.orthodox.universel.ast.navigation.NavigationAxis;
-import org.orthodox.universel.ast.navigation.NavigationStep;
+import org.orthodox.universel.ast.navigation.NavigationAxisAndNodeTest;
 import org.orthodox.universel.ast.navigation.NodeType;
 import org.orthodox.universel.ast.Node;
 import org.orthodox.universel.exec.navigation.NavigatorRegistry;
@@ -41,20 +42,20 @@ public class ScriptScope extends BoundScope {
 
     public static final int SCRIPT_BINDING_LOCAL_OFFSET = 0;
 
-    public ScriptScope(final Class<?> bindingType, final NavigatorRegistry navigatorRegistry) {
-        super(bindingType, navigatorRegistry);
+    public ScriptScope(final Class<?> bindingType, final Script script, final NavigatorRegistry navigatorRegistry) {
+        super(bindingType, new LoadLocal(script.getTokenImage(), bindingType, SCRIPT_BINDING_LOCAL_OFFSET), navigatorRegistry);
     }
 
     @Override
-    public NavigationStep<?> resolveInitial(final NavigationStep<?> initialStep) {
+    public NavigationAxisAndNodeTest<?> resolveInitial(final NavigationAxisAndNodeTest<?> initialStep) {
         Node transformedNode = super.navigate(initialStep);
         if ( Objects.equals(transformedNode, initialStep) ) return null;
 
-        return new NavigationStep<>(initialStep.getTokenImage(), NavigationAxis.BINDING, new NodeType(initialStep.getTokenImage()));
+        return new NavigationAxisAndNodeTest<>(initialStep.getTokenImage(), NavigationAxis.BINDING, new NodeType(initialStep.getTokenImage()));
     }
 
     @Override
-    public Node navigate(final NavigationStep<?> step) {
+    public Node navigate(final NavigationAxisAndNodeTest<?> step) {
         if ( !(step.getAxis().equals(NavigationAxis.BINDING.getCanonicalName()) && step.getNodeTest() instanceof NodeType) ) return null;
 
         return new LoadLocal(step.getTokenImage(), getBindingType(), SCRIPT_BINDING_LOCAL_OFFSET);

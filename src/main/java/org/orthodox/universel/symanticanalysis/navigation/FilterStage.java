@@ -30,7 +30,7 @@ package org.orthodox.universel.symanticanalysis.navigation;
 
 import org.orthodox.universel.ast.Node;
 
-public abstract class FilterStage extends AbstractNavigationStage {
+public abstract class FilterStage extends NavigationStage {
     public FilterStage(final Node node,
                        final boolean inSequence
     ) {

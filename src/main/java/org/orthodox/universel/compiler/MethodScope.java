@@ -31,7 +31,7 @@ package org.orthodox.universel.compiler;
 import org.orthodox.universel.ast.LoadLocal;
 import org.orthodox.universel.ast.navigation.NameTest;
 import org.orthodox.universel.ast.navigation.NavigationAxis;
-import org.orthodox.universel.ast.navigation.NavigationStep;
+import org.orthodox.universel.ast.navigation.NavigationAxisAndNodeTest;
 import org.orthodox.universel.ast.Node;
 import org.orthodox.universel.ast.methods.MethodDeclaration;
 
@@ -48,7 +48,7 @@ public class MethodScope implements NameScope {
     }
 
     @Override
-    public Node navigate(final NavigationStep<?> step) {
+    public Node navigate(final NavigationAxisAndNodeTest<?> step) {
         if ( methodDeclaration.getParameters().isEmpty() ||
              !step.getAxis().equals(NavigationAxis.DEFAULT.getCanonicalName()) ||
              !(step.getNodeTest() instanceof NameTest) ) return step;

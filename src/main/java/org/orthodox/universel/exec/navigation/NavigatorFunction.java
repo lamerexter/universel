@@ -28,9 +28,9 @@
 
 package org.orthodox.universel.exec.navigation;
 
-import org.orthodox.universel.ast.navigation.NavigationStep;
+import org.orthodox.universel.ast.navigation.NavigationAxisAndNodeTest;
 import org.orthodox.universel.ast.Node;
 
 public interface NavigatorFunction {
-    Node navigationTransform(Class<?> fromType, NavigationStep<?> step);
+    Node navigationTransform(Class<?> fromType, Node instanceReadAccessor, NavigationAxisAndNodeTest<?> step);
 }

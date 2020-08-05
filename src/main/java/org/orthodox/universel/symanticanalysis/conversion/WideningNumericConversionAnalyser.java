@@ -141,8 +141,6 @@ public class WideningNumericConversionAnalyser extends AbstractSemanticAnalyser 
             }
         }
 
-        BinaryExpression transformedNode = new BinaryExpression(node.getOperator(), lhs, rhs);
-        transformedNode.setType(new ResolvedTypeReferenceOld(transformedNode.getTokenImage(), resultingType));
-        return transformedNode;
+        return new BinaryExpression(node.getOperator(), lhs, rhs);
     }
 }

@@ -15,75 +15,68 @@
  ******************************************************************************/
 package org.orthodox.universel.ast.navigation;
 
-import org.orthodox.universel.ast.*;
+import org.beanplanet.core.collections.ListBuilder;
+import org.orthodox.universel.ast.CompositeNode;
+import org.orthodox.universel.ast.Expression;
+import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.ast.TokenImage;
 import org.orthodox.universel.symanticanalysis.name.InternalNodeSequence;
 
 import java.util.List;
 import java.util.Objects;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static org.orthodox.universel.symanticanalysis.name.InternalNodeSequence.emptyNodeSequence;
 
 public class NavigationStep<N extends NodeTest> extends Expression implements CompositeNode {
-    protected String axis;
+    private final NavigationAxisAndNodeTest<N> navigationAxisAndNodeTest;
 
-    protected N nodeTest;
+    private final InternalNodeSequence filters;
 
-    protected InternalNodeSequence filters;
-
-    public NavigationStep(final TokenImage tokenImage, final String axis, final N nodeTest, final InternalNodeSequence filters) {
+    public NavigationStep(final TokenImage tokenImage,
+                          final NavigationAxisAndNodeTest<N> navigationAxisAndNodeTest,
+                          final InternalNodeSequence filters) {
         super(tokenImage);
-        this.axis = axis;
-        this.nodeTest = nodeTest;
+        this.navigationAxisAndNodeTest = navigationAxisAndNodeTest;
         this.filters = filters;
     }
 
-    public NavigationStep(final TokenImage tokenImage, final NavigationAxis axis, final N nodeTest) {
-        this(tokenImage, axis.getCanonicalName(), nodeTest, null);
+    public NavigationStep(final TokenImage tokenImage, final NavigationAxisAndNodeTest<N> navigationAxisAndNodeTest) {
+        this(tokenImage, navigationAxisAndNodeTest, null);
     }
 
-    public NavigationStep(final TokenImage tokenImage, final NavigationAxis axis, final N nodeTest, final InternalNodeSequence filters) {
-        this(tokenImage, axis.getCanonicalName(), nodeTest, filters);
-    }
-
-    public String getAxis() {
-        return axis;
-    }
-
-    public N getNodeTest() {
-        return nodeTest;
+    public NavigationAxisAndNodeTest<N> getNavigationAxisAndNodeTest() {
+        return navigationAxisAndNodeTest;
     }
 
     public InternalNodeSequence getFilters() {
         return filters == null ? emptyNodeSequence() : filters;
     }
 
-   @Override
-   public boolean equals(final Object o) {
-      if (this == o)
-         return true;
-      if (!(o instanceof NavigationStep))
-         return false;
-      if (!super.equals(o))
-         return false;
-      NavigationStep<?> that = (NavigationStep<?>) o;
-      return Objects.equals(getAxis(), that.getAxis()) && Objects.equals(getNodeTest(), that.getNodeTest()) && Objects
-              .equals(getFilters(), that.getFilters());
-   }
-
-   @Override
-   public int hashCode() {
-      return Objects.hash(super.hashCode(), getAxis(), getNodeTest(), getFilters());
-   }
-
-   @Override
-   public Node accept(UniversalCodeVisitor visitor) {
-        return visitor.visitNavigationStep(this);
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (!(o instanceof NavigationStep)) return false;
+        if (!super.equals(o)) return false;
+        NavigationStep<?> that = (NavigationStep<?>) o;
+        return Objects.equals(getNavigationAxisAndNodeTest(), that.getNavigationAxisAndNodeTest()) &&
+               Objects.equals(getFilters(), that.getFilters());
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), getNavigationAxisAndNodeTest(), getFilters());
+    }
+
+    //   @Override
+//   public Node accept(UniversalCodeVisitor visitor) {
+//        return visitor.visitNavigationStep(this);
+//    }
+
+    @Override
     public List<Node> getChildNodes() {
-        return nodeTest == null ? emptyList() : singletonList((Node)nodeTest);
+        return ListBuilder.<Node>builder()
+                          .addNotNull(navigationAxisAndNodeTest)
+                          .addNotNull(filters)
+                          .build();
     }
 }

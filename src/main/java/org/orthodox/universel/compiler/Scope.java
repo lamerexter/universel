@@ -29,17 +29,23 @@
 package org.orthodox.universel.compiler;
 
 import org.beanplanet.core.models.path.NamePath;
-import org.orthodox.universel.ast.navigation.NavigationStep;
+import org.orthodox.universel.ast.navigation.NavigationAxisAndNodeTest;
 import org.orthodox.universel.ast.Node;
 import org.orthodox.universel.ast.Type;
+import org.orthodox.universel.ast.navigation.NavigationTransform;
 
 import java.util.List;
+import java.util.Objects;
 
 import static java.util.Collections.emptyList;
 
 public interface Scope {
-    default NavigationStep<?> resolveInitial(NavigationStep<?> initialStep) { return null; }
-    Node navigate(NavigationStep<?> step);
+    default NavigationAxisAndNodeTest<?> resolveInitial(NavigationAxisAndNodeTest<?> initialStep) { return null; }
+    default Node navigate(NavigationAxisAndNodeTest<?> step) { return step; }
+    default NavigationTransform navigate(Node source, NavigationAxisAndNodeTest<?> step) {
+        final Node target = navigate(step);
+        return target != null && !Objects.equals(step, target) ? new NavigationTransform(null, target) : null;
+    }
     default List<Type> resolveType(NamePath name) {
         return emptyList();
     }

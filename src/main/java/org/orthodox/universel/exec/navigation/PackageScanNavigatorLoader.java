@@ -32,7 +32,8 @@ import org.beanplanet.core.lang.FilteringPackageClassScanner;
 import org.beanplanet.core.lang.PackageResourceScanner;
 import org.beanplanet.core.lang.conversion.TypeConversionException;
 import org.beanplanet.core.logging.Logger;
-import org.orthodox.universel.ast.navigation.NavigationStep;
+import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.ast.navigation.NavigationAxisAndNodeTest;
 import org.orthodox.universel.ast.navigation.ReductionNodeTest;
 
 import java.io.BufferedReader;
@@ -85,9 +86,10 @@ public class PackageScanNavigatorLoader implements NavigatorLoader, Logger {
                && isStatic(method.getModifiers())
                && !isAbstract(method.getModifiers())
                && method.isAnnotationPresent(MappingNavigator.class)
-               && (paramTypes.length == 2)
+               && (paramTypes.length == 3)
                && paramTypes[0] == Class.class
-               && paramTypes[1] == NavigationStep.class;
+               && paramTypes[1] == Node.class
+               && paramTypes[2] == NavigationAxisAndNodeTest.class;
     };
 
     private static final Predicate<Method> METHOD_NAVIGATOR_METHOD_FILTER = method -> {
@@ -96,9 +98,10 @@ public class PackageScanNavigatorLoader implements NavigatorLoader, Logger {
                && isStatic(method.getModifiers())
                && !isAbstract(method.getModifiers())
                && method.isAnnotationPresent(MethodNavigator.class)
-               && (paramTypes.length == 2)
+               && (paramTypes.length == 3)
                && paramTypes[0] == Class.class
-               && paramTypes[1] == NavigationStep.class;
+               && paramTypes[1] == Node.class
+               && paramTypes[2] == NavigationAxisAndNodeTest.class;
     };
 
     private static final Predicate<Method> ANNOTATED_REDUCTION_FILTER = method -> {
@@ -107,9 +110,10 @@ public class PackageScanNavigatorLoader implements NavigatorLoader, Logger {
                && isStatic(method.getModifiers())
                && !isAbstract(method.getModifiers())
                && method.isAnnotationPresent(ReductionNavigator.class)
-               && (paramTypes.length == 2)
+               && (paramTypes.length == 3)
                && paramTypes[0] == Class.class
-               && paramTypes[1] == NavigationStep.class;
+               && paramTypes[1] == Node.class
+               && paramTypes[2] == NavigationAxisAndNodeTest.class;
     };
 
     /**
@@ -252,7 +256,7 @@ public class PackageScanNavigatorLoader implements NavigatorLoader, Logger {
         ReductionNavigator navigatorAnnotation = method.getAnnotation(ReductionNavigator.class);
         registry.addReductionNavigator(determineNavigationSourceType(method.getGenericParameterTypes()[0]),
                                        asList(navigatorAnnotation.axis().length == 0 ? navigatorAnnotation.value() : navigatorAnnotation.axis()),
-                                       determineReductionNodeTestType(method.getGenericParameterTypes()[1]),
+                                       determineReductionNodeTestType(method.getGenericParameterTypes()[2]),
                                        new StaticMethodNavigatorFunction(method)
         );
     }
