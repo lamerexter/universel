@@ -47,11 +47,10 @@ import static org.orthodox.universel.ast.Modifiers.STATIC;
 public class MethodDeclarationTest {
     @Test
     void voidReturn_noArgs() {
-//        assertThat(execute("public static void aMethod() { }\n aMethod()"), nullValue());
-
         CompiledUnit<?> compiled = compile("public static void aMethod() { }");
 
-        Optional<Method> method = findMethod(PUBLIC | STATIC, "aMethod", compiled.getCompiledClasses().get(0), void.class, (Class<?>[]) null);
+        Class<?> compiledClass = compiled.getCompiledClasses().get(0);
+        Optional<Method> method = findMethod(compiledClass, PUBLIC | STATIC, "aMethod", void.class);
         assertThat(method.isPresent(), is(true));
     }
 
@@ -60,7 +59,7 @@ public class MethodDeclarationTest {
         CompiledUnit<?> compiled = compile("public static int doubleIt(int x) { x * 2 }");
 
         Class<?> compiledClass = compiled.getCompiledClasses().get(0);
-        Optional<Method> method = findMethod(PUBLIC | STATIC, "doubleIt", compiledClass, int.class, int.class);
+        Optional<Method> method = findMethod(compiledClass, PUBLIC | STATIC, "doubleIt", int.class, int.class);
         assertThat(method.isPresent(), is(true));
     }
 
@@ -69,7 +68,7 @@ public class MethodDeclarationTest {
         CompiledUnit<?> compiled = compile("public static double doubleIt(int x) { x * 2 }");
 
         Class<?> compiledClass = compiled.getCompiledClasses().get(0);
-        Optional<Method> method = findMethod(PUBLIC | STATIC, "doubleIt", compiledClass, double.class, int.class);
+        Optional<Method> method = findMethod(compiledClass, PUBLIC | STATIC, "doubleIt", double.class, int.class);
         assertThat(method.isPresent(), is(true));
     }
 
@@ -78,7 +77,7 @@ public class MethodDeclarationTest {
         CompiledUnit<?> compiled = compile("public static char doubleIt(int x) { x * 2 }");
 
         Class<?> compiledClass = compiled.getCompiledClasses().get(0);
-        Optional<Method> method = findMethod(PUBLIC | STATIC, "doubleIt", compiledClass, char.class, int.class);
+        Optional<Method> method = findMethod(compiledClass, PUBLIC | STATIC, "doubleIt", char.class, int.class);
         assertThat(method.isPresent(), is(true));
     }
 }

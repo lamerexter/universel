@@ -115,6 +115,11 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
     }
 
     @Override
+    public Node visitFieldDeclaration(final FieldDeclaration node) {
+        return node;
+    }
+
+    @Override
     public Node visitBooleanLiteral(final BooleanLiteralExpr node) {
         return node;
     }

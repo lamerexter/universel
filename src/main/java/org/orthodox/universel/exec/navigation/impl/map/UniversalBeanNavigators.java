@@ -74,7 +74,7 @@ public class UniversalBeanNavigators {
     public static Node universalMethodNavigator(final Class<?> fromType,
                                                 final Node instanceReadAccessor,
                                                 final NavigationAxisAndNodeTest<MethodCall> step) {
-        final List<Method> matchingMethods = streamMethods(PUBLIC | PROTECTED, step.getNodeTest().getName().getName(), fromType, null, (Class<?>[]) null)
+        final List<Method> matchingMethods = streamMethods(fromType, PUBLIC | PROTECTED, step.getNodeTest().getName().getName(), null, (Class<?>[]) null)
                                                  .filter(m -> parameterTypesCompatible(step.getNodeTest(), m))
                                                  .collect(Collectors.toList());
         if (matchingMethods.size() != 1) return step;

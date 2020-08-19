@@ -379,6 +379,7 @@ public class ScriptAssembler extends AbstractSemanticAnalyser {
     }
 
     private boolean isTypeMember(final Node n) {
-        return n instanceof MethodDeclaration;
+        return n instanceof MethodDeclaration
+            || n instanceof FieldDeclaration;
     }
 }

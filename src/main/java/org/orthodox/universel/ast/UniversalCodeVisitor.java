@@ -96,7 +96,7 @@ public interface UniversalCodeVisitor {
 
     //   Node visitEnumDeclaration(EnumDeclaration node);
 //   Node visitEmptyStatement(EmptyStatement node);
-//   Node visitFieldDeclaration(FieldDeclaration node);
+    Node visitFieldDeclaration(FieldDeclaration node);
 //   Node visitFieldExpression(FieldExpression node);
 //   Node visitFilterExpression(FilterExpression node);
 //   Node visitForEachStatement(ForEachStatement node);

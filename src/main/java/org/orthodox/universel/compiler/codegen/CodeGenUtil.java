@@ -36,4 +36,8 @@ public class CodeGenUtil {
     public static String internalName(TypeReference typeReference) {
         return typeReference.getName().join("/");
     }
+
+    public static String descriptor(TypeReference typeReference) {
+        return Type.getDescriptor(typeReference.getTypeDescriptor());
+    }
 }

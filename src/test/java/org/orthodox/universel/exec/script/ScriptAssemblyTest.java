@@ -97,9 +97,9 @@ public class ScriptAssemblyTest {
     }
 
     private void assertStaticExecutionMethodPresent(final CompiledUnit<?> compiled) {
-        Optional<Method> staticExecutionMethod = TypeUtil.findMethod(SCRIPT_EXECUTE_METHOD_MODIFIERS.getModifiers(),
+        Optional<Method> staticExecutionMethod = TypeUtil.findMethod(compiled.getCompiledClasses().get(0),
+                                                                     SCRIPT_EXECUTE_METHOD_MODIFIERS.getModifiers(),
                                                                      SCRIPT_MAIN_METHOD_NAME,
-                                                                     compiled.getCompiledClasses().get(0),
                                                                      null,
                                                                      BeanWithProperties.class
                                                                     );
@@ -107,15 +107,15 @@ public class ScriptAssemblyTest {
     }
 
     private void assertNonStaticExecutionMethodPresent(final CompiledUnit<?> compiled) {
-        Optional<Method> staticExecutionMethod = TypeUtil.findMethod(SCRIPT_MAIN_METHOD_MODIFIERS.getModifiers(),
+        Optional<Method> staticExecutionMethod = TypeUtil.findMethod(compiled.getCompiledClasses().get(0),
+                                                                     SCRIPT_MAIN_METHOD_MODIFIERS.getModifiers(),
                                                                      SCRIPT_MAIN_METHOD_NAME,
-                                                                     compiled.getCompiledClasses().get(0),
                                                                      null,
                                                                      BeanWithProperties.class
                                                                     );
-        Optional<Method> nonStaticExecutionMethod = TypeUtil.findMethod(SCRIPT_EXECUTE_METHOD_MODIFIERS.getModifiers(),
+        Optional<Method> nonStaticExecutionMethod = TypeUtil.findMethod(compiled.getCompiledClasses().get(0),
+                                                                        SCRIPT_EXECUTE_METHOD_MODIFIERS.getModifiers(),
                                                                         SCRIPT_EXECUTE_METHOD_NAME,
-                                                                        compiled.getCompiledClasses().get(0),
                                                                         null,
                                                                         BeanWithProperties.class
                                                                        );

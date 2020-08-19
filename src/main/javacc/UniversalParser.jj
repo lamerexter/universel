@@ -529,7 +529,7 @@ List<Node> BodyElements() :
 {
     (
       (
-        LOOKAHEAD(Modifiers() MethodDeclaration())node=ClassOrInterfaceBodyDeclaration()
+        LOOKAHEAD(ClassOrInterfaceBodyDeclaration())node=ClassOrInterfaceBodyDeclaration()
         |
         node=StatementOrExpression()
       ) { nodes = add(nodes, node); }
@@ -1770,9 +1770,9 @@ Node ClassOrInterfaceBodyDeclaration():
 //          member = ConstructorDeclaration(modifiers)
 //          |
 //          LOOKAHEAD( [TypeParameters()] ResultType() <IDENTIFIER> "(" )
-          member = MethodDeclaration(modifiers)
-//          |
-//          member = FieldDeclaration(modifiers)
+          LOOKAHEAD(MethodDeclaration())member = MethodDeclaration(modifiers)
+          |
+          member = FieldDeclaration(modifiers)
       )
 //    |
 //      ";" { ret = new EmptyMemberDeclaration(token.beginLine, token.beginColumn)); }
@@ -1990,4 +1990,39 @@ Expression VariableInitializer() :
     )
 
     { return expr; }
+}
+
+FieldDeclaration FieldDeclaration(Modifiers modifiers):
+{
+    TypeReference type;
+    List<VariableDeclaration> variables = null;
+    VariableDeclaration decl;
+}
+{
+  type = Type() decl=VariableDeclaration() { variables = add(variables, decl); }
+  ( "," decl=VariableDeclaration() { variables = add(variables, decl); } )*
+
+  { return new FieldDeclaration(modifiers, type, variables); }
+}
+
+VariableDeclaration VariableDeclaration():
+{
+    VariableDeclarationId id;
+    Expression init = null;
+}
+{
+  id = VariableDeclaratorId() [ "=" init = VariableInitializer() ]
+  { return new VariableDeclaration(id, init); }
+}
+
+VariableDeclarationId VariableDeclaratorId():
+{
+    String name;
+    int arrayCount = 0, startLine, startColumn, endLine, endColumn;
+}
+{
+  <IDENTIFIER> { name = token.image; startLine=token.beginLine; startColumn=token.beginColumn; endLine=token.endLine; endColumn=token.endColumn;}
+  // 2013-11-11: TODO Investigate the lookahead below
+  ( LOOKAHEAD(2) "[" "]" { arrayCount++; endLine=token.endLine; endColumn=token.endColumn; } )*
+  { return new VariableDeclarationId(startLine, startColumn, endLine, endColumn, name, arrayCount); }
 }

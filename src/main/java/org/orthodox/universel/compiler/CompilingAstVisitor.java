@@ -51,6 +51,7 @@ import static org.objectweb.asm.Opcodes.*;
 import static org.objectweb.asm.Type.getInternalName;
 import static org.orthodox.universel.StringEscapeUtil.unescapeUniversalCharacterEscapeSequences;
 import static org.orthodox.universel.compiler.BytecodeHelper.CTOR_METHOD_NAME;
+import static org.orthodox.universel.compiler.codegen.CodeGenUtil.descriptor;
 import static org.orthodox.universel.compiler.codegen.CodeGenUtil.internalName;
 
 public class CompilingAstVisitor extends UniversalVisitorAdapter {
@@ -192,6 +193,17 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
 
         compilationContext.addCompiledType(fqClassName.join("."), new ByteArrayResource(cw.toByteArray()));
         compilationContext.popTypeInfo();
+
+        return node;
+    }
+
+    @Override
+    public Node visitFieldDeclaration(final FieldDeclaration node) {
+        final ClassWriter cw = compilationContext.getBytecodeHelper().peekClassWriter();
+
+        for (VariableDeclaration v : node.getVariableDeclarations()) {
+            cw.visitField(node.getModifiers().getModifiers(), v.getId().getName(), descriptor(node.getDeclarationType()), null, null);
+        }
 
         return node;
     }
@@ -747,7 +759,7 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
         node.getExpression().accept(this);
 
         Class<?> unaryExprType = node.getTypeDescriptor();
-        Optional<Method> unaryMinusFunction = findMethod(PUBLIC + STATIC, "unaryMinus", UnaryFunctions.class, unaryExprType, unaryExprType);
+        Optional<Method> unaryMinusFunction = findMethod(UnaryFunctions.class, PUBLIC + STATIC, "unaryMinus", unaryExprType, unaryExprType);
 
         if (!unaryMinusFunction.isPresent()) {
             compilationContext.getMessages().addError("uel.compiler.math.unary-minus.not-found", "Unable to find unary minus function for the given type: {0}", unaryExprType);

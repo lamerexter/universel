@@ -166,7 +166,7 @@ public class MethodDeclarationTest {
         CompiledUnit<?> compiled = compile("public static int doubleIt(int x) { x * 2 }");
 
         Class<?> compiledClass = compiled.getCompiledClasses().get(0);
-        Optional<Method> method = findMethod(PUBLIC | STATIC, "doubleIt", compiledClass, int.class, int.class);
+        Optional<Method> method = findMethod(compiledClass, PUBLIC | STATIC, "doubleIt", int.class, int.class);
         assertThat(method.isPresent(), is(true));
         assertThat(invokeStaticMethod(method.get(), 100), equalTo(200));
     }
@@ -176,7 +176,7 @@ public class MethodDeclarationTest {
         CompiledUnit<?> compiled = compile("public static double doubleIt(int x) { x * 2 }");
 
         Class<?> compiledClass = compiled.getCompiledClasses().get(0);
-        Optional<Method> method = findMethod(PUBLIC | STATIC, "doubleIt", compiledClass, double.class, int.class);
+        Optional<Method> method = findMethod(compiledClass, PUBLIC | STATIC, "doubleIt", double.class, int.class);
         assertThat(method.isPresent(), is(true));
         assertThat(invokeStaticMethod(method.get(), 100), equalTo(200d));
     }
@@ -186,7 +186,7 @@ public class MethodDeclarationTest {
         CompiledUnit<?> compiled = compile("public static char doubleIt(int x) { x * 2 }");
 
         Class<?> compiledClass = compiled.getCompiledClasses().get(0);
-        Optional<Method> method = findMethod(PUBLIC | STATIC, "doubleIt", compiledClass, char.class, int.class);
+        Optional<Method> method = findMethod(compiledClass, PUBLIC | STATIC, "doubleIt", char.class, int.class);
         assertThat(method.isPresent(), is(true));
         assertThat(invokeStaticMethod(method.get(), 100), equalTo(((char) 200)));
     }
@@ -196,8 +196,7 @@ public class MethodDeclarationTest {
         CompiledUnit<?> compiled = compile("public static Integer doubleIt(int x) { x * 2 }");
 
         Class<?> compiledClass = compiled.getCompiledClasses().get(0);
-        Optional<Method> method = findMethod(PUBLIC | STATIC, "doubleIt", compiledClass, Integer.class, int.class);
-        System.out.println("****> "+asList(compiledClass.getDeclaredMethods()));
+        Optional<Method> method = findMethod(compiledClass, PUBLIC | STATIC, "doubleIt", Integer.class, int.class);
         assertThat(method.isPresent(), is(true));
         assertThat(invokeStaticMethod(method.get(), 100), equalTo(200));
     }
@@ -207,9 +206,8 @@ public class MethodDeclarationTest {
         CompiledUnit<?> compiled = compile("public static long unboxIt(Long x) { x }");
 
         Class<?> compiledClass = compiled.getCompiledClasses().get(0);
-        Optional<Method> method = findMethod(PUBLIC | STATIC, "unboxIt", compiledClass, long.class, Long.class);
+        Optional<Method> method = findMethod(compiledClass, PUBLIC | STATIC, "unboxIt", long.class, Long.class);
         assertThat(method.isPresent(), is(true));
-        System.out.println("****> "+method);
         assertThat(invokeStaticMethod(method.get(), 100L), equalTo(100L));
     }
 
@@ -218,7 +216,7 @@ public class MethodDeclarationTest {
         CompiledUnit<?> compiled = compile("import " + BeanWithProperties.class.getName() + "\npublic static BeanWithProperties callIt(int intProperty) { BeanWithProperties(intProperty) }");
 
         Class<?> compiledClass = compiled.getCompiledClasses().get(0);
-        Optional<Method> method = findMethod(PUBLIC | STATIC, "callIt", compiledClass, BeanWithProperties.class, int.class);
+        Optional<Method> method = findMethod(compiledClass, PUBLIC | STATIC, "callIt", BeanWithProperties.class, int.class);
         assertThat(method.isPresent(), is(true));
         assertThat(invokeStaticMethod(method.get(), 999), equalTo(new BeanWithProperties(999)));
     }
