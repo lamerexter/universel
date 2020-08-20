@@ -116,7 +116,10 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
 
     @Override
     public Node visitFieldDeclaration(final FieldDeclaration node) {
-        return node;
+        TypeReference transformedDeclarationType = node.getDeclarationType().accept(this);
+
+        boolean noTransformationChanges = Objects.equals(node.getDeclarationType(), transformedDeclarationType);
+        return noTransformationChanges ? node : new FieldDeclaration(node.getModifiers(), transformedDeclarationType, node.getVariableDeclarations());
     }
 
     @Override

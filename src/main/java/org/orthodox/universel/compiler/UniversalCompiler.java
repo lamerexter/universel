@@ -16,6 +16,7 @@ import org.orthodox.universel.exec.navigation.PackageScanNavigatorLoader;
 import org.orthodox.universel.symanticanalysis.*;
 import org.orthodox.universel.symanticanalysis.conversion.BinaryExpressionOperatorMethodConverter;
 import org.orthodox.universel.symanticanalysis.conversion.WideningNumericConversionAnalyser;
+import org.orthodox.universel.symanticanalysis.declarations.FieldDeclarationErrorReporter;
 import org.orthodox.universel.symanticanalysis.methods.ImplicitMethodModifiersDecorator;
 import org.orthodox.universel.symanticanalysis.methods.ImplicitReturnStatementDecorator;
 import org.orthodox.universel.symanticanalysis.navigation.UnresolvedMethodCallReporter;
@@ -56,7 +57,8 @@ public class UniversalCompiler {
             new TypeReferenceResolver(true),
             new UnresolvedMethodCallReporter(),
             new UnresolvedNameReporter(),
-            new UnresolvedTypeReferenceReporter()
+            new UnresolvedTypeReferenceReporter(),
+            new FieldDeclarationErrorReporter()
         );
     }
 

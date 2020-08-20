@@ -28,38 +28,44 @@
 
 package org.orthodox.universel.compiler;
 
+import org.beanplanet.messages.domain.Message;
+
 import static org.beanplanet.messages.domain.Message.Builder;
 import static org.beanplanet.messages.domain.Message.builder;
 
 public interface Messages {
     interface ConditionalExpression {
-        Builder AMBIGUOUS_TYPE = builder().code("uel.ternary.type.ambiguous").message("The type of the conditional expression cannot be determined");
+        Builder AMBIGUOUS_TYPE = builder().code("uel.ternary.type.ambiguous").parameterisedMessage("The type of the conditional expression cannot be determined");
     }
 
     interface Constructor {
-        Builder CONSTRUCTOR_AMBIGUOUS = builder().code("uel.constructor.ambiguous").message("The call to constructor named \"{0}\" is ambiguous and matches {1} methods: {2}");
+        Builder CONSTRUCTOR_AMBIGUOUS = builder().code("uel.constructor.ambiguous").parameterisedMessage("The call to constructor named \"{0}\" is ambiguous and matches {1} methods: {2}");
+    }
+
+    interface FieldDeclaration {
+        Message VOID_TYPE = builder().code("uel.field.voidtype.illegal").parameterisedMessage("The void type may not be used in field declaraions").build();
     }
 
     interface MethodCall {
-        Builder METHOD_NOT_FOUND = builder().code("uel.method.notfound").message("Method named \"{0}\" not found");
-        Builder METHOD_AMBIGUOUS = builder().code("uel.method.ambiguous").message("T call to method named \"{0}\" is ambiguous and matches {1} methods: {2}");
+        Builder METHOD_NOT_FOUND = builder().code("uel.method.notfound").parameterisedMessage("Method named \"{0}\" not found");
+        Builder METHOD_AMBIGUOUS = builder().code("uel.method.ambiguous").parameterisedMessage("T call to method named \"{0}\" is ambiguous and matches {1} methods: {2}");
     }
 
     interface MethodDeclaration {
-        Builder MISSING_RETURN = builder().code("uel.method.missingreturn").message("Missing return statement from method");
-        Builder IMPLICIT_RETURN_TYPE_MISMATCH = builder().code("uel.method.implicitreturntypemismatch").message("Implicitly returned type \"{0}\" cannot be converted to method return type \"{1}\"");
+        Builder MISSING_RETURN = builder().code("uel.method.missingreturn").parameterisedMessage("Missing return statement from method");
+        Builder IMPLICIT_RETURN_TYPE_MISMATCH = builder().code("uel.method.implicitreturntypemismatch").parameterisedMessage("Implicitly returned type \"{0}\" cannot be converted to method return type \"{1}\"");
     }
 
     interface NAME {
-        Builder NAME_NOT_RESOLVED = builder().code("uel.navigation.unresolvedname").message("The name \"{0}\" could not be resolved");
+        Builder NAME_NOT_RESOLVED = builder().code("uel.navigation.unresolvedname").parameterisedMessage("The name \"{0}\" could not be resolved");
     }
 
     interface NavigationExpression {
-        Builder UNRESOLVED_STEP = builder().code("uel.navigation.unresolvedstep").message("The navigation step could not be resolved. Is there a navigator function available on the classpath for this type of navigation? ");
+        Builder UNRESOLVED_STEP = builder().code("uel.navigation.unresolvedstep").parameterisedMessage("The navigation step could not be resolved. Is there a navigator function available on the classpath for this type of navigation? ");
     }
 
     interface TYPE {
-        Builder TYPE_NOT_FOUND = builder().code("uel.type.notfound").message("Type named \"{0}\" not found");
-        Builder TYPE_AMBIGUOUS = builder().code("uel.type.ambiguous").message("The type reference \"{0}\" is ambiguous and matches {1} inferred types: {2}");
+        Builder TYPE_NOT_FOUND = builder().code("uel.type.notfound").parameterisedMessage("Type named \"{0}\" not found");
+        Builder TYPE_AMBIGUOUS = builder().code("uel.type.ambiguous").parameterisedMessage("The type reference \"{0}\" is ambiguous and matches {1} inferred types: {2}");
     }
 }
