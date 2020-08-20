@@ -28,6 +28,7 @@
 
 package org.orthodox.universel.symanticanalysis.declarations;
 
+import org.beanplanet.core.lang.TypeUtil;
 import org.beanplanet.messages.domain.Message;
 import org.orthodox.universel.ast.FieldDeclaration;
 import org.orthodox.universel.ast.Node;
@@ -39,6 +40,8 @@ import org.orthodox.universel.symanticanalysis.ResolvedTypeReference;
 import org.orthodox.universel.symanticanalysis.SemanticAnalyser;
 
 import java.util.Objects;
+
+import static org.beanplanet.core.lang.TypeUtil.determineArrayBaseComponentType;
 
 /**
  * Iterates over the AST, performing a depth-first post-order traversal to establish the types on the AST. Essentially,
@@ -55,7 +58,7 @@ public class FieldDeclarationErrorReporter extends AbstractSemanticAnalyser impl
 
     @Override
     public Node visitFieldDeclaration(final FieldDeclaration node) {
-        if (node.getDeclarationType().getTypeDescriptor() == void.class || node.getDeclarationType().getTypeDescriptor() == Void.class) {
+        if (node.getDeclarationType().getTypeDescriptor() == void.class || determineArrayBaseComponentType(node.getDeclarationType().getTypeDescriptor()) == Void.class) {
             getContext().addError(Message.builder().message(Messages.FieldDeclaration.VOID_TYPE)
                                       .withRelatedObject(node.getDeclarationType()));
 
