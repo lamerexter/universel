@@ -143,4 +143,17 @@ public interface Type {
         final Class<?> clazz = getTypeClass();
         return isArray() || (clazz != null && Iterable.class.isAssignableFrom(clazz));
     }
+
+    /**
+     * Determines whether this type is assignment compatible from the given type. That is, whether an instance of this
+     * type may be assigned an expression of the given type.
+     *
+     * @param type the type whose assigment compatibility with this type is to be determined.
+     * @return true if this type is assigment compatible with this type.
+     */
+    default boolean isAssignableFrom(Type type) {
+        return getTypeClass() != null
+            && type.getTypeClass() != null
+            && getTypeClass().isAssignableFrom(type.getTypeClass());
+    }
 }

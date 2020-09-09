@@ -29,10 +29,14 @@
 package org.orthodox.universel.compiler;
 
 import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.ast.Type;
+import org.orthodox.universel.ast.UniversalCodeVisitor;
+import org.orthodox.universel.ast.type.reference.ResolvedTypeReferenceOld;
 import org.orthodox.universel.symanticanalysis.JvmInstructionNode;
 
 import java.util.Objects;
 
+import static org.beanplanet.core.lang.TypeUtil.ensureNonPrimitiveType;
 import static org.beanplanet.core.lang.TypeUtil.primitiveTypeFor;
 
 public class Unbox extends JvmInstructionNode {
@@ -58,12 +62,17 @@ public class Unbox extends JvmInstructionNode {
     }
 
     @Override
-    public Class<?> getTypeDescriptor() {
-        return primitiveTypeFor(super.getTypeDescriptor());
+    public Type getType() {
+        return getSource() == null ? super.getType() : new ResolvedTypeReferenceOld(primitiveTypeFor(getSource().getTypeDescriptor()));
     }
 
     @Override
     public void emit(final BytecodeHelper bch) {
         bch.unbox(getSource().getTypeDescriptor());
+    }
+
+    @Override
+    public Node accept(UniversalCodeVisitor visitor) {
+        return visitor.visitUnboxExpression(this);
     }
 }

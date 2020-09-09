@@ -26,7 +26,7 @@
  *
  */
 
-package org.orthodox.universel.exec.types.script;
+package org.orthodox.universel.exec.types.script.declarations.field.stat;
 
 import org.beanplanet.messages.domain.Message;
 import org.junit.jupiter.api.Test;

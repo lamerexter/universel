@@ -10,7 +10,7 @@ public class VariableDeclaration extends Node implements CompositeNode {
    private final VariableDeclarationId id;
    
    /** The initialisation expression associated with this declaration. */
-   private final Expression initialiser;
+   private final Node initialiser;
 
 
    /**
@@ -20,7 +20,7 @@ public class VariableDeclaration extends Node implements CompositeNode {
     * @param initialiser the initialisation expression associated with this declaration.
     */
    public VariableDeclaration(final VariableDeclarationId id,
-                              final Expression initialiser) {
+                              final Node initialiser) {
       super(TokenImage.range(id, initialiser));
       this.id = id;
       this.initialiser = initialiser;
@@ -40,7 +40,7 @@ public class VariableDeclaration extends Node implements CompositeNode {
     * 
     * @return the initialisation expression associated with this declaration, which may be null.
     */
-   public Expression getInitialiser() {
+   public Node getInitialiser() {
       return initialiser;
    }
 

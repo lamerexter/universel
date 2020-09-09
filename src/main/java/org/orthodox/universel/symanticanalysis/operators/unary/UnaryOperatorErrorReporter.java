@@ -26,23 +26,29 @@
  *
  */
 
-package org.orthodox.universel.compiler.codegen;
+package org.orthodox.universel.symanticanalysis.operators.unary;
 
-import org.beanplanet.core.models.path.NamePath;
-import org.objectweb.asm.Type;
-import org.orthodox.universel.ast.type.reference.TypeReference;
+import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.ast.UnaryExpression;
+import org.orthodox.universel.symanticanalysis.AbstractSemanticAnalyser;
+import org.orthodox.universel.symanticanalysis.SemanticAnalyser;
 
-public class CodeGenUtil {
-    public static final Type[] EMPTY_TYPES = {};
-    public static String internalName(TypeReference typeReference) {
-        return internalName(typeReference.getName());
-    }
+import static org.beanplanet.messages.domain.Message.builder;
+import static org.orthodox.universel.compiler.Messages.OPERATOR.UNARY_NOTFOUND;
 
-    public static String internalName(NamePath namePath) {
-        return namePath.join("/");
-    }
+/**
+ * Reports errors relating to unary operators.
+ */
+public class UnaryOperatorErrorReporter extends AbstractSemanticAnalyser implements SemanticAnalyser {
 
-    public static String descriptor(TypeReference typeReference) {
-        return Type.getDescriptor(typeReference.getTypeDescriptor());
+    @Override
+    public Node visitUnaryExpression(final UnaryExpression node) {
+        getContext().addError(builder()
+                                  .message(UNARY_NOTFOUND)
+                                  .parameters(node.getOperator().getSymbol())
+                                  .withRelatedObject(node)
+        );
+
+        return node;
     }
 }

@@ -42,6 +42,7 @@ import java.lang.invoke.*;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static java.lang.reflect.Modifier.PUBLIC;
 import static java.lang.reflect.Modifier.STATIC;
@@ -146,6 +147,14 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
     }
 
     @Override
+    public Node visitBooleanLiteral(final BooleanLiteralExpr node) {
+        boolean booleanValue = node.getBooleanValue();
+        compilationContext.getVirtualMachine().loadOperandConstant(booleanValue);
+        compilationContext.getBytecodeHelper().emitLoadBooleanOperand(booleanValue);
+        return node;
+    }
+
+    @Override
     public Node visitBoxConversion(final BoxConversion node) {
         node.getSource().accept(this);
         compilationContext.getVirtualMachine().box();
@@ -153,10 +162,9 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
     }
 
     @Override
-    public Node visitBooleanLiteral(final BooleanLiteralExpr node) {
-        boolean booleanValue = node.getBooleanValue();
-        compilationContext.getVirtualMachine().loadOperandConstant(booleanValue);
-        compilationContext.getBytecodeHelper().emitLoadBooleanOperand(booleanValue);
+    public Node visitBoxExpression(final Box node) {
+        node.getSource().accept(this);
+        compilationContext.getVirtualMachine().box();
         return node;
     }
 
@@ -174,14 +182,53 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
                                                                               toTypesArray(node.getImplementsList())
                                                                               );
         // Generate a default constructor, for now...
-        MethodVisitor mv=cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
-        mv.visitCode();
-        mv.visitVarInsn(ALOAD, 0);
-        mv.visitMethodInsn(INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false);
-        mv.visitInsn(RETURN);
-        mv.visitMaxs(1,1);
-        mv.visitEnd();
+        withinStack(node, n -> {
+            MethodVisitor mv=cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
+            mv.visitCode();
+            mv.visitVarInsn(ALOAD, 0);
+            mv.visitMethodInsn(INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false);
+            mv.visitInsn(RETURN);
+            mv.visitMaxs(1,1);
+            mv.visitEnd();
 
+            return node;
+        });
+
+        //--------------------------------------------------------------------------------------------------------------
+        // Generate Class Initialiser, if appropriate.
+        //--------------------------------------------------------------------------------------------------------------
+        withinStack(node, n -> {
+            List<FieldDeclaration> applicableStaticInitialisations = node.getMembers()
+                                                                         .stream()
+                                                                         .filter(FieldDeclaration.class::isInstance)
+                                                                         .map(FieldDeclaration.class::cast)
+                                                                         .filter(f -> Modifiers.isStatic(f.getModifiers().getModifiers()) && f.getVariableDeclarations().stream().anyMatch(v -> v.getInitialiser() != null))
+                                                                         .collect(Collectors.toList());
+            if ( applicableStaticInitialisations.isEmpty() ) return node;
+
+            MethodVisitor mv = compilationContext.getBytecodeHelper().generateMethod(ACC_STATIC, "<clinit>", void.class, null);
+
+            applicableStaticInitialisations.forEach(f -> {
+                f.getVariableDeclarations()
+                 .stream()
+                 .filter(vd -> vd.getInitialiser() != null)
+                 .forEach(vd -> {
+                     vd.getInitialiser().accept(this);
+
+                     mv.visitFieldInsn(PUTSTATIC, internalName(fqClassName), vd.getId().getName(), descriptor(f.getDeclarationType()));
+                 });
+            });
+
+            mv.visitInsn(RETURN);
+
+            mv.visitEnd();
+            mv.visitMaxs(0, 0);
+
+            compilationContext.getBytecodeHelper().popMethodVisitor();
+
+
+            return node;
+        });
 
         // Generate the class members
         for (Node member : node.getMembers()) {
@@ -721,6 +768,7 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
     @Override
     public Node visitStaticFieldGet(final StaticFieldGetExpression node) {
         compilationContext.getBytecodeHelper().emitGetStaticField(node.getDeclaringType(), node.getFieldType(), node.getFieldName());
+        compilationContext.getVirtualMachine().loadOperandOfType(node.getFieldType());
         return node;
     }
 
@@ -755,19 +803,9 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
     }
 
     @Override
-    public Node visitUnaryExpression(final UnaryExpression node) {
-        node.getExpression().accept(this);
-
-        Class<?> unaryExprType = node.getTypeDescriptor();
-        Optional<Method> unaryMinusFunction = findMethod(UnaryFunctions.class, PUBLIC + STATIC, "unaryMinus", unaryExprType, unaryExprType);
-
-        if (!unaryMinusFunction.isPresent()) {
-            compilationContext.getMessages().addError("uel.compiler.math.unary-minus.not-found", "Unable to find unary minus function for the given type: {0}", unaryExprType);
-            return node;
-        }
-
-        compilationContext.getBytecodeHelper().emitInvokeStaticMethod(unaryMinusFunction.get());
-        compilationContext.getVirtualMachine().loadOperandOfType(unaryMinusFunction.get().getReturnType());
+    public Node visitUnboxExpression(final Unbox node) {
+        node.getSource().accept(this);
+        compilationContext.getVirtualMachine().unbox();
         return node;
     }
 

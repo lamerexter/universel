@@ -31,7 +31,7 @@ public class DecimalIntegerLiteralParseTest {
         assertThat(expr.getTokenImage().getStartColumn(), equalTo(3));
         assertThat(expr.getTokenImage().getEndLine(), equalTo(2));
         assertThat(expr.getTokenImage().getEndColumn(), equalTo(10));
-        assertThat(input, endsWith(expr.getExpression().getTokenImage().getImage()));
+        assertThat(input, endsWith(expr.getOperand().getTokenImage().getImage()));
     }
 
     private DecimalIntegerLiteralExpr parse(String input) throws Exception {
@@ -72,28 +72,28 @@ public class DecimalIntegerLiteralParseTest {
 
     @Test()
     public void negativeIntegerLiterals() throws Exception {
-        assertThat(parseUnaryMinus("-0").getExpression().getTokenImage().getImage(), equalTo("0"));
-        assertThat(parseUnaryMinus("-1").getExpression().getTokenImage().getImage(), equalTo("1"));
-        assertThat(parseUnaryMinus("-1234").getExpression().getTokenImage().getImage(), equalTo("1234"));
-        assertThat(parseUnaryMinus("-1000__1000__1000").getExpression().getTokenImage().getImage(), equalTo("1000__1000__1000"));
-        assertThat(parseUnaryMinus("-"+Integer.toString(Integer.MAX_VALUE)).getExpression().getTokenImage().getImage(), equalTo(Integer.toString(Integer.MAX_VALUE)));
+        assertThat(parseUnaryMinus("-0").getOperand().getTokenImage().getImage(), equalTo("0"));
+        assertThat(parseUnaryMinus("-1").getOperand().getTokenImage().getImage(), equalTo("1"));
+        assertThat(parseUnaryMinus("-1234").getOperand().getTokenImage().getImage(), equalTo("1234"));
+        assertThat(parseUnaryMinus("-1000__1000__1000").getOperand().getTokenImage().getImage(), equalTo("1000__1000__1000"));
+        assertThat(parseUnaryMinus("-"+Integer.toString(Integer.MAX_VALUE)).getOperand().getTokenImage().getImage(), equalTo(Integer.toString(Integer.MAX_VALUE)));
     }
 
     @Test()
     public void negativeLongLiterals() throws Exception {
-        assertThat(parseUnaryMinus("-0l").getExpression().getTokenImage().getImage(), equalTo("0l"));
-        assertThat(parseUnaryMinus("-1L").getExpression().getTokenImage().getImage(), equalTo("1L"));
-        assertThat(parseUnaryMinus("-1234L").getExpression().getTokenImage().getImage(), equalTo("1234L"));
-        assertThat(parseUnaryMinus("-1000__1000__1000L").getExpression().getTokenImage().getImage(), equalTo("1000__1000__1000L"));
-        assertThat(parseUnaryMinus("-"+Long.toString(Integer.MAX_VALUE)+"L").getExpression().getTokenImage().getImage(), equalTo(Long.toString(Integer.MAX_VALUE)+"L"));
+        assertThat(parseUnaryMinus("-0l").getOperand().getTokenImage().getImage(), equalTo("0l"));
+        assertThat(parseUnaryMinus("-1L").getOperand().getTokenImage().getImage(), equalTo("1L"));
+        assertThat(parseUnaryMinus("-1234L").getOperand().getTokenImage().getImage(), equalTo("1234L"));
+        assertThat(parseUnaryMinus("-1000__1000__1000L").getOperand().getTokenImage().getImage(), equalTo("1000__1000__1000L"));
+        assertThat(parseUnaryMinus("-"+Long.toString(Integer.MAX_VALUE)+"L").getOperand().getTokenImage().getImage(), equalTo(Long.toString(Integer.MAX_VALUE) + "L"));
     }
 
     @Test()
     public void negativeBigLiterals() throws Exception {
-        assertThat(parseUnaryMinus("-0I").getExpression().getTokenImage().getImage(), equalTo("0I"));
-        assertThat(parseUnaryMinus("-1I").getExpression().getTokenImage().getImage(), equalTo("1I"));
-        assertThat(parseUnaryMinus("-1234I").getExpression().getTokenImage().getImage(), equalTo("1234I"));
-        assertThat(parseUnaryMinus("-1000__1000__1000I").getExpression().getTokenImage().getImage(), equalTo("1000__1000__1000I"));
-        assertThat(parseUnaryMinus("-"+Long.toString(Integer.MAX_VALUE)+"I").getExpression().getTokenImage().getImage(), equalTo(Long.toString(Integer.MAX_VALUE)+"I"));
+        assertThat(parseUnaryMinus("-0I").getOperand().getTokenImage().getImage(), equalTo("0I"));
+        assertThat(parseUnaryMinus("-1I").getOperand().getTokenImage().getImage(), equalTo("1I"));
+        assertThat(parseUnaryMinus("-1234I").getOperand().getTokenImage().getImage(), equalTo("1234I"));
+        assertThat(parseUnaryMinus("-1000__1000__1000I").getOperand().getTokenImage().getImage(), equalTo("1000__1000__1000I"));
+        assertThat(parseUnaryMinus("-"+Long.toString(Integer.MAX_VALUE)+"I").getOperand().getTokenImage().getImage(), equalTo(Long.toString(Integer.MAX_VALUE) + "I"));
     }
 }

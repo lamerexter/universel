@@ -32,7 +32,7 @@ public class DecimalFloatingPointLiteralParseTest {
         assertThat(expr.getTokenImage().getStartColumn(), equalTo(3));
         assertThat(expr.getTokenImage().getEndLine(), equalTo(2));
         assertThat(expr.getTokenImage().getEndColumn(), equalTo(11));
-        assertThat(input, endsWith(expr.getExpression().getTokenImage().getImage()));
+        assertThat(input, endsWith(expr.getOperand().getTokenImage().getImage()));
     }
 
     private DecimalFloatingPointLiteralExpr parse(String input) throws Exception {
@@ -91,36 +91,36 @@ public class DecimalFloatingPointLiteralParseTest {
 
     @Test
     public void negativeUntypedLiterals() throws Exception{
-        assertThat(parseUnaryMinus("-0.0").getExpression().getTokenImage().getImage(), equalTo("0.0"));
-        assertThat(parseUnaryMinus("-.1").getExpression().getTokenImage().getImage(), equalTo(".1"));
-        assertThat(parseUnaryMinus("-1.").getExpression().getTokenImage().getImage(), equalTo("1."));
-        assertThat(parseUnaryMinus("-1234.5").getExpression().getTokenImage().getImage(), equalTo("1234.5"));
-        assertThat(parseUnaryMinus("-123e02").getExpression().getTokenImage().getImage(), equalTo("123e02"));
-        assertThat(parseUnaryMinus("-1000__1000__1000.25").getExpression().getTokenImage().getImage(), equalTo("1000__1000__1000.25"));
+        assertThat(parseUnaryMinus("-0.0").getOperand().getTokenImage().getImage(), equalTo("0.0"));
+        assertThat(parseUnaryMinus("-.1").getOperand().getTokenImage().getImage(), equalTo(".1"));
+        assertThat(parseUnaryMinus("-1.").getOperand().getTokenImage().getImage(), equalTo("1."));
+        assertThat(parseUnaryMinus("-1234.5").getOperand().getTokenImage().getImage(), equalTo("1234.5"));
+        assertThat(parseUnaryMinus("-123e02").getOperand().getTokenImage().getImage(), equalTo("123e02"));
+        assertThat(parseUnaryMinus("-1000__1000__1000.25").getOperand().getTokenImage().getImage(), equalTo("1000__1000__1000.25"));
 
         // Parses with negative exponent
-        assertThat(parseUnaryMinus("-"+Double.toString(Double.MAX_VALUE)).getExpression().getTokenImage().getImage(), equalTo(Double.toString(Double.MAX_VALUE)));
+        assertThat(parseUnaryMinus("-"+Double.toString(Double.MAX_VALUE)).getOperand().getTokenImage().getImage(), equalTo(Double.toString(Double.MAX_VALUE)));
     }
 
     @Test
     public void negativeFloatLiterals() throws Exception{
-        assertThat(parseUnaryMinus("-0.0f").getExpression().getTokenImage().getImage(), equalTo("0.0f"));
-        assertThat(parseUnaryMinus("-.1f").getExpression().getTokenImage().getImage(), equalTo(".1f"));
-        assertThat(parseUnaryMinus("-1.f").getExpression().getTokenImage().getImage(), equalTo("1.f"));
-        assertThat(parseUnaryMinus("-1234.5f").getExpression().getTokenImage().getImage(), equalTo("1234.5f"));
-        assertThat(parseUnaryMinus("-123e02f").getExpression().getTokenImage().getImage(), equalTo("123e02f"));
-        assertThat(parseUnaryMinus("-1000__1000__1000.25").getExpression().getTokenImage().getImage(), equalTo("1000__1000__1000.25"));
-        assertThat(parseUnaryMinus("-"+Float.toString(Float.MAX_VALUE)+"f").getExpression().getTokenImage().getImage(), equalTo(Float.toString(Float.MAX_VALUE)+"f"));
+        assertThat(parseUnaryMinus("-0.0f").getOperand().getTokenImage().getImage(), equalTo("0.0f"));
+        assertThat(parseUnaryMinus("-.1f").getOperand().getTokenImage().getImage(), equalTo(".1f"));
+        assertThat(parseUnaryMinus("-1.f").getOperand().getTokenImage().getImage(), equalTo("1.f"));
+        assertThat(parseUnaryMinus("-1234.5f").getOperand().getTokenImage().getImage(), equalTo("1234.5f"));
+        assertThat(parseUnaryMinus("-123e02f").getOperand().getTokenImage().getImage(), equalTo("123e02f"));
+        assertThat(parseUnaryMinus("-1000__1000__1000.25").getOperand().getTokenImage().getImage(), equalTo("1000__1000__1000.25"));
+        assertThat(parseUnaryMinus("-"+Float.toString(Float.MAX_VALUE)+"f").getOperand().getTokenImage().getImage(), equalTo(Float.toString(Float.MAX_VALUE) + "f"));
     }
 
     @Test
     public void negativeBigLiterals() throws Exception{
-        assertThat(parseUnaryMinus("-0.0D").getExpression().getTokenImage().getImage(), equalTo("0.0D"));
-        assertThat(parseUnaryMinus("-.1D").getExpression().getTokenImage().getImage(), equalTo(".1D"));
-        assertThat(parseUnaryMinus("-1.D").getExpression().getTokenImage().getImage(), equalTo("1.D"));
-        assertThat(parseUnaryMinus("-1234.5D").getExpression().getTokenImage().getImage(), equalTo("1234.5D"));
-        assertThat(parseUnaryMinus("-123e02D").getExpression().getTokenImage().getImage(), equalTo("123e02D"));
-        assertThat(parseUnaryMinus("-1000__1000__1000.25").getExpression().getTokenImage().getImage(), equalTo("1000__1000__1000.25"));
-        assertThat(parseUnaryMinus("-"+Double.toString(Double.MAX_VALUE)+"D").getExpression().getTokenImage().getImage(), equalTo(Double.toString(Double.MAX_VALUE)+"D"));
+        assertThat(parseUnaryMinus("-0.0D").getOperand().getTokenImage().getImage(), equalTo("0.0D"));
+        assertThat(parseUnaryMinus("-.1D").getOperand().getTokenImage().getImage(), equalTo(".1D"));
+        assertThat(parseUnaryMinus("-1.D").getOperand().getTokenImage().getImage(), equalTo("1.D"));
+        assertThat(parseUnaryMinus("-1234.5D").getOperand().getTokenImage().getImage(), equalTo("1234.5D"));
+        assertThat(parseUnaryMinus("-123e02D").getOperand().getTokenImage().getImage(), equalTo("123e02D"));
+        assertThat(parseUnaryMinus("-1000__1000__1000.25").getOperand().getTokenImage().getImage(), equalTo("1000__1000__1000.25"));
+        assertThat(parseUnaryMinus("-"+Double.toString(Double.MAX_VALUE)+"D").getOperand().getTokenImage().getImage(), equalTo(Double.toString(Double.MAX_VALUE) + "D"));
     }
 }

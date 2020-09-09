@@ -12,7 +12,11 @@ public class BoxingFunctions {
     public static boolean booleanUnbox(Object value) {
         // Allow null value for now and treat as false (done to allow unboxing test expressions like in the
         // case when <test> then ...
-        return value != null && TYPE_CONVERTER.convert(value, boolean.class);
+        if ( value == null ) return false;
+        else if ( value == Boolean.TRUE ) return true;
+        else if ( value == Boolean.FALSE ) return false;
+
+        return TYPE_CONVERTER.convert(value, boolean.class);
     }
 
     public static byte byteUnbox(Object value) {

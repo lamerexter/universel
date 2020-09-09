@@ -50,6 +50,8 @@ import org.orthodox.universel.ast.type.StaticFieldGetExpression;
 import org.orthodox.universel.ast.type.declaration.ClassDeclaration;
 import org.orthodox.universel.ast.type.declaration.InterfaceDeclaration;
 import org.orthodox.universel.ast.type.reference.TypeReference;
+import org.orthodox.universel.compiler.Box;
+import org.orthodox.universel.compiler.Unbox;
 import org.orthodox.universel.symanticanalysis.JvmInstructionNode;
 import org.orthodox.universel.symanticanalysis.ValueConsumingNode;
 import org.orthodox.universel.symanticanalysis.conversion.BinaryExpressionOperatorMethodCall;
@@ -109,17 +111,36 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
     }
 
     @Override
+    public Node visitBoxExpression(Box node) {
+        final Node transformedSource = node.getSource().accept(this);
+
+        boolean noTransformationChanges = Objects.equals(node.getSource(), transformedSource);
+        return noTransformationChanges ? node : new Box(transformedSource);
+    }
+
+
+    @Override
     public Node visitBinaryExpression(final BinaryExpressionOperatorMethodCall node) {
-        node.getParameters().forEach(p -> p.accept(this));
-        return node;
+        List<Node> transformedParameters = transformNodeList(node.getParameters());
+
+        boolean noTransformationChanges = Objects.equals(node.getParameters(), transformedParameters);
+        return noTransformationChanges ? node : new BinaryExpressionOperatorMethodCall(node.getTokenImage(),
+                                                                                       node.getOperator(),
+                                                                                       node.getOperatorMethod(),
+                                                                                       transformedParameters);
     }
 
     @Override
     public Node visitFieldDeclaration(final FieldDeclaration node) {
         TypeReference transformedDeclarationType = node.getDeclarationType().accept(this);
+        List<VariableDeclaration> transformedVariableDeclarations = new ArrayList<>(node.getVariableDeclarations().size());
+        for (VariableDeclaration vd : node.getVariableDeclarations()) {
+            transformedVariableDeclarations.add(new VariableDeclaration(vd.getId(), vd.getInitialiser() == null ? null : vd.getInitialiser().accept(this)));
+        }
 
-        boolean noTransformationChanges = Objects.equals(node.getDeclarationType(), transformedDeclarationType);
-        return noTransformationChanges ? node : new FieldDeclaration(node.getModifiers(), transformedDeclarationType, node.getVariableDeclarations());
+        boolean noTransformationChanges = Objects.equals(node.getDeclarationType(), transformedDeclarationType)
+            && Objects.equals(node.getVariableDeclarations(), transformedVariableDeclarations);
+        return noTransformationChanges ? node : new FieldDeclaration(node.getModifiers(), transformedDeclarationType, transformedVariableDeclarations);
     }
 
     @Override
@@ -611,8 +632,18 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
 
     @Override
     public Node visitUnaryExpression(final UnaryExpression node) {
-        node.getExpression().accept(this);
-        return node;
+        Node transformedOperand = node.getOperand().accept(this);
+
+        boolean noTransformationChanges = Objects.equals(node.getOperand(), transformedOperand);
+        return noTransformationChanges ? node : new UnaryExpression(node.getTokenImage(), node.getOperator(), transformedOperand);
+    }
+
+    @Override
+    public Node visitUnboxExpression(Unbox node) {
+        final Node transformedSource = node.getSource().accept(this);
+
+        boolean noTransformationChanges = Objects.equals(node.getSource(), transformedSource);
+        return noTransformationChanges ? node : new Unbox(transformedSource);
     }
 
     @Override

@@ -38,13 +38,13 @@ import static org.orthodox.universel.ast.Operator.*;
 public class ByteBinaryOperatorFunctions {
 
     @BinaryOperator(AMPERSAND)
-    public static int bitAnd(byte lhs, byte rhs) {
-        return lhs & rhs;
+    public static byte bitAnd(byte lhs, byte rhs) {
+        return (byte)(lhs & rhs);
     }
 
     @BinaryOperator(CARAT)
-    public static int power(byte lhs, byte rhs) {
-        return lhs ^ rhs;
+    public static byte power(byte lhs, byte rhs) {
+        return (byte)(lhs ^ rhs);
     }
 
     @BinaryOperator({EXCLAMATION_EQUAL, LESS_GREATER_THAN})
@@ -53,8 +53,8 @@ public class ByteBinaryOperatorFunctions {
     }
 
     @BinaryOperator(FORWARD_SLASH)
-    public static int divide(byte lhs, byte rhs) {
-        return lhs / rhs;
+    public static byte divide(byte lhs, byte rhs) {
+        return (byte)(lhs / rhs);
     }
 
     @BinaryOperator({EQUAL, TREBLE_EQUAL})
@@ -93,23 +93,23 @@ public class ByteBinaryOperatorFunctions {
     }
 
     @BinaryOperator(MINUS)
-    public static int minus(byte lhs, byte rhs) {
-        return lhs - rhs;
+    public static byte minus(byte lhs, byte rhs) {
+        return (byte)(lhs - rhs);
     }
 
     @BinaryOperator(PERCENT)
-    public static int modulus(byte lhs, byte rhs) {
-        return lhs % rhs;
+    public static byte modulus(byte lhs, byte rhs) {
+        return (byte)(lhs % rhs);
     }
 
     @BinaryOperator(PIPE)
-    public static int bitOr(byte lhs, byte rhs) {
-        return lhs | rhs;
+    public static byte bitOr(byte lhs, byte rhs) {
+        return (byte)(lhs | rhs);
     }
 
     @BinaryOperator(PLUS)
-    public static int plus(byte lhs, byte rhs) {
-        return lhs + rhs;
+    public static byte plus(byte lhs, byte rhs) {
+        return (byte)(lhs + rhs);
     }
 
     @BinaryOperator({
@@ -125,22 +125,22 @@ public class ByteBinaryOperatorFunctions {
     }
 
     @BinaryOperator(SHIFT_LEFT)
-    public static int shiftLeft(byte lhs, byte rhs) {
-        return lhs << rhs;
+    public static byte shiftLeft(byte lhs, byte rhs) {
+        return (byte)(lhs << rhs);
     }
 
     @BinaryOperator(SHIFT_RIGHT)
-    public static int shiftRight(byte lhs, byte rhs) {
-        return lhs >> rhs;
+    public static byte shiftRight(byte lhs, byte rhs) {
+        return (byte)(lhs >> rhs);
     }
 
     @BinaryOperator(TREBLE_SHIFT_RIGHT)
-    public static int zeroFillShiftRight(byte lhs, byte rhs) {
-        return lhs >>> rhs;
+    public static byte zeroFillShiftRight(byte lhs, byte rhs) {
+        return (byte)(lhs >>> rhs);
     }
 
     @BinaryOperator(STAR)
-    public static int multiply(byte lhs, byte rhs) {
-        return lhs * rhs;
+    public static byte multiply(byte lhs, byte rhs) {
+        return (byte)(lhs * rhs);
     }
 }

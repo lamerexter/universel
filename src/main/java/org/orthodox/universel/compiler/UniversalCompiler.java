@@ -17,12 +17,15 @@ import org.orthodox.universel.symanticanalysis.*;
 import org.orthodox.universel.symanticanalysis.conversion.BinaryExpressionOperatorMethodConverter;
 import org.orthodox.universel.symanticanalysis.conversion.WideningNumericConversionAnalyser;
 import org.orthodox.universel.symanticanalysis.declarations.FieldDeclarationErrorReporter;
+import org.orthodox.universel.symanticanalysis.declarations.FieldDeclarationInitialiserConverter;
 import org.orthodox.universel.symanticanalysis.methods.ImplicitMethodModifiersDecorator;
 import org.orthodox.universel.symanticanalysis.methods.ImplicitReturnStatementDecorator;
 import org.orthodox.universel.symanticanalysis.navigation.UnresolvedMethodCallReporter;
 import org.orthodox.universel.symanticanalysis.navigation.UnresolvedNameReporter;
 import org.orthodox.universel.symanticanalysis.name.IfStatementImplicitResultValueResolver;
 import org.orthodox.universel.symanticanalysis.navigation.NavigationResolver;
+import org.orthodox.universel.symanticanalysis.operators.unary.UnaryOperatorErrorReporter;
+import org.orthodox.universel.symanticanalysis.operators.unary.UnaryOperatorImplementationAnalyser;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -52,13 +55,16 @@ public class UniversalCompiler {
             new IfStatementImplicitResultValueResolver(),
             new ImplicitReturnStatementDecorator(),
             new BinaryExpressionOperatorMethodConverter(),
+            new UnaryOperatorImplementationAnalyser(),
+            new FieldDeclarationInitialiserConverter(),
 
             // Lastly, when all opportunities for resolution has preceded, report any errors
             new TypeReferenceResolver(true),
             new UnresolvedMethodCallReporter(),
             new UnresolvedNameReporter(),
             new UnresolvedTypeReferenceReporter(),
-            new FieldDeclarationErrorReporter()
+            new FieldDeclarationErrorReporter(),
+            new UnaryOperatorErrorReporter()
         );
     }
 

@@ -29,33 +29,24 @@ package org.orthodox.universel.ast;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class UnaryExpression extends Expression implements CompositeNode {
     protected Operator operator;
 
-    protected Expression expression;
+    protected Node operand;
 
-    public UnaryExpression(TokenImage tokenImage, Operator operator, Expression expression) {
+    public UnaryExpression(final TokenImage tokenImage, final Operator operator, final Node operand) {
         super(tokenImage);
-        setExpression(expression);
-        setOperator(operator);
+        this.operator = operator;
+        this.operand = operand;
     }
 
     /**
      * @return the expression
      */
-    public Expression getExpression() {
-        return expression;
-    }
-
-    /**
-     * @param expression the expression to set
-     */
-    public void setExpression(Expression expression) {
-        this.expression = expression;
-        if (expression != null) {
-            expression.setParent(this);
-        }
+    public Node getOperand() {
+        return operand;
     }
 
     /**
@@ -63,13 +54,6 @@ public class UnaryExpression extends Expression implements CompositeNode {
      */
     public Operator getOperator() {
         return operator;
-    }
-
-    /**
-     * @param operator the operator to set
-     */
-    public void setOperator(Operator operator) {
-        this.operator = operator;
     }
 
     public Node accept(UniversalCodeVisitor visitor) {
@@ -82,23 +66,31 @@ public class UnaryExpression extends Expression implements CompositeNode {
 
     @Override
     public Type getType() {
-        return expression.getType();
+        return operand.getType();
     }
 
     @Override
     public Class<?> getTypeDescriptor() {
-        return expression.getTypeDescriptor();
+        return operand.getTypeDescriptor();
     }
 
     @Override
     public List<Node> getChildNodes() {
-        return Collections.singletonList(getExpression());
+        return Collections.singletonList(getOperand());
     }
 
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
-        if ( !(o instanceof UnaryExpression) ) return false;
-        return super.equals(o);
+        if (!(o instanceof UnaryExpression)) return false;
+        if (!super.equals(o)) return false;
+        UnaryExpression nodes = (UnaryExpression) o;
+        return getOperator() == nodes.getOperator() &&
+               Objects.equals(getOperand(), nodes.getOperand());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), getOperator(), getOperand());
     }
 }

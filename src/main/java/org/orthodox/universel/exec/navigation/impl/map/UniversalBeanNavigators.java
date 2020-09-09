@@ -77,8 +77,8 @@ public class UniversalBeanNavigators {
         final List<Method> matchingMethods = streamMethods(fromType, PUBLIC | PROTECTED, step.getNodeTest().getName().getName(), null, (Class<?>[]) null)
                                                  .filter(m -> parameterTypesCompatible(step.getNodeTest(), m))
                                                  .collect(Collectors.toList());
-        if (matchingMethods.size() != 1) return step;
-        final Method matchingMethod = matchingMethods.get(0);
+        if (matchingMethods.isEmpty()) return step;
+        final Method matchingMethod = matchingMethods.get(matchingMethods.size()-1); // Last method in the overloaded case
         return new InstanceMethodCall(step.getTokenImage(),
                                       instanceReadAccessor,
                                       new ResolvedTypeReferenceOld(step.getTokenImage(), matchingMethod.getDeclaringClass()),

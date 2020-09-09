@@ -32,7 +32,7 @@ public class HexadecimalIntegerLiteralParseTest {
         assertThat(expr.getTokenImage().getStartColumn(), equalTo(3));
         assertThat(expr.getTokenImage().getEndLine(), equalTo(2));
         assertThat(expr.getTokenImage().getEndColumn(), equalTo(11));
-        assertThat(input, endsWith(expr.getExpression().getTokenImage().getImage()));
+        assertThat(input, endsWith(expr.getOperand().getTokenImage().getImage()));
     }
 
     private HexadecimalIntegerLiteralExpr parse(String input) {
@@ -65,20 +65,20 @@ public class HexadecimalIntegerLiteralParseTest {
 
     @Test()
     public void negativeIntegerLiterals() {
-        assertThat(parseUnaryMinus("-0x0").getExpression().getTokenImage().getImage(), equalTo("0x0"));
-        assertThat(parseUnaryMinus("-0X1").getExpression().getTokenImage().getImage(), equalTo("0X1"));
-        assertThat(parseUnaryMinus("-0xffeedd").getExpression().getTokenImage().getImage(), equalTo("0xffeedd"));
-        assertThat(parseUnaryMinus("-0xff__ee__dd").getExpression().getTokenImage().getImage(), equalTo("0xff__ee__dd"));
-        assertThat(parseUnaryMinus("-0xffffffff").getExpression().getTokenImage().getImage(), equalTo("0xffffffff"));
+        assertThat(parseUnaryMinus("-0x0").getOperand().getTokenImage().getImage(), equalTo("0x0"));
+        assertThat(parseUnaryMinus("-0X1").getOperand().getTokenImage().getImage(), equalTo("0X1"));
+        assertThat(parseUnaryMinus("-0xffeedd").getOperand().getTokenImage().getImage(), equalTo("0xffeedd"));
+        assertThat(parseUnaryMinus("-0xff__ee__dd").getOperand().getTokenImage().getImage(), equalTo("0xff__ee__dd"));
+        assertThat(parseUnaryMinus("-0xffffffff").getOperand().getTokenImage().getImage(), equalTo("0xffffffff"));
     }
 
 
     @Test()
     public void negativeLongLiterals() {
-        assertThat(parseUnaryMinus("-0x0L").getExpression().getTokenImage().getImage(), equalTo("0x0L"));
-        assertThat(parseUnaryMinus("-0X1l").getExpression().getTokenImage().getImage(), equalTo("0X1l"));
-        assertThat(parseUnaryMinus("-0xffeeddL").getExpression().getTokenImage().getImage(), equalTo("0xffeeddL"));
-        assertThat(parseUnaryMinus("-0xff__ee__ddL").getExpression().getTokenImage().getImage(), equalTo("0xff__ee__ddL"));
-        assertThat(parseUnaryMinus("-0xffffffffL").getExpression().getTokenImage().getImage(), equalTo("0xffffffffL"));
+        assertThat(parseUnaryMinus("-0x0L").getOperand().getTokenImage().getImage(), equalTo("0x0L"));
+        assertThat(parseUnaryMinus("-0X1l").getOperand().getTokenImage().getImage(), equalTo("0X1l"));
+        assertThat(parseUnaryMinus("-0xffeeddL").getOperand().getTokenImage().getImage(), equalTo("0xffeeddL"));
+        assertThat(parseUnaryMinus("-0xff__ee__ddL").getOperand().getTokenImage().getImage(), equalTo("0xff__ee__ddL"));
+        assertThat(parseUnaryMinus("-0xffffffffL").getOperand().getTokenImage().getImage(), equalTo("0xffffffffL"));
     }
 }

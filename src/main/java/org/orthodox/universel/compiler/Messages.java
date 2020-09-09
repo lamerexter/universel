@@ -60,6 +60,10 @@ public interface Messages {
         Builder NAME_NOT_RESOLVED = builder().code("uel.navigation.unresolvedname").parameterisedMessage("The name \"{0}\" could not be resolved");
     }
 
+    interface OPERATOR {
+        Message UNARY_NOTFOUND = builder().code("uel.operator.unary.notapplicable").parameterisedMessage("Unary \"{0}\" operator not applicable for the given expression type").build();
+    }
+
     interface NavigationExpression {
         Builder UNRESOLVED_STEP = builder().code("uel.navigation.unresolvedstep").parameterisedMessage("The navigation step could not be resolved. Is there a navigator function available on the classpath for this type of navigation? ");
     }

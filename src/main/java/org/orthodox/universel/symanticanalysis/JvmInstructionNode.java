@@ -79,10 +79,10 @@ public abstract class JvmInstructionNode extends Node implements CompositeNode {
         return visitor.visitJvmInstruction(this);
     }
 
-    @Override
-    public Class<?> getTypeDescriptor() {
-        return source == null ? super.getTypeDescriptor() : source.getTypeDescriptor();
-    }
+//    @Override
+//    public Class<?> getTypeDescriptor() {
+//        return source == null ? super.getTypeDescriptor() : source.getTypeDescriptor();
+//    }
 
     public abstract void emit(BytecodeHelper bch);
 }

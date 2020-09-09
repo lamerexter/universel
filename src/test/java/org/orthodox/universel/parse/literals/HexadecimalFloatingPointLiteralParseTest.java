@@ -31,7 +31,7 @@ public class HexadecimalFloatingPointLiteralParseTest {
         assertThat(expr.getTokenImage().getStartColumn(), equalTo(4));
         assertThat(expr.getTokenImage().getEndLine(), equalTo(2));
         assertThat(expr.getTokenImage().getEndColumn(), equalTo(16));
-        assertThat(input, endsWith(expr.getExpression().getTokenImage().getImage()));
+        assertThat(input, endsWith(expr.getOperand().getTokenImage().getImage()));
     }
 
     private HexadecimalFloatingPointLiteralExpr parse(String input) throws Exception {
@@ -72,29 +72,29 @@ public class HexadecimalFloatingPointLiteralParseTest {
 
     @Test
     public void negativeUntypedLiterals() throws Exception{
-        assertThat(parseUnaryMinus("-0x1p3").getExpression().getTokenImage().getImage(), equalTo("0x1p3"));
-        assertThat(parseUnaryMinus("-0X1p3").getExpression().getTokenImage().getImage(), equalTo("0X1p3"));
-        assertThat(parseUnaryMinus("-0X12.2P2").getExpression().getTokenImage().getImage(), equalTo("0X12.2P2"));
+        assertThat(parseUnaryMinus("-0x1p3").getOperand().getTokenImage().getImage(), equalTo("0x1p3"));
+        assertThat(parseUnaryMinus("-0X1p3").getOperand().getTokenImage().getImage(), equalTo("0X1p3"));
+        assertThat(parseUnaryMinus("-0X12.2P2").getOperand().getTokenImage().getImage(), equalTo("0X12.2P2"));
     }
 
     @Test
     public void negativeFloatLiterals() throws Exception{
-        assertThat(parseUnaryMinus("-0x1p3f").getExpression().getTokenImage().getImage(), equalTo("0x1p3f"));
-        assertThat(parseUnaryMinus("-0X1p3f").getExpression().getTokenImage().getImage(), equalTo("0X1p3f"));
-        assertThat(parseUnaryMinus("-0x12.2P2f").getExpression().getTokenImage().getImage(), equalTo("0x12.2P2f"));
+        assertThat(parseUnaryMinus("-0x1p3f").getOperand().getTokenImage().getImage(), equalTo("0x1p3f"));
+        assertThat(parseUnaryMinus("-0X1p3f").getOperand().getTokenImage().getImage(), equalTo("0X1p3f"));
+        assertThat(parseUnaryMinus("-0x12.2P2f").getOperand().getTokenImage().getImage(), equalTo("0x12.2P2f"));
     }
 
     @Test
     public void negativeDoubleLiterals() throws Exception{
-        assertThat(parseUnaryMinus("-0x1p3d").getExpression().getTokenImage().getImage(), equalTo("0x1p3d"));
-        assertThat(parseUnaryMinus("-0X1p3d").getExpression().getTokenImage().getImage(), equalTo("0X1p3d"));
-        assertThat(parseUnaryMinus("-0x12.2P2d").getExpression().getTokenImage().getImage(), equalTo("0x12.2P2d"));
+        assertThat(parseUnaryMinus("-0x1p3d").getOperand().getTokenImage().getImage(), equalTo("0x1p3d"));
+        assertThat(parseUnaryMinus("-0X1p3d").getOperand().getTokenImage().getImage(), equalTo("0X1p3d"));
+        assertThat(parseUnaryMinus("-0x12.2P2d").getOperand().getTokenImage().getImage(), equalTo("0x12.2P2d"));
     }
 
     @Test
     public void negativeBigLiterals() throws Exception{
-        assertThat(parseUnaryMinus("-0x1p3D").getExpression().getTokenImage().getImage(), equalTo("0x1p3D"));
-        assertThat(parseUnaryMinus("-0X1p3D").getExpression().getTokenImage().getImage(), equalTo("0X1p3D"));
-        assertThat(parseUnaryMinus("-0x1p3D").getExpression().getTokenImage().getImage(), equalTo("0x1p3D"));
+        assertThat(parseUnaryMinus("-0x1p3D").getOperand().getTokenImage().getImage(), equalTo("0x1p3D"));
+        assertThat(parseUnaryMinus("-0X1p3D").getOperand().getTokenImage().getImage(), equalTo("0X1p3D"));
+        assertThat(parseUnaryMinus("-0x1p3D").getOperand().getTokenImage().getImage(), equalTo("0x1p3D"));
     }
 }

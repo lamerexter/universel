@@ -32,7 +32,7 @@ public class OctalIntegerLiteralParseTest {
         assertThat(expr.getTokenImage().getStartColumn(), equalTo(3));
         assertThat(expr.getTokenImage().getEndLine(), equalTo(2));
         assertThat(expr.getTokenImage().getEndColumn(), equalTo(7));
-        assertThat(input, endsWith(expr.getExpression().getTokenImage().getImage()));
+        assertThat(input, endsWith(expr.getOperand().getTokenImage().getImage()));
     }
 
     private OctalIntegerLiteralExpr parse(String input) throws Exception {
@@ -65,20 +65,20 @@ public class OctalIntegerLiteralParseTest {
 
     @Test()
     public void negativeIntegerLiterals() throws Exception {
-        assertThat(parseUnaryMinus("-00").getExpression().getTokenImage().getImage(), equalTo("00"));
-        assertThat(parseUnaryMinus("-01").getExpression().getTokenImage().getImage(), equalTo("01"));
-        assertThat(parseUnaryMinus("-0127").getExpression().getTokenImage().getImage(), equalTo("0127"));
-        assertThat(parseUnaryMinus("-012__7").getExpression().getTokenImage().getImage(), equalTo("012__7"));
-        assertThat(parseUnaryMinus("-0777").getExpression().getTokenImage().getImage(), equalTo("0777"));
+        assertThat(parseUnaryMinus("-00").getOperand().getTokenImage().getImage(), equalTo("00"));
+        assertThat(parseUnaryMinus("-01").getOperand().getTokenImage().getImage(), equalTo("01"));
+        assertThat(parseUnaryMinus("-0127").getOperand().getTokenImage().getImage(), equalTo("0127"));
+        assertThat(parseUnaryMinus("-012__7").getOperand().getTokenImage().getImage(), equalTo("012__7"));
+        assertThat(parseUnaryMinus("-0777").getOperand().getTokenImage().getImage(), equalTo("0777"));
     }
 
     @Test()
     public void negativeLongLiterals() throws Exception {
-        assertThat(parseUnaryMinus("-00L").getExpression().getTokenImage().getImage(), equalTo("00L"));
-        assertThat(parseUnaryMinus("-01l").getExpression().getTokenImage().getImage(), equalTo("01l"));
-        assertThat(parseUnaryMinus("-0127L").getExpression().getTokenImage().getImage(), equalTo("0127L"));
-        assertThat(parseUnaryMinus("-012__7L").getExpression().getTokenImage().getImage(), equalTo("012__7L"));
-        assertThat(parseUnaryMinus("-0777L").getExpression().getTokenImage().getImage(), equalTo("0777L"));
+        assertThat(parseUnaryMinus("-00L").getOperand().getTokenImage().getImage(), equalTo("00L"));
+        assertThat(parseUnaryMinus("-01l").getOperand().getTokenImage().getImage(), equalTo("01l"));
+        assertThat(parseUnaryMinus("-0127L").getOperand().getTokenImage().getImage(), equalTo("0127L"));
+        assertThat(parseUnaryMinus("-012__7L").getOperand().getTokenImage().getImage(), equalTo("012__7L"));
+        assertThat(parseUnaryMinus("-0777L").getOperand().getTokenImage().getImage(), equalTo("0777L"));
     }
 
 }

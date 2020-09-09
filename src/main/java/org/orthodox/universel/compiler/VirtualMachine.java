@@ -1,7 +1,9 @@
 package org.orthodox.universel.compiler;
 
+import org.beanplanet.core.lang.Assert;
 import org.beanplanet.core.lang.TypeUtil;
 import org.objectweb.asm.MethodVisitor;
+import org.orthodox.universel.ast.Type;
 
 import java.util.Stack;
 
@@ -39,6 +41,11 @@ public class VirtualMachine {
 
     public void loadOperandConstant(double operand) {
         loadOperandOfType(double.class);
+    }
+
+    public void loadOperandOfType(Type operandType) {
+        Assert.notNull(operandType.getTypeClass());
+        operandStack.push(operandType.getTypeClass());
     }
 
     public void loadOperandOfType(Class<?> operandType) {

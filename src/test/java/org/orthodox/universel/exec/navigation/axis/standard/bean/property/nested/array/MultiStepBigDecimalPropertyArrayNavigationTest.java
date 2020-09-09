@@ -31,6 +31,8 @@ package org.orthodox.universel.exec.navigation.axis.standard.bean.property.neste
 import org.beanplanet.core.beans.JavaBean;
 import org.junit.jupiter.api.Test;
 import org.orthodox.universel.BeanWithProperties;
+import org.orthodox.universel.compiler.CompiledUnit;
+import org.orthodox.universel.tools.BytecodeOutput;
 
 import java.math.BigDecimal;
 

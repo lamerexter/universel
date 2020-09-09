@@ -1246,7 +1246,7 @@ public Expression Expression():
         |
         expr = NavigationExpression()
         |
-        "(" expr=Expression() ")"
+        "(" expr=PrimaryExpression() ")"
     )
 
     { return expr; }
@@ -1996,7 +1996,7 @@ Expression VariableInitializer() :
         LOOKAHEAD(3)
 	    expr=ArrayInitializer()
 	    |
-	    expr=Expression()
+	    expr=PrimaryExpression()
     )
 
     { return expr; }

@@ -52,7 +52,26 @@ public class TransformationUtil {
     private static final Map<Set<Class<?>>, Class<?>> standardWideningMap = new HashMap<>();
 
     static {
-        standardWideningMap.put(new HashSet<>(asList(short.class, short.class)), int.class);
+        standardWideningMap.put(new HashSet<>(asList(byte.class, byte.class)), byte.class);
+        standardWideningMap.put(new HashSet<>(asList(byte.class, char.class)), char.class);
+        standardWideningMap.put(new HashSet<>(asList(byte.class, short.class)), int.class);
+        standardWideningMap.put(new HashSet<>(asList(byte.class, int.class)), int.class);
+        standardWideningMap.put(new HashSet<>(asList(byte.class, long.class)), long.class);
+        standardWideningMap.put(new HashSet<>(asList(byte.class, BigInteger.class)), BigInteger.class);
+        standardWideningMap.put(new HashSet<>(asList(byte.class, float.class)), float.class);
+        standardWideningMap.put(new HashSet<>(asList(byte.class, double.class)), double.class);
+        standardWideningMap.put(new HashSet<>(asList(byte.class, BigDecimal.class)), BigDecimal.class);
+
+        standardWideningMap.put(new HashSet<>(asList(char.class, char.class)), char.class);
+        standardWideningMap.put(new HashSet<>(asList(char.class, short.class)), int.class);
+        standardWideningMap.put(new HashSet<>(asList(char.class, int.class)), int.class);
+        standardWideningMap.put(new HashSet<>(asList(char.class, long.class)), long.class);
+        standardWideningMap.put(new HashSet<>(asList(char.class, BigInteger.class)), BigInteger.class);
+        standardWideningMap.put(new HashSet<>(asList(char.class, float.class)), float.class);
+        standardWideningMap.put(new HashSet<>(asList(char.class, double.class)), double.class);
+        standardWideningMap.put(new HashSet<>(asList(char.class, BigDecimal.class)), BigDecimal.class);
+
+        standardWideningMap.put(new HashSet<>(asList(short.class, short.class)), short.class);
         standardWideningMap.put(new HashSet<>(asList(short.class, int.class)), int.class);
         standardWideningMap.put(new HashSet<>(asList(short.class, long.class)), long.class);
         standardWideningMap.put(new HashSet<>(asList(short.class, BigInteger.class)), BigInteger.class);
@@ -86,7 +105,7 @@ public class TransformationUtil {
         standardWideningMap.put(new HashSet<>(asList(double.class, BigDecimal.class)), BigDecimal.class);
     }
 
-    private static final List<Class<?>> widenNumericalTypeOrder = asList(short.class, int.class, long.class, BigInteger.class,
+    private static final List<Class<?>> widenNumericalTypeOrder = asList(byte.class, char.class, short.class, int.class, long.class, BigInteger.class,
                                                                          float.class, double.class, BigDecimal.class);
 
     private static final Set<Class<?>> STANDARD_NUMERIC_TYPES = new HashSet<>(widenNumericalTypeOrder);
@@ -103,7 +122,7 @@ public class TransformationUtil {
     }
 
     public static Node autoBoxIfNecessary(Node node, Class<?> targetType) {
-        Class<?> nodeType = node.getTypeDescriptor();
+        final Class<?> nodeType = node.getTypeDescriptor();
 
         if ( boxCompatible(nodeType, targetType) ) {
             return box(node);
@@ -111,6 +130,20 @@ public class TransformationUtil {
 
         if ( unboxCompatible(nodeType, targetType) ) {
             return unbox(node);
+        }
+
+        return node;
+    }
+
+    public static Node promoteIfNecessary(Node node, Class<?> targetType) {
+        final Class<?> nodeType = node.getTypeDescriptor();
+
+        if ( numericWideningTypeConversionApplies(nodeType, targetType) ) {
+            return wideningConversion(node, targetType);
+        }
+
+        if ( numericNarrowingTypeConversionApplies(nodeType, targetType) ) {
+            return narrowingConversion(node, targetType);
         }
 
         return node;
@@ -145,13 +178,13 @@ public class TransformationUtil {
     private static boolean numericWideningTypeConversionApplies(final Class<?> nodeType, final Class<?> targetType) {
         if (targetType.isAssignableFrom(nodeType) ) return false;
 
-        return widenNumericalTypeOrder.indexOf(targetType) > widenNumericalTypeOrder.indexOf(nodeType);
+        return widenNumericalTypeOrder.indexOf(primitiveTypeFor(targetType)) > widenNumericalTypeOrder.indexOf(primitiveTypeFor(nodeType));
     }
 
     private static boolean numericNarrowingTypeConversionApplies(final Class<?> nodeType, final Class<?> targetType) {
         if (targetType.isAssignableFrom(nodeType) ) return false;
 
-        return widenNumericalTypeOrder.indexOf(targetType) < widenNumericalTypeOrder.indexOf(nodeType);
+        return widenNumericalTypeOrder.indexOf(primitiveTypeFor(targetType)) < widenNumericalTypeOrder.indexOf(primitiveTypeFor(nodeType));
     }
 
     private static Node wideningConversion(final Node node, final Class<?> targetType) {
@@ -201,8 +234,12 @@ public class TransformationUtil {
                ((NullType.class == sourceType) && !TypeUtil.isPrimitiveType(targetType));
     }
 
-    private static boolean autoboxCompatible(Class<?> sourceType, Class<?> targetType) {
+    public static boolean autoboxCompatible(Class<?> sourceType, Class<?> targetType) {
         return boxCompatible(sourceType, targetType) || unboxCompatible(sourceType, targetType);
+    }
+
+    public static boolean promotionCompatible(Class<?> sourceType, Class<?> targetType) {
+        return numericWideningTypeConversionApplies(sourceType, targetType) || numericNarrowingTypeConversionApplies(sourceType, targetType);
     }
 
     private static boolean boxCompatible(Class<?> sourceType, Class<?> targetType) {

@@ -50,6 +50,8 @@ import org.orthodox.universel.ast.type.StaticFieldGetExpression;
 import org.orthodox.universel.ast.type.declaration.ClassDeclaration;
 import org.orthodox.universel.ast.type.declaration.InterfaceDeclaration;
 import org.orthodox.universel.ast.type.reference.TypeReference;
+import org.orthodox.universel.compiler.Box;
+import org.orthodox.universel.compiler.Unbox;
 import org.orthodox.universel.symanticanalysis.JvmInstructionNode;
 import org.orthodox.universel.symanticanalysis.ValueConsumingNode;
 import org.orthodox.universel.symanticanalysis.conversion.BinaryExpressionOperatorMethodCall;
@@ -72,6 +74,8 @@ public interface UniversalCodeVisitor {
     //   Node visitAssertStatement(AssertStatement node);
 //   Node visitAssignmentExpression(AssignmentExpression node);
     Node visitBetweenExpression(BetweenExpression node);
+
+    Node visitBoxExpression(Box node);
 
     Node visitBooleanLiteral(BooleanLiteralExpr node);
 
@@ -198,6 +202,8 @@ public interface UniversalCodeVisitor {
 
     //   Node visitTryStatement(TryStatement node);
     Node visitUnaryExpression(UnaryExpression node);
+
+    Node visitUnboxExpression(Unbox node);
 
     Node visitValueConsumingNode(ValueConsumingNode node);
 

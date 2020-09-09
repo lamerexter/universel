@@ -36,9 +36,29 @@ import java.math.BigInteger;
  */
 public class UnaryFunctions {
     /**
+     * Performs a unary minus of a byte.
+     *
+     * @param number the number to be unary negated.
+     * @return the unary minus of the given number.
+     */
+    public static byte unaryMinus(byte number) {
+        return (byte)-number;
+    }
+
+    /**
+     * Performs a unary minus of a character.
+     *
+     * @param number the number to be unary negated.
+     * @return the unary minus of the given number.
+     */
+    public static char unaryMinus(char number) {
+        return (char)-number;
+    }
+
+    /**
      * Performs a unary minus of a double.
      *
-     * @param number the number to be unary negated, which may be null.
+     * @param number the number to be unary negated.
      * @return the unary minus of the given number.
      */
     public static double unaryMinus(double number) {
@@ -48,7 +68,7 @@ public class UnaryFunctions {
     /**
      * Performs a unary minus of a float.
      *
-     * @param number the number to be unary negated, which may be null.
+     * @param number the number to be unary negated.
      * @return the unary minus of the given number.
      */
     public static float unaryMinus(float number) {
@@ -56,9 +76,29 @@ public class UnaryFunctions {
     }
 
     /**
+     * Performs a unary minus of an integer.
+     *
+     * @param number the number to be unary negated.
+     * @return the unary minus of the given number.
+     */
+    public static int unaryMinus(int number) {
+        return -number;
+    }
+
+    /**
+     * Performs a unary minus of a long.
+     *
+     * @param number the number to be unary negated.
+     * @return the unary minus of the given number.
+     */
+    public static long unaryMinus(long number) {
+        return -number;
+    }
+
+    /**
      * Performs a unary minus of a {@link BigDecimal}.
      *
-     * @param number the number to be unary negated, which may be null.
+     * @param number the number to be unary negated.
      * @return the unary minus of the given number.
      */
     public static BigDecimal unaryMinus(BigDecimal number) {
@@ -68,10 +108,20 @@ public class UnaryFunctions {
     /**
      * Performs a unary minus of a {@link BigInteger}.
      *
-     * @param number the number to be unary negated, which may be null.
+     * @param number the number to be unary negated.
      * @return the unary minus of the given number.
      */
     public static BigInteger unaryMinus(BigInteger number) {
         return number.negate();
+    }
+
+    /**
+     * Performs a unary minus of a short.
+     *
+     * @param number the number to be unary negated.
+     * @return the unary minus of the given number.
+     */
+    public static short unaryMinus(short number) {
+        return (short)-number;
     }
 }

@@ -488,7 +488,6 @@ public class NavigationResolver extends AbstractSemanticAnalyser {
                                                                                                ))
                                                                                                .build(),
                                                                                            NodeSequence.builder()
-//                                                                                                       .add(new LoadLocal(previousStage.getNode().getTokenImage(), (TypeReference) prevMapStageType, 0))
                                                                                                        .add(new ReturnStatement(autoBoxIfNecessary(step, boolean.class)))
                                                                                                        .build()
                         );

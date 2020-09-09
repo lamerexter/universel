@@ -29,7 +29,11 @@
 package org.orthodox.universel.compiler;
 
 import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.ast.Type;
+import org.orthodox.universel.ast.UniversalCodeVisitor;
+import org.orthodox.universel.ast.type.reference.ResolvedTypeReferenceOld;
 import org.orthodox.universel.symanticanalysis.JvmInstructionNode;
+import org.orthodox.universel.symanticanalysis.ResolvedTypeReference;
 
 import java.util.Objects;
 
@@ -58,12 +62,18 @@ public class Box extends JvmInstructionNode {
     }
 
     @Override
-    public Class<?> getTypeDescriptor() {
-        return ensureNonPrimitiveType(super.getTypeDescriptor());
+    public Type getType() {
+        return getSource() == null ? super.getType() : new ResolvedTypeReferenceOld(ensureNonPrimitiveType(getSource().getTypeDescriptor()));
     }
 
     @Override
     public void emit(final BytecodeHelper bch) {
         bch.box(getSource().getTypeDescriptor());
     }
+
+    @Override
+    public Node accept(UniversalCodeVisitor visitor) {
+        return visitor.visitBoxExpression(this);
+    }
+
 }

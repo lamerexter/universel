@@ -26,7 +26,7 @@
  *
  */
 
-package org.orthodox.universel.exec.types.script;
+package org.orthodox.universel.exec.types.script.declarations.field.stat.fin;
 
 import org.beanplanet.messages.domain.Message;
 import org.junit.jupiter.api.Test;
@@ -51,7 +51,7 @@ import static org.orthodox.universel.compiler.Messages.TYPE.TYPE_NOT_FOUND;
 /**
  * Unit tests for simple static field declarations scoped at the enclosing script level.
  */
-public class StaticFieldDeclarationTest {
+public class StaticFinalFieldDeclarationTest {
     @Test
     void primitive_byteField() {
         assertSingleAllAccessStaticFieldCanBeGenerated("byte", byte.class, "byteField");

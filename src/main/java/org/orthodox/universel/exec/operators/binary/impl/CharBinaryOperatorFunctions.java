@@ -26,90 +26,91 @@
  *
  */
 
-package org.orthodox.universel.exec.operators.binary.impl.numeric;
+package org.orthodox.universel.exec.operators.binary.impl;
 
 import org.orthodox.universel.ast.Operator;
 import org.orthodox.universel.exec.operators.binary.BinaryOperator;
-import org.orthodox.universel.exec.operators.range.ShortRange;
+import org.orthodox.universel.exec.operators.range.ByteRange;
+import org.orthodox.universel.exec.operators.range.CharacterRange;
 
 import static org.orthodox.universel.ast.Operator.*;
 
 @BinaryOperator
-public class ShortBinaryOperatorFunctions {
+public class CharBinaryOperatorFunctions {
 
     @BinaryOperator(AMPERSAND)
-    public static short bitAnd(short lhs, short rhs) {
-        return (short)(lhs & rhs);
+    public static char bitAnd(char lhs, char rhs) {
+        return (char)(lhs & rhs);
     }
 
     @BinaryOperator(CARAT)
-    public static short power(short lhs, short rhs) {
-        return (short)(lhs ^ rhs);
+    public static char power(char lhs, char rhs) {
+        return (char)(lhs ^ rhs);
     }
 
     @BinaryOperator({EXCLAMATION_EQUAL, LESS_GREATER_THAN})
-    public static boolean notEqual(short lhs, short rhs) {
+    public static boolean notEqual(char lhs, char rhs) {
         return lhs != rhs;
     }
 
     @BinaryOperator(FORWARD_SLASH)
-    public static short divide(short lhs, short rhs) {
-        return (short)(lhs / rhs);
+    public static char divide(char lhs, char rhs) {
+        return (char)(lhs / rhs);
     }
 
     @BinaryOperator({EQUAL, TREBLE_EQUAL})
-    public static boolean equal(short lhs, short rhs) {
+    public static boolean equal(char lhs, char rhs) {
         return lhs == rhs;
     }
 
     @BinaryOperator(GREATER_THAN)
-    public static boolean greaterThan(short lhs, short rhs) {
+    public static boolean greaterThan(char lhs, char rhs) {
         return lhs > rhs;
     }
 
     @BinaryOperator(GREATER_THAN_EQUAL)
-    public static boolean greaterThanEqual(short lhs, short rhs) {
+    public static boolean greaterThanEqual(char lhs, char rhs) {
         return lhs >= rhs;
     }
 
     @BinaryOperator(LESS_THAN)
-    public static boolean lessThan(short lhs, short rhs) {
+    public static boolean lessThan(char lhs, char rhs) {
         return lhs < rhs;
     }
 
     @BinaryOperator(LESS_THAN_EQUAL)
-    public static boolean lessThanEqual(short lhs, short rhs) {
+    public static boolean lessThanEqual(char lhs, char rhs) {
         return lhs <= rhs;
     }
 
     @BinaryOperator(LOGICAL_OR)
-    public static boolean logicalOr(short lhs, short rhs) {
+    public static boolean logicalOr(char lhs, char rhs) {
         return lhs != 0 || rhs != 0;
     }
 
     @BinaryOperator(LOGICAL_AND)
-    public static boolean logicalAnd(short lhs, short rhs) {
+    public static boolean logicalAnd(char lhs, char rhs) {
         return lhs != 00 && rhs != 0;
     }
 
     @BinaryOperator(MINUS)
-    public static short minus(short lhs, short rhs) {
-        return (short)(lhs - rhs);
+    public static char minus(char lhs, char rhs) {
+        return (char)(lhs - rhs);
     }
 
     @BinaryOperator(PERCENT)
-    public static short modulus(short lhs, short rhs) {
-        return (short)(lhs % rhs);
+    public static char modulus(char lhs, char rhs) {
+        return (char)(lhs % rhs);
     }
 
     @BinaryOperator(PIPE)
-    public static short bitOr(short lhs, short rhs) {
-        return (short)(lhs | rhs);
+    public static char bitOr(char lhs, char rhs) {
+        return (char)(lhs | rhs);
     }
 
     @BinaryOperator(PLUS)
-    public static short plus(short lhs, short rhs) {
-        return (short)(lhs + rhs);
+    public static char plus(char lhs, char rhs) {
+        return (char)(lhs + rhs);
     }
 
     @BinaryOperator({
@@ -120,27 +121,28 @@ public class ShortBinaryOperatorFunctions {
             RANGE_LEFT_GTE_RIGHT_GT, RANGE_LEFT_GTE_RIGHT_GTE, RANGE_LEFT_GTE_RIGHT_INCLUSIVE, RANGE_LEFT_GTE_RIGHT_LT, RANGE_LEFT_GTE_RIGHT_LTE,
             RANGE_LEFT_INCLUSIVE_RIGHT_GT, RANGE_LEFT_INCLUSIVE_RIGHT_GTE, RANGE_LEFT_INCLUSIVE_RIGHT_LT, RANGE_LEFT_INCLUSIVE_RIGHT_LTE
     })
-    public static ShortRange shortRange(short lhs, short rhs, Operator operator) {
-        return new ShortRange(operator, lhs, rhs);
+
+    public static CharacterRange charRange(char lhs, char rhs, Operator operator) {
+        return new CharacterRange(operator, lhs, rhs);
     }
 
     @BinaryOperator(SHIFT_LEFT)
-    public static short shiftLeft(short lhs, short rhs) {
-        return (short)(lhs << rhs);
+    public static char shiftLeft(char lhs, char rhs) {
+        return (char)(lhs << rhs);
     }
 
     @BinaryOperator(SHIFT_RIGHT)
-    public static short shiftRight(short lhs, short rhs) {
-        return (short)(lhs >> rhs);
+    public static char shiftRight(char lhs, char rhs) {
+        return (char)(lhs >> rhs);
     }
 
     @BinaryOperator(TREBLE_SHIFT_RIGHT)
-    public static short zeroFillShiftRight(short lhs, short rhs) {
-        return (short)(lhs >>> rhs);
+    public static char zeroFillShiftRight(char lhs, char rhs) {
+        return (char)(lhs >>> rhs);
     }
 
     @BinaryOperator(STAR)
-    public static short multiply(short lhs, short rhs) {
-        return (short)(lhs * rhs);
+    public static char multiply(char lhs, char rhs) {
+        return (char)(lhs * rhs);
     }
 }

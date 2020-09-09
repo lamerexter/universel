@@ -28,9 +28,7 @@
 
 package org.orthodox.universel.symanticanalysis.conversion;
 
-import org.beanplanet.core.lang.TypeUtil;
 import org.orthodox.universel.ast.*;
-import org.orthodox.universel.compiler.TransformationUtil;
 import org.orthodox.universel.exec.operators.binary.BinaryOperatorRegistry;
 import org.orthodox.universel.exec.operators.binary.ConcurrentBinaryOperatorRegistry;
 import org.orthodox.universel.exec.operators.binary.PackageScanBinaryOperatorLoader;
@@ -74,16 +72,18 @@ public class BinaryExpressionOperatorMethodConverter extends UniversalVisitorAda
 
     @Override
     public Node visitBinaryExpression(final BinaryExpression node) {
-        Node lhs = node.getLhsExpression().accept(this);
-        Node rhs = node.getRhsExpression().accept(this);
+        final BinaryExpression transformedBinaryExpr = (BinaryExpression)super.visitBinaryExpression(node);
+
+        Node lhs = transformedBinaryExpr.getLhsExpression().accept(this);
+        Node rhs = transformedBinaryExpr.getRhsExpression().accept(this);
 
         Class<?> lhsType = lhs.getTypeDescriptor();
         Class<?> rhsType = rhs.getTypeDescriptor();
 
-        if (lhsType == null || rhsType == null) return node;
+        if (lhsType == null || rhsType == null) return transformedBinaryExpr;
 
         // Separately implemented, for now...
-        if (Operator.ELVIS == node.getOperator() || Operator.INSTANCE_OF == node.getOperator()) {
+        if (Operator.ELVIS == transformedBinaryExpr.getOperator() || Operator.INSTANCE_OF == transformedBinaryExpr.getOperator()) {
             if (isPrimitiveType(lhsType)) {
                 lhs = new BoxConversion(lhs);
                 lhsType = lhs.getTypeDescriptor();
@@ -92,44 +92,46 @@ public class BinaryExpressionOperatorMethodConverter extends UniversalVisitorAda
                 rhs = new BoxConversion(rhs);
                 rhsType = rhs.getTypeDescriptor();
             }
-        } else if (Operator.INSTANCE_OF == node.getOperator()) {
+        } else if (Operator.INSTANCE_OF == transformedBinaryExpr.getOperator()) {
             rhsType = Class.class;
         }
 
-        Optional<Method> binaryOperatorMethod = binaryOperatorRegistry.lookup(node.getOperator(), lhsType, rhsType);
+        Optional<Method> binaryOperatorMethod = binaryOperatorRegistry.lookup(transformedBinaryExpr.getOperator(), lhsType, rhsType);
         if ( binaryOperatorMethod.isPresent()) {
-            return new BinaryExpressionOperatorMethodCall(node.getTokenImage(), node.getOperator(), binaryOperatorMethod.get(), asList(lhs, rhs));
+            return new BinaryExpressionOperatorMethodCall(transformedBinaryExpr.getTokenImage(), transformedBinaryExpr.getOperator(), binaryOperatorMethod.get(), asList(lhs, rhs));
         }
 
-        if ( Operator.ELVIS != node.getOperator() && Operator.INSTANCE_OF != node.getOperator()
+        if ( Operator.ELVIS != transformedBinaryExpr.getOperator() && Operator.INSTANCE_OF != transformedBinaryExpr.getOperator()
              && isPrimitiveTypeOrWrapperClass(lhsType) && isPrimitiveTypeOrWrapperClass(rhsType) ) {
-            binaryOperatorMethod = binaryOperatorRegistry.lookup(node.getOperator(), primitiveTypeFor(lhsType), primitiveTypeFor(rhsType));
+            binaryOperatorMethod = binaryOperatorRegistry.lookup(transformedBinaryExpr.getOperator(), primitiveTypeFor(lhsType), primitiveTypeFor(rhsType));
             if ( binaryOperatorMethod.isPresent()) {
-                return new BinaryExpressionOperatorMethodCall(node.getTokenImage(), node.getOperator(), binaryOperatorMethod.get(), asList(autoBoxIfNecessary(lhs, primitiveTypeFor(lhsType)), autoBoxIfNecessary(rhs, primitiveTypeFor(rhsType))));
+                return new BinaryExpressionOperatorMethodCall(transformedBinaryExpr.getTokenImage(), transformedBinaryExpr.getOperator(), binaryOperatorMethod.get(), asList(autoBoxIfNecessary(lhs, primitiveTypeFor(lhsType)), autoBoxIfNecessary(rhs, primitiveTypeFor(rhsType))));
             }
-            binaryOperatorMethod = binaryOperatorRegistry.lookup(node.getOperator(), getPrimitiveWrapperType(lhsType), getPrimitiveWrapperType(rhsType));
+            binaryOperatorMethod = binaryOperatorRegistry.lookup(transformedBinaryExpr.getOperator(), getPrimitiveWrapperType(lhsType), getPrimitiveWrapperType(rhsType));
             if ( binaryOperatorMethod.isPresent()) {
-                return new BinaryExpressionOperatorMethodCall(node.getTokenImage(), node.getOperator(), binaryOperatorMethod.get(), asList(autoBoxIfNecessary(lhs, getPrimitiveWrapperType(lhsType)), autoBoxIfNecessary(rhs, getPrimitiveWrapperType(rhsType))));
+                return new BinaryExpressionOperatorMethodCall(transformedBinaryExpr.getTokenImage(), transformedBinaryExpr.getOperator(), binaryOperatorMethod.get(), asList(autoBoxIfNecessary(lhs, getPrimitiveWrapperType(lhsType)), autoBoxIfNecessary(rhs, getPrimitiveWrapperType(rhsType))));
             }
         }
-        return node;
+        return transformedBinaryExpr;
     }
 
     @Override
     public Node visitInstanceofExpression(final InstanceofExpression node) {
-        Node lhs = node.getLhsExpression().accept(this);
-        Node rhs = node.getRhsExpression().accept(this);
+        final InstanceofExpression transformedInstanceOfExpr = (InstanceofExpression)super.visitInstanceofExpression(node);
+
+        Node lhs = transformedInstanceOfExpr.getLhsExpression().accept(this);
+        Node rhs = transformedInstanceOfExpr.getRhsExpression().accept(this);
 
         Class<?> lhsType = lhs.getTypeDescriptor();
         Class<?> rhsType = rhs.getTypeDescriptor();
 
-        if (lhsType == null || rhsType == null) return node;
+        if (lhsType == null || rhsType == null) return transformedInstanceOfExpr;
 
         if (isPrimitiveType(lhsType)) {
             lhs = new BoxConversion(lhs);
         }
 
-        Optional<Method> binaryOperatorMethod = binaryOperatorRegistry.lookup(node.getOperator(), Object.class, Class.class);
-        return binaryOperatorMethod.isPresent() ? new BinaryExpressionOperatorMethodCall(node.getTokenImage(), node.getOperator(), binaryOperatorMethod.get(), asList(lhs, rhs)) : node;
+        Optional<Method> binaryOperatorMethod = binaryOperatorRegistry.lookup(transformedInstanceOfExpr.getOperator(), Object.class, Class.class);
+        return binaryOperatorMethod.isPresent() ? new BinaryExpressionOperatorMethodCall(transformedInstanceOfExpr.getTokenImage(), transformedInstanceOfExpr.getOperator(), binaryOperatorMethod.get(), asList(lhs, rhs)) : transformedInstanceOfExpr;
     }
 }

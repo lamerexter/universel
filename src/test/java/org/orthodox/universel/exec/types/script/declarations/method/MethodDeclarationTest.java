@@ -26,7 +26,7 @@
  *
  */
 
-package org.orthodox.universel.exec.types.script;
+package org.orthodox.universel.exec.types.script.declarations.method;
 
 import org.junit.jupiter.api.Test;
 import org.orthodox.universel.compiler.CompiledUnit;
