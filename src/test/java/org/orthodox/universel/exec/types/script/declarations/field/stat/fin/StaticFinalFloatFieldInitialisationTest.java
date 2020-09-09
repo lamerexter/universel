@@ -79,7 +79,7 @@ public class StaticFinalFloatFieldInitialisationTest extends AbstractStaticFinal
 
     @Test
     void primitiveFloatWrapperField_withPrimitiveValue_isAssignedBoxedValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("Float", Float.class, "floatWrapperField", "Byte('123').byteValue()", 123f);
+        assertSingleAllAccessStaticFieldIsAssigned("Float", Float.class, "floatWrapperField", "Float('123').floatValue()", 123f);
     }
 
     @Test

@@ -80,7 +80,7 @@ public class StaticFinalDoubleFieldInitialisationTest extends AbstractStaticFina
 
     @Test
     void primitiveDoubleWrapperField_withPrimitiveValue_isAssignedBoxedValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("Double", Double.class, "doubleWrapperField", "Byte('123').byteValue()", 123d);
+        assertSingleAllAccessStaticFieldIsAssigned("Double", Double.class, "doubleWrapperField", "Double('123').doubleValue()", 123d);
     }
 
     @Test

@@ -28,7 +28,6 @@
 
 package org.orthodox.universel.exec.types.script.declarations.field.stat.fin;
 
-import org.junit.jupiter.api.Test;
 import org.orthodox.universel.compiler.CompiledUnit;
 
 import java.lang.reflect.Field;
