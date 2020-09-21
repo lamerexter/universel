@@ -33,78 +33,78 @@ import org.junit.jupiter.api.Test;
 /**
  * Unit tests for simple static final float field assignment scoped at the enclosing script level.
  */
-public class StaticFinalFloatFieldInitialisationTest extends AbstractStaticFinalFieldInitialisationTest {
+public class StaticFinalFloatFieldInitialisationTest extends AbstractStaticFieldInitialisationTest {
     @Test
     void primitiveFloatField_withPrimitiveValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("float", float.class, "floatField", "0f", 0f);
-        assertSingleAllAccessStaticFieldIsAssigned("float", float.class, "floatField", "123f", 123f);
-        assertSingleAllAccessStaticFieldIsAssigned("float", float.class, "floatField", "-1f", -1f);
-        assertSingleAllAccessStaticFieldIsAssigned("float", float.class, "floatField", "Float('"+Float.MAX_VALUE+"').floatValue()", Float.MAX_VALUE);
-        assertSingleAllAccessStaticFieldIsAssigned("float", float.class, "floatField", "Float('"+Float.MIN_VALUE+"').floatValue()", Float.MIN_VALUE);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("float", float.class, "floatField", "0f", 0f);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("float", float.class, "floatField", "123f", 123f);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("float", float.class, "floatField", "-1f", -1f);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("float", float.class, "floatField", "Float('" + Float.MAX_VALUE + "').floatValue()", Float.MAX_VALUE);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("float", float.class, "floatField", "Float('" + Float.MIN_VALUE + "').floatValue()", Float.MIN_VALUE);
     }
 
     @Test
     void primitiveFloatField_withPrimitiveWrapperValue_isAssignedUnboxedValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("float", float.class, "floatField", "Float('123')", 123f);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("float", float.class, "floatField", "Float('123')", 123f);
     }
 
     @Test
     void primitiveFloatField_withWiderTypeValue_isAssignedNarrowedValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("float", float.class, "floatField", "123d", 123f);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("float", float.class, "floatField", "123d", 123f);
     }
 
     @Test
     void primitiveFloatField_withWiderPrimitiveWrapperTypeValue_isAssignedNarrowedUnboxedValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("float", float.class, "floatField", "Double('123')", 123f);
-        assertSingleAllAccessStaticFieldIsAssigned("float", float.class, "floatField", "123D", 123f);
-        assertSingleAllAccessStaticFieldIsAssigned("float", float.class, "floatField", "123I", 123f);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("float", float.class, "floatField", "Double('123')", 123f);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("float", float.class, "floatField", "123D", 123f);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("float", float.class, "floatField", "123I", 123f);
     }
 
     @Test
     void primitiveFloatField_withExpressionValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("float", float.class, "floatField", "100f - 10f", 100f - 10f);
-        assertSingleAllAccessStaticFieldIsAssigned("float", float.class, "floatField", "5f * -1f", -5f);
-        assertSingleAllAccessStaticFieldIsAssigned("import java.lang.Float.*", "Float", Float.class, "floatField", "MAX_VALUE", Float.MAX_VALUE);
-        assertSingleAllAccessStaticFieldIsAssigned("import java.lang.Float.*", "Float", Float.class, "floatField", "-9f + MAX_VALUE - 1f", -9f + Float.MAX_VALUE - 1f);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("float", float.class, "floatField", "100f - 10f", 100f - 10f);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("float", float.class, "floatField", "5f * -1f", -5f);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("import java.lang.Float.*", "Float", Float.class, "floatField", "MAX_VALUE", Float.MAX_VALUE);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("import java.lang.Float.*", "Float", Float.class, "floatField", "-9f + MAX_VALUE - 1f", -9f + Float.MAX_VALUE - 1f);
     }
 
     @Test
     void primitiveFloatWrapperField_withPrimitiveWrapperValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("Float", Float.class, "floatWrapperField", "Float(0f)", 0f);
-        assertSingleAllAccessStaticFieldIsAssigned("Float", Float.class, "floatWrapperField", "Float(123f)", 123f);
-        assertSingleAllAccessStaticFieldIsAssigned("Float", Float.class, "floatWrapperField", "Float(-1f)", -1f);
-        assertSingleAllAccessStaticFieldIsAssigned("Float", Float.class, "floatWrapperField", "Float("+Float.MAX_VALUE+")", Float.MAX_VALUE);
-        assertSingleAllAccessStaticFieldIsAssigned("Float", Float.class, "floatWrapperField", "Float("+Float.MIN_VALUE+")", Float.MIN_VALUE);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Float", Float.class, "floatWrapperField", "Float(0f)", 0f);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Float", Float.class, "floatWrapperField", "Float(123f)", 123f);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Float", Float.class, "floatWrapperField", "Float(-1f)", -1f);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Float", Float.class, "floatWrapperField", "Float(" + Float.MAX_VALUE + ")", Float.MAX_VALUE);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Float", Float.class, "floatWrapperField", "Float(" + Float.MIN_VALUE + ")", Float.MIN_VALUE);
     }
 
     @Test
     void primitiveFloatWrapperField_withPrimitiveValue_isAssignedBoxedValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("Float", Float.class, "floatWrapperField", "Float('123').floatValue()", 123f);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Float", Float.class, "floatWrapperField", "Float('123').floatValue()", 123f);
     }
 
     @Test
     void primitiveFloatWrapperField_withWiderTypeValue_isAssignedNarrowedValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("Float", Float.class, "floatWrapperField", "Double(123d)", 123f);
-        assertSingleAllAccessStaticFieldIsAssigned("Float", Float.class, "floatWrapperField", "123I", 123f);
-        assertSingleAllAccessStaticFieldIsAssigned("Float", Float.class, "floatWrapperField", "123D", 123f);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Float", Float.class, "floatWrapperField", "Double(123d)", 123f);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Float", Float.class, "floatWrapperField", "123I", 123f);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Float", Float.class, "floatWrapperField", "123D", 123f);
     }
 
     @Test
     void primitiveFloatWrapperField_withWiderPrimitiveTypeValue_isAssignedNarrowedBoxedValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("Float", Float.class, "floatWrapperField", "123", 123f);
-        assertSingleAllAccessStaticFieldIsAssigned("Float", Float.class, "floatWrapperField", "123d", 123f);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Float", Float.class, "floatWrapperField", "123", 123f);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Float", Float.class, "floatWrapperField", "123d", 123f);
     }
 
     @Test
     void primitiveFloatWrapperField_withExpressionValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("Float", Float.class, "floatWrapperField", "Float(100f) - Float(10f)", 100f - 10f);
-        assertSingleAllAccessStaticFieldIsAssigned("Float", Float.class, "floatWrapperField", "Float(5f) * Float(-1f)", -5f);
-        assertSingleAllAccessStaticFieldIsAssigned("import java.lang.Float.*", "Float", Float.class, "floatWrapperField", "Float(MAX_VALUE)", Float.MAX_VALUE);
-        assertSingleAllAccessStaticFieldIsAssigned("import java.lang.Float.*", "Float", Float.class, "floatWrapperField", "Float(-9f) + MAX_VALUE - Float(1f)", -9f + Float.MAX_VALUE - 1f);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Float", Float.class, "floatWrapperField", "Float(100f) - Float(10f)", 100f - 10f);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Float", Float.class, "floatWrapperField", "Float(5f) * Float(-1f)", -5f);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("import java.lang.Float.*", "Float", Float.class, "floatWrapperField", "Float(MAX_VALUE)", Float.MAX_VALUE);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("import java.lang.Float.*", "Float", Float.class, "floatWrapperField", "Float(-9f) + MAX_VALUE - Float(1f)", -9f + Float.MAX_VALUE - 1f);
     }
 
     @Test
     void primitiveFloatWrapperField_withNullValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("Float", Float.class, "floatWrapperField", "null", null);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Float", Float.class, "floatWrapperField", "null", null);
     }
 }

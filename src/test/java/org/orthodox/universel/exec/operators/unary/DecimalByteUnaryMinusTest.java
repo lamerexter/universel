@@ -25,7 +25,6 @@ public class DecimalByteUnaryMinusTest {
         assertThat(execute("-Byte('1')"), equalTo((byte)-1));
         assertThat(execute("-Byte('10')"), equalTo((byte)-10));
 
-//        assertThat(execute("-Byte.MAX_VALUE"), equalTo((byte)-MAX_VALUE));
         assertThat(execute("-Byte('" + MAX_VALUE + "')"), equalTo((byte)-MAX_VALUE));
         assertThat(execute("- -Byte('" + MAX_VALUE + "')"), equalTo((byte)MAX_VALUE));
     }

@@ -26,7 +26,7 @@
  *
  */
 
-package org.orthodox.universel.exec.types.script.declarations.field.stat.fin;
+package org.orthodox.universel.exec.types.script.declarations.field.stat;
 
 import org.beanplanet.messages.domain.Message;
 import org.junit.jupiter.api.Test;
@@ -34,7 +34,6 @@ import org.orthodox.universel.BeanWithProperties;
 import org.orthodox.universel.ast.Node;
 import org.orthodox.universel.compiler.CompiledUnit;
 
-import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Optional;
@@ -50,89 +49,27 @@ import static org.orthodox.universel.compiler.Messages.FieldDeclaration.VOID_TYP
 import static org.orthodox.universel.compiler.Messages.TYPE.TYPE_NOT_FOUND;
 
 /**
- * Unit tests for simple static field assignment scoped at the enclosing script level.
+ * Unit tests for simple static field declarations scoped at the enclosing script level.
  */
-public class StaticFinalFieldInitialisationTest {
+public class StaticFieldDeclarationTest {
     @Test
-    void primitive_byteField() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("byte", byte.class, "byteField", "0", (byte)0);
-        assertSingleAllAccessStaticFieldIsAssigned("byte", byte.class, "byteField", "123", (byte)123);
-        assertSingleAllAccessStaticFieldIsAssigned("byte", byte.class, "byteField", Byte.toString(Byte.MAX_VALUE), Byte.MAX_VALUE);
-
-        assertSingleAllAccessStaticFieldIsAssigned("byte", byte.class, "byteField", "-1", (byte)-1);
-        assertSingleAllAccessStaticFieldIsAssigned("byte", byte.class, "byteField", Byte.toString(Byte.MIN_VALUE), Byte.MIN_VALUE);
+    void primitive_byteField() {
+        assertSingleAllAccessStaticFieldCanBeGenerated("byte", byte.class, "byteField");
     }
 
     @Test
-    void expression_byteField() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("byte", byte.class, "byteField", "100 - 10", (byte)(100 - 10));
-        assertSingleAllAccessStaticFieldIsAssigned("byte", byte.class, "byteField", "5 * -1", (byte)-5);
-        assertSingleAllAccessStaticFieldIsAssigned("import java.lang.Byte.*", "Byte", Byte.class, "byteField", "MAX_VALUE", Byte.MAX_VALUE);
-        assertSingleAllAccessStaticFieldIsAssigned("import java.lang.Byte.*", "Byte", Byte.class, "byteField", "-9 + MAX_VALUE - 1", (byte)(-9 + Byte.MAX_VALUE - 1));
+    void primitiveWrapper_byteField() {
+        assertSingleAllAccessStaticFieldCanBeGenerated("Byte", Byte.class, "byteWrapperField");
     }
 
     @Test
-    void primitive_byteWrapperField() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("Byte", Byte.class, "byteWrapperField", "0", (byte)0);
-        assertSingleAllAccessStaticFieldIsAssigned("Byte", Byte.class, "byteWrapperField", "123", (byte)123);
-        assertSingleAllAccessStaticFieldIsAssigned("Byte", Byte.class, "byteWrapperField", Byte.toString(Byte.MAX_VALUE), Byte.MAX_VALUE);
-
-        assertSingleAllAccessStaticFieldIsAssigned("Byte", Byte.class, "byteWrapperField", "-1", (byte)-1);
-        assertSingleAllAccessStaticFieldIsAssigned("Byte", Byte.class, "byteWrapperField", Byte.toString(Byte.MIN_VALUE), Byte.MIN_VALUE);
+    void primitive_booleanField() {
+        assertSingleAllAccessStaticFieldCanBeGenerated("boolean", boolean.class, "booleanField");
     }
 
     @Test
-    void expression_byteWrapperField() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("Byte", Byte.class, "byteWrapperField", "Byte('100') - Byte('10')", (byte)(100 - 10));
-        assertSingleAllAccessStaticFieldIsAssigned("Byte", Byte.class, "byteWrapperField", "Byte('5') * Byte('-1')", (byte)-5);
-        assertSingleAllAccessStaticFieldIsAssigned("import java.lang.Byte.*", "Byte", Byte.class, "byteWrapperField", "Byte(MAX_VALUE)", Byte.MAX_VALUE);
-    }
-
-    @Test
-    void null_byteWrapperField() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("Byte", Byte.class, "byteWrapperField", "null", null);
-    }
-
-    @Test
-    void primitive_booleanField() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("boolean", boolean.class, "booleanField", "true", true);
-        assertSingleAllAccessStaticFieldIsAssigned("boolean", boolean.class, "booleanField", "false", false);
-    }
-
-    @Test
-    void primitive_booleanField_isAssignedUnboxedValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("boolean", boolean.class, "booleanField", "Boolean(true)", true);
-        assertSingleAllAccessStaticFieldIsAssigned("boolean", boolean.class, "booleanField", "Boolean(false)", false);
-    }
-
-    @Test
-    void expression_booleanField() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("boolean", boolean.class, "booleanField", "1 == 1", true);
-        assertSingleAllAccessStaticFieldIsAssigned("boolean", boolean.class, "booleanField", "1 == 2", false);
-
-        assertSingleAllAccessStaticFieldIsAssigned("import java.lang.Boolean.*", "boolean", boolean.class, "booleanField", "TRUE", true);
-        assertSingleAllAccessStaticFieldIsAssigned("import java.lang.Boolean.*", "boolean", boolean.class, "booleanField", "FALSE", false);
-    }
-
-    @Test
-    void primitive_booleanWrapperField() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("Boolean", Boolean.class, "booleanWrapperField", "Boolean(true)", true);
-        assertSingleAllAccessStaticFieldIsAssigned("Boolean", Boolean.class, "booleanWrapperField", "Boolean(false)", false);
-    }
-
-    @Test
-    void primitive_booleanWrapperField_isAssignedBoxedValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("Boolean", Boolean.class, "booleanWrapperField", "true", true);
-        assertSingleAllAccessStaticFieldIsAssigned("Boolean", Boolean.class, "booleanWrapperField", "false", false);
-    }
-
-    @Test
-    void expression_booleanWrapperField() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("Boolean", Boolean.class, "booleanWrapperField", "1 == 1", true);
-        assertSingleAllAccessStaticFieldIsAssigned("Boolean", Boolean.class, "booleanWrapperField", "1 == 2", false);
-
-        assertSingleAllAccessStaticFieldIsAssigned("import java.lang.Boolean.*", "Boolean", Boolean.class, "booleanWrapperField", "TRUE", true);
-        assertSingleAllAccessStaticFieldIsAssigned("import java.lang.Boolean.*", "Boolean", Boolean.class, "booleanWrapperField", "FALSE", false);
+    void primitiveWrapper_booleanField() {
+        assertSingleAllAccessStaticFieldCanBeGenerated("Boolean", Boolean.class, "booleanWrapperField");
     }
 
     @Test
@@ -284,44 +221,4 @@ public class StaticFinalFieldInitialisationTest {
         assertThat(findField(compiled.getCompiledClasses().get(0), STATIC, fieldName, fieldType).isPresent(), is(true));
         assertThat(findFields(compiled.getCompiledClasses().get(0)).size(), equalTo(1));
     }
-
-    private void assertSingleAllAccessStaticFieldIsAssigned(final String importDec, final String fieldDeclType, final Class<?> fieldType, final String fieldName, final String assignmentExpression, Object expectedValue) throws Exception {
-        assertSinglePublicStaticFieldIsAssigned(importDec, fieldDeclType, fieldType, fieldName, assignmentExpression, expectedValue);
-        assertSingleProtectedStaticFieldIsAssigned(importDec, fieldDeclType, fieldType, fieldName, assignmentExpression, expectedValue);
-        assertSinglePackageStaticFieldIsAssigned(importDec, fieldDeclType, fieldType, fieldName, assignmentExpression, expectedValue);
-        assertSinglePrivateStaticFieldIsAssigned(importDec, fieldDeclType, fieldType, fieldName, assignmentExpression, expectedValue);
-    }
-
-    private void assertSingleAllAccessStaticFieldIsAssigned(final String fieldDeclType, final Class<?> fieldType, final String fieldName, final String assignmentExpression, Object expectedValue) throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned(null, fieldDeclType, fieldType, fieldName, assignmentExpression, expectedValue);
-    }
-
-    private void assertSinglePublicStaticFieldIsAssigned(final String importDecl, final String fieldDeclType, final Class<?> fieldType, final String fieldName, final String assignmentExpression, Object expectedValue) throws Exception {
-        assertSingleStaticFieldIsAssigned(importDecl, "public", fieldDeclType, fieldType, fieldName, assignmentExpression, expectedValue);
-    }
-
-    private void assertSingleProtectedStaticFieldIsAssigned(final String importDecl, final String fieldDeclType, final Class<?> fieldType, final String fieldName, final String assignmentExpression, Object expectedValue) throws Exception {
-        assertSingleStaticFieldIsAssigned(importDecl, "protected", fieldDeclType, fieldType, fieldName, assignmentExpression, expectedValue);
-    }
-
-    private void assertSinglePackageStaticFieldIsAssigned(final String importDecl, final String fieldDeclType, final Class<?> fieldType, final String fieldName, final String assignmentExpression, Object expectedValue) throws Exception {
-        assertSingleStaticFieldIsAssigned(importDecl, null, fieldDeclType, fieldType, fieldName, assignmentExpression, expectedValue);
-    }
-
-    private void assertSinglePrivateStaticFieldIsAssigned(final String importDecl, final String fieldDeclType, final Class<?> fieldType, final String fieldName, final String assignmentExpression, Object expectedValue) throws Exception {
-        assertSingleStaticFieldIsAssigned(importDecl, "private", fieldDeclType, fieldType, fieldName, assignmentExpression, expectedValue);
-    }
-
-    private void assertSingleStaticFieldIsAssigned(final String importDecl, final String access, final String fieldDeclType, final Class<?> fieldType, final String fieldName, final String assignmentExpression, Object expectedValue) throws Exception {
-        CompiledUnit<?> compiled = compile(format("%s %s static %s %s = %s", (importDecl == null ? "" : importDecl), (access == null ? "" : access), fieldDeclType, fieldName, assignmentExpression));
-
-        Class<?> type = compiled.getCompiledClasses().get(0);
-        Optional<Field> field = findField(type, PUBLIC | STATIC, fieldName, fieldType);
-        assertThat(findFields(type).size(), equalTo(1));
-        assertThat(field.isPresent(), is(true));
-
-        field.get().setAccessible(true);
-        assertThat(field.get().get(null), equalTo(expectedValue));
-    }
-
 }

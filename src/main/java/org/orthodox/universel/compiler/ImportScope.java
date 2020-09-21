@@ -110,6 +110,9 @@ public class ImportScope implements Scope {
         transformedStep = resolveFieldReferenceFromImports(step);
         if (transformedStep != null) return transformedStep;
 
+        transformedStep = resolvePrimitiveTypeReference(step);
+        if (transformedStep != null) return transformedStep;
+
         return null;
     }
 
@@ -163,6 +166,12 @@ public class ImportScope implements Scope {
         }
 
         return matchingNameTransformations;
+    }
+
+    private Node resolvePrimitiveTypeReference(final NavigationAxisAndNodeTest<NameTest> step) {
+        if ( !NavigationAxis.DEFAULT.getCanonicalName().equals(step.getAxis()) || !TypeUtil.isPrimitiveType(step.getNodeTest().getName())) return null;
+
+        return new LoadTypeExpression(step.getTokenImage(), Type.forClass(TypeUtil.loadClass(step.getNodeTest().getName())));
     }
 
     private Node resolveFieldReferenceFromImports(final NavigationAxisAndNodeTest<NameTest> step) {

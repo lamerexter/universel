@@ -26,9 +26,10 @@
  *
  */
 
-package org.orthodox.universel.exec.types.script.declarations.field.stat.fin;
+package org.orthodox.universel.exec.types.script.declarations.field.stat;
 
 import org.junit.jupiter.api.Test;
+import org.orthodox.universel.exec.types.script.declarations.field.stat.fin.AbstractStaticFieldInitialisationTest;
 
 /**
  * Unit tests for simple static final char field assignment scoped at the enclosing script level.
@@ -36,36 +37,36 @@ import org.junit.jupiter.api.Test;
 public class StaticFinalCharFieldInitialisationTest extends AbstractStaticFieldInitialisationTest {
     @Test
     void  primitiveCharField_withPrimitiveValue() throws Exception {
-        assertSingleAllAccessStaticFinalFieldIsAssigned("char", char.class, "charField", "String('a').charAt(0)", 'a');
+        assertSingleAllAccessStaticFieldIsAssigned("char", char.class, "charField", "String('a').charAt(0)", 'a');
     }
 
     @Test
     void primitiveCharField_withPrimitiveWrapperValue_isAssignedUnboxedValue() throws Exception {
-        assertSingleAllAccessStaticFinalFieldIsAssigned("char", char.class, "charField", "Character(String('a').charAt(0))", 'a');
+        assertSingleAllAccessStaticFieldIsAssigned("char", char.class, "charField", "Character(String('a').charAt(0))", 'a');
     }
 
     @Test
     void primitiveCharField_withExpressionValue() throws Exception {
-        assertSingleAllAccessStaticFinalFieldIsAssigned("char", char.class, "charField", "String('Z').charAt(0) - String('A').charAt(0)", (char)('Z' - 'A'));
+        assertSingleAllAccessStaticFieldIsAssigned("char", char.class, "charField", "String('Z').charAt(0) - String('A').charAt(0)", (char)('Z' - 'A'));
     }
 
     @Test
     void primitiveCharWrapperField_withPrimitiveWrapperValue() throws Exception {
-        assertSingleAllAccessStaticFinalFieldIsAssigned("Character", Character.class, "charWrapperField", "Character(String('a').charAt(0))", 'a');
+        assertSingleAllAccessStaticFieldIsAssigned("Character", Character.class, "charWrapperField", "Character(String('a').charAt(0))", 'a');
     }
 
     @Test
     void primitiveCharWrapperField_withPrimitiveValue_isAssignedBoxedValue() throws Exception {
-        assertSingleAllAccessStaticFinalFieldIsAssigned("Character", Character.class, "charWrapperField", "String('a').charAt(0)", 'a');
+        assertSingleAllAccessStaticFieldIsAssigned("Character", Character.class, "charWrapperField", "String('a').charAt(0)", 'a');
     }
 
     @Test
     void primitiveCharWrapperField_withExpressionValue() throws Exception {
-        assertSingleAllAccessStaticFinalFieldIsAssigned("Character", Character.class, "charWrapperField", "Character(String('Z').charAt(0)) - Character(String('A').charAt(0))", (char)('Z' - 'A'));
+        assertSingleAllAccessStaticFieldIsAssigned("Character", Character.class, "charWrapperField", "Character(String('Z').charAt(0)) - Character(String('A').charAt(0))", (char)('Z' - 'A'));
     }
 
     @Test
     void primitiveCharWrapperField_withNullValue() throws Exception {
-        assertSingleAllAccessStaticFinalFieldIsAssigned("Character", Character.class, "charWrapperField", "null", null);
+        assertSingleAllAccessStaticFieldIsAssigned("Character", Character.class, "charWrapperField", "null", null);
     }
 }

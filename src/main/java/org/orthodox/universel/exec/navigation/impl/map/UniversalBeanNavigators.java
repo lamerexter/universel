@@ -31,6 +31,7 @@ package org.orthodox.universel.exec.navigation.impl.map;
 import org.beanplanet.core.beans.TypePropertiesSource;
 import org.orthodox.universel.ast.InstanceMethodCall;
 import org.orthodox.universel.ast.MethodCall;
+import org.orthodox.universel.ast.Modifiers;
 import org.orthodox.universel.ast.Node;
 import org.orthodox.universel.ast.navigation.NameTest;
 import org.orthodox.universel.ast.navigation.NavigationAxisAndNodeTest;
@@ -74,7 +75,8 @@ public class UniversalBeanNavigators {
     public static Node universalMethodNavigator(final Class<?> fromType,
                                                 final Node instanceReadAccessor,
                                                 final NavigationAxisAndNodeTest<MethodCall> step) {
-        final List<Method> matchingMethods = streamMethods(fromType, PUBLIC | PROTECTED, step.getNodeTest().getName().getName(), null, (Class<?>[]) null)
+        final List<Method> matchingMethods = streamMethods(fromType, 0, step.getNodeTest().getName().getName(), null, (Class<?>[]) null)
+                                                 .filter(m -> Modifiers.isPublic(m.getModifiers()) || Modifiers.isProtected(m.getModifiers()))
                                                  .filter(m -> parameterTypesCompatible(step.getNodeTest(), m))
                                                  .collect(Collectors.toList());
         if (matchingMethods.isEmpty()) return step;

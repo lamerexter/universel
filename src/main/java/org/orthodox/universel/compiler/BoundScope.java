@@ -28,9 +28,8 @@
 
 package org.orthodox.universel.compiler;
 
-import org.orthodox.universel.ast.LoadLocal;
-import org.orthodox.universel.ast.navigation.NavigationAxisAndNodeTest;
 import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.ast.navigation.NavigationAxisAndNodeTest;
 import org.orthodox.universel.ast.navigation.NavigationTransform;
 import org.orthodox.universel.exec.navigation.NavigatorRegistry;
 
@@ -80,9 +79,5 @@ public class BoundScope implements NameScope {
     @Override
     public void generateAccess(String name) {
 //            throw new UnsupportedOperationException();
-//        compilationContext.getBytecodeHelper().emitLoadLocal(true, 0, Map.class);
-//        compilationContext.getBytecodeHelper().emitLoadStringOperand(name);
-//        compilationContext.getBytecodeHelper().emitInvokeInstanceMethod(Map.class, "get", Object.class, Object.class);
-//        compilationContext.getVirtualMachine().loadOperandOfType(Object.class);
     }
 }

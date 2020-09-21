@@ -450,8 +450,8 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
 
     @Override
     public Node visitLoadType(LoadTypeExpression node) {
-        compilationContext.getVirtualMachine().loadOperandOfType(node.getLoadType().getTypeClass());
         compilationContext.getBytecodeHelper().emitLoadType(node.getLoadType().getTypeClass());
+        compilationContext.getVirtualMachine().loadOperandOfType(node.getLoadType().getTypeClass());
 
         return node;
     }

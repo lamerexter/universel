@@ -33,51 +33,51 @@ import org.junit.jupiter.api.Test;
 /**
  * Unit tests for simple static final boolean field assignment scoped at the enclosing script level.
  */
-public class StaticFinalBooleanFieldInitialisationTest  extends AbstractStaticFinalFieldInitialisationTest {
+public class StaticFinalBooleanFieldInitialisationTest  extends AbstractStaticFieldInitialisationTest {
     @Test
     void primitiveBooleanField_withPrimitiveValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("boolean", boolean.class, "booleanField", "true", true);
-        assertSingleAllAccessStaticFieldIsAssigned("boolean", boolean.class, "booleanField", "false", false);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("boolean", boolean.class, "booleanField", "true", true);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("boolean", boolean.class, "booleanField", "false", false);
     }
 
     @Test
     void primitiveBooleanField_isAssignedUnboxedValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("boolean", boolean.class, "booleanField", "Boolean(true)", true);
-        assertSingleAllAccessStaticFieldIsAssigned("boolean", boolean.class, "booleanField", "Boolean(false)", false);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("boolean", boolean.class, "booleanField", "Boolean(true)", true);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("boolean", boolean.class, "booleanField", "Boolean(false)", false);
     }
 
     @Test
     void primitiveBooleanField_withExpressionValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("boolean", boolean.class, "booleanField", "1 == 1", true);
-        assertSingleAllAccessStaticFieldIsAssigned("boolean", boolean.class, "booleanField", "1 == 2", false);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("boolean", boolean.class, "booleanField", "1 == 1", true);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("boolean", boolean.class, "booleanField", "1 == 2", false);
 
-        assertSingleAllAccessStaticFieldIsAssigned("import java.lang.Boolean.*", "boolean", boolean.class, "booleanField", "TRUE", true);
-        assertSingleAllAccessStaticFieldIsAssigned("import java.lang.Boolean.*", "boolean", boolean.class, "booleanField", "FALSE", false);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("import java.lang.Boolean.*", "boolean", boolean.class, "booleanField", "TRUE", true);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("import java.lang.Boolean.*", "boolean", boolean.class, "booleanField", "FALSE", false);
     }
 
     @Test
     void primitiveWrapperBooleanField_withPrimitiveWrapperValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("Boolean", Boolean.class, "booleanWrapperField", "Boolean(true)", true);
-        assertSingleAllAccessStaticFieldIsAssigned("Boolean", Boolean.class, "booleanWrapperField", "Boolean(false)", false);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Boolean", Boolean.class, "booleanWrapperField", "Boolean(true)", true);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Boolean", Boolean.class, "booleanWrapperField", "Boolean(false)", false);
     }
 
     @Test
     void primitiveWrapperBooleanField_withPrimitiveValue_isAssignedBoxedValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("Boolean", Boolean.class, "booleanWrapperField", "true", true);
-        assertSingleAllAccessStaticFieldIsAssigned("Boolean", Boolean.class, "booleanWrapperField", "false", false);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Boolean", Boolean.class, "booleanWrapperField", "true", true);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Boolean", Boolean.class, "booleanWrapperField", "false", false);
     }
 
     @Test
     void primitiveWrapperBooleanField_withExpressionValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("Boolean", Boolean.class, "booleanWrapperField", "1 == 1", true);
-        assertSingleAllAccessStaticFieldIsAssigned("Boolean", Boolean.class, "booleanWrapperField", "1 == 2", false);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Boolean", Boolean.class, "booleanWrapperField", "1 == 1", true);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Boolean", Boolean.class, "booleanWrapperField", "1 == 2", false);
 
-        assertSingleAllAccessStaticFieldIsAssigned("import java.lang.Boolean.*", "Boolean", Boolean.class, "booleanWrapperField", "TRUE", true);
-        assertSingleAllAccessStaticFieldIsAssigned("import java.lang.Boolean.*", "Boolean", Boolean.class, "booleanWrapperField", "FALSE", false);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("import java.lang.Boolean.*", "Boolean", Boolean.class, "booleanWrapperField", "TRUE", true);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("import java.lang.Boolean.*", "Boolean", Boolean.class, "booleanWrapperField", "FALSE", false);
     }
 
     @Test
     void primitiveCharWrapperField_withNullValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("Boolean", Boolean.class, "booleanWrapperField", "null", null);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Boolean", Boolean.class, "booleanWrapperField", "null", null);
     }
 }

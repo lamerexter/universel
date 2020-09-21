@@ -33,79 +33,79 @@ import org.junit.jupiter.api.Test;
 /**
  * Unit tests for simple static final short field assignment scoped at the enclosing script level.
  */
-public class StaticFinalShortFieldInitialisationTest extends AbstractStaticFinalFieldInitialisationTest {
+public class StaticFinalShortFieldInitialisationTest extends AbstractStaticFieldInitialisationTest {
     @Test
     void primitiveShortField_withPrimitiveValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("short", short.class, "shortField", "Short('0').shortValue()", (short)0);
-        assertSingleAllAccessStaticFieldIsAssigned("short", short.class, "shortField", "Short('123').shortValue()", (short)123);
-        assertSingleAllAccessStaticFieldIsAssigned("short", short.class, "shortField", "Short('-1').shortValue()", (short)-1);
-        assertSingleAllAccessStaticFieldIsAssigned("short", short.class, "shortField", "Short('"+Short.MAX_VALUE+"').shortValue()", Short.MAX_VALUE);
-        assertSingleAllAccessStaticFieldIsAssigned("short", short.class, "shortField", "Short('"+Short.MIN_VALUE+"').shortValue()", Short.MIN_VALUE);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("short", short.class, "shortField", "Short('0').shortValue()", (short)0);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("short", short.class, "shortField", "Short('123').shortValue()", (short)123);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("short", short.class, "shortField", "Short('-1').shortValue()", (short)-1);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("short", short.class, "shortField", "Short('" + Short.MAX_VALUE + "').shortValue()", Short.MAX_VALUE);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("short", short.class, "shortField", "Short('" + Short.MIN_VALUE + "').shortValue()", Short.MIN_VALUE);
     }
 
     @Test
     void primitiveShortField_withPrimitiveWrapperValue_isAssignedUnboxedValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("short", short.class, "shortField", "Short('123')", (short)123);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("short", short.class, "shortField", "Short('123')", (short)123);
     }
 
     @Test
     void primitiveShortField_withWiderTypeValue_isAssignedNarrowedValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("short", short.class, "shortField", "123I", (short)123);
-        assertSingleAllAccessStaticFieldIsAssigned("short", short.class, "shortField", "123D", (short)123);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("short", short.class, "shortField", "123I", (short)123);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("short", short.class, "shortField", "123D", (short)123);
     }
 
     @Test
     void primitiveShortField_withWiderPrimitiveWrapperTypeValue_isAssignedNarrowedUnboxedValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("short", short.class, "shortField", "Short('123')", (short)123);
-        assertSingleAllAccessStaticFieldIsAssigned("short", short.class, "shortField", "123D", (short)123);
-        assertSingleAllAccessStaticFieldIsAssigned("short", short.class, "shortField", "123I", (short)123);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("short", short.class, "shortField", "Short('123')", (short)123);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("short", short.class, "shortField", "123D", (short)123);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("short", short.class, "shortField", "123I", (short)123);
     }
 
     @Test
     void primitiveShortField_withExpressionValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("short", short.class, "shortField", "Short('100').shortValue() - Short('10')", (short)(100 - 10));
-        assertSingleAllAccessStaticFieldIsAssigned("short", short.class, "shortField", "Short('5') * Short('-1').shortValue()", (short)-5);
-        assertSingleAllAccessStaticFieldIsAssigned("import java.lang.Short.*", "Short", Short.class, "shortField", "MAX_VALUE", Short.MAX_VALUE);
-        assertSingleAllAccessStaticFieldIsAssigned("import java.lang.Short.*", "Short", Short.class, "shortField", "Short('-9') + MAX_VALUE - Short('1')", (short)(-9 + Short.MAX_VALUE - 1));
+        assertSingleAllAccessStaticFinalFieldIsAssigned("short", short.class, "shortField", "Short('100').shortValue() - Short('10')", (short)(100 - 10));
+        assertSingleAllAccessStaticFinalFieldIsAssigned("short", short.class, "shortField", "Short('5') * Short('-1').shortValue()", (short)-5);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("import java.lang.Short.*", "Short", Short.class, "shortField", "MAX_VALUE", Short.MAX_VALUE);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("import java.lang.Short.*", "Short", Short.class, "shortField", "Short('-9') + MAX_VALUE - Short('1')", (short)(-9 + Short.MAX_VALUE - 1));
     }
 
     @Test
     void primitiveShortWrapperField_withPrimitiveWrapperValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("Short", Short.class, "shortWrapperField", "Short('0')", (short)0);
-        assertSingleAllAccessStaticFieldIsAssigned("Short", Short.class, "shortWrapperField", "Short('123')", (short)123);
-        assertSingleAllAccessStaticFieldIsAssigned("Short", Short.class, "shortWrapperField", "Short('-1')", (short)-1);
-        assertSingleAllAccessStaticFieldIsAssigned("Short", Short.class, "shortWrapperField", "Short('"+Short.MAX_VALUE+"')", Short.MAX_VALUE);
-        assertSingleAllAccessStaticFieldIsAssigned("Short", Short.class, "shortWrapperField", "Short('"+Short.MIN_VALUE+"')", Short.MIN_VALUE);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Short", Short.class, "shortWrapperField", "Short('0')", (short)0);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Short", Short.class, "shortWrapperField", "Short('123')", (short)123);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Short", Short.class, "shortWrapperField", "Short('-1')", (short)-1);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Short", Short.class, "shortWrapperField", "Short('" + Short.MAX_VALUE + "')", Short.MAX_VALUE);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Short", Short.class, "shortWrapperField", "Short('" + Short.MIN_VALUE + "')", Short.MIN_VALUE);
     }
 
     @Test
     void primitiveShortWrapperField_withPrimitiveValue_isAssignedBoxedValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("Short", Short.class, "shortWrapperField", "Short('123').shortValue()", (short)123);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Short", Short.class, "shortWrapperField", "Short('123').shortValue()", (short)123);
     }
 
     @Test
     void primitiveShortWrapperField_withWiderTypeValue_isAssignedNarrowedValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("Short", Short.class, "shortWrapperField", "Double(123.5)", (short)123);
-        assertSingleAllAccessStaticFieldIsAssigned("Short", Short.class, "shortWrapperField", "123I", (short)123);
-        assertSingleAllAccessStaticFieldIsAssigned("Short", Short.class, "shortWrapperField", "123D", (short)123);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Short", Short.class, "shortWrapperField", "Double(123.5)", (short)123);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Short", Short.class, "shortWrapperField", "123I", (short)123);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Short", Short.class, "shortWrapperField", "123D", (short)123);
     }
 
     @Test
     void primitiveShortWrapperField_withWiderPrimitiveTypeValue_isAssignedNarrowedBoxedValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("Short", Short.class, "shortWrapperField", "123I", (short)123L);
-        assertSingleAllAccessStaticFieldIsAssigned("Short", Short.class, "shortWrapperField", "123D", (short)123L);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Short", Short.class, "shortWrapperField", "123I", (short)123L);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Short", Short.class, "shortWrapperField", "123D", (short)123L);
     }
 
     @Test
     void primitiveShortWrapperField_withExpressionValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("Short", Short.class, "shortWrapperField", "Short('100') - Short('10')", (short)(100 - 10));
-        assertSingleAllAccessStaticFieldIsAssigned("Short", Short.class, "shortWrapperField", "Short('5') * Short('-1')", (short)-5);
-        assertSingleAllAccessStaticFieldIsAssigned("import java.lang.Short.*", "Short", Short.class, "shortWrapperField", "Short(MAX_VALUE)", Short.MAX_VALUE);
-        assertSingleAllAccessStaticFieldIsAssigned("import java.lang.Short.*", "Short", Short.class, "shortWrapperField", "Short('-9') + MAX_VALUE - Short('1')", (short)(-9 + Short.MAX_VALUE - 1));
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Short", Short.class, "shortWrapperField", "Short('100') - Short('10')", (short)(100 - 10));
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Short", Short.class, "shortWrapperField", "Short('5') * Short('-1')", (short)-5);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("import java.lang.Short.*", "Short", Short.class, "shortWrapperField", "Short(MAX_VALUE)", Short.MAX_VALUE);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("import java.lang.Short.*", "Short", Short.class, "shortWrapperField", "Short('-9') + MAX_VALUE - Short('1')", (short)(-9 + Short.MAX_VALUE - 1));
     }
 
     @Test
     void primitiveShortWrapperField_withNullValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("Short", Short.class, "shortWrapperField", "null", null);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Short", Short.class, "shortWrapperField", "null", null);
     }
 }

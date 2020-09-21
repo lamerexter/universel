@@ -195,30 +195,30 @@ public class StaticFinalFieldDeclarationTest {
     }
 
     private void assertSinglePublicStaticFieldCanBeGenerated(final String importDecl, final String fieldDeclType, final Class<?> fieldType, final String fieldName) {
-        CompiledUnit<?> compiled = compile(format("%s public static %s %s", (importDecl == null ? "" : importDecl), fieldDeclType, fieldName));
+        CompiledUnit<?> compiled = compile(format("%s public static final %s %s", (importDecl == null ? "" : importDecl), fieldDeclType, fieldName));
 
-        assertThat(findField(compiled.getCompiledClasses().get(0), PUBLIC | STATIC, fieldName, fieldType).isPresent(), is(true));
+        assertThat(findField(compiled.getCompiledClasses().get(0), PUBLIC | STATIC | FINAL, fieldName, fieldType).isPresent(), is(true));
         assertThat(findFields(compiled.getCompiledClasses().get(0)).size(), equalTo(1));
     }
 
     private void assertSingleProtectedStaticFieldCanBeGenerated(final String importDecl, final String fieldDeclType, final Class<?> fieldType, final String fieldName) {
-        CompiledUnit<?> compiled = compile(format("%s protected static %s %s", (importDecl == null ? "" : importDecl), fieldDeclType, fieldName));
+        CompiledUnit<?> compiled = compile(format("%s protected static final %s %s", (importDecl == null ? "" : importDecl), fieldDeclType, fieldName));
 
-        assertThat(findField(compiled.getCompiledClasses().get(0), PROTECTED | STATIC, fieldName, fieldType).isPresent(), is(true));
+        assertThat(findField(compiled.getCompiledClasses().get(0), PROTECTED | STATIC | FINAL, fieldName, fieldType).isPresent(), is(true));
         assertThat(findFields(compiled.getCompiledClasses().get(0)).size(), equalTo(1));
     }
 
     private void assertSinglePrivateStaticFieldCanBeGenerated(final String importDecl, final String fieldDeclType, final Class<?> fieldType, final String fieldName) {
-        CompiledUnit<?> compiled = compile(format("%s private static %s %s", (importDecl == null ? "" : importDecl), fieldDeclType, fieldName));
+        CompiledUnit<?> compiled = compile(format("%s private static final %s %s", (importDecl == null ? "" : importDecl), fieldDeclType, fieldName));
 
-        assertThat(findField(compiled.getCompiledClasses().get(0), PRIVATE | STATIC, fieldName, fieldType).isPresent(), is(true));
+        assertThat(findField(compiled.getCompiledClasses().get(0), PRIVATE | STATIC | FINAL, fieldName, fieldType).isPresent(), is(true));
         assertThat(findFields(compiled.getCompiledClasses().get(0)).size(), equalTo(1));
     }
 
     private void assertSinglePackageStaticFieldCanBeGenerated(final String importDecl, final String fieldDeclType, final Class<?> fieldType, final String fieldName) {
-        CompiledUnit<?> compiled = compile(format("%s static %s %s", (importDecl == null ? "" : importDecl), fieldDeclType, fieldName));
+        CompiledUnit<?> compiled = compile(format("%s static final %s %s", (importDecl == null ? "" : importDecl), fieldDeclType, fieldName));
 
-        assertThat(findField(compiled.getCompiledClasses().get(0), STATIC, fieldName, fieldType).isPresent(), is(true));
+        assertThat(findField(compiled.getCompiledClasses().get(0), STATIC | FINAL, fieldName, fieldType).isPresent(), is(true));
         assertThat(findFields(compiled.getCompiledClasses().get(0)).size(), equalTo(1));
     }
 }

@@ -33,79 +33,79 @@ import org.junit.jupiter.api.Test;
 /**
  * Unit tests for simple static final int field assignment scoped at the enclosing script level.
  */
-public class StaticFinalIntFieldInitialisationTest extends AbstractStaticFinalFieldInitialisationTest {
+public class StaticFinalIntFieldInitialisationTest extends AbstractStaticFieldInitialisationTest {
     @Test
     void primitiveIntField_withPrimitiveValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("int", int.class, "intField", "0", 0);
-        assertSingleAllAccessStaticFieldIsAssigned("int", int.class, "intField", "123", 123);
-        assertSingleAllAccessStaticFieldIsAssigned("int", int.class, "intField", "-1", -1);
-        assertSingleAllAccessStaticFieldIsAssigned("int", int.class, "intField", "Integer('"+Integer.MAX_VALUE+"').intValue()", Integer.MAX_VALUE);
-        assertSingleAllAccessStaticFieldIsAssigned("int", int.class, "intField", "Integer('"+Integer.MIN_VALUE+"').intValue()", Integer.MIN_VALUE);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("int", int.class, "intField", "0", 0);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("int", int.class, "intField", "123", 123);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("int", int.class, "intField", "-1", -1);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("int", int.class, "intField", "Integer('" + Integer.MAX_VALUE + "').intValue()", Integer.MAX_VALUE);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("int", int.class, "intField", "Integer('" + Integer.MIN_VALUE + "').intValue()", Integer.MIN_VALUE);
     }
 
     @Test
     void primitiveIntField_withPrimitiveWrapperValue_isAssignedUnboxedValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("int", int.class, "intField", "Integer(123)", 123);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("int", int.class, "intField", "Integer(123)", 123);
     }
 
     @Test
     void primitiveIntField_withWiderTypeValue_isAssignedNarrowedValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("int", int.class, "intField", "123I", 123);
-        assertSingleAllAccessStaticFieldIsAssigned("int", int.class, "intField", "123D", 123);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("int", int.class, "intField", "123I", 123);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("int", int.class, "intField", "123D", 123);
     }
 
     @Test
     void primitiveIntField_withWiderPrimitiveWrapperTypeValue_isAssignedNarrowedUnboxedValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("int", int.class, "intField", "Integer('123')", 123);
-        assertSingleAllAccessStaticFieldIsAssigned("int", int.class, "intField", "123D", 123);
-        assertSingleAllAccessStaticFieldIsAssigned("int", int.class, "intField", "123I", 123);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("int", int.class, "intField", "Integer('123')", 123);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("int", int.class, "intField", "123D", 123);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("int", int.class, "intField", "123I", 123);
     }
 
     @Test
     void primitiveIntField_withExpressionValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("int", int.class, "intField", "100 - 10", 100 - 10);
-        assertSingleAllAccessStaticFieldIsAssigned("int", int.class, "intField", "5 * -1", -5);
-        assertSingleAllAccessStaticFieldIsAssigned("import java.lang.Integer.*", "Integer", Integer.class, "intField", "MAX_VALUE", Integer.MAX_VALUE);
-        assertSingleAllAccessStaticFieldIsAssigned("import java.lang.Integer.*", "Integer", Integer.class, "intField", "-9 + MAX_VALUE - 1", -9 + Integer.MAX_VALUE - 1);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("int", int.class, "intField", "100 - 10", 100 - 10);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("int", int.class, "intField", "5 * -1", -5);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("import java.lang.Integer.*", "Integer", Integer.class, "intField", "MAX_VALUE", Integer.MAX_VALUE);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("import java.lang.Integer.*", "Integer", Integer.class, "intField", "-9 + MAX_VALUE - 1", -9 + Integer.MAX_VALUE - 1);
     }
 
     @Test
     void primitiveIntWrapperField_withPrimitiveWrapperValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("Integer", Integer.class, "intWrapperField", "Integer(0)", 0);
-        assertSingleAllAccessStaticFieldIsAssigned("Integer", Integer.class, "intWrapperField", "Integer(123)", 123);
-        assertSingleAllAccessStaticFieldIsAssigned("Integer", Integer.class, "intWrapperField", "Integer(-1)", -1);
-        assertSingleAllAccessStaticFieldIsAssigned("Integer", Integer.class, "intWrapperField", "Integer('"+Integer.MAX_VALUE+"')", Integer.MAX_VALUE);
-        assertSingleAllAccessStaticFieldIsAssigned("Integer", Integer.class, "intWrapperField", "Integer('"+Integer.MIN_VALUE+"')", Integer.MIN_VALUE);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Integer", Integer.class, "intWrapperField", "Integer(0)", 0);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Integer", Integer.class, "intWrapperField", "Integer(123)", 123);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Integer", Integer.class, "intWrapperField", "Integer(-1)", -1);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Integer", Integer.class, "intWrapperField", "Integer('" + Integer.MAX_VALUE + "')", Integer.MAX_VALUE);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Integer", Integer.class, "intWrapperField", "Integer('" + Integer.MIN_VALUE + "')", Integer.MIN_VALUE);
     }
 
     @Test
     void primitiveIntWrapperField_withPrimitiveValue_isAssignedBoxedValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("Integer", Integer.class, "intWrapperField", "Integer('123').intValue()", 123);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Integer", Integer.class, "intWrapperField", "Integer('123').intValue()", 123);
     }
 
     @Test
     void primitiveIntWrapperField_withWiderTypeValue_isAssignedNarrowedValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("Integer", Integer.class, "intWrapperField", "Integer(123)", 123);
-        assertSingleAllAccessStaticFieldIsAssigned("Integer", Integer.class, "intWrapperField", "123I", 123);
-        assertSingleAllAccessStaticFieldIsAssigned("Integer", Integer.class, "intWrapperField", "123D", 123);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Integer", Integer.class, "intWrapperField", "Integer(123)", 123);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Integer", Integer.class, "intWrapperField", "123I", 123);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Integer", Integer.class, "intWrapperField", "123D", 123);
     }
 
     @Test
     void primitiveIntWrapperField_withWiderPrimitiveTypeValue_isAssignedNarrowedBoxedValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("Integer", Integer.class, "intWrapperField", "123d", 123);
-        assertSingleAllAccessStaticFieldIsAssigned("Integer", Integer.class, "intWrapperField", "123I", 123);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Integer", Integer.class, "intWrapperField", "123d", 123);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Integer", Integer.class, "intWrapperField", "123I", 123);
     }
 
     @Test
     void primitiveIntWrapperField_withExpressionValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("Integer", Integer.class, "intWrapperField", "Integer(100) - Integer(10)", 100 - 10);
-        assertSingleAllAccessStaticFieldIsAssigned("Integer", Integer.class, "intWrapperField", "Integer(5) * Integer(-1)", -5);
-        assertSingleAllAccessStaticFieldIsAssigned("import java.lang.Integer.*", "Integer", Integer.class, "intWrapperField", "Integer(MAX_VALUE)", Integer.MAX_VALUE);
-        assertSingleAllAccessStaticFieldIsAssigned("import java.lang.Integer.*", "Integer", Integer.class, "intWrapperField", "Integer(-9) + MAX_VALUE - Integer(1)", -9 + Integer.MAX_VALUE - 1);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Integer", Integer.class, "intWrapperField", "Integer(100) - Integer(10)", 100 - 10);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Integer", Integer.class, "intWrapperField", "Integer(5) * Integer(-1)", -5);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("import java.lang.Integer.*", "Integer", Integer.class, "intWrapperField", "Integer(MAX_VALUE)", Integer.MAX_VALUE);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("import java.lang.Integer.*", "Integer", Integer.class, "intWrapperField", "Integer(-9) + MAX_VALUE - Integer(1)", -9 + Integer.MAX_VALUE - 1);
     }
 
     @Test
     void primitiveIntWrapperField_withNullValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("Integer", Integer.class, "intWrapperField", "null", null);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Integer", Integer.class, "intWrapperField", "null", null);
     }
 }

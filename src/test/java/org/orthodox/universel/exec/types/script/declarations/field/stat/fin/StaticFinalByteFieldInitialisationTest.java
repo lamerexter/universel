@@ -33,73 +33,73 @@ import org.junit.jupiter.api.Test;
 /**
  * Unit tests for simple static final byte field assignment scoped at the enclosing script level.
  */
-public class StaticFinalByteFieldInitialisationTest extends AbstractStaticFinalFieldInitialisationTest {
+public class StaticFinalByteFieldInitialisationTest extends AbstractStaticFieldInitialisationTest {
     @Test
     void primitiveByteField_withPrimitiveValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("byte", byte.class, "byteField", "Byte('0').byteValue()", (byte)0);
-        assertSingleAllAccessStaticFieldIsAssigned("byte", byte.class, "byteField", "Byte('123').byteValue()", (byte)123);
-        assertSingleAllAccessStaticFieldIsAssigned("byte", byte.class, "byteField", "Byte('-1').byteValue()", (byte)-1);
-        assertSingleAllAccessStaticFieldIsAssigned("byte", byte.class, "byteField", "Byte('"+Byte.MAX_VALUE+"').byteValue()", Byte.MAX_VALUE);
-        assertSingleAllAccessStaticFieldIsAssigned("byte", byte.class, "byteField", "Byte('"+Byte.MIN_VALUE+"').byteValue()", Byte.MIN_VALUE);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("byte", byte.class, "byteField", "Byte('0').byteValue()", (byte)0);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("byte", byte.class, "byteField", "Byte('123').byteValue()", (byte)123);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("byte", byte.class, "byteField", "Byte('-1').byteValue()", (byte)-1);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("byte", byte.class, "byteField", "Byte('" + Byte.MAX_VALUE + "').byteValue()", Byte.MAX_VALUE);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("byte", byte.class, "byteField", "Byte('" + Byte.MIN_VALUE + "').byteValue()", Byte.MIN_VALUE);
     }
 
     @Test
     void primitiveByteField_withPrimitiveWrapperValue_isAssignedUnboxedValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("byte", byte.class, "byteField", "Byte('123')", (byte)123);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("byte", byte.class, "byteField", "Byte('123')", (byte)123);
     }
 
     @Test
     void primitiveByteField_withWiderTypeValue_isAssignedNarrowedValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("byte", byte.class, "byteField", "123", (byte)123);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("byte", byte.class, "byteField", "123", (byte)123);
     }
 
     @Test
     void primitiveByteField_withWiderPrimitiveWrapperTypeValue_isAssignedNarrowedUnboxedValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("byte", byte.class, "byteField", "Integer('123')", (byte)123);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("byte", byte.class, "byteField", "Integer('123')", (byte)123);
     }
 
     @Test
     void primitiveByteField_withExpressionValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("byte", byte.class, "byteField", "100 - 10", (byte)(100 - 10));
-        assertSingleAllAccessStaticFieldIsAssigned("byte", byte.class, "byteField", "5 * -1", (byte)-5);
-        assertSingleAllAccessStaticFieldIsAssigned("import java.lang.Byte.*", "Byte", Byte.class, "byteField", "MAX_VALUE", Byte.MAX_VALUE);
-        assertSingleAllAccessStaticFieldIsAssigned("import java.lang.Byte.*", "Byte", Byte.class, "byteField", "-9 + MAX_VALUE - 1", (byte)(-9 + Byte.MAX_VALUE - 1));
+        assertSingleAllAccessStaticFinalFieldIsAssigned("byte", byte.class, "byteField", "100 - 10", (byte)(100 - 10));
+        assertSingleAllAccessStaticFinalFieldIsAssigned("byte", byte.class, "byteField", "5 * -1", (byte)-5);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("import java.lang.Byte.*", "Byte", Byte.class, "byteField", "MAX_VALUE", Byte.MAX_VALUE);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("import java.lang.Byte.*", "Byte", Byte.class, "byteField", "-9 + MAX_VALUE - 1", (byte)(-9 + Byte.MAX_VALUE - 1));
     }
 
     @Test
     void primitiveByteWrapperField_withPrimitiveWrapperValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("Byte", Byte.class, "byteWrapperField", "Byte('0')", (byte)0);
-        assertSingleAllAccessStaticFieldIsAssigned("Byte", Byte.class, "byteWrapperField", "Byte('123')", (byte)123);
-        assertSingleAllAccessStaticFieldIsAssigned("Byte", Byte.class, "byteWrapperField", "Byte('-1')", (byte)-1);
-        assertSingleAllAccessStaticFieldIsAssigned("Byte", Byte.class, "byteWrapperField", "Byte('"+Byte.MAX_VALUE+"')", Byte.MAX_VALUE);
-        assertSingleAllAccessStaticFieldIsAssigned("Byte", Byte.class, "byteWrapperField", "Byte('"+Byte.MIN_VALUE+"')", Byte.MIN_VALUE);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Byte", Byte.class, "byteWrapperField", "Byte('0')", (byte)0);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Byte", Byte.class, "byteWrapperField", "Byte('123')", (byte)123);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Byte", Byte.class, "byteWrapperField", "Byte('-1')", (byte)-1);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Byte", Byte.class, "byteWrapperField", "Byte('" + Byte.MAX_VALUE + "')", Byte.MAX_VALUE);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Byte", Byte.class, "byteWrapperField", "Byte('" + Byte.MIN_VALUE + "')", Byte.MIN_VALUE);
     }
 
     @Test
     void primitiveByteWrapperField_withPrimitiveValue_isAssignedBoxedValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("Byte", Byte.class, "byteWrapperField", "Byte('123').byteValue()", (byte)123);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Byte", Byte.class, "byteWrapperField", "Byte('123').byteValue()", (byte)123);
     }
 
     @Test
     void primitiveByteWrapperField_withWiderTypeValue_isAssignedNarrowedValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("Byte", Byte.class, "byteWrapperField", "Integer('123')", (byte)123);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Byte", Byte.class, "byteWrapperField", "Integer('123')", (byte)123);
     }
 
     @Test
     void primitiveByteWrapperField_withWiderPrimitiveTypeValue_isAssignedNarrowedValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("Byte", Byte.class, "byteWrapperField", "123", (byte)123);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Byte", Byte.class, "byteWrapperField", "123", (byte)123);
     }
 
     @Test
     void primitiveByteWrapperField_withExpressionValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("Byte", Byte.class, "byteWrapperField", "Byte('100') - Byte('10')", (byte)(100 - 10));
-        assertSingleAllAccessStaticFieldIsAssigned("Byte", Byte.class, "byteWrapperField", "Byte('5') * Byte('-1')", (byte)-5);
-        assertSingleAllAccessStaticFieldIsAssigned("import java.lang.Byte.*", "Byte", Byte.class, "byteWrapperField", "Byte(MAX_VALUE)", Byte.MAX_VALUE);
-        assertSingleAllAccessStaticFieldIsAssigned("import java.lang.Byte.*", "Byte", Byte.class, "byteField", "Byte('-9') + Byte(MAX_VALUE) - Byte('1')", (byte)(-9 + Byte.MAX_VALUE - 1));
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Byte", Byte.class, "byteWrapperField", "Byte('100') - Byte('10')", (byte)(100 - 10));
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Byte", Byte.class, "byteWrapperField", "Byte('5') * Byte('-1')", (byte)-5);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("import java.lang.Byte.*", "Byte", Byte.class, "byteWrapperField", "Byte(MAX_VALUE)", Byte.MAX_VALUE);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("import java.lang.Byte.*", "Byte", Byte.class, "byteField", "Byte('-9') + Byte(MAX_VALUE) - Byte('1')", (byte)(-9 + Byte.MAX_VALUE - 1));
     }
 
     @Test
     void primitiveByteWrapperField_withNullValue() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("Byte", Byte.class, "byteWrapperField", "null", null);
+        assertSingleAllAccessStaticFinalFieldIsAssigned("Byte", Byte.class, "byteWrapperField", "null", null);
     }
 }

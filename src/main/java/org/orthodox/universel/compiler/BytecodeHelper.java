@@ -194,7 +194,7 @@ public class BytecodeHelper {
         // Prepare to call into the Type Converter subsystem to convert to the target type. This is Object-based, with
         // primitives needing to be wrapped accordingly.
         //--------------------------------------------------------------------------------------------------------------
-        Class<?> toTypeWrapped = TypeUtil.ensureNonPrimitiveType(toType);
+        Class<?> toTypeWrapped = ensureNonPrimitiveType(toType);
         MethodVisitor mv = peekMethodVisitor();
         mv.visitMethodInsn(INVOKESTATIC, Type.getInternalName(SystemTypeConverter.class), "getInstance",
                            Type.getMethodDescriptor(Type.getType(TypeConverter.class), EMPTY_TYPES));
@@ -337,8 +337,16 @@ public class BytecodeHelper {
         }
     }
 
-    public void emitLoadType(Class<?> typeName) {
-        peekMethodVisitor().visitLdcInsn(Type.getType(typeName));
+    public void emitLoadType(Class<?> type) {
+        if ( type.isPrimitive() ) {
+            peekMethodVisitor().visitFieldInsn(GETSTATIC,
+                                               Type.getInternalName(ensureNonPrimitiveType(type)),
+                                               "TYPE",
+                                               Type.getDescriptor(Class.class));
+        } else {
+            peekMethodVisitor().visitLdcInsn(Type.getType(type));
+        }
+
     }
 
     public static final Type[] typeArrayFor(Class<?> types[]) {
