@@ -26,15 +26,15 @@
  *
  */
 
-package org.orthodox.universel.exec.types.script.declarations.field.stat;
+package org.orthodox.universel.exec.types.script.declarations.field.stat.nonfinal;
 
 import org.junit.jupiter.api.Test;
-import org.orthodox.universel.exec.types.script.declarations.field.stat.fin.AbstractStaticFieldInitialisationTest;
+import org.orthodox.universel.exec.types.script.declarations.field.stat.AbstractStaticFieldInitialisationTest;
 
 /**
  * Unit tests for simple static final boolean field assignment scoped at the enclosing script level.
  */
-public class StaticFinalBooleanFieldInitialisationTest  extends AbstractStaticFieldInitialisationTest {
+public class StaticBooleanFieldInitialisationTest extends AbstractStaticFieldInitialisationTest {
     @Test
     void primitiveBooleanField_withPrimitiveValue() throws Exception {
         assertSingleAllAccessStaticFieldIsAssigned("boolean", boolean.class, "booleanField", "true", true);

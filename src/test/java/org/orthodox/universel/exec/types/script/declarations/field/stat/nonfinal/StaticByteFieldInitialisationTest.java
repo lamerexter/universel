@@ -26,15 +26,15 @@
  *
  */
 
-package org.orthodox.universel.exec.types.script.declarations.field.stat;
+package org.orthodox.universel.exec.types.script.declarations.field.stat.nonfinal;
 
 import org.junit.jupiter.api.Test;
-import org.orthodox.universel.exec.types.script.declarations.field.stat.fin.AbstractStaticFieldInitialisationTest;
+import org.orthodox.universel.exec.types.script.declarations.field.stat.AbstractStaticFieldInitialisationTest;
 
 /**
  * Unit tests for simple static final byte field assignment scoped at the enclosing script level.
  */
-public class StaticFinalByteFieldInitialisationTest extends AbstractStaticFieldInitialisationTest {
+public class StaticByteFieldInitialisationTest extends AbstractStaticFieldInitialisationTest {
     @Test
     void primitiveByteField_withPrimitiveValue() throws Exception {
         assertSingleAllAccessStaticFieldIsAssigned("byte", byte.class, "byteField", "Byte('0').byteValue()", (byte)0);

@@ -26,15 +26,15 @@
  *
  */
 
-package org.orthodox.universel.exec.types.script.declarations.field.stat;
+package org.orthodox.universel.exec.types.script.declarations.field.stat.nonfinal;
 
 import org.junit.jupiter.api.Test;
-import org.orthodox.universel.exec.types.script.declarations.field.stat.fin.AbstractStaticFieldInitialisationTest;
+import org.orthodox.universel.exec.types.script.declarations.field.stat.AbstractStaticFieldInitialisationTest;
 
 /**
  * Unit tests for simple static final char field assignment scoped at the enclosing script level.
  */
-public class StaticFinalCharFieldInitialisationTest extends AbstractStaticFieldInitialisationTest {
+public class StaticCharFieldInitialisationTest extends AbstractStaticFieldInitialisationTest {
     @Test
     void  primitiveCharField_withPrimitiveValue() throws Exception {
         assertSingleAllAccessStaticFieldIsAssigned("char", char.class, "charField", "String('a').charAt(0)", 'a');

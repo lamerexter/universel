@@ -26,15 +26,15 @@
  *
  */
 
-package org.orthodox.universel.exec.types.script.declarations.field.stat;
+package org.orthodox.universel.exec.types.script.declarations.field.stat.nonfinal;
 
 import org.junit.jupiter.api.Test;
-import org.orthodox.universel.exec.types.script.declarations.field.stat.fin.AbstractStaticFieldInitialisationTest;
+import org.orthodox.universel.exec.types.script.declarations.field.stat.AbstractStaticFieldInitialisationTest;
 
 /**
  * Unit tests for simple static final float field assignment scoped at the enclosing script level.
  */
-public class StaticFinalFloatFieldInitialisationTest extends AbstractStaticFieldInitialisationTest {
+public class StaticFloatFieldInitialisationTest extends AbstractStaticFieldInitialisationTest {
     @Test
     void primitiveFloatField_withPrimitiveValue() throws Exception {
         assertSingleAllAccessStaticFieldIsAssigned("float", float.class, "floatField", "0f", 0f);

@@ -26,15 +26,15 @@
  *
  */
 
-package org.orthodox.universel.exec.types.script.declarations.field.stat;
+package org.orthodox.universel.exec.types.script.declarations.field.stat.nonfinal;
 
 import org.junit.jupiter.api.Test;
-import org.orthodox.universel.exec.types.script.declarations.field.stat.fin.AbstractStaticFieldInitialisationTest;
+import org.orthodox.universel.exec.types.script.declarations.field.stat.AbstractStaticFieldInitialisationTest;
 
 /**
  * Unit tests for simple static final int field assignment scoped at the enclosing script level.
  */
-public class StaticFinalIntFieldInitialisationTest extends AbstractStaticFieldInitialisationTest {
+public class StaticIntFieldInitialisationTest extends AbstractStaticFieldInitialisationTest {
     @Test
     void primitiveIntField_withPrimitiveValue() throws Exception {
         assertSingleAllAccessStaticFieldIsAssigned("int", int.class, "intField", "0", 0);

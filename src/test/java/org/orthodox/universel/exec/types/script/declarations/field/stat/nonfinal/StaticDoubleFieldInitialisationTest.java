@@ -26,15 +26,15 @@
  *
  */
 
-package org.orthodox.universel.exec.types.script.declarations.field.stat;
+package org.orthodox.universel.exec.types.script.declarations.field.stat.nonfinal;
 
 import org.junit.jupiter.api.Test;
-import org.orthodox.universel.exec.types.script.declarations.field.stat.fin.AbstractStaticFieldInitialisationTest;
+import org.orthodox.universel.exec.types.script.declarations.field.stat.AbstractStaticFieldInitialisationTest;
 
 /**
  * Unit tests for simple static final double field assignment scoped at the enclosing script level.
  */
-public class StaticFinalDoubleFieldInitialisationTest extends AbstractStaticFieldInitialisationTest {
+public class StaticDoubleFieldInitialisationTest extends AbstractStaticFieldInitialisationTest {
     @Test
     void primitiveDoubleField_withPrimitiveValue() throws Exception {
         assertSingleAllAccessStaticFieldIsAssigned("double", double.class, "doubleField", "0d", 0d);

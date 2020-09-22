@@ -29,6 +29,7 @@
 package org.orthodox.universel.exec.types.script.declarations.field.stat.fin;
 
 import org.junit.jupiter.api.Test;
+import org.orthodox.universel.exec.types.script.declarations.field.stat.AbstractStaticFieldInitialisationTest;
 
 /**
  * Unit tests for simple static final boolean field assignment scoped at the enclosing script level.

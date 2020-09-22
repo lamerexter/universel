@@ -26,7 +26,7 @@
  *
  */
 
-package org.orthodox.universel.exec.types.script.declarations.field.stat.fin;
+package org.orthodox.universel.exec.types.script.declarations.field.stat;
 
 import org.orthodox.universel.compiler.CompiledUnit;
 import org.orthodox.universel.compiler.codegen.CodeGenUtil;
@@ -97,7 +97,6 @@ public abstract class AbstractStaticFieldInitialisationTest {
         assertThat(findFields(type).size(), equalTo(1));
         assertThat(field.isPresent(), is(true));
 
-        BytecodeOutput.printClass(compiled.getCompiledClassResources().get(0).getValue().readFullyAsBytes());
         field.get().setAccessible(true);
         assertThat(field.get().get(null), equalTo(expectedValue));
     }

@@ -26,15 +26,15 @@
  *
  */
 
-package org.orthodox.universel.exec.types.script.declarations.field.stat;
+package org.orthodox.universel.exec.types.script.declarations.field.stat.nonfinal;
 
 import org.junit.jupiter.api.Test;
-import org.orthodox.universel.exec.types.script.declarations.field.stat.fin.AbstractStaticFieldInitialisationTest;
+import org.orthodox.universel.exec.types.script.declarations.field.stat.AbstractStaticFieldInitialisationTest;
 
 /**
  * Unit tests for simple static final long field assignment scoped at the enclosing script level.
  */
-public class StaticFinalLongFieldInitialisationTest extends AbstractStaticFieldInitialisationTest {
+public class StaticLongFieldInitialisationTest extends AbstractStaticFieldInitialisationTest {
     @Test
     void primitiveLongField_withPrimitiveValue() throws Exception {
         assertSingleAllAccessStaticFieldIsAssigned("long", long.class, "longField", "0L", 0L);

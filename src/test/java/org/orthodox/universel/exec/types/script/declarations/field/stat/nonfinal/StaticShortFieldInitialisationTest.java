@@ -26,15 +26,15 @@
  *
  */
 
-package org.orthodox.universel.exec.types.script.declarations.field.stat;
+package org.orthodox.universel.exec.types.script.declarations.field.stat.nonfinal;
 
 import org.junit.jupiter.api.Test;
-import org.orthodox.universel.exec.types.script.declarations.field.stat.fin.AbstractStaticFieldInitialisationTest;
+import org.orthodox.universel.exec.types.script.declarations.field.stat.AbstractStaticFieldInitialisationTest;
 
 /**
  * Unit tests for simple static final short field assignment scoped at the enclosing script level.
  */
-public class StaticFinalShortFieldInitialisationTest extends AbstractStaticFieldInitialisationTest {
+public class StaticShortFieldInitialisationTest extends AbstractStaticFieldInitialisationTest {
     @Test
     void primitiveShortField_withPrimitiveValue() throws Exception {
         assertSingleAllAccessStaticFieldIsAssigned("short", short.class, "shortField", "Short('0').shortValue()", (short)0);
