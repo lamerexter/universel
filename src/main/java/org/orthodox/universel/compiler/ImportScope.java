@@ -39,7 +39,7 @@ import org.orthodox.universel.ast.navigation.NameTest;
 import org.orthodox.universel.ast.navigation.NavigationAxis;
 import org.orthodox.universel.ast.navigation.NavigationAxisAndNodeTest;
 import org.orthodox.universel.ast.type.LoadTypeExpression;
-import org.orthodox.universel.ast.type.StaticFieldGetExpression;
+import org.orthodox.universel.ast.type.declaration.FieldRead;
 import org.orthodox.universel.ast.type.reference.ResolvedTypeReferenceOld;
 
 import javax.lang.model.type.NullType;
@@ -203,10 +203,11 @@ public class ImportScope implements Scope {
             try {
                 java.lang.reflect.Field field = declaringType.getField(name);
                 if ( !Modifier.isStatic(field.getModifiers()) ) continue;
-                matchingNameTransformations.add(new StaticFieldGetExpression(step.getTokenImage(),
-                                                                             forClass(declaringType),
-                                                                             forClass(field.getType()),
-                                                                             name
+                matchingNameTransformations.add(new FieldRead(step.getTokenImage(),
+                                                              true,
+                                                              forClass(declaringType),
+                                                              forClass(field.getType()),
+                                                              name
                 ));
             } catch (NoSuchFieldException notFoundIgnoredEx) {
                 continue;

@@ -41,7 +41,7 @@ import static org.orthodox.universel.ast.NodeSequence.emptyNodeSequence;
 /**
  * A Universel method declaration on the Abstract Syntax Tree (AST).
  */
-public abstract class AbstractMethodDeclaration extends Node implements CompositeNode {
+public abstract class AbstractMethodDeclaration extends Node implements Declaration, CompositeNode {
     private final Modifiers modifiers;
     private final NodeSequence<TypeParameter> typeParameters;
     private TypeReference declaringType;

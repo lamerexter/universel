@@ -46,9 +46,9 @@ import org.orthodox.universel.ast.methods.MethodDeclaration;
 import org.orthodox.universel.ast.navigation.*;
 import org.orthodox.universel.ast.type.LoadTypeExpression;
 import org.orthodox.universel.ast.type.Parameter;
-import org.orthodox.universel.ast.type.StaticFieldGetExpression;
 import org.orthodox.universel.ast.type.declaration.ClassDeclaration;
 import org.orthodox.universel.ast.type.declaration.InterfaceDeclaration;
+import org.orthodox.universel.ast.type.declaration.FieldRead;
 import org.orthodox.universel.ast.type.reference.TypeReference;
 import org.orthodox.universel.compiler.Box;
 import org.orthodox.universel.compiler.Unbox;
@@ -100,6 +100,8 @@ public interface UniversalCodeVisitor {
 
     //   Node visitEnumDeclaration(EnumDeclaration node);
 //   Node visitEmptyStatement(EmptyStatement node);
+    Node visitFieldAccess(FieldRead node);
+
     Node visitFieldDeclaration(FieldDeclaration node);
 //   Node visitFieldExpression(FieldExpression node);
 //   Node visitFilterExpression(FilterExpression node);
@@ -189,8 +191,6 @@ public interface UniversalCodeVisitor {
     Node visitSet(SetExpr node);
 
     Node visitStringLiteral(StringLiteralExpr node);
-
-    Node visitStaticFieldGet(StaticFieldGetExpression node);
 
     //   Node visitSetExpression(SetExpression node);
     Node visitTernaryExpression(TernaryExpression node);

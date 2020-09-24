@@ -44,17 +44,20 @@ import org.orthodox.universel.ast.type.reference.TypeNameReference;
 import org.orthodox.universel.ast.type.reference.TypeReference;
 import org.orthodox.universel.symanticanalysis.name.InternalNodeSequence;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.orthodox.universel.ast.Modifiers.*;
 import static org.orthodox.universel.ast.NodeSequence.emptyNodeSequence;
 import static org.orthodox.universel.compiler.CompilationDefaults.*;
-import static org.orthodox.universel.ast.Modifiers.*;
 
 /**
  * This is where semantic analysis really begins. Looks at what the incoming script looks like and assembles a
@@ -63,6 +66,9 @@ import static org.orthodox.universel.ast.Modifiers.*;
 public class ScriptAssembler extends AbstractSemanticAnalyser {
     private static AtomicLong generatedScriptIndex = new AtomicLong();
     private static final List<Node> EMPTY_SCRIPT_SYNTHETIC_ELEMENTS = singletonList(new NullLiteralExpr());
+    private static final Set<Class<?>> STATIC_IMPL_IF_ALL_MEMBERS_STATIC = new HashSet(
+        asList(MethodDeclaration.class, FieldDeclaration.class)
+    );
 
     private boolean withinMainMethod;
     private TypeReference executionMethodReturnType;
@@ -209,9 +215,9 @@ public class ScriptAssembler extends AbstractSemanticAnalyser {
 
     private boolean shouldGenerateStaticImplementation(final Script script) {
         return script.getBody().stream()
-                     .filter(MethodDeclaration.class::isInstance)
-                     .map(MethodDeclaration.class::cast)
-                     .map(MethodDeclaration::getModifiers)
+                     .filter(m -> STATIC_IMPL_IF_ALL_MEMBERS_STATIC.contains(m.getClass()))
+                     .map(Declaration.class::cast)
+                     .map(Declaration::getModifiers)
                      .filter(Objects::nonNull)
                      .allMatch(Modifiers::isStatic);
     }

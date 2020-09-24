@@ -78,7 +78,7 @@ public class StaticFinalBooleanFieldInitialisationTest  extends AbstractStaticFi
     }
 
     @Test
-    void primitiveCharWrapperField_withNullValue() throws Exception {
+    void  primitiveWrapperBooleanField_withNullValue() throws Exception {
         assertSingleAllAccessStaticFinalFieldIsAssigned("Boolean", Boolean.class, "booleanWrapperField", "null", null);
     }
 }

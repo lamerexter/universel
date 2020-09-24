@@ -44,7 +44,7 @@ import static java.util.Collections.emptyList;
 /**
  * Super class of AST nodes that are type declarations.
  */
-public class TypeDeclaration extends Node implements CompositeNode {
+public class TypeDeclaration extends Node implements Declaration, CompositeNode {
    /** The modifiers associated with this type declaration. */
    private final Modifiers modifiers;
 
@@ -148,6 +148,15 @@ public class TypeDeclaration extends Node implements CompositeNode {
     */
    public List<MethodDeclaration> getMethods() {
       return getMembers().getNodes().stream().filter(MethodDeclaration.class::isInstance).map(MethodDeclaration.class::cast).collect(Collectors.toList());
+   }
+
+   /**
+    * Gets the fields declared by the type.
+    *
+    * @return the fields declared by the type.
+    */
+   public List<FieldDeclaration> getFields() {
+      return getMembers().getNodes().stream().filter(FieldDeclaration.class::isInstance).map(FieldDeclaration.class::cast).collect(Collectors.toList());
    }
 
    /**

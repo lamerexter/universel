@@ -475,4 +475,9 @@ public class BytecodeHelper {
     public void emitGetStaticField(final org.orthodox.universel.ast.Type declaringType, final org.orthodox.universel.ast.Type fieldType, final String fieldName) {
         peekMethodVisitor().visitFieldInsn(GETSTATIC, getInternalName(declaringType), fieldName, getDescriptor(fieldType));
     }
+
+    public void emitGetNonStaticField(final org.orthodox.universel.ast.Type declaringType, final org.orthodox.universel.ast.Type fieldType, final String fieldName) {
+        peekMethodVisitor().visitIntInsn(ALOAD, 0); // this
+        peekMethodVisitor().visitFieldInsn(GETFIELD, getInternalName(declaringType), fieldName, getDescriptor(fieldType));
+    }
 }

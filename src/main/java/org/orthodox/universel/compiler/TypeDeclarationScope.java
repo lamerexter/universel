@@ -29,16 +29,13 @@
 package org.orthodox.universel.compiler;
 
 import org.beanplanet.core.models.path.NamePath;
-import org.orthodox.universel.ast.InstanceMethodCall;
-import org.orthodox.universel.ast.LoadLocal;
-import org.orthodox.universel.ast.StaticMethodCall;
+import org.orthodox.universel.ast.*;
+import org.orthodox.universel.ast.navigation.NameTest;
 import org.orthodox.universel.ast.navigation.NavigationAxis;
 import org.orthodox.universel.ast.navigation.NavigationAxisAndNodeTest;
-import org.orthodox.universel.ast.MethodCall;
-import org.orthodox.universel.ast.Node;
-import org.orthodox.universel.ast.Type;
 import org.orthodox.universel.ast.methods.MethodDeclaration;
 import org.orthodox.universel.ast.type.Parameter;
+import org.orthodox.universel.ast.type.declaration.FieldRead;
 import org.orthodox.universel.ast.type.declaration.TypeDeclaration;
 import org.orthodox.universel.ast.type.declaration.TypeDeclarationReference;
 import org.orthodox.universel.ast.type.reference.TypeReference;
@@ -62,10 +59,16 @@ public class TypeDeclarationScope implements Scope {
 
     @Override
     public Node navigate(final NavigationAxisAndNodeTest<?> step) {
-        if ( !step.getAxis().equals(NavigationAxis.DEFAULT.getCanonicalName()) ||
-             !(step.getNodeTest() instanceof MethodCall) ) return step;
+        if ( !step.getAxis().equals(NavigationAxis.DEFAULT.getCanonicalName()) ) return step;
 
-        final MethodCall methodCall = (MethodCall)step.getNodeTest();
+        if ( step.getNodeTest() instanceof MethodCall ) return navigateMethodCall((NavigationAxisAndNodeTest<MethodCall>)step);
+        if ( step.getNodeTest() instanceof NameTest) return navigateName((NavigationAxisAndNodeTest<NameTest>)step);
+
+        return step;
+    }
+
+    private Node navigateMethodCall(final NavigationAxisAndNodeTest<MethodCall> step) {
+        final MethodCall methodCall = step.getNodeTest();
         return typeDeclaration.getMethods()
                               .stream()
                               .filter(methodDeclaration -> Objects.equals(methodDeclaration.getName(),
@@ -105,6 +108,29 @@ public class TypeDeclarationScope implements Scope {
                                                                                                                                           .map(Node::getTypeDescriptor)
                                                                                                                                           .collect(Collectors.toList()))))
                                    .build();
+    }
+
+    private Node navigateName(final NavigationAxisAndNodeTest<NameTest> step) {
+        final NameTest nameTest = step.getNodeTest();
+        return typeDeclaration.getFields()
+                              .stream()
+                              .filter(fieldDeclaration -> fieldDeclaration.getVariableDeclarations()
+                                                                          .stream()
+                                                                          .map(VariableDeclaration::getId)
+                                                                          .map(VariableDeclarationId::getName).collect(Collectors.toSet()).contains(nameTest.getName())
+                              )
+                              .findFirst()
+                              .map(fieldDeclaration -> resolveFieldGet(step, typeDeclaration, fieldDeclaration))
+                              .orElse(step);
+    }
+
+    private Node resolveFieldGet(final NavigationAxisAndNodeTest<NameTest> step, final TypeDeclaration typeDeclaration, final FieldDeclaration fieldDeclaration) {
+        return new FieldRead(step.getTokenImage(),
+                             fieldDeclaration.getModifiers().isStatic(),
+                             new TypeDeclarationReference(typeDeclaration),
+                             fieldDeclaration.getDeclarationType(),
+                             step.getNodeTest().getName()
+        );
     }
 
     public List<Type> resolveType(NamePath name) {

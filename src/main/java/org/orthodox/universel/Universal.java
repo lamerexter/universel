@@ -11,6 +11,7 @@ import org.orthodox.universel.compiler.CompiledUnit;
 import org.orthodox.universel.compiler.UniversalCompiler;
 import org.orthodox.universel.exec.Result;
 import org.orthodox.universel.exec.TypedValue;
+import org.orthodox.universel.tools.BytecodeOutput;
 
 import java.util.Collections;
 import java.util.List;
@@ -406,6 +407,7 @@ public class Universal implements Logger {
             throw new IllegalStateException("It looks like the script compiled is not executable? Were there excecutable statements specified?");
         }
 
+//        BytecodeOutput.printClass(script.getCompiledClassResources().get(0).getValue().readFullyAsBytes());
         Object result = TypeUtil.invokeStaticMethod(compiledClasses.get(0), "main", script.getBindingType() != null ? new Object[] { binding } : null);
         return (T) result;
     }

@@ -22,14 +22,13 @@ import org.orthodox.universel.ast.literals.*;
 import org.orthodox.universel.ast.methods.LambdaFunction;
 import org.orthodox.universel.ast.methods.MethodDeclaration;
 import org.orthodox.universel.ast.type.LoadTypeExpression;
-import org.orthodox.universel.ast.type.StaticFieldGetExpression;
 import org.orthodox.universel.ast.type.declaration.ClassDeclaration;
+import org.orthodox.universel.ast.type.declaration.FieldRead;
 import org.orthodox.universel.ast.type.reference.TypeReference;
 import org.orthodox.universel.compiler.CompilationContext.CompilingTypeInfo;
 import org.orthodox.universel.exec.operators.binary.BinaryOperatorRegistry;
 import org.orthodox.universel.exec.operators.binary.ConcurrentBinaryOperatorRegistry;
 import org.orthodox.universel.exec.operators.binary.PackageScanBinaryOperatorLoader;
-import org.orthodox.universel.exec.operators.unary.UnaryFunctions;
 import org.orthodox.universel.symanticanalysis.JvmInstructionNode;
 import org.orthodox.universel.symanticanalysis.ValueConsumingNode;
 import org.orthodox.universel.symanticanalysis.conversion.BinaryExpressionOperatorMethodCall;
@@ -44,9 +43,6 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static java.lang.reflect.Modifier.PUBLIC;
-import static java.lang.reflect.Modifier.STATIC;
-import static org.beanplanet.core.lang.TypeUtil.findMethod;
 import static org.beanplanet.core.util.CollectionUtil.isNullOrEmpty;
 import static org.objectweb.asm.Opcodes.*;
 import static org.objectweb.asm.Type.getInternalName;
@@ -183,10 +179,36 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
                                                                               );
         // Generate a default constructor, for now...
         withinStack(node, n -> {
-            MethodVisitor mv=cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
+            MethodVisitor mv = compilationContext.getBytecodeHelper().generateMethod(ACC_PUBLIC, "<init>", void.class, null);
+//            MethodVisitor mv = compilationContext.getBytecodeHelper().generateMethod(ACC_PUBLIC, "<init>", "()V", null, null);
             mv.visitCode();
             mv.visitVarInsn(ALOAD, 0);
             mv.visitMethodInsn(INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false);
+
+            //----------------------------------------------------------------------------------------------------------
+            // Initialise non-static fields. TODO: This should be done along side constructor chaining, but as we only
+            //                                     have one non-arg constructor this will wait.
+            //----------------------------------------------------------------------------------------------------------
+            List<FieldDeclaration> applicableNonstaticInitialisations = node.getMembers()
+                                                                         .stream()
+                                                                         .filter(FieldDeclaration.class::isInstance)
+                                                                         .map(FieldDeclaration.class::cast)
+                                                                         .filter(f -> !Modifiers.isStatic(f.getModifiers().getModifiers()) && f.getVariableDeclarations().stream().anyMatch(v -> v.getInitialiser() != null))
+                                                                         .collect(Collectors.toList());
+            if ( !applicableNonstaticInitialisations.isEmpty() ) {
+                applicableNonstaticInitialisations.forEach(f -> {
+                    f.getVariableDeclarations()
+                     .stream()
+                     .filter(vd -> vd.getInitialiser() != null)
+                     .forEach(vd -> {
+                         mv.visitVarInsn(ALOAD, 0);
+                         vd.getInitialiser().accept(this);
+
+                         mv.visitFieldInsn(PUTFIELD, internalName(fqClassName), vd.getId().getName(), descriptor(f.getDeclarationType()));
+                     });
+                });
+            };
+
             mv.visitInsn(RETURN);
             mv.visitMaxs(1,1);
             mv.visitEnd();
@@ -241,6 +263,17 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
         compilationContext.addCompiledType(fqClassName.join("."), new ByteArrayResource(cw.toByteArray()));
         compilationContext.popTypeInfo();
 
+        return node;
+    }
+
+    @Override
+    public Node visitFieldAccess(final FieldRead node) {
+        if ( node.isStatic()) {
+            compilationContext.getBytecodeHelper().emitGetStaticField(node.getDeclaringType(), node.getFieldType(), node.getFieldName());
+        } else {
+            compilationContext.getBytecodeHelper().emitGetNonStaticField(node.getDeclaringType(), node.getFieldType(), node.getFieldName());
+        }
+        compilationContext.getVirtualMachine().loadOperandOfType(node.getFieldType());
         return node;
     }
 
@@ -762,13 +795,6 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
         }
         compilationContext.getVirtualMachine().loadOperandOfType(LinkedHashSet.class);
 
-        return node;
-    }
-
-    @Override
-    public Node visitStaticFieldGet(final StaticFieldGetExpression node) {
-        compilationContext.getBytecodeHelper().emitGetStaticField(node.getDeclaringType(), node.getFieldType(), node.getFieldName());
-        compilationContext.getVirtualMachine().loadOperandOfType(node.getFieldType());
         return node;
     }
 

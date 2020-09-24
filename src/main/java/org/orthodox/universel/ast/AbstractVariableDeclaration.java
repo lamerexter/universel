@@ -10,7 +10,7 @@ import static org.orthodox.universel.ast.TokenImage.range;
 /**
  * An abstract variable declaration, containing state and accessors common to most.
  */
-public abstract class AbstractVariableDeclaration extends Node {
+public abstract class AbstractVariableDeclaration extends Node implements Declaration{
    /** The type modifiers associated with this declaration. */
    private Modifiers modifiers;
 

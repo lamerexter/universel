@@ -46,9 +46,9 @@ import org.orthodox.universel.ast.methods.MethodDeclaration;
 import org.orthodox.universel.ast.navigation.*;
 import org.orthodox.universel.ast.type.LoadTypeExpression;
 import org.orthodox.universel.ast.type.Parameter;
-import org.orthodox.universel.ast.type.StaticFieldGetExpression;
 import org.orthodox.universel.ast.type.declaration.ClassDeclaration;
 import org.orthodox.universel.ast.type.declaration.InterfaceDeclaration;
+import org.orthodox.universel.ast.type.declaration.FieldRead;
 import org.orthodox.universel.ast.type.reference.TypeReference;
 import org.orthodox.universel.compiler.Box;
 import org.orthodox.universel.compiler.Unbox;
@@ -128,6 +128,11 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
                                                                                        node.getOperator(),
                                                                                        node.getOperatorMethod(),
                                                                                        transformedParameters);
+    }
+
+    @Override
+    public Node visitFieldAccess(final FieldRead node) {
+        return node;
     }
 
     @Override
@@ -592,11 +597,6 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
 
     @Override
     public Node visitStringLiteral(final StringLiteralExpr node) {
-        return node;
-    }
-
-    @Override
-    public Node visitStaticFieldGet(final StaticFieldGetExpression node) {
         return node;
     }
 

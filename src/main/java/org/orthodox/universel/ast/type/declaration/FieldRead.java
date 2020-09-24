@@ -26,34 +26,69 @@
  *
  */
 
-package org.orthodox.universel.ast.type;
+package org.orthodox.universel.ast.type.declaration;
 
-import org.orthodox.universel.ast.*;
+import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.ast.TokenImage;
+import org.orthodox.universel.ast.Type;
+import org.orthodox.universel.ast.UniversalCodeVisitor;
 
 import java.util.Objects;
 
-public class StaticFieldGetExpression extends Expression {
+/**
+ * A read of a type's field on the Abstract Syntax Tree (AST).
+ */
+public class FieldRead extends Node {
+    /** Whether the field read is static. */
+    private final boolean isStatic;
+    /** The Type in which the field is declared. */
     private final Type declaringType;
+    /** The name of the field read. */
     private final String fieldName;
 
-    public StaticFieldGetExpression(TokenImage tokenImage,
-                                    Type declaringType,
-                                    Type fieldType,
-                                    String fieldName
-    ) {
+    public FieldRead(TokenImage tokenImage,
+                     boolean isStatic,
+                     Type declaringType,
+                     Type fieldType,
+                     String fieldName) {
         super(tokenImage, fieldType);
+        this.isStatic = isStatic;
         this.declaringType = declaringType;
         this.fieldName = fieldName;
     }
 
+    /**
+     * Whether the field read is static
+     *
+     * @return true if the field read is a static field, false if it is non-static.
+     */
+    public boolean isStatic() {
+        return isStatic;
+    }
+
+    /**
+     * Gets the Type in which the field is declared.
+     *
+     * @return the Type in which the field is declared.
+     */
     public Type getDeclaringType() {
         return declaringType;
     }
 
+    /**
+     * Gets the type of the field read.
+     *
+     * @return the type of the field.
+     */
     public Type getFieldType() {
         return getType();
     }
 
+    /**
+     * Gets the name of the field read.
+     *
+     * @return the name of the field read.
+     */
     public String getFieldName() {
         return fieldName;
     }
@@ -61,19 +96,20 @@ public class StaticFieldGetExpression extends Expression {
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
-        if (!(o instanceof StaticFieldGetExpression)) return false;
+        if (!(o instanceof FieldRead)) return false;
         if (!super.equals(o)) return false;
-        StaticFieldGetExpression that = (StaticFieldGetExpression) o;
-        return Objects.equals(declaringType, that.declaringType) &&
+        FieldRead that = (FieldRead) o;
+        return Objects.equals(isStatic(), that.isStatic()) &&
+               Objects.equals(getDeclaringType(), that.getDeclaringType()) &&
                Objects.equals(getFieldName(), that.getFieldName());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), declaringType, getFieldName());
+        return Objects.hash(super.hashCode(), isStatic(), getDeclaringType(), getFieldName());
     }
 
     public Node accept(UniversalCodeVisitor visitor) {
-        return visitor.visitStaticFieldGet(this);
+        return visitor.visitFieldAccess(this);
     }
 }
