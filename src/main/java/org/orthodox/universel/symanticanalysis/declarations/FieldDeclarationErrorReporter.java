@@ -58,7 +58,7 @@ public class FieldDeclarationErrorReporter extends AbstractSemanticAnalyser impl
 
     @Override
     public Node visitFieldDeclaration(final FieldDeclaration node) {
-        if (node.getDeclarationType().getTypeDescriptor() == void.class || determineArrayBaseComponentType(node.getDeclarationType().getTypeDescriptor()) == Void.class) {
+        if (determineArrayBaseComponentType(node.getDeclarationType().getTypeDescriptor()) == void.class || determineArrayBaseComponentType(node.getDeclarationType().getTypeDescriptor()) == Void.class) {
             getContext().addError(Message.builder().message(Messages.FieldDeclaration.VOID_TYPE)
                                       .withRelatedObject(node.getDeclarationType()));
 

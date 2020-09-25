@@ -51,116 +51,121 @@ import static org.orthodox.universel.compiler.Messages.TYPE.TYPE_NOT_FOUND;
 /**
  * Unit tests for simple static field declarations scoped at the enclosing script level.
  */
-public class StaticArrayFieldDeclarationTest {
+public class FieldDeclarationTest {
     @Test
     void primitive_byteField() {
-        assertSingleAllAccessStaticFieldCanBeGenerated("byte[]", byte[].class, "byteArrayField");
+        assertSingleAllAccessStaticFieldCanBeGenerated("byte", byte.class, "byteField");
     }
 
     @Test
     void primitiveWrapper_byteField() {
-        assertSingleAllAccessStaticFieldCanBeGenerated("Byte[]", Byte[].class, "byteWrapperArrayField");
+        assertSingleAllAccessStaticFieldCanBeGenerated("Byte", Byte.class, "byteWrapperField");
     }
 
     @Test
     void primitive_booleanField() {
-        assertSingleAllAccessStaticFieldCanBeGenerated("boolean[]", boolean[].class, "booleanArrayField");
+        assertSingleAllAccessStaticFieldCanBeGenerated("boolean", boolean.class, "booleanField");
     }
 
     @Test
     void primitiveWrapper_booleanField() {
-        assertSingleAllAccessStaticFieldCanBeGenerated("Boolean[]", Boolean[].class, "booleanWrapperField");
+        assertSingleAllAccessStaticFieldCanBeGenerated("Boolean", Boolean.class, "booleanWrapperField");
     }
 
     @Test
     void primitive_charField() {
-        assertSingleAllAccessStaticFieldCanBeGenerated("char[]", char[].class, "charArrayField");
+        assertSingleAllAccessStaticFieldCanBeGenerated("char", char.class, "charField");
     }
 
     @Test
     void primitiveWrapper_charField() {
-        assertSingleAllAccessStaticFieldCanBeGenerated("Character[]", Character[].class, "charWrapperArrayField");
+        assertSingleAllAccessStaticFieldCanBeGenerated("Character", Character.class, "charWrapperField");
     }
 
     @Test
     void primitive_doubleField() {
-        assertSingleAllAccessStaticFieldCanBeGenerated("double[]", double[].class, "doubleArrayField");
+        assertSingleAllAccessStaticFieldCanBeGenerated("double", double.class, "doubleField");
     }
 
     @Test
     void primitiveWrapper_doubleField() {
-        assertSingleAllAccessStaticFieldCanBeGenerated("Double[]", Double[].class, "doubleWrapperArrayField");
+        assertSingleAllAccessStaticFieldCanBeGenerated("Double", Double.class, "doubleWrapperField");
     }
 
     @Test
     void primitive_floatField() {
-        assertSingleAllAccessStaticFieldCanBeGenerated("float[]", float[].class, "floatArrayField");
+        assertSingleAllAccessStaticFieldCanBeGenerated("float", float.class, "floatField");
     }
 
     @Test
     void primitiveWrapper_floatField() {
-        assertSingleAllAccessStaticFieldCanBeGenerated("Float[]", Float[].class, "floatWrapperArrayField");
+        assertSingleAllAccessStaticFieldCanBeGenerated("Float", Float.class, "floatWrapperField");
     }
 
     @Test
     void primitive_intField() {
-        assertSingleAllAccessStaticFieldCanBeGenerated("int[]", int[].class, "intArrayField");
+        assertSingleAllAccessStaticFieldCanBeGenerated("int", int.class, "intField");
     }
 
     @Test
     void primitiveWrapper_intField() {
-        assertSingleAllAccessStaticFieldCanBeGenerated("Integer[]", Integer[].class, "intWrapperArrayField");
+        assertSingleAllAccessStaticFieldCanBeGenerated("Integer", Integer.class, "intWrapperField");
     }
 
     @Test
     void primitive_longField() {
-        assertSingleAllAccessStaticFieldCanBeGenerated("long[]", long[].class, "longArrayField");
+        assertSingleAllAccessStaticFieldCanBeGenerated("long", long.class, "longField");
     }
 
     @Test
     void primitiveWrapper_longField() {
-        assertSingleAllAccessStaticFieldCanBeGenerated("Long[]", Long[].class, "longWrapperArrayField");
+        assertSingleAllAccessStaticFieldCanBeGenerated("Long", Long.class, "longWrapperField");
     }
 
     @Test
     void primitive_shortField() {
-        assertSingleAllAccessStaticFieldCanBeGenerated("short[]", short[].class, "shortArrayField");
+        assertSingleAllAccessStaticFieldCanBeGenerated("short", short.class, "shortField");
     }
 
     @Test
     void primitiveWrapper_shortField() {
-        assertSingleAllAccessStaticFieldCanBeGenerated("Short[]", Short[].class, "shortWrapperArrayField");
+        assertSingleAllAccessStaticFieldCanBeGenerated("Short", Short.class, "shortWrapperField");
     }
 
     @Test
     void typeField() {
-        assertSingleAllAccessStaticFieldCanBeGenerated("Class[]", Class[].class, "typeArrayField");
-        assertSingleAllAccessStaticFieldCanBeGenerated("Class<?>[]", Class[].class, "typeArrayField");
+        assertSingleAllAccessStaticFieldCanBeGenerated("Class", Class.class, "typeField");
+        assertSingleAllAccessStaticFieldCanBeGenerated("Class<?>", Class.class, "typeField");
     }
 
     @Test
     void bigDecimalField() {
-        assertSingleAllAccessStaticFieldCanBeGenerated("BigDecimal[]", BigDecimal[].class, "bigDecimalArrayField");
+        assertSingleAllAccessStaticFieldCanBeGenerated("BigDecimal", BigDecimal.class, "bigDecimalField");
     }
 
     @Test
     void bigIntegerField() {
-        assertSingleAllAccessStaticFieldCanBeGenerated("BigInteger[]", BigInteger[].class, "bigIntegerArrayField");
+        assertSingleAllAccessStaticFieldCanBeGenerated("BigInteger", BigInteger.class, "bigIntegerField");
     }
 
     @Test
     void referenceTypeField() {
-        assertSingleAllAccessStaticFieldCanBeGenerated("import " + BeanWithProperties.class.getName(), BeanWithProperties.class.getSimpleName()+"[]", BeanWithProperties[].class, "referenceTypeArrayField");
+        assertSingleAllAccessStaticFieldCanBeGenerated("import " + BeanWithProperties.class.getName(), BeanWithProperties.class.getSimpleName(), BeanWithProperties.class, "referenceTypeField");
     }
 
     @Test
     void unresolvedTypeIsReported() {
-        assertErrorIsPresent("\npublic static UnknownType[] unknownTypeField", TYPE_NOT_FOUND.getCode(), 2, 15, 2, 27);
+        assertErrorIsPresent("\npublic static UnknownType unknownTypeField", TYPE_NOT_FOUND.getCode(), 2, 15, 2, 25);
+    }
+
+    @Test
+    void primitive_voidField_IsReported() {
+        assertErrorIsPresent("public static void illegalVoidField", VOID_TYPE.getCode(), 1, 15, 1, 18);
     }
 
     @Test
     void primitiveWrapper_voidField_IsReported() {
-        assertErrorIsPresent("public static Void[] illegalVoidField", VOID_TYPE.getCode(), 1, 15, 1, 20);
+        assertErrorIsPresent("public static Void illegalVoidField", VOID_TYPE.getCode(), 1, 15, 1, 18);
     }
 
     void assertErrorIsPresent(String script, String code, int startLine, int startColumn, int endLine, int endColumn) {

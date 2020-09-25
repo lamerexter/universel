@@ -5,6 +5,7 @@ import org.orthodox.universel.ast.type.reference.TypeReference;
 import java.util.List;
 import java.util.Objects;
 
+import static org.orthodox.universel.ast.Modifiers.EMPTY_MODIFIERS;
 import static org.orthodox.universel.ast.TokenImage.range;
 
 /**
@@ -43,7 +44,7 @@ public abstract class AbstractVariableDeclaration extends Node implements Declar
     * @return the type modifiers associated with this declaration.
     */
    public Modifiers getModifiers() {
-      return modifiers;
+      return modifiers == null ? EMPTY_MODIFIERS : modifiers;
    }
 
    /**

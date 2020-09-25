@@ -43,6 +43,8 @@ import java.util.Objects;
  * @author Gary Watson
  */
 public final class Modifiers extends Node {
+    public static final Modifiers EMPTY_MODIFIERS = new Modifiers();
+
     // Bit representations of the Java modifiers
     public static final int ABSTRACT     = 0x00000400;
     public static final int ANNOTATION   = 0x00002000;
@@ -130,6 +132,15 @@ public final class Modifiers extends Node {
      */
     public void setModifiers(int modifiers) {
         this.modifiers = modifiers;
+    }
+
+    /**
+     * Whether the modifiers set is empty.
+     *
+     * @return true if there are no modifiers, false otherwise.
+     */
+    public boolean isEmpty() {
+        return modifiers == 0;
     }
 
     public boolean isAbstract() {

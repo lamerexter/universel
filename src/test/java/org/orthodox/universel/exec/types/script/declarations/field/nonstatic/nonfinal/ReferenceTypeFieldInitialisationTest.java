@@ -30,14 +30,14 @@ package org.orthodox.universel.exec.types.script.declarations.field.nonstatic.no
 
 import org.junit.jupiter.api.Test;
 import org.orthodox.universel.BeanWithProperties;
-import org.orthodox.universel.exec.types.script.declarations.field.stat.AbstractStaticFieldInitialisationTest;
+import org.orthodox.universel.exec.types.script.declarations.field.nonstatic.AbstractFieldInitialisationTest;
 
 /**
  * Unit tests for simple static final reference type field assignment scoped at the enclosing script level.
  */
-public class StaticReferenceTypeFieldInitialisationTest extends AbstractStaticFieldInitialisationTest {
+public class ReferenceTypeFieldInitialisationTest extends AbstractFieldInitialisationTest {
     @Test
     void referenceTypeField() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("import "+BeanWithProperties.class.getName(), "BeanWithProperties", BeanWithProperties.class, "rtField", "BeanWithProperties(1234)", new BeanWithProperties(1234));
+        assertSingleAllAccessFieldIsAssigned("import "+BeanWithProperties.class.getName(), "BeanWithProperties", BeanWithProperties.class, "rtField", "BeanWithProperties(1234)", new BeanWithProperties(1234));
     }
 }

@@ -29,26 +29,26 @@
 package org.orthodox.universel.exec.types.script.declarations.field.nonstatic.nonfinal;
 
 import org.junit.jupiter.api.Test;
-import org.orthodox.universel.exec.types.script.declarations.field.stat.AbstractStaticFieldInitialisationTest;
+import org.orthodox.universel.exec.types.script.declarations.field.nonstatic.AbstractFieldInitialisationTest;
 
 /**
  * Unit tests for simple static final string field assignment scoped at the enclosing script level.
  */
-public class StaticStringFieldInitialisationTest extends AbstractStaticFieldInitialisationTest {
+public class StringFieldInitialisationTest extends AbstractFieldInitialisationTest {
     @Test
     void stringField_initialisedWithLiteral() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("String", String.class, "stringField", "''", "");
-        assertSingleAllAccessStaticFieldIsAssigned("String", String.class, "stringField", "'Hello World'", "Hello World");
-        assertSingleAllAccessStaticFieldIsAssigned("String", String.class, "stringField", "\"Hello World!\"", "Hello World!");
+        assertSingleAllAccessFieldIsAssigned("String", String.class, "stringField", "''", "");
+        assertSingleAllAccessFieldIsAssigned("String", String.class, "stringField", "'Hello World'", "Hello World");
+        assertSingleAllAccessFieldIsAssigned("String", String.class, "stringField", "\"Hello World!\"", "Hello World!");
     }
 
     @Test
     void stringField_initialisedWithInterpolatedString() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("String", String.class, "stringField", "\"Look Ma, I can see the ${ 'stars' }\"", "Look Ma, I can see the stars");
+        assertSingleAllAccessFieldIsAssigned("String", String.class, "stringField", "\"Look Ma, I can see the ${ 'stars' }\"", "Look Ma, I can see the stars");
     }
 
     @Test
     void stringField_initialisedWithExpression() throws Exception {
-        assertSingleAllAccessStaticFieldIsAssigned("String", String.class, "stringField", "\"Look Ma, 1 plus 1 does equal \" + '2'", "Look Ma, 1 plus 1 does equal 2");
+        assertSingleAllAccessFieldIsAssigned("String", String.class, "stringField", "\"Look Ma, 1 plus 1 does equal \" + '2'", "Look Ma, 1 plus 1 does equal 2");
     }
 }

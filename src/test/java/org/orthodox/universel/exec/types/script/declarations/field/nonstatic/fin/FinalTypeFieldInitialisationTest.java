@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Test;
 import org.orthodox.universel.exec.types.script.declarations.field.nonstatic.AbstractFieldInitialisationTest;
 
 /**
- * Unit tests for simple static final type/class field assignment scoped at the enclosing script level.
+ * Unit tests for simple final type/class field assignment scoped at the enclosing script level.
  */
 public class FinalTypeFieldInitialisationTest extends AbstractFieldInitialisationTest {
     @Test

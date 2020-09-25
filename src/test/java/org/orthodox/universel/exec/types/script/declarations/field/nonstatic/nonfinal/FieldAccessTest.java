@@ -37,19 +37,19 @@ import static org.orthodox.universel.Universal.execute;
 /**
  * Tests for accessing static field in all contexts and scopes.
  */
-public class StaticFieldAccessTest {
+public class FieldAccessTest {
     @Test
     void access_fromScriptTopLevel() {
-        assertThat(execute("static int x = 1234  x"), equalTo(1234));
+        assertThat(execute("int x = 1234  x"), equalTo(1234));
     }
 
     @Test
     void access_fromScriptMethod() {
-        assertThat(execute("static int x = 1111 static int getX() { x } getX()"), equalTo(1111));
+        assertThat(execute("int x = 1111 int getX() { x } getX()"), equalTo(1111));
     }
 
     @Test
     void access_asParameterToScriptMethod() {
-        assertThat(execute("static int x = 1111 static int add1(int y) { y+1 } add1(x)"), equalTo(1112));
+        assertThat(execute("int x = 1111 int add1(int y) { y+1 } add1(x)"), equalTo(1112));
     }
 }

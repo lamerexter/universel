@@ -33,7 +33,7 @@ import org.orthodox.universel.BeanWithProperties;
 import org.orthodox.universel.exec.types.script.declarations.field.nonstatic.AbstractFieldInitialisationTest;
 
 /**
- * Unit tests for simple static final reference type field assignment scoped at the enclosing script level.
+ * Unit tests for simple final reference type field assignment scoped at the enclosing script level.
  */
 public class FinalReferenceTypeFieldInitialisationTest extends AbstractFieldInitialisationTest {
     @Test
