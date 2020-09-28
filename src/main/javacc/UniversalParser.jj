@@ -546,7 +546,7 @@ Node StatementOrExpression() :
    (
       expr=Statement()
       |
-      expr=PrimaryExpression()
+      expr=Expression()
    )
 
    { return expr; }
@@ -694,23 +694,73 @@ Node BlockStatement():
   { return node; }
 }
 
+public Expression Expression():
+{
+    Expression expr;
+}
+{
+    (
+        expr=AssignmentExpression() // Lookahead as ( could prelude an expression or subquery
+    )
+
+    { return expr; }
+}
+
+Expression AssignmentExpression() :
+{
+    Expression expr;
+    Expression rhsExpr;
+    Operator op;
+}
+{
+   expr=ConditionalExpression()
+   [op=AssignmentOperator() rhsExpr=Expression() { expr = new AssignmentExpression(expr, op, rhsExpr); }]
+
+   { return expr; }
+}
+
+Operator AssignmentOperator() :
+{
+	Operator op;
+}
+{
+   (
+        "="    { op = Operator.ASSIGN; }
+      | "+="   { op = Operator.PLUS_ASSIGN; }
+      | "-="   { op = Operator.MINUS_ASSIGN; }
+      | "*="   { op = Operator.STAR_ASSIGN; }
+      | "/="   { op = Operator.FORWARD_SLASH_ASSIGN; }
+      | "&="   { op = Operator.AMPERSAND_ASSIGN; }
+      | "|="   { op = Operator.PIPE_ASSIGN; }
+      | "^="   { op = Operator.CARAT_ASSIGN; }
+      | "%="   { op = Operator.PERCENT_ASSIGN; }
+      | "<<="  { op = Operator.SHIFT_LEFT_ASSIGN; }
+      | ">>="  { op = Operator.SHIFT_RIGHT_ASSIGN; }
+      | ">>>=" { op = Operator.TREBLE_SHIFT_RIGHT_ASSIGN; }
+   )
+
+   { return op; }
+}
+
 
 Expression PrimaryExpression():
 {
     Expression expr;
 }
 {
-    expr=RValueExpression()
-
-    { return expr; }
-}
-
-Expression RValueExpression():
-{
-    Expression expr;
-}
-{
-    expr=ConditionalExpression()
+    (
+        expr = Literal()
+        |
+        expr = ListExpression()
+        |
+        expr = MapOrSetExpression()
+        |
+        expr=AllocationExpression()
+        |
+        expr = NavigationExpression()
+        |
+        "(" expr=Expression() ")"
+    )
 
     { return expr; }
 }
@@ -1217,7 +1267,7 @@ Expression PostfixExpression() :
 	Operator op;
 }
 {
-   expr=Expression()
+   expr=PrimaryExpression()
    [
       LOOKAHEAD(2)
       (
@@ -1228,28 +1278,6 @@ Expression PostfixExpression() :
    ]
 
    { return expr; }
-}
-
-public Expression Expression():
-{
-    Expression expr;
-}
-{
-    (
-        expr = Literal()
-        |
-        expr = ListExpression()
-        |
-        expr = MapOrSetExpression()
-        |
-        expr=AllocationExpression()
-        |
-        expr = NavigationExpression()
-        |
-        "(" expr=PrimaryExpression() ")"
-    )
-
-    { return expr; }
 }
 
 public Expression Literal():
@@ -1351,7 +1379,7 @@ Expression InterpolatedStringLiteral() :
                                     }
 
 
-                ( part=PrimaryExpression() { parts=add(parts, part); s.append(part.getTokenImage().getImage()); })?
+                ( part=Expression() { parts=add(parts, part); s.append(part.getTokenImage().getImage()); })?
 
                 <RBRACE> { s.append(token.image); }
             )
@@ -1408,7 +1436,7 @@ Expression InterpolatedStringLiteral() :
                             }
                         }
 
-                    (part=PrimaryExpression() { parts=add(parts, part); s.append(part.getTokenImage().getImage()); })?
+                    (part=Expression() { parts=add(parts, part); s.append(part.getTokenImage().getImage()); })?
 
                     <RBRACE> { s.append(token.image); }
                 )
@@ -1539,7 +1567,7 @@ List<Node> ArgumentsList() :
 	Expression expr;
 }
 {
-   expr=PrimaryExpression() { argumentsList=add(argumentsList, expr); } ("," expr=PrimaryExpression() { argumentsList=add(argumentsList, expr); } )*
+   expr=Expression() { argumentsList=add(argumentsList, expr); } ("," expr=Expression() { argumentsList=add(argumentsList, expr); } )*
 
    { return argumentsList; }
 }
@@ -1553,13 +1581,13 @@ InternalNodeSequence FiltersList() :
 }
 {
    "["                             { startLine=token.beginLine; startColumn=token.beginColumn; }
-   expr=PrimaryExpression()
+   expr=Expression()
    "]"                             { flb.add(new NodeSequence<Node>(tokenImageToEnd(startLine, startColumn), singletonList(expr))); }
 
    (
         LOOKAHEAD(2)
         "["                        { startLine=token.beginLine; startColumn=token.beginColumn; }
-        expr=PrimaryExpression()
+        expr=Expression()
         "]"                        { flb.add(new NodeSequence<Node>(tokenImageToEnd(startLine, startColumn), singletonList(expr))); }
    )*
 
@@ -1575,8 +1603,8 @@ ListExpr ListExpression() :
 {
   "[" {startLine=token.beginLine; startColumn=token.beginColumn;}
 	   [
-	     expr=PrimaryExpression() { expressionList=add(expressionList, expr); }
-	     ("," expr=PrimaryExpression() { expressionList=add(expressionList, expr); } )*
+	     expr=Expression() { expressionList=add(expressionList, expr); }
+	     ("," expr=Expression() { expressionList=add(expressionList, expr); } )*
 	   ]
   "]"
 
@@ -1602,18 +1630,18 @@ Expression MapOrSetExpression() :
      |
      (
         (
-            keyExpr=PrimaryExpression() { addedFirst = false; }
+            keyExpr=Expression() { addedFirst = false; }
         )
 
         [
             (
-              ("," valueExpr=PrimaryExpression() { if (!addedFirst) { expressionList=add(expressionList, keyExpr); addedFirst = true; }  expressionList=add(expressionList, valueExpr); } )+
+              ("," valueExpr=Expression() { if (!addedFirst) { expressionList=add(expressionList, keyExpr); addedFirst = true; }  expressionList=add(expressionList, valueExpr); } )+
             )
             |
             (
                 (":" { isSet = false; }
                     [
-                       valueExpr=PrimaryExpression() { expressionList=add(expressionList,
+                       valueExpr=Expression() { expressionList=add(expressionList,
                                                                    new MapEntryExpr(new TokenImage(keyExpr.getTokenImage().getStartLine(),
                                                                                                    keyExpr.getTokenImage().getStartColumn(),
                                                                                                    valueExpr.getTokenImage().getEndLine(),
@@ -1623,9 +1651,9 @@ Expression MapOrSetExpression() :
                                               }
                        (
                            ","
-                           keyExpr=PrimaryExpression()
+                           keyExpr=Expression()
                            ":"
-                           valueExpr=PrimaryExpression() { expressionList=add(expressionList,
+                           valueExpr=Expression() { expressionList=add(expressionList,
                                                                        new MapEntryExpr(new TokenImage(keyExpr.getTokenImage().getStartLine(),
                                                                                                        keyExpr.getTokenImage().getStartColumn(),
                                                                                                        valueExpr.getTokenImage().getEndLine(),
@@ -2000,7 +2028,7 @@ Expression VariableInitializer() :
         LOOKAHEAD(3)
 	    expr=ArrayInitializer()
 	    |
-	    expr=PrimaryExpression()
+	    expr=Expression()
     )
 
     { return expr; }
