@@ -47,6 +47,7 @@ import org.orthodox.universel.ast.navigation.*;
 import org.orthodox.universel.ast.type.LoadTypeExpression;
 import org.orthodox.universel.ast.type.Parameter;
 import org.orthodox.universel.ast.type.declaration.ClassDeclaration;
+import org.orthodox.universel.ast.type.declaration.FieldWrite;
 import org.orthodox.universel.ast.type.declaration.InterfaceDeclaration;
 import org.orthodox.universel.ast.type.declaration.FieldRead;
 import org.orthodox.universel.ast.type.reference.TypeReference;
@@ -71,6 +72,16 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
     @Override
     public Node visitAnnotation(final Annotation node) {
         return node;
+    }
+
+    @Override
+    public Node visitAssignment(final AssignmentExpression node) {
+        Node transformedRhs = node.getRhsExpression().accept(this);
+        Node transformedLhs = node.getLhsExpression().accept(this);
+
+        boolean noTransformationChanges = Objects.equals(transformedLhs, node.getLhsExpression())
+                                          && Objects.equals(transformedRhs, node.getRhsExpression());
+        return noTransformationChanges ? node : new AssignmentExpression(transformedLhs, node.getOperator(), transformedRhs);
     }
 
     @Override
@@ -133,6 +144,19 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
     @Override
     public Node visitFieldAccess(final FieldRead node) {
         return node;
+    }
+
+    @Override
+    public Node visitFieldAccess(final FieldWrite node) {
+        Node transformedRhs = (node.getFieldValue() == null ? null : node.getFieldValue().accept(this));
+
+        boolean noTransformationChanges = Objects.equals(transformedRhs, node.getFieldValue());
+        return noTransformationChanges ? node : new FieldWrite(node.getTokenImage(),
+                                                               node.isStatic(),
+                                                               node.getDeclaringType(),
+                                                               node.getFieldType(),
+                                                               node.getFieldName(),
+                                                               transformedRhs);
     }
 
     @Override

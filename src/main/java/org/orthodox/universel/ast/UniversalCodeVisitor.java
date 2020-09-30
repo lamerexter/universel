@@ -47,6 +47,7 @@ import org.orthodox.universel.ast.navigation.*;
 import org.orthodox.universel.ast.type.LoadTypeExpression;
 import org.orthodox.universel.ast.type.Parameter;
 import org.orthodox.universel.ast.type.declaration.ClassDeclaration;
+import org.orthodox.universel.ast.type.declaration.FieldWrite;
 import org.orthodox.universel.ast.type.declaration.InterfaceDeclaration;
 import org.orthodox.universel.ast.type.declaration.FieldRead;
 import org.orthodox.universel.ast.type.reference.TypeReference;
@@ -67,6 +68,8 @@ import org.orthodox.universel.symanticanalysis.name.InternalNodeSequence;
  */
 public interface UniversalCodeVisitor {
     Node visitAnnotation(Annotation node);
+
+    Node visitAssignment(AssignmentExpression node);
 
     //   Node visitAnnotationDeclaration(AnnotationDeclaration node);
     Node visitArrayCreationExpression(ArrayCreationExpression node);
@@ -101,6 +104,7 @@ public interface UniversalCodeVisitor {
     //   Node visitEnumDeclaration(EnumDeclaration node);
 //   Node visitEmptyStatement(EmptyStatement node);
     Node visitFieldAccess(FieldRead node);
+    Node visitFieldAccess(FieldWrite node);
 
     Node visitFieldDeclaration(FieldDeclaration node);
 //   Node visitFieldExpression(FieldExpression node);

@@ -36,6 +36,7 @@ import org.orthodox.universel.ast.navigation.NavigationAxisAndNodeTest;
 import org.orthodox.universel.ast.methods.MethodDeclaration;
 import org.orthodox.universel.ast.type.Parameter;
 import org.orthodox.universel.ast.type.declaration.FieldRead;
+import org.orthodox.universel.ast.type.declaration.FieldWrite;
 import org.orthodox.universel.ast.type.declaration.TypeDeclaration;
 import org.orthodox.universel.ast.type.declaration.TypeDeclarationReference;
 import org.orthodox.universel.ast.type.reference.TypeReference;
@@ -43,7 +44,9 @@ import org.orthodox.universel.symanticanalysis.name.InternalNodeSequence;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -112,19 +115,23 @@ public class TypeDeclarationScope implements Scope {
 
     private Node navigateName(final NavigationAxisAndNodeTest<NameTest> step) {
         final NameTest nameTest = step.getNodeTest();
+        return findFieldByName(nameTest)
+                              .map(fieldDeclaration -> resolveFieldGet(step, fieldDeclaration))
+                              .findFirst()
+                              .orElse(step);
+    }
+
+    private Stream<FieldDeclaration> findFieldByName(final NameTest nameTest) {
         return typeDeclaration.getFields()
                               .stream()
                               .filter(fieldDeclaration -> fieldDeclaration.getVariableDeclarations()
                                                                           .stream()
                                                                           .map(VariableDeclaration::getId)
                                                                           .map(VariableDeclarationId::getName).collect(Collectors.toSet()).contains(nameTest.getName())
-                              )
-                              .findFirst()
-                              .map(fieldDeclaration -> resolveFieldGet(step, typeDeclaration, fieldDeclaration))
-                              .orElse(step);
+                              );
     }
 
-    private Node resolveFieldGet(final NavigationAxisAndNodeTest<NameTest> step, final TypeDeclaration typeDeclaration, final FieldDeclaration fieldDeclaration) {
+    private Node resolveFieldGet(final NavigationAxisAndNodeTest<NameTest> step, final FieldDeclaration fieldDeclaration) {
         return new FieldRead(step.getTokenImage(),
                              fieldDeclaration.getModifiers().isStatic(),
                              new TypeDeclarationReference(typeDeclaration),
@@ -139,6 +146,31 @@ public class TypeDeclarationScope implements Scope {
         }
 
         return emptyList();
+    }
+
+    public Node assign(Node rValue, NavigationAxisAndNodeTest<?> step) {
+        if ( !step.getAxis().equals(NavigationAxis.DEFAULT.getCanonicalName()) ) return step;
+
+        if ( step.getNodeTest() instanceof NameTest) return assignToName(rValue, (NavigationAxisAndNodeTest<NameTest>)step);
+
+        return null;
+    }
+
+    private Node assignToName(final Node fieldValue, final NavigationAxisAndNodeTest<NameTest> step) {
+//        if ( fieldValue.getType() == null || fieldValue.getType().getTypeClass() == null) return null;
+
+        return findFieldByName(step.getNodeTest())
+//                   .filter(f -> f.getDeclarationType() != null && f.getDeclarationType().getTypeDescriptor() != null)
+//                   .filter(f -> TransformationUtil.isAssignmentCompatible(fieldValue.getType().getTypeClass(), f.getDeclarationType().getTypeDescriptor()))
+            .map(f -> new FieldWrite(step.getTokenImage(),
+                                     f.getModifiers().isStatic(),
+                                     new TypeDeclarationReference(typeDeclaration),
+                                     f.getDeclarationType(),
+                                     step.getNodeTest().getName(),
+                                     fieldValue
+                                     ))
+            .findFirst()
+            .orElse(null);
     }
 
 }

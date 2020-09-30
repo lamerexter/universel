@@ -106,4 +106,8 @@ public class AssignmentExpression extends Expression implements CompositeNode {
                           .addNotNull(rhsExpression)
                           .build();
     }
+
+    public Node accept(UniversalCodeVisitor visitor) {
+        return visitor.visitAssignment(this);
+    }
 }

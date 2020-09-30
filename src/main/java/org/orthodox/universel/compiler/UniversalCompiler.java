@@ -51,6 +51,7 @@ public class UniversalCompiler {
             new WideningNumericConversionAnalyser(),
             new NodeSequenceLastValueAnalyser(),
 //            new NavigationContextResolver(),
+            new AssignmentAnalyser(),
             new NavigationResolver(),
             new IfStatementImplicitResultValueResolver(),
             new ImplicitReturnStatementDecorator(),

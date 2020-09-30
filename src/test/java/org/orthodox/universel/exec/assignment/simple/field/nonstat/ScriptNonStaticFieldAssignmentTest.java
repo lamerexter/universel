@@ -1,7 +1,7 @@
 /*
  *  MIT Licence:
  *
- *  Copyright (c) 2019 Orthodox Engineering Ltd
+ *  Copyright (c) 2020 Orthodox Engineering Ltd
  *
  *  Permission is hereby granted, free of charge, to any person
  *  obtaining a copy of this software and associated documentation
@@ -26,32 +26,20 @@
  *
  */
 
-package org.orthodox.universel.compiler;
+package org.orthodox.universel.exec.assignment.simple.field.nonstat;
 
-import org.beanplanet.core.models.path.NamePath;
-import org.orthodox.universel.ast.navigation.NavigationAxisAndNodeTest;
-import org.orthodox.universel.ast.Node;
-import org.orthodox.universel.ast.Type;
-import org.orthodox.universel.ast.navigation.NavigationTransform;
+import org.junit.jupiter.api.Test;
 
-import java.util.List;
-import java.util.Objects;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.orthodox.universel.Universal.execute;
 
-import static java.util.Collections.emptyList;
-
-public interface Scope {
-    default NavigationAxisAndNodeTest<?> resolveInitial(NavigationAxisAndNodeTest<?> initialStep) { return null; }
-
-    default Node assign(Node rValue, NavigationAxisAndNodeTest<?> step) {
-        return null;
-    }
-
-    default Node navigate(NavigationAxisAndNodeTest<?> step) { return step; }
-    default NavigationTransform navigate(Node source, NavigationAxisAndNodeTest<?> step) {
-        final Node target = navigate(step);
-        return target != null && !Objects.equals(step, target) ? new NavigationTransform(null, target) : null;
-    }
-    default List<Type> resolveType(NamePath name) {
-        return emptyList();
+/**
+ * Tests that non-static Script scope fields can be assigned successfully.
+ */
+public class ScriptNonStaticFieldAssignmentTest {
+    @Test
+    void static_primitive_memberField_assignedSuccessfully() {
+        assertThat(execute("int field   field = 1234"), equalTo(1234));
     }
 }

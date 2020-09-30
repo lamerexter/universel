@@ -24,6 +24,7 @@ import org.orthodox.universel.ast.methods.MethodDeclaration;
 import org.orthodox.universel.ast.type.LoadTypeExpression;
 import org.orthodox.universel.ast.type.declaration.ClassDeclaration;
 import org.orthodox.universel.ast.type.declaration.FieldRead;
+import org.orthodox.universel.ast.type.declaration.FieldWrite;
 import org.orthodox.universel.ast.type.reference.TypeReference;
 import org.orthodox.universel.compiler.CompilationContext.CompilingTypeInfo;
 import org.orthodox.universel.exec.operators.binary.BinaryOperatorRegistry;
@@ -83,6 +84,15 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
 
         return node;
     }
+
+//    @Override
+//    public Node visitAssignment(final AssignmentExpression node) {
+//        node.getRhsExpression().accept(this);
+//        node.getLhsExpression().accept(this);
+//
+//        return node;
+//    }
+
 
     @Override
     public Node visitBetweenExpression(final BetweenExpression node) {
@@ -274,6 +284,24 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
             compilationContext.getBytecodeHelper().emitGetNonStaticField(node.getDeclaringType(), node.getFieldType(), node.getFieldName());
         }
         compilationContext.getVirtualMachine().loadOperandOfType(node.getFieldType());
+        return node;
+    }
+
+    @Override
+    public Node visitFieldAccess(final FieldWrite node) {
+        if ( node.getFieldValue() != null ) {
+            node.getFieldValue().accept(this);
+            compilationContext.getVirtualMachine().loadOperandOfType(node.getFieldType());
+        }
+        compilationContext.getVirtualMachine().getBytecodeHelper().emitDuplicate();  // Push value of assignment onto operand stack
+
+        if ( node.isStatic()) {
+            compilationContext.getBytecodeHelper().emitPutStaticField(node.getDeclaringType(), node.getFieldType(), node.getFieldName());
+        } else {
+            compilationContext.getBytecodeHelper().peekMethodVisitor().visitIntInsn(ALOAD, 0); // this
+            compilationContext.getBytecodeHelper().emitSwap();
+            compilationContext.getBytecodeHelper().emitPutNonStaticField(node.getDeclaringType(), node.getFieldType(), node.getFieldName());
+        }
         return node;
     }
 

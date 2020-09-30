@@ -33,16 +33,46 @@ import org.orthodox.universel.ast.TokenImage;
 import org.orthodox.universel.ast.Type;
 import org.orthodox.universel.ast.UniversalCodeVisitor;
 
+import java.util.Objects;
+
 /**
- * A read of a declared type's field on the Abstract Syntax Tree (AST).
+ * A write of a declared type's field on the Abstract Syntax Tree (AST).
  */
-public class FieldRead extends AbstractFieldOperation {
-    public FieldRead(TokenImage tokenImage,
-                     boolean isStatic,
-                     Type declaringType,
-                     Type fieldType,
-                     String fieldName) {
+public class FieldWrite extends AbstractFieldOperation {
+    /** The r-value to write to the field. */
+    private final Node fieldValue;
+
+    public FieldWrite(TokenImage tokenImage,
+                      boolean isStatic,
+                      Type declaringType,
+                      Type fieldType,
+                      String fieldName,
+                      Node fieldValue) {
         super(tokenImage, isStatic, declaringType, fieldType, fieldName);
+        this.fieldValue = fieldValue;
+    }
+
+    /**
+     * Gets the r-value to write to the field.
+     *
+     * @return the r-value to write to the field.
+     */
+    public Node getFieldValue() {
+        return fieldValue;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (!(o instanceof FieldWrite)) return false;
+        if (!super.equals(o)) return false;
+        FieldWrite that = (FieldWrite) o;
+        return Objects.equals(getFieldValue(), that.getFieldValue());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), getFieldValue());
     }
 
     public Node accept(UniversalCodeVisitor visitor) {

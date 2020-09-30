@@ -31,6 +31,7 @@ package org.orthodox.universel.compiler;
 import org.beanplanet.core.lang.TypeUtil;
 import org.orthodox.universel.ast.MethodCall;
 import org.orthodox.universel.ast.Node;
+import org.orthodox.universel.ast.Type;
 import org.orthodox.universel.ast.methods.MethodDeclaration;
 import org.orthodox.universel.symanticanalysis.conversion.TypeConversion;
 
@@ -229,9 +230,7 @@ public class TransformationUtil {
     }
 
     private static boolean callCompatible(final Class<?> sourceType, final Class<?> targetType) {
-        return targetType.isAssignableFrom(sourceType) ||
-               autoboxCompatible(sourceType, targetType) ||
-               ((NullType.class == sourceType) && !TypeUtil.isPrimitiveType(targetType));
+        return isAssignmentCompatible(sourceType, targetType);
     }
 
     public static boolean autoboxCompatible(Class<?> sourceType, Class<?> targetType) {
@@ -248,5 +247,29 @@ public class TransformationUtil {
 
     private static boolean unboxCompatible(Class<?> sourceType, Class<?> targetType) {
         return isPrimitiveTypeWrapperClass(sourceType) && isPrimitiveType(targetType);
+    }
+
+    public static boolean isAssignableFrom(final Type targetType, final Type sourceType) {
+        return targetType != null
+               && sourceType != null
+               && targetType.getTypeClass() != null
+               && sourceType.getTypeClass() != null
+               && targetType.getTypeClass().isAssignableFrom(sourceType.getTypeClass());
+    }
+
+    public static boolean isAssignmentCompatible(final Type targetType, final Type sourceType) {
+        return targetType != null
+               && sourceType != null
+               && targetType.getTypeClass() != null
+               && sourceType.getTypeClass() != null
+               && (targetType.getTypeClass().isAssignableFrom(sourceType.getTypeClass())
+                   || autoboxCompatible(sourceType.getTypeClass(), targetType.getTypeClass())
+                   ||((NullType.class == sourceType.getTypeClass()) && !TypeUtil.isPrimitiveType(targetType.getTypeClass())));
+    }
+
+    public static boolean isAssignmentCompatible(final Class<?> sourceType, final Class<?> targetType) {
+        return targetType.isAssignableFrom(sourceType) ||
+               autoboxCompatible(sourceType, targetType) ||
+               ((NullType.class == sourceType) && !TypeUtil.isPrimitiveType(targetType));
     }
 }
