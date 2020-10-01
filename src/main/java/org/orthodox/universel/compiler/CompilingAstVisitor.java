@@ -291,9 +291,9 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
     public Node visitFieldAccess(final FieldWrite node) {
         if ( node.getFieldValue() != null ) {
             node.getFieldValue().accept(this);
-            compilationContext.getVirtualMachine().loadOperandOfType(node.getFieldType());
+            compilationContext.getVirtualMachine().loadOperandOfType(node.getFieldValue().getTypeDescriptor());
         }
-        compilationContext.getVirtualMachine().getBytecodeHelper().emitDuplicate();  // Push value of assignment onto operand stack
+        compilationContext.getVirtualMachine().getBytecodeHelper().emitDuplicate(compilationContext.getVirtualMachine().peekOperandStack());  // Push value of assignment onto operand stack
 
         if ( node.isStatic()) {
             compilationContext.getBytecodeHelper().emitPutStaticField(node.getDeclaringType(), node.getFieldType(), node.getFieldName());

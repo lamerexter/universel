@@ -45,6 +45,10 @@ public class BytecodeHelper {
         primitiveTypeToNewArrayAsmOpCode.put(short.class, T_SHORT);
     }
 
+    private enum ComputationalCategory {
+        CATEGORY_1, CATEGORY_2;
+    }
+
     public BytecodeHelper() {}
 
     public BytecodeHelper(MethodVisitor methodVisitor) {
@@ -230,8 +234,15 @@ public class BytecodeHelper {
         peekMethodVisitor().visitMethodInsn(INVOKESPECIAL, className, BytecodeHelper.CTOR_METHOD_NAME, Type.getMethodDescriptor(Type.VOID_TYPE, BytecodeHelper.EMPTY_TYPES), false);
     }
 
-    public void emitDuplicate() {
-        peekMethodVisitor().visitInsn(DUP);
+    /**
+     * Duplicates the operand at the top of the evaluation stack. The operation code for the duplicate operation is derived
+     * from the lookup table, <a href="https://docs.oracle.com/javase/specs/jvms/se7/html/jvms-2.html#jvms-2.11.1">Actual and Computational types in the Java Virtual Machine.</a>.
+     *
+     * @param actualType the Actual type, as defined in the JVM.
+     * @return the category of the corresponding computational type in the JVM.
+     */
+    public void emitDuplicate(final Class<?> actualType) {
+        peekMethodVisitor().visitInsn(getCategoryForActualType(actualType) == ComputationalCategory.CATEGORY_1 ? DUP : DUP2);
     }
 
     public void emitInvokeInstanceMethod(Class<?> type, Class<?> returnType, String methodName, Class<?> ... paramTypes) {
@@ -242,6 +253,16 @@ public class BytecodeHelper {
                 methodName,
                 Type.getMethodDescriptor(Type.getType(returnType), toTypes(paramTypes)),
                 type.isInterface());
+    }
+
+    /**
+     * Taken from the lookup table, <a href="https://docs.oracle.com/javase/specs/jvms/se7/html/jvms-2.html#jvms-2.11.1">Actual and Computational types in the Java Virtual Machine.</a>.
+     *
+     * @param actualType the Actual type, as defined in the JVM.
+     * @return the category of the corresponding computational type in the JVM.
+     */
+    private ComputationalCategory getCategoryForActualType(final Class<?> actualType) {
+        return (actualType == long.class || actualType == double.class) ? ComputationalCategory.CATEGORY_2 : ComputationalCategory.CATEGORY_1;
     }
 
     /**

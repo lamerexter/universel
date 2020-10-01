@@ -577,9 +577,11 @@ public class NavigationResolver extends AbstractSemanticAnalyser {
             if (isPrimitiveType(transformStep.getTypeDescriptor())) {
                 transformStep = new BoxConversion(transformStep);
             }
+            final Node evaluationNode = transformedStages.get(n - 1);
+            final Node finalTransformStep = transformStep;
             Node transformedNullSafeStep = InternalNodeSequence
                                                .builder()
-                                               .add(transformedStages.get(n - 1))
+                                               .add(evaluationNode)
                                                .add(new IfStatement(transformStep.getTokenImage(),
                                                                     new NullTestExpression(transformStep
                                                                                                .getTokenImage(),
@@ -587,7 +589,9 @@ public class NavigationResolver extends AbstractSemanticAnalyser {
                                                                                                                       .getTokenImage()) {
                                                                                                @Override
                                                                                                public void emit(BytecodeHelper bch) {
-                                                                                                   bch.emitDuplicate();
+                                                                                                   System.out.println(evaluationNode);
+                                                                                                   System.out.println(finalTransformStep);
+                                                                                                   bch.emitDuplicate(finalTransformStep.getTypeDescriptor());
                                                                                                }
                                                                                            },
                                                                                            true
