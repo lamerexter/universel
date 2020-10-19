@@ -18,6 +18,8 @@ import java.util.*;
 import static java.util.Arrays.stream;
 import static org.beanplanet.core.lang.TypeUtil.*;
 import static org.objectweb.asm.Opcodes.*;
+import static org.orthodox.universel.compiler.codegen.CodeGenUtil.descriptor;
+import static org.orthodox.universel.compiler.codegen.CodeGenUtil.internalName;
 
 /**
  * Utility for generating JVM bytecode instructions, using the ASM bytecode manipulation library.
@@ -43,6 +45,10 @@ public class BytecodeHelper {
         primitiveTypeToNewArrayAsmOpCode.put(int.class, T_INT);
         primitiveTypeToNewArrayAsmOpCode.put(long.class, T_LONG);
         primitiveTypeToNewArrayAsmOpCode.put(short.class, T_SHORT);
+    }
+
+    public void emitLoadBooleanWrapperOperand(final boolean operand) {
+        peekMethodVisitor().visitFieldInsn(GETSTATIC, internalName(Boolean.class), (operand ? "TRUE" : "FALSE"), descriptor(Boolean.class));
     }
 
     private enum ComputationalCategory {
@@ -358,6 +364,27 @@ public class BytecodeHelper {
         }
     }
 
+    public void emitStoreLocal(boolean staticMethod, int paramPosition, org.orthodox.universel.ast.Type type) {
+        final int varPosition = staticMethod ? paramPosition : paramPosition+1;
+        if (type.isPrimitiveType()) {
+            if (type.getTypeClass() == boolean.class
+                || type.getTypeClass() == int.class
+                || type.getTypeClass() == char.class
+                || type.getTypeClass() == short.class
+                || type.getTypeClass() == byte.class ) {
+                peekMethodVisitor().visitVarInsn(ISTORE, varPosition);
+            } else if (type.getTypeClass() == double.class) {
+                peekMethodVisitor().visitVarInsn(DSTORE, varPosition);
+            } else if (type.getTypeClass() == float.class) {
+                peekMethodVisitor().visitVarInsn(FSTORE, varPosition);
+            } else if (type.getTypeClass() == long.class) {
+                peekMethodVisitor().visitVarInsn(LSTORE, varPosition);
+            }
+        } else {
+            peekMethodVisitor().visitVarInsn(ASTORE, varPosition);
+        }
+    }
+
     public void emitLoadType(Class<?> type) {
         if ( type.isPrimitive() ) {
             peekMethodVisitor().visitFieldInsn(GETSTATIC,
@@ -370,7 +397,7 @@ public class BytecodeHelper {
 
     }
 
-    public static final Type[] typeArrayFor(Class<?> types[]) {
+    public static final Type[] typeArrayFor(Class<?> ... types) {
         if (types == null) return null;
         if (types.length == 0) return EMPTY_TYPES;
 

@@ -36,7 +36,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * A class and method tagging annotation for marking classes and methods as hbeing implementations of
+ * A class and method tagging annotation for marking classes and methods as being implementations of
  * {@link BinaryExpression}s for binary {@link Operator}s.
  * 
  * <p>Classes tagged by this annotation may have static methods which perform designated binary operators.</p>

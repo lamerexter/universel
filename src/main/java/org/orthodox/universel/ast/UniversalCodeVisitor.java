@@ -141,6 +141,8 @@ public interface UniversalCodeVisitor {
 
     Node visitLoadType(LoadTypeExpression node);
 
+    Node visitLogicalNot(LogicalNotExpression node);
+
     MapEntryExpr visitMapEntry(MapEntryExpr node);
 
     Node visitMap(MapExpr node);
@@ -195,6 +197,8 @@ public interface UniversalCodeVisitor {
     Node visitSet(SetExpr node);
 
     Node visitStringLiteral(StringLiteralExpr node);
+
+    Node visitStoreLocal(StoreLocal node);
 
     //   Node visitSetExpression(SetExpression node);
     Node visitTernaryExpression(TernaryExpression node);

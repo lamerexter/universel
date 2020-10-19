@@ -28,6 +28,7 @@
 
 package org.orthodox.universel.symanticanalysis.operators.unary;
 
+import org.orthodox.universel.ast.LogicalNotExpression;
 import org.orthodox.universel.ast.Node;
 import org.orthodox.universel.ast.StaticMethodCall;
 import org.orthodox.universel.ast.UnaryExpression;
@@ -58,6 +59,11 @@ public class UnaryOperatorImplementationAnalyser extends AbstractSemanticAnalyse
 
         final Class<?> unaryExprType = transformedOperand.getTypeDescriptor();
         if (unaryExprType == null) return node;
+
+        // TODO: Quick hack to implement logical NOT operations. Refactor into UnaryOperator discovery
+        if ( primitiveTypeFor(unaryExprType) == boolean.class ) {
+            return new LogicalNotExpression(node.getTokenImage(), node.getOperand());
+        }
 
         final Class<?> unaryExprPrimitiveType = primitiveTypeFor(unaryExprType);
         return findMethod(UnaryFunctions.class, PUBLIC + STATIC, "unaryMinus", unaryExprPrimitiveType, unaryExprPrimitiveType)

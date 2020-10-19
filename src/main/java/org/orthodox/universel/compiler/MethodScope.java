@@ -29,6 +29,7 @@
 package org.orthodox.universel.compiler;
 
 import org.orthodox.universel.ast.LoadLocal;
+import org.orthodox.universel.ast.StoreLocal;
 import org.orthodox.universel.ast.navigation.NameTest;
 import org.orthodox.universel.ast.navigation.NavigationAxis;
 import org.orthodox.universel.ast.navigation.NavigationAxisAndNodeTest;
@@ -70,4 +71,23 @@ public class MethodScope implements NameScope {
     public void generateAccess(final String name) {
 
     }
+
+    public Node assign(Node rValue, NavigationAxisAndNodeTest<?> step) {
+        if ( methodDeclaration.getParameters().isEmpty() ||
+             !step.getAxis().equals(NavigationAxis.DEFAULT.getCanonicalName()) ||
+             !(step.getNodeTest() instanceof NameTest) ) return step;
+
+        NameTest nameTest = (NameTest)step.getNodeTest();
+        final String name = nameTest.getName();
+        final boolean isStaticMethod = methodDeclaration.getModifiers() != null && methodDeclaration.getModifiers().isStatic();
+        return range(0, methodDeclaration.getParameters().size())
+                   .filter(i -> methodDeclaration.getParameters().getNodes().get(i).getName().getName().equals(name))
+                   .mapToObj(i -> (Node)new StoreLocal(step.getTokenImage(),
+                                                       methodDeclaration.getParameters().getNodes().get(i).getType(),
+                                                       rValue,
+                                                       isStaticMethod,
+                                                       i + (methodDeclaration.getModifiers().isStatic() ? 0 : 1)))
+                   .findFirst().orElse(null);
+    }
+
 }

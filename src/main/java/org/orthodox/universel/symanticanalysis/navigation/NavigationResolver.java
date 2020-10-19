@@ -589,8 +589,6 @@ public class NavigationResolver extends AbstractSemanticAnalyser {
                                                                                                                       .getTokenImage()) {
                                                                                                @Override
                                                                                                public void emit(BytecodeHelper bch) {
-                                                                                                   System.out.println(evaluationNode);
-                                                                                                   System.out.println(finalTransformStep);
                                                                                                    bch.emitDuplicate(finalTransformStep.getTypeDescriptor());
                                                                                                }
                                                                                            },

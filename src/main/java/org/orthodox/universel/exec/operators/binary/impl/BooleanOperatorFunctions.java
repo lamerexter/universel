@@ -28,9 +28,7 @@
 
 package org.orthodox.universel.exec.operators.binary.impl;
 
-import org.orthodox.universel.ast.Operator;
 import org.orthodox.universel.exec.operators.binary.BinaryOperator;
-import org.orthodox.universel.exec.operators.range.LongRange;
 
 import static org.orthodox.universel.ast.Operator.*;
 

@@ -25,32 +25,24 @@
  *  DEALINGS IN THE SOFTWARE.
  *
  */
+package org.orthodox.universel.exec.operators.unary.impl;
 
-package org.orthodox.universel.compiler.codegen;
+import org.orthodox.universel.ast.BinaryExpression;
+import org.orthodox.universel.ast.Operator;
 
-import org.beanplanet.core.models.path.NamePath;
-import org.objectweb.asm.Type;
-import org.orthodox.universel.ast.type.reference.TypeReference;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public class CodeGenUtil {
-    public static final Type[] EMPTY_TYPES = {};
-    public static String internalName(TypeReference typeReference) {
-        return internalName(typeReference.getName());
-    }
-
-    public static String internalName(NamePath namePath) {
-        return namePath.join("/");
-    }
-
-    public static String internalName(Class<?> type) {
-        return Type.getInternalName(type);
-    }
-
-    public static String descriptor(TypeReference typeReference) {
-        return descriptor(typeReference.getTypeDescriptor());
-    }
-
-    public static String descriptor(Class<?> type) {
-        return Type.getDescriptor(type);
-    }
+/**
+ * A class and method tagging annotation for marking classes and methods as being implementations of
+ * {@link org.orthodox.universel.ast.UnaryExpression}s for unary {@link Operator}s.
+ * 
+ * <p>Classes tagged by this annotation may have static methods which perform designated unary operators.</p>
+ */
+@Target({ ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface UnaryOperator {
+    Operator[] value() default {};
 }

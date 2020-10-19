@@ -26,31 +26,34 @@
  *
  */
 
-package org.orthodox.universel.compiler.codegen;
+package org.orthodox.universel.exec.operators.unary.bool;
 
-import org.beanplanet.core.models.path.NamePath;
-import org.objectweb.asm.Type;
-import org.orthodox.universel.ast.type.reference.TypeReference;
+import org.junit.jupiter.api.Test;
+import org.orthodox.universel.Universal;
 
-public class CodeGenUtil {
-    public static final Type[] EMPTY_TYPES = {};
-    public static String internalName(TypeReference typeReference) {
-        return internalName(typeReference.getName());
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+/**
+ * Unary operators applied to boolean types.
+ */
+public class BooleanUnaryOperatorTest {
+    @Test
+    void primitive_literal_logical_not() {
+        assertThat(Universal.execute("!false"), is(true));
+        assertThat(Universal.execute("!true"), is(false));
     }
 
-    public static String internalName(NamePath namePath) {
-        return namePath.join("/");
+    @Test
+    void primitiveWrapper_literal_logical_not() {
+        assertThat(Universal.execute("import java.lang.Boolean.* !FALSE"), is(true));
+        assertThat(Universal.execute("import java.lang.Boolean.* !TRUE"), is(false));
     }
 
-    public static String internalName(Class<?> type) {
-        return Type.getInternalName(type);
+    @Test
+    void primitive_expression_logical_not() {
+        assertThat(Universal.execute("import java.lang.Boolean.* !(1 == 2)"), is(true));
+        assertThat(Universal.execute("import java.lang.Boolean.* !(1 == 1)"), is(false));
     }
 
-    public static String descriptor(TypeReference typeReference) {
-        return descriptor(typeReference.getTypeDescriptor());
-    }
-
-    public static String descriptor(Class<?> type) {
-        return Type.getDescriptor(type);
-    }
 }

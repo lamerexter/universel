@@ -47,9 +47,9 @@ import org.orthodox.universel.ast.navigation.*;
 import org.orthodox.universel.ast.type.LoadTypeExpression;
 import org.orthodox.universel.ast.type.Parameter;
 import org.orthodox.universel.ast.type.declaration.ClassDeclaration;
+import org.orthodox.universel.ast.type.declaration.FieldRead;
 import org.orthodox.universel.ast.type.declaration.FieldWrite;
 import org.orthodox.universel.ast.type.declaration.InterfaceDeclaration;
-import org.orthodox.universel.ast.type.declaration.FieldRead;
 import org.orthodox.universel.ast.type.reference.TypeReference;
 import org.orthodox.universel.compiler.Box;
 import org.orthodox.universel.compiler.Unbox;
@@ -374,6 +374,14 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
         return node;
     }
 
+    @Override
+    public Node visitLogicalNot(final LogicalNotExpression node) {
+        Node transformedOperand = node.getOperand() == null ? null : node.getOperand().accept(this);
+
+        boolean noTransformationChanges = Objects.equals(node.getOperand(), transformedOperand);
+        return noTransformationChanges ? node : new LogicalNotExpression(node.getTokenImage(), transformedOperand);
+    }
+
 
     public MapEntryExpr visitMapEntry(MapEntryExpr node) {
         Node transformedKey = node.getKeyExpression() == null ? null : node.getKeyExpression().accept(this);
@@ -622,6 +630,14 @@ public class UniversalVisitorAdapter implements UniversalCodeVisitor {
     @Override
     public Node visitStringLiteral(final StringLiteralExpr node) {
         return node;
+    }
+
+    @Override
+    public Node visitStoreLocal(final StoreLocal node) {
+        Node transformedValue = node.getValue() == null ? null : node.getValue().accept(this);
+
+        boolean noTransformationChanges = Objects.equals(node.getValue(), transformedValue);
+        return noTransformationChanges ? node : new StoreLocal(node.getTokenImage(), node.getType(), transformedValue, node.isStaticMethod(), node.getLocalIndex());
     }
 
     @Override

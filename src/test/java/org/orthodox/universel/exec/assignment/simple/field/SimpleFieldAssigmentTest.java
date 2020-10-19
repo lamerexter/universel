@@ -62,18 +62,18 @@ public class SimpleFieldAssigmentTest {
 
     @Test
     void withPrimitiveTypeField_returnsNarrowedAssignedPrimitiveValue() {
-        assertThat(execute("static byte field   field = 123"), equalTo((byte)123));
-        assertThat(execute("static byte field   field = 123L"), equalTo((byte)123));
-        assertThat(execute("static byte field   field = 123I"), equalTo((byte)123));
-        assertThat(execute("static byte field   field = 123D"), equalTo((byte)123));
+        assertThat(execute("static byte field   field = 123"), equalTo((byte) 123));
+        assertThat(execute("static byte field   field = 123L"), equalTo((byte) 123));
+        assertThat(execute("static byte field   field = 123I"), equalTo((byte) 123));
+        assertThat(execute("static byte field   field = 123D"), equalTo((byte) 123));
     }
 
     @Test
     void withPrimitiveWrapperTypeField_returnsNarrowedAssignedPrimitiveValue() {
-        assertThat(execute("static Byte field   field = 123"), equalTo((byte)123));
-        assertThat(execute("static Byte field   field = 123L"), equalTo((byte)123));
-        assertThat(execute("static Byte field   field = 123I"), equalTo((byte)123));
-        assertThat(execute("static Byte field   field = 123D"), equalTo((byte)123));
+        assertThat(execute("static Byte field   field = 123"), equalTo((byte) 123));
+        assertThat(execute("static Byte field   field = 123L"), equalTo((byte) 123));
+        assertThat(execute("static Byte field   field = 123I"), equalTo((byte) 123));
+        assertThat(execute("static Byte field   field = 123D"), equalTo((byte) 123));
     }
 
     @Test

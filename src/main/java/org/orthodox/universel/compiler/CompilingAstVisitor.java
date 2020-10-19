@@ -49,6 +49,7 @@ import static org.objectweb.asm.Opcodes.*;
 import static org.objectweb.asm.Type.getInternalName;
 import static org.orthodox.universel.StringEscapeUtil.unescapeUniversalCharacterEscapeSequences;
 import static org.orthodox.universel.compiler.BytecodeHelper.CTOR_METHOD_NAME;
+import static org.orthodox.universel.compiler.BytecodeHelper.typeArrayFor;
 import static org.orthodox.universel.compiler.codegen.CodeGenUtil.descriptor;
 import static org.orthodox.universel.compiler.codegen.CodeGenUtil.internalName;
 
@@ -472,6 +473,36 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
     }
 
     @Override
+    public Node visitLogicalNot(final LogicalNotExpression node) {
+        final Label isFalseLabel = new Label(), notEndLabel = new Label();
+        if ( Boolean.class == node.getType().getTypeClass() ) {
+            compilationContext.getBytecodeHelper().emitLoadBooleanWrapperOperand(false);
+            compilationContext.getBytecodeHelper().emitDuplicate(Boolean.class);
+            node.getOperand().accept(this);
+            compilationContext.getBytecodeHelper().peekMethodVisitor().visitMethodInsn(INVOKEVIRTUAL, internalName(Object.class), "equals",
+                                                                                       Type.getMethodDescriptor(Type.getType(boolean.class), typeArrayFor(Object.class)), false);
+            compilationContext.getBytecodeHelper().peekMethodVisitor().visitJumpInsn(IFEQ, isFalseLabel);
+            compilationContext.getBytecodeHelper().emitLoadBooleanWrapperOperand(true);
+            compilationContext.getBytecodeHelper().peekMethodVisitor().visitJumpInsn(GOTO, notEndLabel);
+            compilationContext.getBytecodeHelper().peekMethodVisitor().visitLabel(isFalseLabel);
+            compilationContext.getBytecodeHelper().emitLoadBooleanWrapperOperand(false);
+            compilationContext.getBytecodeHelper().peekMethodVisitor().visitLabel(notEndLabel);
+            compilationContext.getVirtualMachine().loadOperandOfType(Boolean.class);
+        } else {
+            node.getOperand().accept(this);
+            compilationContext.getBytecodeHelper().peekMethodVisitor().visitJumpInsn(IFEQ, isFalseLabel);
+            compilationContext.getBytecodeHelper().emitLoadBooleanOperand(false);
+            compilationContext.getBytecodeHelper().peekMethodVisitor().visitJumpInsn(GOTO, notEndLabel);
+            compilationContext.getBytecodeHelper().peekMethodVisitor().visitLabel(isFalseLabel);
+            compilationContext.getBytecodeHelper().emitLoadBooleanOperand(true);
+            compilationContext.getBytecodeHelper().peekMethodVisitor().visitLabel(notEndLabel);
+            compilationContext.getVirtualMachine().loadOperandOfType(boolean.class);
+        }
+
+        return node;
+    }
+
+    @Override
     public Node visitList(final ListExpr node) {
         MethodVisitor mv = compilationContext.getBytecodeHelper().peekMethodVisitor();
         String className = getInternalName(ArrayList.class);
@@ -830,6 +861,17 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
     public Node visitStringLiteral(final StringLiteralExpr node) {
         compilationContext.getVirtualMachine().loadOperandOfType(String.class);
         compilationContext.getBytecodeHelper().emitLoadStringOperand(unescapeUniversalCharacterEscapeSequences(node.getUndelimitedTokenImage()));
+        return node;
+    }
+
+    @Override
+    public Node visitStoreLocal(final StoreLocal node) {
+        if (node.getValue() != null) {
+            node.getValue().accept(this);
+        }
+        compilationContext.getBytecodeHelper().emitStoreLocal(node.isStaticMethod(), node.getLocalIndex(), node.getType());
+
+        compilationContext.getVirtualMachine().loadOperandOfType(node.getType());
         return node;
     }
 
