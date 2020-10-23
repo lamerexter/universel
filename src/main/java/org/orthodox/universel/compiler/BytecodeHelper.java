@@ -322,66 +322,63 @@ public class BytecodeHelper {
         return mv;
     }
 
-    public void emitLoadLocal(boolean staticMethod, int paramPosition, Class<?> type) {
-        int varPosition = staticMethod ? paramPosition : paramPosition+1;
+    public void emitLoadLocal(int paramPosition, Class<?> type) {
         if (type.isPrimitive()) {
             if (type == boolean.class
                 || type == int.class
                 || type == char.class
                 || type == short.class
                 || type == byte.class ) {
-                peekMethodVisitor().visitVarInsn(ILOAD, varPosition);
+                peekMethodVisitor().visitVarInsn(ILOAD, paramPosition);
             } else if (type == double.class) {
-                peekMethodVisitor().visitVarInsn(DLOAD, varPosition);
+                peekMethodVisitor().visitVarInsn(DLOAD, paramPosition);
             } else if (type == float.class) {
-                peekMethodVisitor().visitVarInsn(FLOAD, varPosition);
+                peekMethodVisitor().visitVarInsn(FLOAD, paramPosition);
             } else if (type == long.class) {
-                peekMethodVisitor().visitVarInsn(LLOAD, varPosition);
+                peekMethodVisitor().visitVarInsn(LLOAD, paramPosition);
             }
         } else {
-            peekMethodVisitor().visitVarInsn(ALOAD, varPosition);
+            peekMethodVisitor().visitVarInsn(ALOAD, paramPosition);
         }
     }
 
-    public void emitLoadLocal(boolean staticMethod, int paramPosition, org.orthodox.universel.ast.Type type) {
-        int varPosition = staticMethod ? paramPosition : paramPosition+1;
+    public void emitLoadLocal(int paramPosition, org.orthodox.universel.ast.Type type) {
         if (type.isPrimitiveType()) {
             if (type.getTypeClass() == boolean.class
                 || type.getTypeClass() == int.class
                 || type.getTypeClass() == char.class
                 || type.getTypeClass() == short.class
                 || type.getTypeClass() == byte.class ) {
-                peekMethodVisitor().visitVarInsn(ILOAD, varPosition);
+                peekMethodVisitor().visitVarInsn(ILOAD, paramPosition);
             } else if (type.getTypeClass() == double.class) {
-                peekMethodVisitor().visitVarInsn(DLOAD, varPosition);
+                peekMethodVisitor().visitVarInsn(DLOAD, paramPosition);
             } else if (type.getTypeClass() == float.class) {
-                peekMethodVisitor().visitVarInsn(FLOAD, varPosition);
+                peekMethodVisitor().visitVarInsn(FLOAD, paramPosition);
             } else if (type.getTypeClass() == long.class) {
-                peekMethodVisitor().visitVarInsn(LLOAD, varPosition);
+                peekMethodVisitor().visitVarInsn(LLOAD, paramPosition);
             }
         } else {
-            peekMethodVisitor().visitVarInsn(ALOAD, varPosition);
+            peekMethodVisitor().visitVarInsn(ALOAD, paramPosition);
         }
     }
 
-    public void emitStoreLocal(boolean staticMethod, int paramPosition, org.orthodox.universel.ast.Type type) {
-        final int varPosition = staticMethod ? paramPosition : paramPosition+1;
+    public void emitStoreLocal(int paramPosition, org.orthodox.universel.ast.Type type) {
         if (type.isPrimitiveType()) {
             if (type.getTypeClass() == boolean.class
                 || type.getTypeClass() == int.class
                 || type.getTypeClass() == char.class
                 || type.getTypeClass() == short.class
                 || type.getTypeClass() == byte.class ) {
-                peekMethodVisitor().visitVarInsn(ISTORE, varPosition);
+                peekMethodVisitor().visitVarInsn(ISTORE, paramPosition);
             } else if (type.getTypeClass() == double.class) {
-                peekMethodVisitor().visitVarInsn(DSTORE, varPosition);
+                peekMethodVisitor().visitVarInsn(DSTORE, paramPosition);
             } else if (type.getTypeClass() == float.class) {
-                peekMethodVisitor().visitVarInsn(FSTORE, varPosition);
+                peekMethodVisitor().visitVarInsn(FSTORE, paramPosition);
             } else if (type.getTypeClass() == long.class) {
-                peekMethodVisitor().visitVarInsn(LSTORE, varPosition);
+                peekMethodVisitor().visitVarInsn(LSTORE, paramPosition);
             }
         } else {
-            peekMethodVisitor().visitVarInsn(ASTORE, varPosition);
+            peekMethodVisitor().visitVarInsn(ASTORE, paramPosition);
         }
     }
 

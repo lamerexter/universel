@@ -71,7 +71,7 @@ public abstract class AbstractMethodDeclaration extends Node implements Declarat
     }
 
     public Modifiers getModifiers() {
-        return modifiers;
+        return modifiers == null ? Modifiers.EMPTY_MODIFIERS : modifiers;
     }
 
     public NodeSequence<TypeParameter> getTypeParameters() {

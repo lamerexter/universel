@@ -218,7 +218,6 @@ public class ScriptAssembler extends AbstractSemanticAnalyser {
                      .filter(m -> STATIC_IMPL_IF_ALL_MEMBERS_STATIC.contains(m.getClass()))
                      .map(Declaration.class::cast)
                      .map(Declaration::getModifiers)
-                     .filter(Objects::nonNull)
                      .allMatch(Modifiers::isStatic);
     }
 

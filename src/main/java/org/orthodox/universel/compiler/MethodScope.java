@@ -86,7 +86,7 @@ public class MethodScope implements NameScope {
                                                        methodDeclaration.getParameters().getNodes().get(i).getType(),
                                                        rValue,
                                                        isStaticMethod,
-                                                       i + (methodDeclaration.getModifiers().isStatic() ? 0 : 1)))
+                                                       i + (isStaticMethod ? 0 : 1)))
                    .findFirst().orElse(null);
     }
 

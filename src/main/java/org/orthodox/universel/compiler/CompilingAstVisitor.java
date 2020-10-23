@@ -531,9 +531,9 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
     @Override
     public Node visitLoadLocal(final LoadLocal node) {
         if ( node.getType() != null ) {
-            compilationContext.getBytecodeHelper().emitLoadLocal(true, node.getLocalIndex(), node.getType());
+            compilationContext.getBytecodeHelper().emitLoadLocal(node.getLocalIndex(), node.getType());
         } else {
-            compilationContext.getBytecodeHelper().emitLoadLocal(true, node.getLocalIndex(), node.getTypeDescriptor());
+            compilationContext.getBytecodeHelper().emitLoadLocal(node.getLocalIndex(), node.getTypeDescriptor());
         }
         compilationContext.getVirtualMachine().loadOperandOfType(node.getTypeDescriptor());
 
@@ -869,7 +869,7 @@ public class CompilingAstVisitor extends UniversalVisitorAdapter {
         if (node.getValue() != null) {
             node.getValue().accept(this);
         }
-        compilationContext.getBytecodeHelper().emitStoreLocal(node.isStaticMethod(), node.getLocalIndex(), node.getType());
+        compilationContext.getBytecodeHelper().emitStoreLocal(node.getLocalIndex(), node.getType());
 
         compilationContext.getVirtualMachine().loadOperandOfType(node.getType());
         return node;

@@ -67,7 +67,7 @@ public class MethodDeclarationTest {
         assertThat(methodDeclaration.getTokenImage().getEndLine(), equalTo(3));
         assertThat(methodDeclaration.getTokenImage().getEndColumn(), equalTo(1));
 
-        assertThat(methodDeclaration.getModifiers(), nullValue());
+        assertThat(methodDeclaration.getModifiers(), equalTo(Modifiers.EMPTY_MODIFIERS));
         assertThat(methodDeclaration.getName(), equalTo("helloWorld"));
         assertThat(methodDeclaration.getParameters().isEmpty(), is(true));
 
